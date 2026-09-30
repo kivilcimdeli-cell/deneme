@@ -6,17 +6,22 @@
 | --- | --- |
 | `BERKE_ISIK_cift_tarafli.3mf` | **Basılacak dosya.** Bambu Studio'da açıp doğrudan dilimleyebilirsin. |
 | `orijinal/Two_line_Customizable_Name_Plate.3mf` | MakerWorld Parametric Model Maker'dan gelen tek taraflı orijinal |
-| `onizleme.png` | Ön yüz, arka yüz (çevrilmiş hâli) ve perspektif görünüm |
+| `onizleme.png` | Orijinal ön yüz ile yeni ön yüz, arka yüz (çevrilmiş hâli) ve perspektif görünüm |
 
 ## Ne değişti?
 
-- **Ön yüz aynen duruyor:** 6 mm kabartma beyaz yazı, 20 mm siyah gövde, ölçüler ve tabladaki konum aynı.
+- **Ön yüz orijinaliyle aynı:** 6 mm kabartma beyaz yazı, 20 mm siyah gövde, dış hat, harf aralarındaki boşluklar,
+  Ş'nin altındaki çıkıntı ve tabladaki konum değişmedi. I ve K'nın altına siyah **eklenmedi**.
 - **Arka yüze yazı eklendi:** Aynı yazı, tablaya bakan alt yüze **1 mm derinliğinde gömülü (inlay)** olarak basılıyor.
   Aynalanmış olarak yerleştirildi, isimliği çevirdiğinde **"BERKE / IŞIK" düz okunuyor**.
-- **Gövde dış hattı biraz genişledi:** Arka yazının da 4 mm'lik siyah çerçeveyle tam oturması için dış hat, ön ve arka
-  yazının dış hatlarının birleşimi yapıldı. "Ş" harfinin alttaki çengeli arka yüzde ters tarafa düştüğü için alttaki iki
-  çıkıntı tek bir düzgün çıkıntıda birleştirildi. Orijinalde gövdeyi boydan boya delen küçük harf boşlukları (E'nin kolları
-  arası, R'nin içi, K'nin ağzı gibi) artık siyah gövdeyle dolu; arka yazı bu bölgelerden geçtiği için gerekli.
+- **Arka yüzdeki Ş'nin çengeli küçük:** İsimlik çevrilince yazının sırası ters döner; arka yazıdaki Ş'nin çengeli
+  önden bakınca I ile K'nın altına denk gelir. Oraya siyah eklememek için arka yüzdeki çengel, mevcut siyah
+  çerçevenin içine sığacak kadar küçültüldü (yaklaşık 6 × 2,4 mm).
+- **Arka harfler boşlukların üstünden geçiyor:** Arka yazı birkaç küçük yerde gövdedeki boşlukların üstünden geçiyor.
+  Oralar siyahla doldurulmadı; harfin kendisi (beyaz) orada 2 mm kalınlıkta basılıyor. Önden bakınca bu boşlukların
+  dibinde ince beyaz parçalar görünür, boşluklar yine açık kalır.
+- **Arkadan bakınca siyah çerçeve harfleri öndeki kadar düzgün sarmaz:** Çerçeve ön yazının dış hattıdır; arkadan
+  bakınca aynalanmış görünür. Örneğin arka yüzde I–K'nın altındaki siyah çıkıntı, ön yüzdeki Ş'nin çengelinin arkasıdır.
 - **Model 3 parçaya ayrıldı** (Bambu Studio'da *Nesneler* listesinde görünür):
   | Parça | Filament |
   | --- | --- |

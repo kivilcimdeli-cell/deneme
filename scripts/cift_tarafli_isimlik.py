@@ -8,9 +8,11 @@ Yapılanlar:
   * Arka yüze aynı yazı AYNALANARAK gömülür (inlay): baskı tablaya bakan ilk
     katmanlarda yazı rengiyle basılır, isimliği çevirince düz okunur.
     Destek gerekmez, yapıştırma gerekmez, tek seferde basılır.
-  * Arka yazının da tam oturması için gövde dış hattı, ön yazının ve aynalanmış
-    yazının dış hatlarının birleşimi yapılır; Ş gibi harflerin alttaki
-    çıkıntıları tek, düzgün bir çıkıntıda birleştirilir.
+  * Gövdenin dış hattı ve harf aralarındaki boşluklar orijinaliyle aynı kalır.
+    Çevirince yazının sırası ters döndüğü için arka yazıdaki Ş'nin çengeli önden
+    bakınca I-K'nın altına denk gelir; siyah eklememek için arka yazıdaki çengel
+    mevcut siyah çerçevenin içine sığacak kadar küçültülür. Arka yazının gövde
+    boşluklarının üstünden geçtiği küçük yerlerde harf biraz kalın basılır.
   * Model üç ayrı parça olarak kaydedilir (Gövde / Ön Yazı / Arka Yazı) ve her
     parçaya filament atanır; Bambu Studio'da renkler "Nesneler" listesinden
     parça bazında değiştirilebilir. Yazıcı/filament/baskı ayarları aynen kalır.
@@ -79,16 +81,6 @@ def majority(values, default):
 
 # ---------------------------------------------------------------- geometri
 
-def outer_only(cs):
-    """Kesitteki delikleri doldurur (yalnız dış konturlar kalır)."""
-    keep = []
-    for p in cs.to_polygons():
-        x, y = p[:, 0], p[:, 1]
-        if np.sum(x * np.roll(y, -1) - np.roll(x, -1) * y) > 0:
-            keep.append(p)
-    return m3.CrossSection(keep)
-
-
 def strip(y0, y1, x0=-1e4, x1=1e4):
     return m3.CrossSection.square((x1 - x0, y1 - y0)).translate((x0, y0))
 
@@ -102,18 +94,39 @@ def row_limits(let, y_min, y_max, frac=0.3, step=0.25):
     return wide.min(), wide.max() + step
 
 
-def estimate_outline(let, sil):
-    """Gövde dış hattının yazıdan ne kadar dışarı taştığını (mm) tahmin eder."""
-    best = None
-    for r in np.arange(0.5, 10.01, 0.25):
-        o = let.offset(r, m3.JoinType.Round)
-        diff = (o - sil).area() + (sil - o).area()
-        if best is None or diff < best[0]:
-            best = (diff, r)
-    return best[1]
+def shrink_protrusion(isl, inner, y_ref, below, aspect=2.0, step=0.25):
+    """Harfin taban (ya da tepe) çizgisinden taşan çıkıntısını (Ş'nin çengeli, İ'nin
+    noktası) `inner` içine sığana kadar bağlandığı yerin etrafında küçültür.
+    Yükseklik sığacak kadar, genişlik en fazla `aspect` katı oranında küçülür."""
+    x0, y0, x1, y1 = isl.bounds()
+    if (y0 >= y_ref - 0.5) if below else (y1 <= y_ref + 0.5):
+        return isl
+    # çıkıntının harfe bağlandığı en dar yer ("boyun")
+    ys = np.arange(y_ref - 4, y_ref + 1e-6, step) if below else np.arange(y_ref, y_ref + 4 + 1e-6, step)
+    widths = np.array([(isl ^ strip(y, y + step)).area() for y in ys])
+    if (widths > 1e-6).any():
+        neck = ys[np.where(widths > 1e-6, widths, np.inf).argmin()] + (0 if below else step)
+        lap = 0.3 if below else -0.3  # kalan harfle üst üste binsin
+        piece = isl ^ (strip(-1e4, neck + lap) if below else strip(neck + lap, 1e4))
+        rest = isl - (strip(-1e4, neck) if below else strip(neck, 1e4))
+        row = isl ^ strip(neck - step, neck + step)
+        ax, ay = (row.bounds()[0] + row.bounds()[2]) / 2, neck + lap
+    else:  # harften ayrı işaret (ör. İ'nin noktası)
+        piece, rest = isl, m3.CrossSection()
+        ax, ay = (x0 + x1) / 2, (y1 if below else y0)
+    for sy in np.arange(1.0, 0.04, -0.01):
+        sx = min(1.0, aspect * sy)
+        h = piece.translate((-ax, -ay)).scale((sx, sy)).translate((ax, ay))
+        if (h - inner).area() < 1e-3:
+            return rest + h
+    print(f"uyarı: x={ax:.1f} civarındaki çıkıntı gövdeye sığdırılamadı")
+    return isl
 
 
-def build_parts(V, T, depth):
+def build_parts(V, T, depth, floor=1.0, margin=0.6):
+    """Gövde, ön yazı ve arka yazı katılarını döndürür. `floor`: arka yazının gövde
+    boşluklarının üstünden geçtiği yerlerde ek kalınlık; `margin`: küçültülen
+    çıkıntının çevresinde kalan siyah pay (mm)."""
     M = m3.Manifold(m3.Mesh(vert_properties=V.astype(np.float32), tri_verts=T.astype(np.uint32)))
     M = max(M.decompose(), key=lambda p: p.volume())  # sıfır hacimli artıkları at
     zs = np.unique(np.round(V[:, 2], 4))
@@ -122,7 +135,7 @@ def build_parts(V, T, depth):
     mid = [z for z in zs if z_bot < z < z_top]
     z_mid = max(mid, key=lambda z: np.sum(np.isclose(V[:, 2], z)))
 
-    sil = M.slice((z_bot + z_mid) / 2)          # gövde silueti
+    sil = M.slice((z_bot + z_mid) / 2)          # gövde silueti (boşluklarıyla birlikte)
     let = M.slice((z_mid + z_top) / 2)          # ön yazı silueti
     x0, y0, x1, y1 = sil.bounds()
     cx = (x0 + x1) / 2
@@ -130,29 +143,37 @@ def build_parts(V, T, depth):
     def mirror(cs):  # isimlik dikey eksen etrafında çevrildiğinde görünen hâl
         return cs.translate((-cx, 0)).mirror((1, 0)).translate((cx, 0))
 
-    back_let = mirror(let)
-    body = sil + mirror(sil)
-
-    # Ş, Ç gibi harflerin alt çıkıntıları (ve İ, Ö gibi üst çıkıntılar) aynalanınca
-    # ikiye çıkar; bunları tek, dışbükey bir çıkıntıda birleştir.
-    r = estimate_outline(let, sil)
+    # Gövde dış hattı ve boşlukları orijinaliyle aynı kalır. Aynalanan yazıda
+    # dış hattan taşan çıkıntılar (Ş'nin çengeli) siyah çerçevenin içine sığacak
+    # kadar küçültülür.
     lx0, ly0, lx1, ly1 = let.bounds()
     y_base, y_cap = row_limits(let, ly0, ly1)
-    both = let + back_let
-    for tabs, keep in ((both ^ strip(ly0 - 1, y_base - 0.5), strip(-1e4, y_base)),
-                       (both ^ strip(y_cap + 0.5, ly1 + 1), strip(y_cap, 1e4))):
-        if len(tabs.decompose()) >= 2:
-            body = body + (tabs.hull().offset(r, m3.JoinType.Round) ^ keep)
-    body = outer_only(body)
+    inner = sil.offset(-margin, m3.JoinType.Round)
+    islands = []
+    for isl in mirror(let).decompose():
+        isl = shrink_protrusion(isl, inner, y_base, below=True)
+        isl = shrink_protrusion(isl, inner, y_cap, below=False)
+        islands.append(isl)
+    back_let = m3.CrossSection.batch_boolean(islands, m3.OpType.Add)
+
+    # Arka yazı, gövdedeki boşlukların (harf araları) üstünden birkaç küçük yerde
+    # geçiyor. Oraları siyahla doldurmak yerine harfin kendisi (yazı rengi) biraz
+    # daha kalın basılır; gövdeye siyah eklenmez, önden boşluklar yine boşluk.
+    bridges = [p for p in (back_let - sil).decompose() if p.area() >= 0.5]
+    bridge = m3.CrossSection.batch_boolean(bridges, m3.OpType.Add) if bridges else m3.CrossSection()
+    back_let = back_let ^ (sil + bridge)  # kalan kıl payı taşmaları kırp
 
     height = z_mid - z_bot
-    govde = body.extrude(height).translate((0, 0, z_bot))
+    govde = sil.extrude(height).translate((0, 0, z_bot))
     govde = govde - back_let.extrude(depth + 1).translate((0, 0, z_bot - 1))
-    arka = (back_let ^ body).extrude(depth).translate((0, 0, z_bot))
+    arka = back_let.extrude(depth).translate((0, 0, z_bot))
+    if bridges:
+        arka = arka + bridge.extrude(depth + floor).translate((0, 0, z_bot))
     # harflerin yan yüzleri dik; trim_by_plane gövde üst yüzünü sıfır kalınlıklı
     # bir yüzey olarak da bıraktığı için ön yazıyı kesitinden yeniden çıkar
     on = let.extrude(z_top - z_mid).translate((0, 0, z_mid))
-    info = dict(z_bot=z_bot, z_mid=z_mid, z_top=z_top, outline=r, cx=cx)
+    info = dict(z_bot=z_bot, z_mid=z_mid, z_top=z_top, cx=cx,
+                bridges=[p.area() for p in bridges])
     return govde, on, arka, info
 
 
@@ -348,7 +369,8 @@ def main():
              ("Arka Yazı", *mesh_arrays(arka), ext_text)]
     for name, v, t, ext in parts:
         print(f"{name:10s} filament {ext}  üçgen {len(t):6d}  z {v[:, 2].min():.2f}..{v[:, 2].max():.2f}")
-    print(f"gövde dış hattı ≈ {info['outline']:.2f} mm, arka yazı derinliği {args.derinlik} mm")
+    print(f"arka yazı derinliği {args.derinlik} mm; boşluk üstünden geçen arka yazı parçaları (mm²): "
+          + ", ".join(f"{a:.1f}" for a in info["bridges"]))
 
     cfg = json.loads(files["Metadata/project_settings.config"])
     colours = cfg.get("filament_colour", ["#000000", "#FFFFFF"])
@@ -376,20 +398,27 @@ def main():
     print("yazıldı:", args.cikti)
 
     if args.onizleme:
-        front = render(shaded, 700, R_top, margin=0.04)
-        back = render(shaded, 700, R_back, margin=0.04)
-        iso = render(shaded, 700, R_iso, margin=0.04)
-        W, H = 2100, 820
-        canvas = Image.new("RGB", (W, H), (244, 246, 250))
+        # orijinal model, boyamasına göre renklendirilmiş (karşılaştırma için)
+        is_text = np.array([p == ext_text for p in paint])
+        original = [(V, T[~is_text], colour(ext_body)), (V, T[is_text], colour(ext_text))]
+        panels = [(render(original, 760, R_top, margin=0.04), "Orijinal - ön yüz"),
+                  (render(shaded, 760, R_top, margin=0.04), "Yeni - ön yüz"),
+                  (render(shaded, 760, R_back, margin=0.04), "Yeni - arka yüz (çevrilmiş)"),
+                  (render(shaded, 760, R_iso, margin=0.04), "Yeni - perspektif")]
+        PW, PH, TOP, GAP = 760, 470, 70, 24
+        canvas = Image.new("RGB", (2 * PW + 3 * GAP, 2 * (PH + TOP) + 2 * GAP), (244, 246, 250))
         d = ImageDraw.Draw(canvas)
         try:
-            font = ImageFont.truetype("DejaVuSans-Bold.ttf", 34)
+            font = ImageFont.truetype("DejaVuSans-Bold.ttf", 32)
         except OSError:
             font = ImageFont.load_default()
-        for i, (im, title) in enumerate([(front, "Ön yüz"), (back, "Arka yüz (çevrilmiş)"), (iso, "Perspektif")]):
-            canvas.paste(im, (i * 700, 90), im)
+        for i, (im, title) in enumerate(panels):
+            px, py = GAP + (i % 2) * (PW + GAP), GAP + (i // 2) * (PH + TOP)
+            # renkli zemin: harf aralarındaki boşluklar zeminden seçilsin
+            d.rounded_rectangle((px, py + TOP - 10, px + PW, py + TOP + PH - 10), 18, fill=(196, 210, 228))
+            canvas.paste(im, (px, py + TOP - 10 + (PH - PW) // 2), im)
             tw = d.textlength(title, font=font)
-            d.text((i * 700 + 350 - tw / 2, 30), title, fill=(40, 44, 52), font=font)
+            d.text((px + PW / 2 - tw / 2, py + 12), title, fill=(40, 44, 52), font=font)
         canvas.save(args.onizleme)
         print("önizleme:", args.onizleme)
 
