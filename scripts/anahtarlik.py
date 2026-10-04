@@ -1,17 +1,26 @@
-"""AUTO FIRAT TUYGUN anahtarlıkları: siyah gövde + sarı kabartma, Bambu Lab 3MF.
+"""AUTO FIRAT TUYGUN (oto galeri) anahtarlıkları: Bambu Lab X2D için 3MF.
 
-Her tasarım iki parçadan oluşur ve tek seferde basılır:
-  * Gövde      : siyah (filament 1), 3,2 mm
-  * Kabartma   : sarı  (filament 2), gövdenin üstünde 1,0 mm (yazılar, çizgiler, çerçeve)
+Her tasarım tek parça basılır, destek gerekmez:
+  * Gövde   : siyah (filament 1), 3,0 mm; alt kenarda 0,3 mm fil ayağı payı,
+              üst kenarda katman katman 0,6 mm pah
+  * Kabartma: gövdenin üstünde 0,8 mm (4 katman); sarı (filament 2) ve bazı
+              tasarımlarda beyaz (filament 3)
+
+Baskı için optimize edildi (0,4 nozul):
+  * küçük yazılar Lexend ExtraBold (küçük boyda kalın, rakam içleri açık), en az ~3,4 mm;
+    isim en az 7,5 mm
+  * çizgiler en az 1,0 mm, kabartmalar arası boşluk en az 0,6 mm (kontrol edilir)
+  * nesne ayarı olarak Arachne duvar üretici (ince yazıları daha düzgün basar)
 
 Yazıcı/filament/baskı ayarları `isimlik/orijinal/...3mf` içindeki Bambu Lab X2D
-projesinden alınır; filament renkleri siyah ve sarı yapılır.
+projesinden alınır; filament sayısı ve renkleri tasarıma göre ayarlanır.
 
 Çıktı : anahtarlik/<tasarım>.3mf, anahtarlik/onizleme/<tasarım>.png, anahtarlik/onizleme/hepsi.png
 
 Kullanım:
   pip install numpy manifold3d pillow shapely scipy fonttools uharfbuzz
-  python3 scripts/anahtarlik.py
+  python3 scripts/anahtarlik.py            # hepsi
+  python3 scripts/anahtarlik.py plaka      # adında "plaka" geçenler
 """
 import datetime
 import io
@@ -39,11 +48,20 @@ FONT_DIR = os.path.join(ROOT, "scripts", "fonts")
 TEMPLATE = os.path.join(ROOT, "isimlik", "orijinal", "Two_line_Customizable_Name_Plate.3mf")
 OUT_DIR = os.path.join(ROOT, "anahtarlik")
 
-BLACK = "#000000"
-YELLOW = "#F4EE2A"   # Bambu PLA Basic Yellow
-BASE_H = 3.2         # siyah gövde kalınlığı (mm)
-RAISE_H = 1.0        # sarı kabartma yüksekliği (mm)
-LINE = 1.2           # sarı çizgi kalınlığı (mm), 0.4 nozul için en az ~3 çizgi
+BLACK, YELLOW, WHITE = 1, 2, 3                       # filament numaraları
+COLOURS = {BLACK: "#000000", YELLOW: "#F4EE2A", WHITE: "#FFFFFF"}   # Bambu PLA Basic renkleri
+COLOUR_NAMES = {BLACK: "siyah", YELLOW: "sarı", WHITE: "beyaz"}
+SHOW = {BLACK: (40, 40, 43), YELLOW: (255, 222, 40), WHITE: (246, 246, 242)}  # önizleme tonları
+
+LAYER = 0.2
+BASE_H = 3.0         # siyah gövde (15 katman)
+RAISE_H = 0.8        # kabartma (4 katman)
+FOOT = 0.3           # ilk katmanda içe çekme (fil ayağı)
+CHAMFER = 0.6        # üst kenar pahı (3 katman)
+LINE = 1.2           # standart çizgi kalınlığı
+EDGE_KEEP = 1.0      # kabartmanın gövde kenarına en yakın mesafesi
+MIN_FEATURE = 0.7    # kontrol: en ince kabartma (mm)
+MIN_GAP = 0.6        # kontrol: kabartmalar arası en dar boşluk (mm)
 BED_CENTER = (128.0, 128.0)
 
 NAME = "FIRAT TUYGUN"
@@ -182,9 +200,10 @@ class Font:
         return self.layout(text, cap, tracking)[1]
 
     def fit_cap(self, text, cap, max_w, tracking=0.0):
-        """`max_w`'ya sığacak en büyük yazı yüksekliği (en fazla `cap`)."""
-        w = self.width(text, cap, tracking)
-        return cap if w <= max_w else cap * max_w / w
+        """`max_w`'ya sığacak en büyük yazı yüksekliği (en fazla `cap`); harf aralığı ölçeklenmez."""
+        glyphs, w = self.layout(text, cap, 0.0)
+        extra = tracking * (len(glyphs) - 1)
+        return cap if w + extra <= max_w else cap * (max_w - extra) / w
 
     def text(self, text, cap, x=0.0, y=0.0, align="c", valign="m", tracking=0.0, angle=0.0):
         """Yazıyı şekle çevirir. (x, y): hizalama noktası; valign 'm' = büyük harf ortası, 'b' = taban çizgisi."""
@@ -225,224 +244,300 @@ class Font:
 
 
 FONTS = {}
+FONT_FILES = {"bebas": "BebasNeue-Regular.ttf",            # isim (fotoğraftakine en yakın)
+              "barlow": "BarlowCondensed-ExtraBold.ttf",   # AUTO, plaka yazısı
+              "small": "Lexend-ExtraBold.ttf"}             # telefon, şehir: küçük boyda kalın, iç boşlukları açık
 
 
 def font(name):
-    files = {"bebas": "BebasNeue-Regular.ttf", "mont": "Montserrat-Bold.ttf",
-             "barlow": "BarlowCondensed-ExtraBold.ttf"}
     if name not in FONTS:
-        FONTS[name] = Font(files[name])
+        FONTS[name] = Font(FONT_FILES[name])
     return FONTS[name]
+
+
+def name_text(cap, x, y, max_w=None, **kw):
+    f = font("bebas")
+    return f.text(NAME, f.fit_cap(NAME, cap, max_w) if max_w else cap, x, y, **kw)
+
+
+def small_text(text, cap, x, y, max_w=None, tracking=0.0, **kw):
+    f = font("small")
+    return f.text(text, f.fit_cap(text, cap, max_w, tracking) if max_w else cap, x, y, tracking=tracking, **kw)
+
+
+def auto_text(cap, x, y, tracking=None, **kw):
+    return font("barlow").text("AUTO", cap, x, y, tracking=cap * 0.12 if tracking is None else tracking, **kw)
 
 
 # ---------------------------------------------------------------- tasarım
 
 @dataclass
 class Design:
-    key: str                 # dosya adı
-    title: str               # Bambu Studio'daki nesne adı
-    base: m3.CrossSection    # siyah gövde dış hattı
-    raised: m3.CrossSection  # sarı kabartma
-    holes: m3.CrossSection = field(default_factory=empty)  # anahtarlık deliği
+    key: str                   # dosya adı
+    title: str                 # Bambu Studio'daki nesne adı
+    base: m3.CrossSection      # siyah gövde dış hattı
+    raised: list               # [(şekil, filament)], sonraki öncekinin üstüne yazar
+    holes: m3.CrossSection = field(default_factory=lambda: m3.CrossSection())
+    note: str = ""
+
+    def body(self):
+        return self.base - self.holes
+
+    def raised_parts(self):
+        """Filament başına, gövdeye kırpılmış ve çakışmaları çözülmüş kabartmalar."""
+        allowed = self.body().offset(-EDGE_KEEP, m3.JoinType.Round) - self.holes.offset(0.8, m3.JoinType.Round)
+        out, taken = {}, empty()
+        for shape, ext in reversed(self.raised):        # en son eklenen en üstte
+            part = (shape ^ allowed) - taken
+            taken = taken + shape
+            out[ext] = out.get(ext, empty()) + part
+        for ext in list(out):
+            keep = [p for p in out[ext].decompose() if p.area() > 0.5]   # kıl payı adacıkları at
+            out[ext] = union(*keep)
+            if out[ext].is_empty():
+                del out[ext]
+        return out
 
     def solids(self):
-        body = self.base - self.holes
-        raised = (self.raised ^ body) - self.holes.offset(0.6, m3.JoinType.Round)
-        # kabartmada 0.4 nozulun basamayacağı kıl payı parçaları at
-        raised = union(*[p for p in raised.decompose() if p.area() > 0.4])
+        body = self.body()
         x0, y0, x1, y1 = body.bounds()
         c = (-(x0 + x1) / 2, -(y0 + y1) / 2)
-        govde = body.translate(c).extrude(BASE_H)
-        kabartma = raised.translate(c).extrude(RAISE_H).translate((0, 0, BASE_H))
-        return govde, kabartma
+        # gövde tek katı; ilk katmandan ve üst 3 katmandan kenar halkaları kesilir (katmanlara oturan pah)
+        body = body.translate(c)
+        govde = body.extrude(BASE_H)
+        n = int(round(BASE_H / LAYER))
+        steps = int(round(CHAMFER / LAYER))
+        cuts = [((body - body.offset(-FOOT, m3.JoinType.Round)), -0.1, LAYER)]
+        for k in range(steps):
+            z0 = BASE_H - (steps - k) * LAYER
+            inset = CHAMFER * (k + 1) / steps
+            top = BASE_H + 0.1 if k == steps - 1 else z0 + LAYER
+            cuts.append((body - body.offset(-inset, m3.JoinType.Round), z0, top))
+        rings = [ring.extrude(z1 - z0).translate((0, 0, z0)) for ring, z0, z1 in cuts]
+        govde = govde - m3.Manifold.batch_boolean(rings, m3.OpType.Add)
+        govde = m3.Manifold.batch_boolean([p for p in govde.decompose() if p.volume() > 1.0], m3.OpType.Add)
+        assert n > steps + 1
+        parts = [("Gövde (siyah)", govde, BLACK)]
+        for ext, cs in sorted(self.raised_parts().items()):
+            parts.append((f"Kabartma ({COLOUR_NAMES[ext]})", cs.translate(c).extrude(RAISE_H).translate((0, 0, BASE_H)), ext))
+        return parts
 
     def size(self):
         x0, y0, x1, y1 = self.base.bounds()
         return x1 - x0, y1 - y0
 
+    def check(self):
+        """Baskı kontrolü: çok ince kabartma ve çok dar boşluk alanları (mm²)."""
+        parts = self.raised_parts()
+        allr = union(*parts.values())
+
+        def spots(cs):  # harf köşelerindeki kıl payı pürüzleri sayma
+            return union(*[p for p in cs.decompose() if p.area() > 0.25])
+
+        thin = union(*[spots(cs - cs.offset(-MIN_FEATURE / 2).offset(MIN_FEATURE / 2)) for cs in parts.values()])
+        gaps = spots(allr.offset(MIN_GAP / 2).offset(-MIN_GAP / 2) - allr)
+        return thin, gaps, allr.area()
+
 
 # ---------------------------------------------------------------- araba profili
 
-CAR_PTS = [(8, 4.4), (3.4, 5.0), (0.8, 7.6), (0.3, 11.5), (1.0, 15.6), (4.5, 18.6), (16, 21.2),
-           (30, 23.4), (39, 27.8), (47.5, 31.2), (57, 32.4), (67, 31.4), (77, 28.4), (85.5, 25.8),
-           (90.3, 27.0), (91.9, 24.4), (92.0, 16.0), (91.0, 9.8), (88.4, 5.6), (81, 4.4),
-           (60, 4.1), (33, 4.1)]
-CAR_WHEELS = [(20.0, 6.0), (71.5, 6.0)]
-CAR_WR = 6.6
+CAR_PTS = [(5.5, 4.4), (2.0, 5.6), (0.2, 8.6), (0.0, 12.4), (1.6, 15.8), (6.4, 18.0), (20, 20.4),
+           (33, 22.4), (40.5, 26.8), (47.5, 31.0), (54, 33.2), (62, 33.9), (71, 32.8), (80, 29.6),
+           (88.5, 26.6), (93.4, 26.4), (96.6, 27.6), (98.8, 25.2), (99.7, 21.0), (99.8, 15.6),
+           (98.9, 10.4), (96.8, 6.0), (93, 4.2), (86, 3.6), (64, 3.5), (36, 3.5), (14, 3.6)]
+CAR_WHEELS = [(22.0, 7.2), (78.5, 7.2)]
+CAR_WR = 7.2
 
 
 def car_profile(length=100.0):
-    """Yandan spor coupe silueti (ön solda), 92 birimlik çizimden `length` mm'ye ölçeklenir.
-    Döner: gövde (tekerleksiz), tekerlekler, tekerlek merkezleri, yarıçap, ölçek."""
-    s = length / 92.0
-    body = polygon(smooth(np.array(CAR_PTS) * s, closed=True, n=400))
-    wheels_c = [(x * s, y * s) for x, y in CAR_WHEELS]
-    wr = CAR_WR * s
-    wheels = union(*[circle(wr, x, y) for x, y in wheels_c])
-    return body, wheels, wheels_c, wr, s
+    """Yandan coupe silueti (ön solda); çizim 100 mm, `length`'e ölçeklenir.
+    Döner: gövde (tekerleksiz), tekerlek merkezleri, yarıçap, ölçek."""
+    s = length / 100.0
+    body = polygon(smooth(np.array(CAR_PTS) * s, closed=True, n=500))
+    return body, [(x * s, y * s) for x, y in CAR_WHEELS], CAR_WR * s, s
 
 
 def car_silhouette(length=100.0):
-    body, wheels, wc, wr, s = car_profile(length)
-    shape = (body + wheels).offset(1.6 * s, m3.JoinType.Round).offset(-1.6 * s, m3.JoinType.Round)
+    body, wc, wr, s = car_profile(length)
+    wheels = union(*[circle(wr, x, y) for x, y in wc])
+    r = 1.8 * s
+    shape = (body + wheels).offset(r, m3.JoinType.Round).offset(-r, m3.JoinType.Round)
     return shape, body, wc, wr, s
 
 
-def car_lineart(length):
-    """Çizgi araba: gövde konturu + açık tekerlek kemerleri + tekerlekler + cam çizgisi."""
-    body, _, wc, wr, s = car_profile(length)
-    arches = union(*[circle(wr + 1.3 * s, x, y) for x, y in wc])
-    lines = outline(body - arches, 1.05)
-    window = smooth(np.array([(34.5, 23.6), (44.0, 27.4), (56.5, 28.8), (67.5, 27.6), (80.5, 23.9)]) * s)
-    lines = lines + stroke(window, 1.05)
-    wheels = union(*[outline(circle(wr - 0.4 * s, x, y), 1.05) for x, y in wc])
-    return lines + wheels, s
+def car_window(body, s, inset, belt, rear, slope=0.9):
+    """Gövde konturundan sabit `inset` içeride, `belt` hizasının üstünde, arkası eğik kesilmiş cam alanı."""
+    region = body.offset(-inset, m3.JoinType.Round) ^ rect(-50, belt * s, 300, 100)
+    cut = polygon([(rear * s, belt * s), ((rear + 60 * slope) * s, (belt + 60) * s), (400, 100), (400, belt * s)])
+    r = 1.0  # sivri köşeleri yuvarla (dar siyah kama kalmasın)
+    return (region - cut).offset(-r, m3.JoinType.Round).offset(r, m3.JoinType.Round)
+
+
+def car_lineart(length, width=1.1):
+    """Çizgi araba: gövde konturu, açık tekerlek kemerleri, tekerlekler ve cam."""
+    body, wc, wr, s = car_profile(length)
+    arches = union(*[circle(wr + 2.0 * s, x, y) for x, y in wc])
+    lines = outline(body - arches, width)
+    window = outline(car_window(body, s, width + 1.6, 23.8, 80.0, 0.6), width)
+    wheels = union(*[outline(circle(wr - 0.6 * s, x, y), width) for x, y in wc])
+    hubs = union(*[circle(1.4 * s, x, y) for x, y in wc])
+    return lines + window + wheels + hubs, s
 
 
 # ---------------------------------------------------------------- tasarımlar
 
 def d1_klasik():
-    """Fotoğraf 1: yuvarlak köşeli kart, çerçeve, çizgi araba, AUTO, isim, telefon, şehir."""
-    W, H = 84.0, 58.0
-    base = rrect(W, H, 6.0)
-    frame = outline(rrect(W - 4.2, H - 4.2, 4.4), 1.4)
-    holes = circle(2.4, W / 2 - 7.8, H / 2 - 7.8)
-    art, s = car_lineart(62.0)
+    """Fotoğraf 1 (mavi→sarı): sarı çerçeve ve AUTO; beyaz çizgi araba, isim, telefon, şehir."""
+    W, H = 84.0, 56.0
+    base = rrect(W, H, 7.0)
+    frame = outline(rrect(W - 4.4, H - 4.4, 5.0), 1.4)
+    holes = circle(2.6, W / 2 - 8.0, H / 2 - 8.0)
+    art, s = car_lineart(58.0)
     ax0, ay0, ax1, ay1 = art.bounds()
-    dx, dy = -(ax0 + ax1) / 2 - 2.0, H / 2 - 5.2 - ay1
+    dx, dy = -(ax0 + ax1) / 2 - 2.5, H / 2 - 5.4 - ay1
     art = art.translate((dx, dy))
-    auto = font("bebas").text("AUTO", 5.8, 46.0 * s + dx, 14.2 * s + dy)
-    name = font("bebas").text(NAME, font("bebas").fit_cap(NAME, 11.0, W - 16), 0, -3.4)
-    phone = font("mont").text(PHONE, 4.2, 0, -13.6)
-    city = font("mont").text(CITY, 3.6, 0, -19.8)
-    raised = union(frame, art, auto, name, phone, city)
-    return Design("1_klasik_kart", "AUTO_FIRAT_TUYGUN_klasik", base, raised, holes)
+    auto = auto_text(4.8, 50.0 * s + dx, 15.8 * s + dy)
+    name = name_text(11.0, 0, -4.0, max_w=W - 14)
+    phone = small_text(PHONE, 4.2, 0, -13.4)
+    city = small_text(CITY, 3.4, 0, -19.6, tracking=0.9)
+    raised = [(frame, YELLOW), (art, WHITE), (auto, YELLOW), (name, WHITE), (phone, WHITE), (city, WHITE)]
+    return Design("1_klasik_kart", "AUTO_FIRAT_TUYGUN_klasik", base, raised, holes, "3 renk")
 
 
-def _car_common(length):
+def _car_common(length=100.0):
     shape, body, wc, wr, s = car_silhouette(length)
-    hole_c = (84.6 * s, 18.0 * s)
-    holes = circle(2.5, *hole_c)
-    # iç kontur çizgisi: deliğin etrafından dolaşır, alttaki tekerlek hizasında biter
-    inner = shape.offset(-1.9, m3.JoinType.Round) - circle(2.5 + 2.2, *hole_c)
-    ring = outline(inner, LINE) ^ rect(-50, 11.0 * s, 200, 100)
-    name = font("bebas").text(NAME, 8.4, 41.5 * s, 13.6 * s)
-    phone = font("mont").text(PHONE, 3.3, 41.5 * s, 6.9 * s)
-    city = font("mont").text(CITY, 2.8, 78.0 * s, 8.6 * s)
-    return shape, holes, union(ring, name, phone, city), s
+    hole_c = (91.0 * s, 17.4 * s)
+    holes = circle(2.6, *hole_c)
+    # iç kontur: deliğin etrafından dolaşır, tekerlek hizasında biter
+    inner = shape.offset(-1.7, m3.JoinType.Round) - circle(2.6 + 2.4, *hole_c)
+    ring = outline(inner, 1.1) ^ rect(-50, 10.6 * s, 200, 100)
+    name = name_text(8.4, 54.0 * s, 13.4 * s)
+    info = small_text(f"{PHONE}  {CITY}", 3.3, 54.0 * s, 6.1 * s)
+    return shape, body, holes, ring, name, info, s
 
 
 def d2_araba():
-    """Fotoğraf 2: araba silueti, büyük cam içinde AUTO, kavisli far çizgileri."""
-    shape, holes, common, s = _car_common(100.0)
-    win = stroke(smooth(np.array([(36.0, 23.9), (44.5, 28.6), (56.0, 30.0), (67.0, 29.2), (76.5, 26.2),
-                                  (68.5, 24.0), (52.0, 23.4)]) * s, closed=True), LINE, closed=True)
-    auto = font("bebas").text("AUTO", 3.8, 56.5 * s, 26.6 * s)
-    head1 = stroke(smooth(np.array([(3.6, 16.2), (7.4, 16.9), (11.6, 15.8)]) * s), LINE)
-    head2 = stroke(np.array([(3.2, 10.6), (6.6, 10.8), (7.8, 8.2)]) * s, LINE)
-    raised = union(common, win, auto, head1, head2)
-    return Design("2_araba_silueti", "AUTO_FIRAT_TUYGUN_araba", shape, raised, holes)
+    """Fotoğraf 2 (mavi→sarı): sarı kontur, cam ve AUTO; beyaz farlar, isim ve bilgi satırı."""
+    shape, body, holes, ring, name, info, s = _car_common()
+    win = outline(car_window(body, s, 1.7 + 1.1 + 1.0, 22.2, 81.0, 0.55), 1.1)
+    auto = auto_text(3.8, 61.5 * s, 26.0 * s)
+    head1 = stroke(smooth(np.array([(5.2, 12.6), (9.0, 13.2), (13.0, 12.0)]) * s), 1.1)
+    head2 = stroke(np.array([(3.6, 9.0), (7.2, 9.2), (8.8, 6.6)]) * s, 1.1)
+    raised = [(ring, YELLOW), (win, YELLOW), (auto, YELLOW), (head1, WHITE), (head2, WHITE),
+              (name, WHITE), (info, WHITE)]
+    return Design("2_araba_silueti", "AUTO_FIRAT_TUYGUN_araba", shape, raised, holes, "3 renk")
 
 
 def d3_araba_cam():
-    """Fotoğraf 3: araba silueti, direkli yan cam içinde küçük AUTO, köşeli far çizgileri."""
-    shape, holes, common, s = _car_common(100.0)
-    win = stroke(np.array([(41.0, 24.0), (48.5, 29.0), (58.5, 30.1), (68.0, 29.1), (75.0, 25.6),
-                           (41.0, 24.0)]) * s, LINE, closed=True)
-    pillar = stroke(np.array([(55.6, 24.6), (53.2, 29.8)]) * s, LINE)
-    auto = font("bebas").text("AUTO", 3.1, 64.6 * s, 26.9 * s)
-    head1 = stroke(np.array([(3.2, 16.0), (8.6, 17.8), (13.0, 17.8)]) * s, LINE)
-    head2 = stroke(np.array([(4.4, 13.6), (10.2, 15.0)]) * s, LINE)
-    head3 = stroke(np.array([(3.0, 10.2), (6.9, 10.4), (8.4, 7.8)]) * s, LINE)
-    raised = union(common, win, pillar, auto, head1, head2, head3)
-    return Design("3_araba_yan_cam", "AUTO_FIRAT_TUYGUN_araba_2", shape, raised, holes)
+    """Fotoğraf 3 (mavi→sarı): direkli yan cam ve AUTO sarı; köşeli farlar, isim ve bilgi beyaz."""
+    shape, body, holes, ring, name, info, s = _car_common()
+    area = car_window(body, s, 1.7 + 1.1 + 1.0, 22.2, 79.0, 0.35)
+    pillar = polygon([(52.2 * s, 21.0 * s), (54.6 * s, 21.0 * s), (50.6 * s, 40 * s), (48.2 * s, 40 * s)])
+    win = outline(area, 1.1) + (pillar ^ area)
+    auto = auto_text(3.8, 66.5 * s, 26.0 * s)
+    head1 = stroke(np.array([(4.4, 14.0), (9.2, 15.4), (14.2, 15.4)]) * s, 1.1)
+    head2 = stroke(np.array([(5.4, 11.4), (10.8, 12.6)]) * s, 1.1)
+    head3 = stroke(np.array([(3.6, 8.6), (7.2, 8.8), (8.8, 6.4)]) * s, 1.1)
+    raised = [(ring, YELLOW), (win, YELLOW), (auto, YELLOW),
+              (head1, WHITE), (head2, WHITE), (head3, WHITE), (name, WHITE), (info, WHITE)]
+    return Design("3_araba_yan_cam", "AUTO_FIRAT_TUYGUN_araba_2", shape, raised, holes, "3 renk")
 
 
 def d4_plaka():
-    """Yeni: Türk plakası görünümü; solda TR şeridi, 07 (Antalya) + isim, altta telefon."""
-    W, H = 96.0, 30.0
-    base = rrect(W, H, 3.6)
-    frame = outline(rrect(W - 3.2, H - 3.2, 2.4), 1.2)
-    sx0, sx1 = -W / 2 + 1.6, -W / 2 + 13.6
-    strip = rrect(sx1 - sx0, H - 3.2, 2.4, (sx0 + sx1) / 2, 0) ^ rect(sx0, -H, sx1 - 0.0, H)
-    tr = font("barlow").text("TR", 5.2, (sx0 + sx1) / 2, -6.6)
-    holes = circle(2.4, (sx0 + sx1) / 2, 5.6)
-    strip = strip - tr.offset(0.05, m3.JoinType.Round)
-    main_w = W / 2 - 3.6 - (sx1 + 2.0)
-    main = "07 " + NAME
-    cap = font("barlow").fit_cap(main, 10.5, main_w)
-    name = font("barlow").text(main, cap, (sx1 + 2.0 + W / 2 - 3.6) / 2, 3.4)
-    line2 = f"{PHONE}  ·  {CITY}"
-    phone = font("mont").text(line2, font("mont").fit_cap(line2, 3.3, main_w), (sx1 + 2.0 + W / 2 - 3.6) / 2, -8.2)
-    raised = union(frame, strip, name, phone)
-    return Design("4_plaka", "AUTO_FIRAT_TUYGUN_plaka", base, raised, holes)
+    """Yeni: galeri plaka çerçevesi; beyaz plaka, siyah oyma yazı, sarı TR şeridi, çerçevede telefon."""
+    W, H = 100.0, 38.0
+    tab = circle(6.0, -W / 2 - 1.5, 0)
+    base = (rrect(W, H, 4.0) + tab).offset(1.5, m3.JoinType.Round).offset(-3.0, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
+    holes = circle(2.6, -W / 2 - 2.0, 0)
+    px0, px1, py0, py1 = -W / 2 + 3.2, W / 2 - 3.2, -5.4, H / 2 - 3.2
+    plate = rrect(px1 - px0, py1 - py0, 1.8, (px0 + px1) / 2, (py0 + py1) / 2)
+    sx1 = px0 + 9.0
+    strip = plate ^ rect(px0 - 1, py0 - 1, sx1, py1 + 1)
+    face = plate - rect(px0 - 1, py0 - 1, sx1 + 0.8, py1 + 1)
+    tr = font("barlow").text("TR", 4.4, (px0 + sx1) / 2, py0 + 4.6, tracking=0.5)
+    strip = strip - tr
+    text = "07 " + NAME
+    cx = (sx1 + 0.8 + px1) / 2
+    cap = font("barlow").fit_cap(text, 12.0, px1 - sx1 - 6.0, tracking=0.9)
+    plate_text = font("barlow").text(text, cap, cx, (py0 + py1) / 2, tracking=0.9)
+    face = face - plate_text
+    info_y = (-H / 2 + py0) / 2 - 0.2
+    phone = small_text(PHONE, 4.0, -W / 2 + 6.0, info_y, align="l")
+    city = small_text(CITY, 3.6, W / 2 - 6.0, info_y, align="r", tracking=0.8)
+    raised = [(strip, YELLOW), (face, WHITE), (phone, YELLOW), (city, YELLOW)]
+    return Design("4_plaka", "AUTO_FIRAT_TUYGUN_plaka", base, raised, holes, "3 renk")
 
 
 def d5_araba_anahtari():
     """Yeni (galeri): araba anahtarı; kumanda gövdesinde isim, anahtar dilinde telefon."""
-    fob = rrect(60.0, 34.0, 11.0, -25.0, 0)
-    shoulder = rrect(9.0, 19.0, 3.0, 8.0, 0)
-    bottom = [(4, -6.2), (12, -6.2), (14, -4.6), (17, -6.2), (21, -6.2), (23.5, -4.4), (26.5, -6.2),
-              (30, -6.2), (32, -4.8), (35, -6.2), (38.5, -6.2), (40.5, -4.8), (42.5, -6.2)]
-    blade = polygon([(4, 6.2), (44.0, 6.2), (49.5, 2.4), (49.5, -2.4), (46.5, -6.2)] + bottom[::-1])
+    fob = rrect(60.0, 35.0, 11.5, -25.0, 0)
+    shoulder = rrect(9.0, 20.0, 3.0, 8.0, 0)
+    bottom = [(4, -6.6), (13, -6.6), (15, -5.0), (18, -6.6), (22, -6.6), (24.5, -4.8), (27.5, -6.6),
+              (31, -6.6), (33, -5.2), (36, -6.6), (40, -6.6), (42, -5.2), (44, -6.6)]
+    blade = polygon([(4, 6.6), (46.0, 6.6), (51.5, 2.6), (51.5, -2.6), (48.0, -6.6)] + bottom[::-1])
     base = union(fob, shoulder, blade)
-    holes = circle(2.6, -48.6, 0.0)
-    panel = rrect(45.5, 27.6, 7.5, -19.6, 0)
-    ring = outline(panel, LINE)
-    collar = outline(shoulder, LINE, inset=1.1)
-    groove = stroke(np.array([(11.5, 3.9), (43.0, 3.9)]), 0.9)
-    auto = font("bebas").text("AUTO", 4.6, -19.6, 7.9)
-    name = font("bebas").text(NAME, font("bebas").fit_cap(NAME, 7.8, 39.0), -19.6, -0.6)
-    city = font("mont").text(CITY, 2.8, -19.6, -8.4)
-    phone = font("mont").text(PHONE, font("mont").fit_cap(PHONE, 3.3, 31.0), 29.2, -1.0)
-    raised = union(ring, collar, groove, auto, name, city, phone)
-    return Design("5_araba_anahtari", "AUTO_FIRAT_TUYGUN_anahtar", base, raised, holes)
-
-
-def d7_kilometre_saati():
-    """Yeni (galeri): kilometre saati; çentikli kadran, ibre, AUTO, isim, telefon, şehir."""
-    cy = 4.0
-    dial = circle(31.0, 0, cy, 160) ^ rect(-40, -22.0, 40, 50)
-    tab = circle(6.2, 0, cy + 33.4)
-    base = (dial + tab).offset(1.5, m3.JoinType.Round).offset(-3.0, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
-    holes = circle(2.4, 0, cy + 33.6)
-    edge = outline(dial.offset(-1.5, m3.JoinType.Round).offset(1.5, m3.JoinType.Round), LINE, inset=1.6)
-    edge = edge - circle(6.2 + 1.2, 0, cy + 33.4)
-    ticks = []
-    for i, a in enumerate(np.arange(180, -0.1, -15)):
-        r0 = 21.0 if i % 2 == 0 else 23.5
-        u = np.array([np.cos(np.radians(a)), np.sin(np.radians(a))])
-        ticks.append(stroke([u * r0 + (0, cy), u * 28.8 + (0, cy)], 1.25 if i % 2 == 0 else 1.0))
-    na = np.radians(38.0)
-    tip = np.array([np.cos(na), np.sin(na)]) * 19.5 + (0, cy)
-    side = np.array([-np.sin(na), np.cos(na)]) * 1.4
-    needle = polygon([(0, cy) + side, tip, (0, cy) - side, (0, cy) - np.array([np.cos(na), np.sin(na)]) * 4.0])
-    hub = circle(3.4, 0, cy) - circle(1.2, 0, cy)
-    auto = font("bebas").text("AUTO", 5.6, -1.0, cy + 13.0)
-    name = font("bebas").text(NAME, font("bebas").fit_cap(NAME, 7.6, 46.0), 0, cy - 8.4)
-    phone = font("mont").text(PHONE, 3.2, 0, cy - 16.1)
-    city = font("mont").text(CITY, 2.7, 0, cy - 21.0)
-    raised = union(edge, union(*ticks), needle, hub, auto, name, phone, city)
-    return Design("7_kilometre_saati", "AUTO_FIRAT_TUYGUN_kilometre", base, raised, holes)
+    holes = circle(2.7, -48.4, 0.0)
+    panel = rrect(45.0, 28.4, 8.0, -19.2, 0)
+    ring = outline(panel, 1.2)
+    collar = outline(shoulder, 1.1, inset=1.2)
+    groove = stroke(np.array([(12.5, 4.1), (44.5, 4.1)]), 1.0)
+    auto = auto_text(4.4, -19.2, 8.6)
+    name = name_text(8.0, -19.2, 0.2, max_w=39.0)
+    phone = small_text(PHONE, 3.6, -19.2, -8.4, max_w=39.0)
+    city = small_text(CITY, 3.6, 29.4, -0.8, max_w=31.0, tracking=0.7)
+    raised = [(ring, YELLOW), (collar, YELLOW), (groove, YELLOW), (auto, YELLOW), (name, YELLOW),
+              (city, YELLOW), (phone, YELLOW)]
+    return Design("5_araba_anahtari", "AUTO_FIRAT_TUYGUN_anahtar", base, raised, holes, "2 renk")
 
 
 def d6_lastik_rozet():
-    """Yeni: lastik/jant rozeti; dişli lastik halkası, üstte ANTALYA, ortada isim, altta telefon."""
+    """Yeni: lastik rozeti; tok blok dişli lastik, iç halka, kavisli şehir ve telefon."""
     R = 31.0
-    base = circle(R, 0, 0, 160) + circle(6.2, 0, R + 2.6) 
-    base = base.offset(1.2, m3.JoinType.Round).offset(-1.2, m3.JoinType.Round)
-    holes = circle(2.4, 0, R + 2.8)
-    tire = circle(R - 1.4, 0, 0, 160) - circle(R - 5.0, 0, 0, 160)
-    grooves = union(*[rect(-0.75, R - 3.2, 0.75, R + 2).rotate(a) for a in np.arange(0, 360, 360 / 36)])
-    tire = tire - grooves - circle(6.2 + 1.0, 0, R + 2.6)
-    rim = outline(circle(R - 6.2, 0, 0, 160), LINE)
-    city = font("mont").arc(CITY, 3.2, 0, 0, R - 11.6, 90.0, top=True, tracking=0.6)
-    phone = font("mont").arc(PHONE, 3.0, 0, 0, R - 8.4, -90.0, top=False, tracking=0.25)
-    auto = font("bebas").text("AUTO", 5.0, 0, 11.2)
-    first = font("bebas").text("FIRAT", 9.0, 0, 3.0)
-    last = font("bebas").text("TUYGUN", font("bebas").fit_cap("TUYGUN", 9.0, 33.0), 0, -8.6)
-    raised = union(tire, rim, city, phone, auto, first, last)
-    return Design("6_lastik_rozet", "AUTO_FIRAT_TUYGUN_rozet", base, raised, holes)
+    tab_c = (0, R + 2.6)
+    base = (circle(R, 0, 0, 180) + circle(6.4, *tab_c)).offset(1.2, m3.JoinType.Round).offset(-1.2, m3.JoinType.Round)
+    holes = circle(2.6, 0, R + 2.9)
+    band = circle(R - EDGE_KEEP, 0, 0, 180) - circle(R - 5.4, 0, 0, 180)
+    grooves = union(*[rect(-0.65, R - 3.4, 0.65, R + 2).rotate(a) for a in np.arange(5, 360, 10.0)])
+    tire = band - grooves - circle(6.4 + 1.2, *tab_c)
+    tire = tire.offset(-0.45, m3.JoinType.Round).offset(0.45, m3.JoinType.Round)   # kesilen ince parçaları at
+    ring = outline(circle(R - 6.2, 0, 0, 180), 1.2)
+    city = font("small").arc(CITY, 3.5, 0, 0, R - 11.8, 90.0, top=True, tracking=1.0)
+    phone = font("small").arc(PHONE, 3.4, 0, 0, R - 8.2, -90.0, top=False, tracking=0.3)
+    auto = auto_text(4.8, 0, 12.6)
+    first = font("bebas").text("FIRAT", 9.4, 0, 3.6)
+    last = font("bebas").text("TUYGUN", font("bebas").fit_cap("TUYGUN", 9.4, 28.0), 0, -7.2)
+    raised = [(tire, YELLOW), (ring, YELLOW), (city, YELLOW), (phone, YELLOW), (auto, YELLOW),
+              (first, YELLOW), (last, YELLOW)]
+    return Design("6_lastik_rozet", "AUTO_FIRAT_TUYGUN_rozet", base, raised, holes, "2 renk")
+
+
+def d7_kilometre_saati():
+    """Yeni (galeri): kilometre saati; beyaz çentikler ve yazılar, sarı ibre, göbek, kenar ve AUTO."""
+    cy = 4.0
+    dial = circle(31.0, 0, cy, 180) ^ rect(-40, -22.5, 40, 50)
+    tab_c = (0, cy + 33.4)
+    base = (dial + circle(6.4, *tab_c)).offset(1.5, m3.JoinType.Round).offset(-3.0, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
+    holes = circle(2.6, 0, cy + 33.6)
+    rounded = dial.offset(-1.5, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
+    edge = outline(rounded, 1.3, inset=1.4) - circle(6.4 + 1.4, *tab_c)
+    ticks = []
+    for i, a in enumerate(np.arange(180, -0.1, -15)):
+        major = i % 2 == 0
+        u = np.array([np.cos(np.radians(a)), np.sin(np.radians(a))])
+        ticks.append(stroke([u * (20.6 if major else 23.2) + (0, cy), u * 26.2 + (0, cy)], 1.4 if major else 1.1))
+    na = np.radians(36.0)
+    d = np.array([np.cos(na), np.sin(na)])
+    side = np.array([-np.sin(na), np.cos(na)]) * 1.5
+    needle = polygon([(0, cy) + side, d * 18.5 + (0, cy), (0, cy) - side, (0, cy) - d * 4.5])
+    needle = needle + stroke([(0, cy), d * 18.2 + (0, cy)], 1.0)   # uç en az 1 mm
+    hub = circle(3.6, 0, cy) - circle(1.3, 0, cy)
+    auto = auto_text(5.4, -1.5, cy + 12.4)
+    name = name_text(8.0, 0, cy - 8.6, max_w=46.0)
+    phone = small_text(PHONE, 3.6, 0, cy - 16.4)
+    city = small_text(CITY, 3.0, 0, cy - 21.6, tracking=0.9)
+    raised = [(edge, YELLOW), (union(*ticks), WHITE), (needle, YELLOW), (hub, YELLOW), (auto, YELLOW),
+              (name, WHITE), (phone, WHITE), (city, WHITE)]
+    return Design("7_kilometre_saati", "AUTO_FIRAT_TUYGUN_kilometre", base, raised, holes, "3 renk")
 
 
 DESIGNS = [d1_klasik, d2_araba, d3_araba_cam, d4_plaka, d5_araba_anahtari, d6_lastik_rozet, d7_kilometre_saati]
@@ -450,9 +545,39 @@ DESIGNS = [d1_klasik, d2_araba, d3_araba_cam, d4_plaka, d5_araba_anahtari, d6_la
 
 # ---------------------------------------------------------------- 3MF
 
-def project_settings(template_files):
+# X2D proje ayarlarında filament başına değil, ekstrüder başına olan 2 elemanlı listeler
+EXTRUDER_KEYS = {"default_nozzle_volume_type", "extruder_colour", "extruder_max_nozzle_count", "extruder_offset",
+                 "extruder_printable_area", "extruder_printable_height", "extruder_type", "extruder_variant_list",
+                 "flush_multiplier", "flush_multiplier_fast", "grab_length", "machine_min_extruding_rate",
+                 "machine_min_travel_rate", "max_layer_height", "min_layer_height", "nozzle_diameter",
+                 "nozzle_volume_type", "physical_extruder_map", "start_end_points"}
+# filament değiştirirken temizleme hacmi (mm³): [kimden][kime] siyah, sarı, beyaz
+FLUSH = [[0, 700, 900], [90, 0, 300], [90, 200, 0]]
+
+
+def project_settings(template_files, filaments):
+    """Şablon (2 filamentli X2D) ayarlarını `filaments` listesindeki filamentlere uyarlar.
+    Ek filamentler 2. filamentin (Bambu PLA Basic) ayarlarını kopyalar."""
     cfg = json.loads(template_files["Metadata/project_settings.config"])
-    cfg["filament_colour"] = [BLACK + "FF", YELLOW + "FF"]
+    n_old, n = len(cfg["filament_colour"]), len(filaments)
+    self_idx = [int(v) for v in cfg["filament_self_index"]]
+    n_var = len(self_idx)
+    src = [i for i, v in enumerate(self_idx) if v == n_old]          # son filamentin varyant blokları
+    for k, v in list(cfg.items()):
+        if not isinstance(v, list) or k in EXTRUDER_KEYS:
+            continue
+        if len(v) == n_old:
+            cfg[k] = (v + [v[-1]] * n)[:n]
+        elif len(v) == n_var and k != "filament_self_index" and not k.startswith(("machine_", "flush_")):
+            blocks = [[v[i] for i, s in enumerate(self_idx) if s == f] for f in range(1, n_old + 1)]
+            blocks += [[v[i] for i in src]] * max(0, n - n_old)
+            cfg[k] = [x for b in blocks[:n] for x in b]
+    per = len(src)
+    cfg["filament_self_index"] = [str(f) for f in range(1, n + 1) for _ in range(per)]
+    nozzles = len(cfg["nozzle_diameter"])
+    one = [str(FLUSH[a - 1][b - 1]) for a in filaments for b in filaments]
+    cfg["flush_volumes_matrix"] = one * nozzles
+    cfg["filament_colour"] = [COLOURS[f] + "FF" for f in filaments]
     return json.dumps(cfg, indent=4).encode()
 
 
@@ -486,6 +611,7 @@ def settings_xml(title, parts):
     pid = len(parts) + 1
     out = ['<?xml version="1.0" encoding="UTF-8"?>\n<config>\n', f'  <object id="{pid}">\n',
            f'    <metadata key="name" value="{title}"/>\n', '    <metadata key="extruder" value="1"/>\n',
+           '    <metadata key="wall_generator" value="arachne"/>\n',
            f'    <metadata face_count="{sum(len(t) for _, _, t, _ in parts)}"/>\n']
     for i, (name, V, T, ext) in enumerate(parts, 1):
         out += [f'    <part id="{i}" subtype="normal_part">\n',
@@ -518,13 +644,6 @@ R_ISO = rotation(0, -52)
 R_TOP = rotation(0, 0)
 
 
-SHOW = {1: (40, 40, 43), 2: (255, 226, 46)}  # önizlemede siyah ve sarının ekrandaki tonu
-
-
-def shaded_parts(parts):
-    return [(V, T, SHOW[ext]) for _, V, T, ext in parts]
-
-
 def fit_into(im, w, h):
     """Şeffaf kenarları kırpıp görseli w x h kutusuna sığdırır."""
     im = im.crop(im.getbbox())
@@ -533,9 +652,12 @@ def fit_into(im, w, h):
 
 
 def write_design(d, template_files, out_dir):
-    govde, kabartma = d.solids()
-    parts = [("Gövde (siyah)", *mesh_arrays(govde), 1), ("Kabartma (sarı)", *mesh_arrays(kabartma), 2)]
-    shaded = shaded_parts(parts)
+    solids = d.solids()
+    used = [ext for _, _, ext in solids]
+    filaments = sorted(set(used))
+    fil_no = {f: i + 1 for i, f in enumerate(filaments)}            # projedeki filament sırası
+    parts = [(name, *mesh_arrays(m), fil_no[ext]) for name, m, ext in solids]
+    shaded = [(V, T, SHOW[ext]) for (_, V, T, _), ext in zip(parts, used)]
     plate = render(shaded, 512, R_ISO)
     world = [(V + (*BED_CENTER, 0), T, c) for V, T, c in shaded]
     images = {
@@ -547,9 +669,10 @@ def write_design(d, template_files, out_dir):
     }
     today = datetime.date.today().isoformat()
     files = {k: v for k, v in template_files.items() if k.startswith(("[Content_Types]", "_rels/", "3D/_rels/"))}
-    for k in ("Metadata/slice_info.config", "Metadata/filament_sequence.json", "Metadata/cut_information.xml"):
+    for k in ("Metadata/slice_info.config", "Metadata/cut_information.xml"):
         files[k] = template_files[k]
-    files["Metadata/project_settings.config"] = project_settings(template_files)
+    files["Metadata/filament_sequence.json"] = b'{"plate_1":{"nozzle_sequence":[],"optimal_assignment":[],"sequence":[]}}'
+    files["Metadata/project_settings.config"] = project_settings(template_files, filaments)
     files["3D/3dmodel.model"] = model_xml(d.title, parts, today).encode()
     head = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
             'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" '
@@ -569,12 +692,12 @@ def write_design(d, template_files, out_dir):
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
         for k in order + sorted(k for k in files if k not in order):
             z.writestr(k, files[k])
-    return path, shaded
+    return path, shaded, filaments
 
 
 # ---------------------------------------------------------------- önizleme
 
-def preview(d, shaded, path):
+def preview(d, shaded, filaments, path):
     W, H = 1400, 620
     canvas = Image.new("RGB", (W, H), (236, 239, 244))
     dr = ImageDraw.Draw(canvas)
@@ -585,14 +708,23 @@ def preview(d, shaded, path):
         dr.rounded_rectangle((x, 70, x + 640, 70 + 520), 22, fill=(126, 134, 148))
         canvas.paste(im, (x + (640 - im.width) // 2, 70 + (520 - im.height) // 2), im)
     try:
-        f = ImageFont.truetype(os.path.join(FONT_DIR, "Montserrat-Bold.ttf"), 30)
-        fs = ImageFont.truetype(os.path.join(FONT_DIR, "Montserrat-Bold.ttf"), 22)
+        f = ImageFont.truetype(os.path.join(FONT_DIR, "Lexend-ExtraBold.ttf"), 30)
+        fs = ImageFont.truetype(os.path.join(FONT_DIR, "Lexend-ExtraBold.ttf"), 21)
     except OSError:
         f = fs = ImageFont.load_default()
     w, h = d.size()
     dr.text((40, 18), d.key.replace("_", " ").upper(), fill=(30, 33, 40), font=f)
-    info = f"{w:.0f} × {h:.0f} × {BASE_H + RAISE_H:.1f} mm   ·   siyah + sarı"
-    dr.text((W - 40 - dr.textlength(info, font=fs), 24), info, fill=(70, 76, 88), font=fs)
+    x = W - 40
+    for ext in reversed(filaments):                          # renk kutucukları
+        label = f"{filaments.index(ext) + 1}: {COLOUR_NAMES[ext]}"
+        x -= dr.textlength(label, font=fs)
+        dr.text((x, 24), label, fill=(70, 76, 88), font=fs)
+        x -= 30
+        dr.rounded_rectangle((x, 24, x + 22, 46), 5, fill=SHOW[ext], outline=(90, 96, 108), width=2)
+        x -= 22
+    info = f"{w:.0f} × {h:.0f} × {BASE_H + RAISE_H:.1f} mm"
+    x -= dr.textlength(info, font=fs) + 10
+    dr.text((x, 24), info, fill=(70, 76, 88), font=fs)
     canvas.save(path)
     return canvas
 
@@ -618,10 +750,13 @@ def main():
         d = fn()
         if only and not any(o in d.key for o in only):
             continue
-        path, shaded = write_design(d, template_files, OUT_DIR)
+        path, shaded, filaments = write_design(d, template_files, OUT_DIR)
         w, h = d.size()
-        print(f"{d.key:24s} {w:5.1f} x {h:5.1f} mm  -> {os.path.relpath(path, ROOT)}")
-        previews.append(preview(d, shaded, os.path.join(OUT_DIR, "onizleme", d.key + ".png")))
+        thin, gaps, area = d.check()
+        thin, gaps = thin.area(), gaps.area()
+        print(f"{d.key:20s} {w:5.1f} x {h:5.1f} mm  {'+'.join(COLOUR_NAMES[f] for f in filaments):18s} "
+              f"ince<{MIN_FEATURE}mm: {thin:4.1f} mm²  dar boşluk<{MIN_GAP}mm: {gaps:4.1f} mm²  (kabartma {area:6.0f} mm²)")
+        previews.append(preview(d, shaded, filaments, os.path.join(OUT_DIR, "onizleme", d.key + ".png")))
     if not only:
         contact_sheet(previews, os.path.join(OUT_DIR, "onizleme", "hepsi.png"))
 

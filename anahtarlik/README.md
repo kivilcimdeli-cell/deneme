@@ -1,36 +1,49 @@
-# AUTO FIRAT TUYGUN anahtarlıkları (siyah + sarı, Bambu Lab)
+# AUTO FIRAT TUYGUN anahtarlıkları (Bambu Lab X2D)
 
 ![Tüm tasarımlar](onizleme/hepsi.png)
 
-Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Hepsi aynı yapıda:
+Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Tek parça, desteksiz basılır.
 
-| Parça | Filament | Kalınlık |
+| Dosya | Ölçü (mm) | Renkler | Açıklama |
+| --- | --- | --- | --- |
+| `1_klasik_kart.3mf` | 84 × 56 | siyah + sarı + beyaz | Fotoğraf 1 (mavi → sarı): sarı çerçeve ve AUTO, beyaz çizgi araba ve yazılar |
+| `2_araba_silueti.3mf` | 100 × 34 | siyah + sarı + beyaz | Fotoğraf 2: sarı kontur, cam ve AUTO; beyaz farlar, isim, telefon |
+| `3_araba_yan_cam.3mf` | 100 × 34 | siyah + sarı + beyaz | Fotoğraf 3: direkli yan cam; köşeli farlar |
+| `4_plaka.3mf` | 107 × 38 | siyah + sarı + beyaz | Galeri plaka çerçevesi: beyaz plaka, oyma siyah "07 FIRAT TUYGUN", sarı TR şeridi |
+| `5_araba_anahtari.3mf` | 106 × 35 | siyah + sarı | Araba anahtarı: kumandada AUTO, isim, telefon; anahtar dilinde ANTALYA |
+| `6_lastik_rozet.3mf` | 62 × 71 | siyah + sarı | Blok dişli lastik, kavisli ANTALYA ve telefon |
+| `7_kilometre_saati.3mf` | 62 × 66 | siyah + sarı + beyaz | Beyaz çentikler ve yazılar, sarı ibre ve kenar |
+
+## Katmanlar
+
+| Parça | Filament | Yükseklik |
 | --- | --- | --- |
-| Gövde | 1 – siyah | 0 – 3,2 mm |
-| Kabartma (yazılar, çizgiler, çerçeve) | 2 – sarı | 3,2 – 4,2 mm |
+| Gövde | 1 – siyah | 0 – 3,0 mm |
+| Kabartma | 2 – sarı, 3 – beyaz | 3,0 – 3,8 mm (4 katman) |
 
-Yazıcı/baskı ayarları önceki projedeki gibi: **Bambu Lab X2D 0.4, Bambu PLA Basic, 0.20 mm Standard**.
-Renk değişimi tek bir yerde (3,2 mm) olur; destek gerekmez.
+Ayarlar önceki X2D projesinden: **Bambu Lab X2D 0.4, Bambu PLA Basic, 0.20 mm Standard**.
 
-## Tasarımlar
+## 3D baskı için yapılan iyileştirmeler
 
-| Dosya | Ölçü (mm) | Açıklama |
-| --- | --- | --- |
-| `1_klasik_kart.3mf` | 84 × 58 | Fotoğraf 1'in siyah-sarı hâli: çerçeve, çizgi araba, AUTO, isim, telefon, şehir |
-| `2_araba_silueti.3mf` | 100 × 36 | Fotoğraf 2'nin siyah-sarı hâli: araba biçimi, büyük cam içinde AUTO |
-| `3_araba_yan_cam.3mf` | 100 × 36 | Fotoğraf 3'ün siyah-sarı hâli: direkli yan cam, köşeli farlar |
-| `4_plaka.3mf` | 96 × 30 | **Yeni** – plaka görünümü: TR şeridi, "07" (Antalya) + isim, altta telefon ve şehir |
-| `5_araba_anahtari.3mf` | 104 × 34 | **Yeni** – araba anahtarı: kumanda gövdesinde isim, anahtar dilinde telefon |
-| `6_lastik_rozet.3mf` | 62 × 71 | **Yeni** – dişli lastik halkası, kavisli ANTALYA ve telefon |
-| `7_kilometre_saati.3mf` | 62 × 66 | **Yeni** – kilometre saati: çentikli kadran ve ibre |
-
-Her tasarımın ayrı önizlemesi `onizleme/` klasöründe (üstten ve perspektif görünüm).
+- **Küçük yazılar kalın ve açık:** Telefon ve şehir **Lexend ExtraBold** ile yazıldı. Bu yazı tipi küçük boyda kalın kalıyor,
+  "3, 5, 8" gibi rakamların iç boşlukları da kapanmıyor. En küçük yazı yaklaşık 3,4 mm. İsim (Bebas Neue) en az 7,5 mm,
+  AUTO yazısı Barlow Condensed ExtraBold.
+- **Ölçüler 0,4 nozula göre:** Çizgiler en az 1,0–1,4 mm, ibre ucu en az 1 mm. Ayrı parçalar arasında en az 0,6 mm boşluk
+  var, kabartma gövde kenarına 1 mm'den fazla yaklaşmıyor. Bunlar betikte otomatik kontrol ediliyor.
+- **Kenarlar:** İlk katman 0,3 mm içe çekik (fil ayağı yapmaz). Gövdenin üst kenarında 3 katmanlık 0,6 mm pah var,
+  elde daha düzgün hissettirir.
+- **Arachne:** Nesne ayarı olarak *Arachne* duvar üretici açık. İnce yazıları daha düzgün basar.
+- **Kabartma 0,8 mm:** Harfler daha az ip çeker, renk değişimi yalnızca son 4 katmanda olur.
+- **Anahtarlık deliği:** 5,2–5,4 mm, etrafında yaklaşık 3 mm veya daha fazla et payı var.
 
 ## Baskı
 
-1. Dosyayı Bambu Studio'da aç, AMS'te **1 = siyah, 2 = sarı** eşleşmesini kontrol et.
-2. Çok adet basmak için nesneye sağ tıkla → *Örnek ekle* (veya `+` tuşu), sonra *Düzenle* ile tablaya yerleştir.
-3. Dilimle → Yazdır.
+1. Dosyayı Bambu Studio'da aç. AMS eşleşmesini kontrol et: 3 renkli dosyalarda **1 = siyah, 2 = sarı, 3 = beyaz**;
+   2 renkli dosyalarda 1 = siyah, 2 = sarı.
+2. 3 renkli tasarımlarda iki filament aynı nozulu paylaşır (X2D'de iki nozul var). Son 4 katmanda renk değişimi ve
+   temizleme kulesi olur, bu normal. En hızlı ve en az atıklı olanlar 2 renkli tasarımlardır (5 ve 6).
+3. Çok adet basmak için nesneye sağ tıkla, *Örnek ekle*; sonra *Düzenle* ile tablaya yerleştir.
+4. Dilimle → Yazdır.
 
 ## Yeniden üretme / değiştirme
 
@@ -40,7 +53,8 @@ python3 scripts/anahtarlik.py          # hepsi
 python3 scripts/anahtarlik.py plaka    # yalnızca adında "plaka" geçen tasarım
 ```
 
-İsim, telefon ve şehir `scripts/anahtarlik.py` dosyasının başındaki `NAME`, `PHONE`, `CITY` değişkenlerinden değiştirilebilir;
-renkler `BLACK` / `YELLOW`, kalınlıklar `BASE_H` / `RAISE_H` ile ayarlanır.
+İsim, telefon ve şehir `scripts/anahtarlik.py` dosyasının başındaki `NAME`, `PHONE`, `CITY` değişkenlerinden;
+renkler `COLOURS`, kalınlıklar `BASE_H` / `RAISE_H` ile değiştirilir. Betik her tasarım için ince kabartma ve dar boşluk
+alanlarını raporlar.
 
-Yazı tipleri: Bebas Neue, Montserrat, Barlow Condensed (SIL Open Font License, `scripts/fonts/OFL-*.txt`).
+Yazı tipleri: Bebas Neue, Barlow Condensed, Lexend (SIL Open Font License, `scripts/fonts/OFL-*.txt`).
