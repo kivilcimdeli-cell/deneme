@@ -15,10 +15,11 @@ Baskı için optimize edildi (0,4 nozul):
 Yazıcı/filament/baskı ayarları `isimlik/orijinal/...3mf` içindeki Bambu Lab X2D
 projesinden alınır; filament sayısı ve renkleri tasarıma göre ayarlanır.
 
-Çıktı : anahtarlik/<tasarım>.3mf, anahtarlik/onizleme/<tasarım>.png, anahtarlik/onizleme/hepsi.png
+Çıktı : anahtarlik/<tasarım>.3mf, anahtarlik/onizleme/<tasarım>.png, anahtarlik/onizleme/hepsi.png,
+        anahtarlik/onizleme/yeni_tasarimlar.png (8-12)
 
 Kullanım:
-  pip install numpy manifold3d pillow shapely scipy fonttools uharfbuzz
+  pip install numpy manifold3d pillow shapely scipy fonttools uharfbuzz segno opencv-python-headless
   python3 scripts/anahtarlik.py            # hepsi
   python3 scripts/anahtarlik.py plaka      # adında "plaka" geçenler
 """
@@ -130,6 +131,30 @@ def circle(r, cx=0.0, cy=0.0, n=96):
 
 def rect(x0, y0, x1, y1):
     return m3.CrossSection.square((x1 - x0, y1 - y0)).translate((x0, y0))
+
+
+def shear(cs, deg):
+    """İtalik/eğik görünüm: x += y * tan(deg)."""
+    return cs.transform([[1.0, np.tan(np.radians(deg)), 0.0], [0.0, 1.0, 0.0]])
+
+
+def qr_matrix(data, error="m"):
+    import segno
+    q = segno.make(data, error=error, micro=False)
+    return np.array([[bool(v) for v in row] for row in q.matrix], bool)
+
+
+def qr_light(data, module, cx, cy, quiet=2):
+    """QR kodun açık (beyaz) alanı: sessiz bölge dahil kare, koyu modüller oyuk.
+    Köşeden değen koyu modüller birleşsin diye 0,05 mm büyütülür; beyazdaki kıl payı köprüler temizlenir."""
+    m = qr_matrix(data)
+    n = m.shape[0]
+    size = (n + 2 * quiet) * module
+    x0, y0 = cx - n * module / 2, cy + n * module / 2
+    dark = union(*[rect(x0 + j * module, y0 - (i + 1) * module, x0 + (j + 1) * module, y0 - i * module)
+                   for i in range(n) for j in range(n) if m[i, j]])
+    light = rect(cx - size / 2, cy - size / 2, cx + size / 2, cy + size / 2) - dark.offset(0.05, m3.JoinType.Miter)
+    return light.offset(-0.25, m3.JoinType.Round).offset(0.25, m3.JoinType.Round), size
 
 
 # ---------------------------------------------------------------- yazı
@@ -338,6 +363,53 @@ class Design:
         gaps = spots(allr.offset(MIN_GAP / 2).offset(-MIN_GAP / 2) - allr)
         return thin, gaps, allr.area()
 
+    def check_pairs(self):
+        """Ayrı tasarım öğeleri (yazı, çizgi, çerçeve...) arasında MIN_GAP'ten yakın olan çiftler."""
+        allowed = self.body().offset(-EDGE_KEEP, m3.JoinType.Round) - self.holes.offset(0.8, m3.JoinType.Round)
+        feats = [shape ^ allowed for shape, _ in self.raised]
+        bad = []
+        for i, a in enumerate(feats):
+            for j in range(i + 1, len(feats)):
+                b = feats[j]
+                if a.is_empty() or b.is_empty():
+                    continue
+                near = (a.offset(MIN_GAP / 2) ^ b.offset(MIN_GAP / 2)).area()
+                if near - (a ^ b).area() > 0.02 and (a ^ b).area() < 0.01:
+                    bad.append((i, j))
+        return bad
+
+    def hole_wall(self):
+        """Deliklerin çevresindeki en ince et payı (mm, 0,1 hassasiyet)."""
+        if self.holes.is_empty():
+            return None
+        for w in np.arange(0.5, 6.01, 0.1):
+            if (self.holes.offset(w, m3.JoinType.Round) - self.base).area() > 1e-3:
+                return round(w - 0.1, 1)
+        return 6.0
+
+
+def qr_decodes(d, data, px_per_mm=12):
+    """Üstten görünüşü (siyah gövde, beyaz kabartma) çizip QR kodu OpenCV ile okur."""
+    import cv2
+    from PIL import ImageDraw as _D
+    body, light = d.body(), d.raised_parts().get(WHITE, empty())
+    x0, y0, x1, y1 = body.bounds()
+    W, H = int((x1 - x0 + 20) * px_per_mm), int((y1 - y0 + 20) * px_per_mm)
+    img = Image.new("L", (W, H), 150)
+    dr = _D.Draw(img)
+
+    def fill(cs, val):
+        for p in cs.to_polygons():
+            x, y = p[:, 0], p[:, 1]
+            hole = np.sum(x * np.roll(y, -1) - np.roll(x, -1) * y) < 0
+            dr.polygon([((u - x0 + 10) * px_per_mm, (y1 - v + 10) * px_per_mm) for u, v in p],
+                       fill=(40 if val == 246 else 150) if hole else val)
+
+    fill(body, 40)
+    fill(light, 246)
+    text, _, _ = cv2.QRCodeDetector().detectAndDecode(np.array(img))
+    return text == data, text
+
 
 # ---------------------------------------------------------------- araba profili
 
@@ -446,7 +518,7 @@ def d3_araba_cam():
 def d4_plaka():
     """Yeni: galeri plaka çerçevesi; beyaz plaka, siyah oyma yazı, sarı TR şeridi, çerçevede telefon."""
     W, H = 100.0, 38.0
-    tab = circle(6.0, -W / 2 - 1.5, 0)
+    tab = circle(6.4, -W / 2 - 1.5, 0)
     base = (rrect(W, H, 4.0) + tab).offset(1.5, m3.JoinType.Round).offset(-3.0, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
     holes = circle(2.6, -W / 2 - 2.0, 0)
     px0, px1, py0, py1 = -W / 2 + 3.2, W / 2 - 3.2, -5.4, H / 2 - 3.2
@@ -540,7 +612,116 @@ def d7_kilometre_saati():
     return Design("7_kilometre_saati", "AUTO_FIRAT_TUYGUN_kilometre", base, raised, holes, "3 renk")
 
 
-DESIGNS = [d1_klasik, d2_araba, d3_araba_cam, d4_plaka, d5_araba_anahtari, d6_lastik_rozet, d7_kilometre_saati]
+QR_DATA = "TEL:+905352783529"   # okutunca galeriyi arar (büyük harf: QR'da daha az modül)
+
+
+def d8_qr_kart():
+    """Modern: okutunca arayan QR kodlu dikey kart; beyaz QR zemini, siyah oyma modüller."""
+    W, H = 54.0, 90.0
+    base = rrect(W, H, 7.0)
+    holes = circle(2.6, 0, H / 2 - 7.2)
+    frame = outline(rrect(W - 4.2, H - 4.2, 5.0), 1.3)
+    auto = auto_text(4.8, 0, 29.0)
+    name = name_text(8.0, 0, 19.6, max_w=W - 9.0)
+    light, size = qr_light(QR_DATA, 1.6, 0, -6.6)
+    phone = small_text(PHONE, 3.8, 0, -31.2, max_w=W - 10.0)
+    city = small_text(CITY, 3.2, 0, -37.0, tracking=0.9)
+    raised = [(frame, YELLOW), (auto, YELLOW), (name, WHITE), (light, WHITE), (phone, YELLOW), (city, WHITE)]
+    d = Design("8_qr_kart", "AUTO_FIRAT_TUYGUN_qr", base, raised, holes, "3 renk")
+    d.qr = (QR_DATA, size)
+    return d
+
+
+def d9_direksiyon():
+    """Modern: üç kollu direksiyon; gerçek açıklıklar (anahtarlık halkası üst açıklıktan geçer)."""
+    R, Ri = 33.0, 24.6
+    band = rect(-R, -7.6, R, 7.6)
+    spoke = rect(-7.4, -R, 7.4, 0)
+    hub = circle(10.5, 0, 0)
+    openings = circle(Ri, 0, 0, 180) - band - spoke - hub
+    holes = openings.offset(-2.2, m3.JoinType.Round).offset(2.2, m3.JoinType.Round)
+    base = circle(R, 0, 0, 180)
+    rim_line = outline(circle(R, 0, 0, 180), 1.1, inset=1.1)
+    city = font("small").arc(CITY, 3.6, 0, 0, Ri + 1.6, 90.0, top=True, tracking=1.0)
+    phone = font("small").arc(PHONE, 3.6, 0, 0, R - 3.6, -90.0, top=False, tracking=0.25)
+    name = name_text(7.8, 0, 0.0, max_w=2 * Ri - 3.0)
+    auto = auto_text(4.4, 0, -15.0)
+    raised = [(rim_line, YELLOW), (city, YELLOW), (phone, YELLOW), (name, YELLOW), (auto, YELLOW)]
+    return Design("9_direksiyon", "AUTO_FIRAT_TUYGUN_direksiyon", base, raised, holes, "2 renk")
+
+
+def d10_hiz_cizgileri():
+    """Modern: eğik (paralelkenar) kart; hız çizgileri, italik isim, telefon."""
+    k = 14.0
+    W, H = 92.0, 32.0
+    base = shear(rrect(W, H, 5.0), k)
+    holes = circle(2.6, -38.0, 0.0)
+    lines = union(*[stroke([(x0, y), (x1, y)], 1.5) for x0, x1, y in
+                    [(-31.0, -17.0, 6.0), (-31.5, -13.5, 0.0), (-30.0, -19.5, -6.0)]])
+    lines = shear(lines, k)
+    auto = shear(auto_text(4.2, -8.6, 10.0, align="l"), k)
+    city = shear(small_text(CITY, 3.4, 37.2, 10.0, align="r", tracking=0.8), k)
+    name = shear(name_text(9.4, -9.0, 1.2, max_w=48.0, align="l"), k)
+    phone = shear(small_text(PHONE, 3.7, -8.6, -9.4, align="l", max_w=46.0), k)
+    edge = shear(outline(rrect(W, H, 5.0), 1.2, inset=1.4), k) - circle(2.6 + 2.4, -38.0, 0.0)
+    raised = [(edge, YELLOW), (lines, YELLOW), (auto, YELLOW), (city, WHITE), (name, WHITE), (phone, YELLOW)]
+    return Design("10_hiz_cizgileri", "AUTO_FIRAT_TUYGUN_hiz", base, raised, holes, "3 renk")
+
+
+def d11_damali_bayrak():
+    """Modern: sağa doğru pikselleşerek açılan damalı bayrak; solda iki satır isim."""
+    W, H = 86.0, 48.0
+    base = rrect(W, H, 6.0)
+    holes = circle(2.6, W / 2 - 7.4, H / 2 - 7.4)
+    frame = outline(rrect(W - 3.6, H - 3.6, 4.4), 1.2)
+    pitch, x_start, x_end = 3.6, 2.0, W / 2 - 3.4
+    cells = []
+    for i, y in enumerate(np.arange(-H / 2 + 3.4 + pitch / 2, H / 2 - 3.4, pitch)):
+        for j, x in enumerate(np.arange(x_start + pitch / 2, x_end, pitch)):
+            if (i + j) % 2:
+                continue
+            t = (x - x_start) / (x_end - x_start)            # 0 solda, 1 sağda
+            side = pitch * (0.32 + 0.48 * t)                   # sola doğru küçülen kareler
+            if side < 1.3:
+                continue
+            cells.append(rect(x - side / 2, y - side / 2, x + side / 2, y + side / 2))
+    flag = union(*cells) ^ rrect(W - 3.6 - 2.6 - 1.6, H - 3.6 - 2.6 - 1.6, 3.0)
+    flag = flag - circle(2.6 + 2.2, W / 2 - 7.4, H / 2 - 7.4)
+    flag = union(*[p for p in flag.decompose() if p.area() > 1.2])
+    x0 = -W / 2 + 6.0
+    auto = auto_text(4.4, x0, 15.6, align="l")
+    first = font("bebas").text("FIRAT", 10.6, x0, 5.0, align="l")
+    last = font("bebas").text("TUYGUN", 10.6, x0, -8.0, align="l")
+    phone = small_text(PHONE, 3.6, x0, -17.4, align="l")
+    raised = [(frame, YELLOW), (flag, YELLOW), (auto, YELLOW), (first, YELLOW), (last, YELLOW), (phone, YELLOW)]
+    return Design("11_damali_bayrak", "AUTO_FIRAT_TUYGUN_bayrak", base, raised, holes, "2 renk")
+
+
+def d12_kalkan_amblem():
+    """Modern: kalkan amblem; büyük FT monogramı, yan şeritler, isim ve telefon; üstte askı kulağı."""
+    half = [(0, 33.4), (14, 32.6), (25.6, 30.6), (29.2, 26.4), (29.6, 12.0), (28.6, -6.0), (25.8, -20.0),
+            (19.6, -31.0), (10.4, -38.6), (0, -42.4)]
+    pts = half + [(-x, y) for x, y in reversed(half[1:-1])]
+    shield = polygon(smooth(np.array(pts), closed=True, n=400))
+    tab_c = (0, 37.6)
+    base = (shield + circle(6.4, *tab_c)).offset(1.4, m3.JoinType.Round).offset(-1.4, m3.JoinType.Round)
+    holes = circle(2.6, 0, 38.0)
+    edge = outline(shield, 1.3, inset=1.6)
+    auto = auto_text(4.8, 0, 22.4)
+    mono = font("bebas").text("FT", 19.0, 0, 6.6, tracking=0.6)
+    mx0, _, mx1, _ = mono.bounds()
+    stripes = union(*[stroke([(sgn * (mx1 + 2.6), y), (sgn * 21.5, y)], 1.4)
+                      for sgn in (-1, 1) for y in (9.8, 6.6, 3.4)])
+    name = name_text(7.8, 0, -9.8, max_w=46.0)
+    phone = small_text(PHONE, 3.5, 0, -20.0, max_w=40.0)
+    city = small_text(CITY, 3.0, 0, -27.0, tracking=0.9)
+    raised = [(edge, YELLOW), (auto, YELLOW), (mono, WHITE), (stripes, YELLOW), (name, WHITE),
+              (phone, YELLOW), (city, WHITE)]
+    return Design("12_kalkan_amblem", "AUTO_FIRAT_TUYGUN_kalkan", base, raised, holes, "3 renk")
+
+
+DESIGNS = [d1_klasik, d2_araba, d3_araba_cam, d4_plaka, d5_araba_anahtari, d6_lastik_rozet, d7_kilometre_saati,
+           d8_qr_kart, d9_direksiyon, d10_hiz_cizgileri, d11_damali_bayrak, d12_kalkan_amblem]
 
 
 # ---------------------------------------------------------------- 3MF
@@ -754,11 +935,18 @@ def main():
         w, h = d.size()
         thin, gaps, area = d.check()
         thin, gaps = thin.area(), gaps.area()
+        pairs, wall = d.check_pairs(), d.hole_wall()
+        extra = ""
+        if getattr(d, "qr", None):
+            ok, text = qr_decodes(d, d.qr[0])
+            extra = f"  QR {'okundu' if ok else 'OKUNAMADI'} ({text!r}, {d.qr[1]:.1f} mm)"
         print(f"{d.key:20s} {w:5.1f} x {h:5.1f} mm  {'+'.join(COLOUR_NAMES[f] for f in filaments):18s} "
-              f"ince<{MIN_FEATURE}mm: {thin:4.1f} mm²  dar boşluk<{MIN_GAP}mm: {gaps:4.1f} mm²  (kabartma {area:6.0f} mm²)")
+              f"ince<{MIN_FEATURE}mm: {thin:4.1f} mm²  dar boşluk<{MIN_GAP}mm: {gaps:4.1f} mm²  "
+              f"yakın öğe: {pairs or 'yok'}  delik et payı: {wall} mm{extra}")
         previews.append(preview(d, shaded, filaments, os.path.join(OUT_DIR, "onizleme", d.key + ".png")))
     if not only:
         contact_sheet(previews, os.path.join(OUT_DIR, "onizleme", "hepsi.png"))
+        contact_sheet(previews[7:], os.path.join(OUT_DIR, "onizleme", "yeni_tasarimlar.png"))
 
 
 if __name__ == "__main__":
