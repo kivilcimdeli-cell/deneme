@@ -1,5 +1,34 @@
 # FIRAT TUYGUN masa isimliği tasarımları (Türk bayraklı)
 
+## Baskıya hazır: çapraz blok
+
+![Çapraz blok](onizleme/capraz_blok_baski.png)
+
+**`capraz_blok.3mf`** – Bambu Studio'da açıp doğrudan dilimlenebilir (Bambu Lab X2D, PLA Basic, 0,20 mm).
+
+| | |
+| --- | --- |
+| Ölçü | 240 × 32 × 56 mm (genişlik × derinlik × yükseklik) |
+| İsim | Bebas Neue, 21 mm, kalın beyaz; altında kırmızı çizgi |
+| Renkler (AMS sırası) | 1 = siyah, 2 = beyaz, 3 = kırmızı (Bambu PLA Basic Red) |
+| Filament (yaklaşık) | siyah ~85 g, kırmızı ~39 g, beyaz ~2 g (2 duvar, %15 dolgu) |
+
+Baskı:
+- Ön yüz **yukarı** bakacak şekilde yatık basılır, destek gerekmez.
+- Kırmızı ve siyah kısımlar bloğun tüm derinliği boyunca sürer. Bambu Studio'da filament eşlemesinde siyah ve kırmızı
+  **farklı nozullara** gelmeli (otomatik eşleme temizlemeyi en aza indirmeye çalışır; kontrol et). Böylece katman başına
+  temizleme atığı olmaz.
+- Beyaz (ay-yıldız, isim, ayraç) ve kırmızı alt çizgi ön yüzde 0,8 mm kabartma: yalnızca son 4 katman.
+- X2D'de ikinci nozul tablanın sol 20,5 mm'sine erişemediği için blok tablaya **boylamasına** yerleştirildi.
+- İlk katman 0,3 mm içe çekik, ön yüz kenarı 0,6 mm pahlı; nesne ayarında Arachne açık.
+
+Kontroller: parçalar sağlam ve birbirine girmiyor, tek gövde; birbirine 0,6 mm'den yakın öğe yok; ince kısım olarak
+kalanlar yalnızca yıldızın ve harflerin sivri uçları.
+
+Yeniden üretme: `python3 scripts/capraz_blok.py`
+
+## İlk tasarım önerileri
+
 ![Tasarımlar](tasarimlar.png)
 
 Bu klasördeki görseller **tasarım seçimi** içindir. Seçilen tasarım baskıya hazır Bambu Lab (X2D) 3MF dosyasına
