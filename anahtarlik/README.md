@@ -2,7 +2,8 @@
 
 ![Tüm tasarımlar](onizleme/hepsi.png)
 
-Yalnızca yeni beş tasarım: [`onizleme/yeni_tasarimlar.png`](onizleme/yeni_tasarimlar.png)
+Yeni tasarımlar (8–13): [`onizleme/yeni_tasarimlar.png`](onizleme/yeni_tasarimlar.png) ·
+İki plaka yan yana: [`onizleme/plakalar.png`](onizleme/plakalar.png)
 
 Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Tek parça, desteksiz basılır.
 
@@ -11,7 +12,7 @@ Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Tek par�
 | `1_klasik_kart.3mf` | 84 × 56 | siyah + sarı + beyaz | Fotoğraf 1 (mavi → sarı): sarı çerçeve ve AUTO, beyaz çizgi araba ve yazılar |
 | `2_araba_silueti.3mf` | 100 × 34 | siyah + sarı + beyaz | Fotoğraf 2: sarı kontur, cam ve AUTO; beyaz farlar, isim, telefon |
 | `3_araba_yan_cam.3mf` | 100 × 34 | siyah + sarı + beyaz | Fotoğraf 3: direkli yan cam; köşeli farlar |
-| `4_plaka.3mf` | 107 × 38 | siyah + sarı + beyaz | Galeri plaka çerçevesi: beyaz plaka, oyma siyah "07 FIRAT TUYGUN", sarı TR şeridi |
+| `4_plaka.3mf` | 114 × 40 | siyah + sarı + beyaz | Galeri plaka çerçevesi: beyaz plakada büyük oyma siyah "AUTO FIRAT TUYGUN", sarı TR şeridi, çerçevede büyük telefon ve ANTALYA |
 | `5_araba_anahtari.3mf` | 106 × 35 | siyah + sarı | Araba anahtarı: kumandada AUTO, isim, telefon; anahtar dilinde ANTALYA |
 | `6_lastik_rozet.3mf` | 62 × 71 | siyah + sarı | Blok dişli lastik, kavisli ANTALYA ve telefon |
 | `7_kilometre_saati.3mf` | 62 × 66 | siyah + sarı + beyaz | Beyaz çentikler ve yazılar, sarı ibre ve kenar |
@@ -20,13 +21,14 @@ Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Tek par�
 | `10_hiz_cizgileri.3mf` | 98 × 32 | siyah + sarı + beyaz | Eğik kart, hız çizgileri, italik isim |
 | `11_damali_bayrak.3mf` | 86 × 48 | siyah + sarı | Sağa doğru pikselleşen damalı bayrak, iki satır isim |
 | `12_kalkan_amblem.3mf` | 61 × 86 | siyah + sarı + beyaz | Kalkan amblem, büyük FT monogramı ve yan şeritler |
+| `13_plaka_klasik.3mf` | 108 × 44 | siyah + beyaz + mavi | Sarısız klasik Türk plakası: beyaz zeminde büyük "07 FT 29", mavi şeritte beyaz TR, altta beyaz "FIRAT TUYGUN" |
 
 ## Katmanlar
 
 | Parça | Filament | Yükseklik |
 | --- | --- | --- |
 | Gövde | 1 – siyah | 0 – 3,0 mm |
-| Kabartma | 2 – sarı, 3 – beyaz | 3,0 – 3,8 mm (4 katman) |
+| Kabartma | sarı / beyaz / mavi (tasarıma göre) | 3,0 – 3,8 mm (4 katman) |
 
 Ayarlar önceki X2D projesinden: **Bambu Lab X2D 0.4, Bambu PLA Basic, 0.20 mm Standard**.
 
@@ -40,6 +42,8 @@ Ayarlar önceki X2D projesinden: **Bambu Lab X2D 0.4, Bambu PLA Basic, 0.20 mm S
 - **Kenarlar:** İlk katman 0,3 mm içe çekik (fil ayağı yapmaz). Gövdenin üst kenarında 3 katmanlık 0,6 mm pah var,
   elde daha düzgün hissettirir.
 - **Arachne:** Nesne ayarı olarak *Arachne* duvar üretici açık. İnce yazıları daha düzgün basar.
+- **Plakalar:** Plaka yazısı beyaz zemine oyma (siyah gövde görünür), gerçek plakalardaki gibi ince siyah iç çerçeve
+  çizgisi var. Plaka 4'te yazı Bebas Neue ile ~9,3 mm, plaka 13'te "07 FT 29" Barlow Condensed Black ile ~14 mm.
 - **Kabartma 0,8 mm:** Harfler daha az ip çeker, renk değişimi yalnızca son 4 katmanda olur.
 - **Anahtarlık deliği:** 5,2–5,4 mm, etrafında en az 3,3 mm et payı var (betik ölçüyor).
 - **QR kod:** Kareler 1,6 mm, beyaz zemin üzerinde siyah oyma; etrafında 2 karelik beyaz boşluk var. Betik QR'ı üstten
@@ -61,7 +65,8 @@ filament ayarlarının (renk sayısı, varyantlar, temizleme matrisi) parça ata
 ## Baskı
 
 1. Dosyayı Bambu Studio'da aç. AMS eşleşmesini kontrol et: 3 renkli dosyalarda **1 = siyah, 2 = sarı, 3 = beyaz**;
-   2 renkli dosyalarda 1 = siyah, 2 = sarı.
+   2 renkli dosyalarda 1 = siyah, 2 = sarı; `13_plaka_klasik` için **1 = siyah, 2 = beyaz, 3 = mavi**
+   (Bambu PLA Basic Blue). Önizlemelerin üstünde her dosyanın renk sırası yazar.
 2. 3 renkli tasarımlarda iki filament aynı nozulu paylaşır (X2D'de iki nozul var). Son 4 katmanda renk değişimi ve
    temizleme kulesi olur, bu normal. En hızlı ve en az atıklı olanlar 2 renkli tasarımlardır (5, 6, 9 ve 11).
 3. Çok adet basmak için nesneye sağ tıkla, *Örnek ekle*; sonra *Düzenle* ile tablaya yerleştir.
@@ -81,4 +86,4 @@ alanlarını raporlar.
 
 QR kod içeriği `QR_DATA` değişkenindedir; değiştirince betik yeni kodu okutarak doğrular.
 
-Yazı tipleri: Bebas Neue, Barlow Condensed, Lexend (SIL Open Font License, `scripts/fonts/OFL-*.txt`).
+Yazı tipleri: Bebas Neue, Barlow Condensed (ExtraBold, Black), Lexend (SIL Open Font License, `scripts/fonts/OFL-*.txt`).

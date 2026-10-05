@@ -3,8 +3,8 @@
 Her tasarım tek parça basılır, destek gerekmez:
   * Gövde   : siyah (filament 1), 3,0 mm; alt kenarda 0,3 mm fil ayağı payı,
               üst kenarda katman katman 0,6 mm pah
-  * Kabartma: gövdenin üstünde 0,8 mm (4 katman); sarı (filament 2) ve bazı
-              tasarımlarda beyaz (filament 3)
+  * Kabartma: gövdenin üstünde 0,8 mm (4 katman); tasarıma göre sarı, beyaz
+              ve/veya mavi
 
 Baskı için optimize edildi (0,4 nozul):
   * küçük yazılar Lexend ExtraBold (küçük boyda kalın, rakam içleri açık), en az ~3,4 mm;
@@ -49,10 +49,10 @@ FONT_DIR = os.path.join(ROOT, "scripts", "fonts")
 TEMPLATE = os.path.join(ROOT, "isimlik", "orijinal", "Two_line_Customizable_Name_Plate.3mf")
 OUT_DIR = os.path.join(ROOT, "anahtarlik")
 
-BLACK, YELLOW, WHITE = 1, 2, 3                       # filament numaraları
-COLOURS = {BLACK: "#000000", YELLOW: "#F4EE2A", WHITE: "#FFFFFF"}   # Bambu PLA Basic renkleri
-COLOUR_NAMES = {BLACK: "siyah", YELLOW: "sarı", WHITE: "beyaz"}
-SHOW = {BLACK: (40, 40, 43), YELLOW: (255, 222, 40), WHITE: (246, 246, 242)}  # önizleme tonları
+BLACK, YELLOW, WHITE, BLUE = 1, 2, 3, 4                                   # renk kimlikleri
+COLOURS = {BLACK: "#000000", YELLOW: "#F4EE2A", WHITE: "#FFFFFF", BLUE: "#0A2989"}   # Bambu PLA Basic renkleri
+COLOUR_NAMES = {BLACK: "siyah", YELLOW: "sarı", WHITE: "beyaz", BLUE: "mavi"}
+SHOW = {BLACK: (40, 40, 43), YELLOW: (255, 222, 40), WHITE: (246, 246, 242), BLUE: (28, 66, 168)}  # önizleme tonları
 
 LAYER = 0.2
 BASE_H = 3.0         # siyah gövde (15 katman)
@@ -270,7 +270,8 @@ class Font:
 
 FONTS = {}
 FONT_FILES = {"bebas": "BebasNeue-Regular.ttf",            # isim (fotoğraftakine en yakın)
-              "barlow": "BarlowCondensed-ExtraBold.ttf",   # AUTO, plaka yazısı
+              "barlow": "BarlowCondensed-ExtraBold.ttf",   # AUTO
+              "plate": "BarlowCondensed-Black.ttf",        # plaka harfleri (07 FT 29, TR)
               "small": "Lexend-ExtraBold.ttf"}             # telefon, şehir: küçük boyda kalın, iç boşlukları açık
 
 
@@ -373,8 +374,9 @@ class Design:
                 b = feats[j]
                 if a.is_empty() or b.is_empty():
                     continue
-                near = (a.offset(MIN_GAP / 2) ^ b.offset(MIN_GAP / 2)).area()
-                if near - (a ^ b).area() > 0.02 and (a ^ b).area() < 0.01:
+                if (a.offset(0.05) ^ b).area() > 0.01:
+                    continue            # bitişik (ör. mavi şerit + beyaz zemin): sorun değil
+                if (a.offset(MIN_GAP / 2) ^ b.offset(MIN_GAP / 2)).area() > 0.02:
                     bad.append((i, j))
         return bad
 
@@ -515,29 +517,55 @@ def d3_araba_cam():
     return Design("3_araba_yan_cam", "AUTO_FIRAT_TUYGUN_araba_2", shape, raised, holes, "3 renk")
 
 
-def d4_plaka():
-    """Yeni: galeri plaka çerçevesi; beyaz plaka, siyah oyma yazı, sarı TR şeridi, çerçevede telefon."""
-    W, H = 100.0, 38.0
+def _plate(W, H, face_bottom, strip_gap):
+    """Plaka anahtarlık iskeleti: solda delikli kulak, siyah çerçeve, plaka zemini ve TR şeridi.
+    Döner: base, holes, face (yazı alanı), strip (TR şeridi), border (gerçek plakalardaki ince siyah çizgi),
+    şerit ve yazı alanı sınırları."""
     tab = circle(6.4, -W / 2 - 1.5, 0)
     base = (rrect(W, H, 4.0) + tab).offset(1.5, m3.JoinType.Round).offset(-3.0, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
     holes = circle(2.6, -W / 2 - 2.0, 0)
-    px0, px1, py0, py1 = -W / 2 + 3.2, W / 2 - 3.2, -5.4, H / 2 - 3.2
-    plate = rrect(px1 - px0, py1 - py0, 1.8, (px0 + px1) / 2, (py0 + py1) / 2)
-    sx1 = px0 + 9.0
+    px0, px1, py0, py1 = -W / 2 + 3.2, W / 2 - 3.2, face_bottom, H / 2 - 3.2
+    plate = rrect(px1 - px0, py1 - py0, 2.0, (px0 + px1) / 2, (py0 + py1) / 2)
+    sx1 = px0 + 9.6
     strip = plate ^ rect(px0 - 1, py0 - 1, sx1, py1 + 1)
-    face = plate - rect(px0 - 1, py0 - 1, sx1 + 0.8, py1 + 1)
-    tr = font("barlow").text("TR", 4.4, (px0 + sx1) / 2, py0 + 4.6, tracking=0.5)
-    strip = strip - tr
-    text = "07 " + NAME
-    cx = (sx1 + 0.8 + px1) / 2
-    cap = font("barlow").fit_cap(text, 12.0, px1 - sx1 - 6.0, tracking=0.9)
-    plate_text = font("barlow").text(text, cap, cx, (py0 + py1) / 2, tracking=0.9)
-    face = face - plate_text
-    info_y = (-H / 2 + py0) / 2 - 0.2
-    phone = small_text(PHONE, 4.0, -W / 2 + 6.0, info_y, align="l")
-    city = small_text(CITY, 3.6, W / 2 - 6.0, info_y, align="r", tracking=0.8)
+    face = plate - rect(px0 - 1, py0 - 1, sx1 + strip_gap, py1 + 1)
+    border = outline(plate, 0.8, inset=1.1)
+    return base, holes, face, strip, border, (px0, sx1, px1, py0, py1)
+
+
+def d4_plaka():
+    """Galeri plaka çerçevesi: beyaz plakada büyük oyma "AUTO FIRAT TUYGUN", sarı TR şeridi,
+    çerçevede büyük telefon ve şehir."""
+    W, H = 106.0, 40.0
+    base, holes, face, strip, border, (px0, sx1, px1, py0, py1) = _plate(W, H, -5.0, 0.8)
+    tr = font("plate").text("TR", 4.0, (px0 + 1.9 + sx1) / 2, py0 + 5.0, tracking=0.4)
+    text = "AUTO " + NAME
+    cx, cy = (sx1 + 0.8 + px1) / 2, (py0 + py1) / 2
+    cap = font("bebas").fit_cap(text, 11.0, px1 - sx1 - 6.4, tracking=0.35)
+    plate_text = font("bebas").text(text, cap, cx, cy, tracking=0.35)
+    face = face - border - plate_text
+    strip = strip - border - tr
+    info_y = (-H / 2 + py0) / 2 - 0.1
+    phone = small_text(PHONE, 4.6, -W / 2 + 5.4, info_y, align="l")
+    city = small_text(CITY, 4.2, W / 2 - 5.4, info_y, align="r", tracking=0.9)
     raised = [(strip, YELLOW), (face, WHITE), (phone, YELLOW), (city, YELLOW)]
     return Design("4_plaka", "AUTO_FIRAT_TUYGUN_plaka", base, raised, holes, "3 renk")
+
+
+def d13_plaka_klasik():
+    """Klasik Türk plakası (sarısız): beyaz zeminde büyük "07 FT 29", mavi şeritte beyaz TR,
+    altta çerçevede beyaz "FIRAT TUYGUN"."""
+    W, H = 100.0, 44.0
+    base, holes, face, strip, border, (px0, sx1, px1, py0, py1) = _plate(W, H, -4.4, 0.0)
+    tr = font("plate").text("TR", 4.2, (px0 + 1.9 + sx1) / 2, py0 + 5.2, tracking=0.4)
+    cx, cy = (sx1 + px1) / 2, (py0 + py1) / 2
+    plate_text = font("plate").text("07 FT 29", font("plate").fit_cap("07 FT 29", 14.5, px1 - sx1 - 8.0, 1.2),
+                                    cx, cy, tracking=1.2)
+    face = face - border - plate_text
+    strip = strip - border
+    name = name_text(9.0, 0, (-H / 2 + py0) / 2 - 0.1, max_w=W - 16.0, tracking=0.5)
+    raised = [(strip, BLUE), (tr, WHITE), (face, WHITE), (name, WHITE)]
+    return Design("13_plaka_klasik", "FIRAT_TUYGUN_plaka_07FT29", base, raised, holes, "3 renk")
 
 
 def d5_araba_anahtari():
@@ -721,7 +749,7 @@ def d12_kalkan_amblem():
 
 
 DESIGNS = [d1_klasik, d2_araba, d3_araba_cam, d4_plaka, d5_araba_anahtari, d6_lastik_rozet, d7_kilometre_saati,
-           d8_qr_kart, d9_direksiyon, d10_hiz_cizgileri, d11_damali_bayrak, d12_kalkan_amblem]
+           d8_qr_kart, d9_direksiyon, d10_hiz_cizgileri, d11_damali_bayrak, d12_kalkan_amblem, d13_plaka_klasik]
 
 
 # ---------------------------------------------------------------- 3MF
@@ -732,8 +760,8 @@ EXTRUDER_KEYS = {"default_nozzle_volume_type", "extruder_colour", "extruder_max_
                  "flush_multiplier", "flush_multiplier_fast", "grab_length", "machine_min_extruding_rate",
                  "machine_min_travel_rate", "max_layer_height", "min_layer_height", "nozzle_diameter",
                  "nozzle_volume_type", "physical_extruder_map", "start_end_points"}
-# filament değiştirirken temizleme hacmi (mm³): [kimden][kime] siyah, sarı, beyaz
-FLUSH = [[0, 700, 900], [90, 0, 300], [90, 200, 0]]
+# filament değiştirirken temizleme hacmi (mm³): [kimden][kime] siyah, sarı, beyaz, mavi
+FLUSH = [[0, 700, 900, 500], [90, 0, 300, 200], [90, 200, 0, 150], [90, 600, 600, 0]]
 
 
 def project_settings(template_files, filaments):
@@ -947,6 +975,8 @@ def main():
     if not only:
         contact_sheet(previews, os.path.join(OUT_DIR, "onizleme", "hepsi.png"))
         contact_sheet(previews[7:], os.path.join(OUT_DIR, "onizleme", "yeni_tasarimlar.png"))
+        plates = [im for d_, im in zip(DESIGNS, previews) if "plaka" in d_.__name__]
+        contact_sheet(plates, os.path.join(OUT_DIR, "onizleme", "plakalar.png"), cols=1)
 
 
 if __name__ == "__main__":
