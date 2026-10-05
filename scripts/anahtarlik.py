@@ -517,14 +517,14 @@ def d3_araba_cam():
     return Design("3_araba_yan_cam", "AUTO_FIRAT_TUYGUN_araba_2", shape, raised, holes, "3 renk")
 
 
-def _plate(W, H, face_bottom, strip_gap):
+def _plate(W, H, face_bottom, strip_gap, rim=3.2):
     """Plaka anahtarlık iskeleti: solda delikli kulak, siyah çerçeve, plaka zemini ve TR şeridi.
     Döner: base, holes, face (yazı alanı), strip (TR şeridi), border (gerçek plakalardaki ince siyah çizgi),
     şerit ve yazı alanı sınırları."""
     tab = circle(6.4, -W / 2 - 1.5, 0)
     base = (rrect(W, H, 4.0) + tab).offset(1.5, m3.JoinType.Round).offset(-3.0, m3.JoinType.Round).offset(1.5, m3.JoinType.Round)
     holes = circle(2.6, -W / 2 - 2.0, 0)
-    px0, px1, py0, py1 = -W / 2 + 3.2, W / 2 - 3.2, face_bottom, H / 2 - 3.2
+    px0, px1, py0, py1 = -W / 2 + rim, W / 2 - rim, face_bottom, H / 2 - rim
     plate = rrect(px1 - px0, py1 - py0, 2.0, (px0 + px1) / 2, (py0 + py1) / 2)
     sx1 = px0 + 9.6
     strip = plate ^ rect(px0 - 1, py0 - 1, sx1, py1 + 1)
@@ -748,8 +748,38 @@ def d12_kalkan_amblem():
     return Design("12_kalkan_amblem", "AUTO_FIRAT_TUYGUN_kalkan", base, raised, holes, "3 renk")
 
 
+def d14_plaka_normal():
+    """Normal plaka (alt bant yok): sarı TR şeridi, beyaz zeminde büyük oyma "AUTO FIRAT TUYGUN"."""
+    W, H, rim = 110.0, 26.0, 2.2
+    base, holes, face, strip, border, (px0, sx1, px1, py0, py1) = _plate(W, H, -H / 2 + rim, 0.8, rim)
+    tr = font("plate").text("TR", 4.0, (px0 + 1.9 + sx1) / 2, py0 + 5.0, tracking=0.4)
+    text = "AUTO " + NAME
+    cx, cy = (sx1 + 0.8 + px1) / 2, (py0 + py1) / 2
+    cap = font("bebas").fit_cap(text, 12.5, px1 - sx1 - 6.4, tracking=0.35)
+    plate_text = font("bebas").text(text, cap, cx, cy, tracking=0.35)
+    face = face - border - plate_text
+    strip = strip - border - tr
+    raised = [(strip, YELLOW), (face, WHITE)]
+    return Design("14_plaka_normal", "AUTO_FIRAT_TUYGUN_plaka_normal", base, raised, holes, "3 renk")
+
+
+def d15_plaka_normal_klasik():
+    """Normal klasik Türk plakası (alt bant yok, sarısız): mavi şeritte beyaz TR, beyaz zeminde büyük "07 FT 29"."""
+    W, H, rim = 104.0, 26.0, 2.2
+    base, holes, face, strip, border, (px0, sx1, px1, py0, py1) = _plate(W, H, -H / 2 + rim, 0.0, rim)
+    tr = font("plate").text("TR", 4.2, (px0 + 1.9 + sx1) / 2, py0 + 5.0, tracking=0.4)
+    cx, cy = (sx1 + px1) / 2, (py0 + py1) / 2
+    plate_text = font("plate").text("07 FT 29", font("plate").fit_cap("07 FT 29", 14.0, px1 - sx1 - 8.0, 1.4),
+                                    cx, cy, tracking=1.4)
+    face = face - border - plate_text
+    strip = strip - border
+    raised = [(strip, BLUE), (tr, WHITE), (face, WHITE)]
+    return Design("15_plaka_normal_07ft29", "FIRAT_TUYGUN_plaka_normal_07FT29", base, raised, holes, "3 renk")
+
+
 DESIGNS = [d1_klasik, d2_araba, d3_araba_cam, d4_plaka, d5_araba_anahtari, d6_lastik_rozet, d7_kilometre_saati,
-           d8_qr_kart, d9_direksiyon, d10_hiz_cizgileri, d11_damali_bayrak, d12_kalkan_amblem, d13_plaka_klasik]
+           d8_qr_kart, d9_direksiyon, d10_hiz_cizgileri, d11_damali_bayrak, d12_kalkan_amblem, d13_plaka_klasik,
+           d14_plaka_normal, d15_plaka_normal_klasik]
 
 
 # ---------------------------------------------------------------- 3MF
@@ -976,7 +1006,7 @@ def main():
         contact_sheet(previews, os.path.join(OUT_DIR, "onizleme", "hepsi.png"))
         contact_sheet(previews[7:], os.path.join(OUT_DIR, "onizleme", "yeni_tasarimlar.png"))
         plates = [im for d_, im in zip(DESIGNS, previews) if "plaka" in d_.__name__]
-        contact_sheet(plates, os.path.join(OUT_DIR, "onizleme", "plakalar.png"), cols=1)
+        contact_sheet(plates, os.path.join(OUT_DIR, "onizleme", "plakalar.png"), cols=2)
 
 
 if __name__ == "__main__":

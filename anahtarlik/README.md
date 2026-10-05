@@ -3,7 +3,7 @@
 ![Tüm tasarımlar](onizleme/hepsi.png)
 
 Yeni tasarımlar (8–13): [`onizleme/yeni_tasarimlar.png`](onizleme/yeni_tasarimlar.png) ·
-İki plaka yan yana: [`onizleme/plakalar.png`](onizleme/plakalar.png)
+Tüm plakalar: [`onizleme/plakalar.png`](onizleme/plakalar.png)
 
 Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Tek parça, desteksiz basılır.
 
@@ -22,6 +22,8 @@ Her `.3mf` dosyası Bambu Studio'da doğrudan açılıp dilimlenebilir. Tek par�
 | `11_damali_bayrak.3mf` | 86 × 48 | siyah + sarı | Sağa doğru pikselleşen damalı bayrak, iki satır isim |
 | `12_kalkan_amblem.3mf` | 61 × 86 | siyah + sarı + beyaz | Kalkan amblem, büyük FT monogramı ve yan şeritler |
 | `13_plaka_klasik.3mf` | 108 × 44 | siyah + beyaz + mavi | Sarısız klasik Türk plakası: beyaz zeminde büyük "07 FT 29", mavi şeritte beyaz TR, altta beyaz "FIRAT TUYGUN" |
+| `14_plaka_normal.3mf` | 118 × 26 | siyah + sarı + beyaz | Normal plaka (alt bant yok): sarı TR şeridi, ~10 mm "AUTO FIRAT TUYGUN" |
+| `15_plaka_normal_07ft29.3mf` | 112 × 26 | siyah + beyaz + mavi | Normal klasik plaka (alt bant yok): mavi şeritte beyaz TR, ~14 mm "07 FT 29" |
 
 ## Katmanlar
 
@@ -65,7 +67,8 @@ filament ayarlarının (renk sayısı, varyantlar, temizleme matrisi) parça ata
 ## Baskı
 
 1. Dosyayı Bambu Studio'da aç. AMS eşleşmesini kontrol et: 3 renkli dosyalarda **1 = siyah, 2 = sarı, 3 = beyaz**;
-   2 renkli dosyalarda 1 = siyah, 2 = sarı; `13_plaka_klasik` için **1 = siyah, 2 = beyaz, 3 = mavi**
+   2 renkli dosyalarda 1 = siyah, 2 = sarı; `13_plaka_klasik` ve `15_plaka_normal_07ft29` için
+   **1 = siyah, 2 = beyaz, 3 = mavi**
    (Bambu PLA Basic Blue). Önizlemelerin üstünde her dosyanın renk sırası yazar.
 2. 3 renkli tasarımlarda iki filament aynı nozulu paylaşır (X2D'de iki nozul var). Son 4 katmanda renk değişimi ve
    temizleme kulesi olur, bu normal. En hızlı ve en az atıklı olanlar 2 renkli tasarımlardır (5, 6, 9 ve 11).
