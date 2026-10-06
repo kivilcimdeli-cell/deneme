@@ -152,7 +152,7 @@ def k2_logo_kare():
 
 def k3_madalyon():
     R = 20.0
-    outline = (A.circle(R, 0, 0, 160) + A.circle(5.6, 0, R + 2.0)).offset(1.4, m3.JoinType.Round).offset(-1.4, m3.JoinType.Round)
+    outline = (A.circle(R, 0, 0, 160) + A.circle(6.0, 0, R + 2.2)).offset(1.4, m3.JoinType.Round).offset(-1.4, m3.JoinType.Round)
     c = Concept("3_madalyon", "Madalyon", "Beyaz yuvarlak madalyon; ince siyah halka içinde siyah FT ve AUTO.",
                 outline, A.circle(2.5, 0, R + 2.4), body=WHITE)
     c.front += [(A.outline(A.circle(R, 0, 0, 160), 1.1, inset=2.2), BLACK), (ft_mark(12.5, 0.6, 3.4), BLACK),

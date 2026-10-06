@@ -5,8 +5,10 @@
 Ayrıntılı sayfalar: [`hepsi.png`](hepsi.png) (marka sistemi + 1–6) · [`hepsi_2.png`](hepsi_2.png) (7–16) ·
 her konsept ayrı: `1_kapsul.png` … `16_lacivert.png`
 
-Önceki anahtarlıklar müşteriye kalabalık gelmişti. Bu konseptler yalnızca **görsel**; seçilen tasarım daha sonra baskıya
-hazır Bambu Lab 3MF dosyasına çevrilecek.
+Önceki anahtarlıklar müşteriye kalabalık gelmişti. Bu konseptler yalnızca **görsel**.
+
+**Müşterinin seçtikleri (1, 2, 3, 6, 7, 9) baskıya hazır:** [`../kurumsal_baski/`](../kurumsal_baski/README.md)
+(ön yüzde 0,8 mm kabartma, X2D'ye göre ayarlı 3MF dosyaları).
 
 ## Yaklaşım
 
