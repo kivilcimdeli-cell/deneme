@@ -6,8 +6,8 @@ Blok 240 × 56 × 32 mm. Çapraz kesimle iki renk: solda kırmızı (beyaz ay-y�
 Baskı (desteksiz): blok ön yüzü YUKARI bakacak şekilde yatık basılır.
   * Kırmızı ve siyah kısımlar bloğun tüm derinliği boyunca sürer; X2D'de iki ayrı nozulda
     basıldıkları için katman başına temizleme atığı olmaz.
-  * Beyaz (ay-yıldız, isim, ayraç) ve kırmızı alt çizgi ön yüzde 0,8 mm kabartma: yalnızca
-    son 4 katman. Böylece üçüncü renk sadece en sonda devreye girer.
+  * Beyaz (ay-yıldız, isim, ayraç) ve kırmızı alt çizgi ön yüzde 2,0 mm kabartma: yalnızca
+    son 10 katman. Böylece üçüncü renk sadece en sonda devreye girer.
   * Tabla kenarında ikinci nozulun erişemediği 20,5 mm'lik şerit yüzünden blok tablaya
     boylamasına (y yönünde) yerleştirilir; ilk katman 0,3 mm içe çekik, üst kenar 0,6 mm pahlı.
 
@@ -32,6 +32,7 @@ OUT_DIR = os.path.join(A.ROOT, "masa_isimligi")
 NAME = "FIRAT TUYGUN"
 
 W, H, D, R = 240.0, 56.0, 32.0, 6.0          # genişlik, yükseklik (ön yüz), derinlik, köşe yarıçapı
+RAISE = 2.0                                   # ön yüz kabartma yüksekliği (10 katman)
 SPLIT_BOT, SPLIT_TOP = -W / 2 + 62.0, -W / 2 + 84.0   # çapraz kesim: alttaki ve üstteki x
 GAP = 2.4                                     # beyaz ayraç genişliği
 FLAG_G = 46.0                                 # ay-yıldız, bu yükseklikteki bayrağın oranlarıyla
@@ -94,7 +95,7 @@ class Block:
         red_body = clean(body ^ self.left.extrude(D + 2).translate((0, 0, -1)))
         black_body = clean(body - red_body)
         raised = self.check2d.raised_parts()
-        top = lambda cs: cs.extrude(A.RAISE_H).translate((0, 0, D))  # noqa: E731
+        top = lambda cs: cs.extrude(RAISE).translate((0, 0, D))  # noqa: E731
         red = red_body + top(raised[A.RED]) if A.RED in raised else red_body
         return [("Gövde (siyah)", black_body, A.BLACK), ("Gövde ve alt çizgi (kırmızı)", red, A.RED),
                 ("Ön yüz (beyaz)", top(raised[A.WHITE]), A.WHITE)]
@@ -140,12 +141,14 @@ def preview(block, parts, path):
         canvas.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0 + 20 + (y1 - y0 - 20 - im.height) // 2), im)
         dr.text((x0 + 16, y0 + 8), label, fill=(236, 239, 244), font=fs)
     dr.text((30, 20), "ÇAPRAZ BLOK – BASKIYA HAZIR", fill=(30, 33, 40), font=f)
-    dr.text((30, 58), f"{W:.0f} × {D:.0f} × {H:.0f} mm  ·  isim Bebas Neue {block.cap:.1f} mm  ·  kırmızı + siyah + beyaz",
+    dr.text((30, 58), f"{W:.0f} × {D + RAISE:.0f} × {H:.0f} mm  ·  isim Bebas Neue {block.cap:.1f} mm  ·  "
+                      f"kabartma {RAISE:.1f} mm  ·  kırmızı + siyah + beyaz",
             fill=(80, 86, 98), font=fs)
     grams = estimate_grams(parts)
     lines = ["Baskı bilgisi (yaklaşık):"] + [f"  {A.COLOUR_NAMES[e]}: ~{g:.0f} g" for e, g in sorted(grams.items())] + [
         f"  toplam: ~{sum(grams.values()):.0f} g", "", "AMS sırası: 1 = siyah, 2 = beyaz, 3 = kırmızı",
-        "Destek: yok   ·   Beyaz: yalnız son 4 katman", "Kırmızı ve siyah ayrı nozullarda (atıksız)"]
+        f"Destek: yok   ·   Kabartma {RAISE:.1f} mm: yalnız son {round(RAISE / A.LAYER)} katman",
+        "Kırmızı ve siyah ayrı nozullarda (atıksız)"]
     for i, t in enumerate(lines):
         dr.text((740, 480 + i * 34), t, fill=(40, 44, 52), font=fs)
     canvas.save(path)

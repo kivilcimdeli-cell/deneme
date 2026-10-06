@@ -8,17 +8,18 @@
 
 | | |
 | --- | --- |
-| Ölçü | 240 × 32 × 56 mm (genişlik × derinlik × yükseklik) |
+| Ölçü | 240 × 34 × 56 mm (genişlik × derinlik × yükseklik; ön yüz kabartması dahil) |
 | İsim | Bebas Neue, 21 mm, kalın beyaz; altında kırmızı çizgi |
+| Kabartma | 2,0 mm (beyaz ay-yıldız, isim, ayraç ve kırmızı çizgi) |
 | Renkler (AMS sırası) | 1 = siyah, 2 = beyaz, 3 = kırmızı (Bambu PLA Basic Red) |
-| Filament (yaklaşık) | siyah ~85 g, kırmızı ~39 g, beyaz ~2 g (2 duvar, %15 dolgu) |
+| Filament (yaklaşık) | siyah ~85 g, kırmızı ~40 g, beyaz ~4 g (2 duvar, %15 dolgu) |
 
 Baskı:
 - Ön yüz **yukarı** bakacak şekilde yatık basılır, destek gerekmez.
 - Kırmızı ve siyah kısımlar bloğun tüm derinliği boyunca sürer. Bambu Studio'da filament eşlemesinde siyah ve kırmızı
   **farklı nozullara** gelmeli (otomatik eşleme temizlemeyi en aza indirmeye çalışır; kontrol et). Böylece katman başına
   temizleme atığı olmaz.
-- Beyaz (ay-yıldız, isim, ayraç) ve kırmızı alt çizgi ön yüzde 0,8 mm kabartma: yalnızca son 4 katman.
+- Beyaz (ay-yıldız, isim, ayraç) ve kırmızı alt çizgi ön yüzde 2,0 mm kabartma: yalnızca son 10 katman.
 - X2D'de ikinci nozul tablanın sol 20,5 mm'sine erişemediği için blok tablaya **boylamasına** yerleştirildi.
 - İlk katman 0,3 mm içe çekik, ön yüz kenarı 0,6 mm pahlı; nesne ayarında Arachne açık.
 
