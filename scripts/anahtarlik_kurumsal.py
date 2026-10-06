@@ -144,14 +144,14 @@ class Keychain:
 
 # ---------------------------------------------------------------- önizleme
 
-def preview(kc, parts, filaments, path):
+def preview(kc, parts, filaments, path, title=None):
     shaded = [(*A.mesh_arrays(m), A.SHOW[e]) for _, m, e in parts]
     views = [("ÖN YÜZ (kabartma)", rotation(0, 0)), ("ARKA YÜZ (tablaya bakan)", rotation(180, 180)),
              ("PERSPEKTİF", rotation(-22, -50))]
     W, H = 1500, 700
     canvas = Image.new("RGB", (W, H), (244, 245, 247))
     dr = ImageDraw.Draw(canvas)
-    dr.text((40, 26), kc.concept.title.upper() + " – BASKIYA HAZIR", fill=(24, 26, 30), font=K.fnt(34))
+    dr.text((40, 26), title or kc.concept.title.upper() + " – BASKIYA HAZIR", fill=(24, 26, 30), font=K.fnt(34))
     w, h = kc.size()
     dr.text((40, 72), f"{w:.0f} × {h:.0f} × {BODY_H + RAISE:.1f} mm  ·  ön yüz {RAISE:.1f} mm kabartma  ·  "
                       f"arka yüz ilk {round(INLAY / A.LAYER)} katmanda gömme renk",
