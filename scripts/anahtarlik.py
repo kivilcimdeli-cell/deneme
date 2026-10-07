@@ -849,11 +849,13 @@ def model_xml(title, parts, today):
 """
 
 
-def settings_xml(title, parts):
+def settings_xml(title, parts, extra=None):
+    """Bambu nesne ayarları. `extra`: nesneye özel ek baskı ayarları (ör. destek)."""
     pid = len(parts) + 1
     out = ['<?xml version="1.0" encoding="UTF-8"?>\n<config>\n', f'  <object id="{pid}">\n',
            f'    <metadata key="name" value="{title}"/>\n', '    <metadata key="extruder" value="1"/>\n',
            '    <metadata key="wall_generator" value="arachne"/>\n',
+           *[f'    <metadata key="{k}" value="{v}"/>\n' for k, v in (extra or {}).items()],
            f'    <metadata face_count="{sum(len(t) for _, _, t, _ in parts)}"/>\n']
     for i, (name, V, T, ext) in enumerate(parts, 1):
         out += [f'    <part id="{i}" subtype="normal_part">\n',
@@ -924,7 +926,7 @@ def write_design(d, template_files, out_dir):
     body = "".join(mesh_xml(i, f"000{i}0000-81cb-4c03-9d28-80fed5dfa1dc", V, T)
                    for i, (_, V, T, _) in enumerate(parts, 1))
     files["3D/Objects/object_1.model"] = (head + body + " </resources>\n <build/>\n</model>\n").encode()
-    files["Metadata/model_settings.config"] = settings_xml(d.title, parts).encode()
+    files["Metadata/model_settings.config"] = settings_xml(d.title, parts, getattr(d, "object_settings", None)).encode()
     for name, im in images.items():
         buf = io.BytesIO()
         im.save(buf, "PNG")
