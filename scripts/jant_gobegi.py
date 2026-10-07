@@ -6,7 +6,7 @@ Tahmin olanlar kumpasla ölçülüp OLCU sözlüğünde değiştirilince betik h
 Yapı (kesit; z = 0 flanşın arka yüzü):
   * flanş: Ø D, kalınlık T; ön yüzde amblem yuvası (kenar halkası `rim` genişliğinde, `cep` derinliğinde),
     ön dış kenar yuvarlatılmış
-  * Ford logosu yuvanın içinde, katman katman (rozet gibi): beyaz zemin (yuva tabanına gömülü, 3 katman),
+  * Ford logosu yuvanın içinde, katman katman (rozet gibi): ten rengi zemin (yuva tabanına gömülü, 3 katman),
     üstünde 0,4 mm kabarık mavi oval, onun üstünde beyaz "Ford" yazısı ve oval çizgisi (kenar halkasıyla aynı hizada).
     Renkler üst üste bindiği için her katmanda en fazla iki renk var: baskıda yalnız 2 filament değişimi.
     Logo çizimi: Simple Icons (scripts/logolar/ford.svg, CC0); Ford logosu Ford Motor Company'nin markasıdır.
@@ -54,7 +54,8 @@ OLCU = {
     "delik": 0.0,        # orta delik (orijinalde Ø4; logolu yüzde kapalı)
     "logo_en": 45.5,     # Ford ovalinin eni                     fotoğraftan (46 × 17 mm)
 }
-ZEMIN, MAVI = 0.6, 0.4                  # beyaz zemin derinliği, mavi oval kabartması (mm); beyaz yazı: cep - MAVI
+ZEMIN, MAVI = 0.6, 0.4                  # zemin derinliği, mavi oval kabartması (mm); beyaz yazı: cep - MAVI
+ZEMIN_RENK = A.SKIN                     # yuva zemini: ten rengi (yazı ve oval çizgisi beyaz kalır)
 YAZI_KALINLASTIR = 0.08                 # beyaz yazıyı her yandan kalınlaştır: ince kıvrımlar 0,4 nozulla basılsın
 RAMPA, DUZ, TUTUNMA = 1.6, 0.4, 0.6     # diş: uçtaki rampa, düz kısım, tutunma yüzü (eksenel, mm)
 SEG = 256
@@ -121,7 +122,7 @@ def ford_logo(width):
 
 
 def cap_parts(o):
-    """Renkli parçalar: gövde (siyah), zemin (beyaz), oval (mavi), yazı ve çizgi (beyaz). Kendi ekseninde."""
+    """Renkli parçalar: gövde (siyah), zemin (ten rengi), oval (mavi), yazı ve çizgi (beyaz). Kendi ekseninde."""
     T, cep, Rp = o["T"], o["cep"], o["D"] / 2 - o["rim"]
     floor = T - cep
     oval, white = ford_logo(o["logo_en"])
@@ -130,7 +131,8 @@ def cap_parts(o):
     mavi = oval.extrude(MAVI).translate((0, 0, floor))
     yazi = white.extrude(cep - MAVI).translate((0, 0, floor + MAVI))
     body = P.clean(cap(o) - zemin)
-    return [("Gövde (siyah)", body, A.BLACK), ("Zemin (beyaz)", zemin, A.WHITE), ("Oval (mavi)", mavi, A.BLUE),
+    return [("Gövde (siyah)", body, A.BLACK), (f"Zemin ({A.COLOUR_NAMES[ZEMIN_RENK]})", zemin, ZEMIN_RENK),
+            ("Oval (mavi)", mavi, A.BLUE),
             ("Ford yazısı ve çizgi (beyaz)", yazi, A.WHITE)]
 
 
@@ -235,7 +237,7 @@ def preview(o, items, path):
     canvas = Image.new("RGB", (W, H), (244, 245, 247))
     dr = ImageDraw.Draw(canvas)
     dr.text((40, 24), "FORD JANT GÖBEĞİ – BASKIYA HAZIR", fill=(24, 26, 30), font=K.fnt(32))
-    dr.text((40, 68), f"Ø{o['D']:.1f} × {o['T'] + o['L']:.1f} mm · 8 tırnak · logo: beyaz zemin, {MAVI} mm kabarık "
+    dr.text((40, 68), f"Ø{o['D']:.1f} × {o['T'] + o['L']:.1f} mm · 8 tırnak · logo: {A.COLOUR_NAMES[ZEMIN_RENK]} zemin, {MAVI} mm kabarık "
                       f"mavi oval, üstünde beyaz yazı · ön yüz yukarıda, arka yüz ağaç destekli",
             fill=(96, 100, 110), font=K.fnt(20))
     for i, (label, mesh, R) in enumerate(views):
@@ -245,7 +247,8 @@ def preview(o, items, path):
         K.paste_center(canvas, img, (box[0], box[1] + 30, box[2], box[3]))
         dr.text((box[0] + 20, box[1] + 16), label, fill=(120, 124, 134), font=K.fnt(16))
     _, changes, flush = items[0].colour_changes()
-    dr.text((40, 548), f"AMS: 1 siyah · 2 beyaz · 3 mavi   ·   filament değişimi: {changes} (~{flush} mm³)   ·   "
+    ams = " · ".join(f"{i} {A.COLOUR_NAMES[f]}" for i, f in enumerate(sorted({e for _, _, e in items[0].solids()}), 1))
+    dr.text((40, 548), f"AMS: {ams}   ·   filament değişimi: {changes} (~{flush} mm³)   ·   "
                        "malzeme: ASA (güneşe ve ısıya dayanır), yoksa PETG", fill=(70, 74, 84), font=K.fnt(19))
     canvas.save(path)
     return canvas

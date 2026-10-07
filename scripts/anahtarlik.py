@@ -49,12 +49,13 @@ FONT_DIR = os.path.join(ROOT, "scripts", "fonts")
 TEMPLATE = os.path.join(ROOT, "isimlik", "orijinal", "Two_line_Customizable_Name_Plate.3mf")
 OUT_DIR = os.path.join(ROOT, "anahtarlik")
 
-BLACK, YELLOW, WHITE, BLUE, RED, GOLD = 1, 2, 3, 4, 5, 6                  # renk kimlikleri
+BLACK, YELLOW, WHITE, BLUE, RED, GOLD, SKIN = 1, 2, 3, 4, 5, 6, 7         # renk kimlikleri
 COLOURS = {BLACK: "#000000", YELLOW: "#F4EE2A", WHITE: "#FFFFFF", BLUE: "#0A2989",
-           RED: "#C12E1F", GOLD: "#E4BD68"}                                  # Bambu PLA Basic renkleri
-COLOUR_NAMES = {BLACK: "siyah", YELLOW: "sarı", WHITE: "beyaz", BLUE: "mavi", RED: "kırmızı", GOLD: "altın"}
+           RED: "#C12E1F", GOLD: "#E4BD68", SKIN: "#E9C5A4"}                 # Bambu PLA Basic renkleri (ten: bej/krem)
+COLOUR_NAMES = {BLACK: "siyah", YELLOW: "sarı", WHITE: "beyaz", BLUE: "mavi", RED: "kırmızı", GOLD: "altın",
+                SKIN: "ten rengi"}
 SHOW = {BLACK: (40, 40, 43), YELLOW: (255, 222, 40), WHITE: (246, 246, 242), BLUE: (28, 66, 168),
-        RED: (214, 26, 36), GOLD: (196, 160, 82)}                            # önizleme tonları
+        RED: (214, 26, 36), GOLD: (196, 160, 82), SKIN: (233, 197, 164)}     # önizleme tonları
 
 LAYER = 0.2
 BASE_H = 3.0         # siyah gövde (15 katman)
@@ -792,9 +793,10 @@ EXTRUDER_KEYS = {"default_nozzle_volume_type", "extruder_colour", "extruder_max_
                  "flush_multiplier", "flush_multiplier_fast", "grab_length", "machine_min_extruding_rate",
                  "machine_min_travel_rate", "max_layer_height", "min_layer_height", "nozzle_diameter",
                  "nozzle_volume_type", "physical_extruder_map", "start_end_points"}
-# filament değiştirirken temizleme hacmi (mm³): [kimden][kime] siyah, sarı, beyaz, mavi, kırmızı, altın
-FLUSH = [[0, 700, 900, 500, 600, 700], [90, 0, 300, 200, 200, 200], [90, 200, 0, 150, 150, 200],
-         [90, 600, 600, 0, 300, 500], [90, 600, 700, 300, 0, 400], [90, 250, 400, 200, 200, 0]]
+# filament değiştirirken temizleme hacmi (mm³): [kimden][kime] siyah, sarı, beyaz, mavi, kırmızı, altın, ten
+FLUSH = [[0, 700, 900, 500, 600, 700, 800], [90, 0, 300, 200, 200, 200, 250], [90, 200, 0, 150, 150, 200, 150],
+         [90, 600, 600, 0, 300, 500, 600], [90, 600, 700, 300, 0, 400, 600], [90, 250, 400, 200, 200, 0, 300],
+         [90, 250, 300, 200, 200, 250, 0]]
 
 
 def project_settings(template_files, filaments):
