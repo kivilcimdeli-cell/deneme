@@ -6,7 +6,7 @@ Tahmin olanlar kumpasla ölçülüp OLCU sözlüğünde değiştirilince betik h
 Yapı (kesit; z = 0 flanşın arka yüzü):
   * flanş: Ø D, kalınlık T; ön yüzde amblem yuvası (kenar halkası `rim` genişliğinde, `cep` derinliğinde),
     ön dış kenar yuvarlatılmış
-  * Ford logosu yuvanın içinde, katman katman (rozet gibi): ten rengi zemin (yuva tabanına gömülü, 3 katman),
+  * Ford logosu yuvanın içinde, katman katman (rozet gibi): açık latte zemin (yuva tabanına gömülü, 3 katman),
     üstünde 0,4 mm kabarık mavi oval, onun üstünde beyaz "Ford" yazısı ve oval çizgisi (kenar halkasıyla aynı hizada).
     Renkler üst üste bindiği için her katmanda en fazla iki renk var: baskıda yalnız 2 filament değişimi.
     Logo çizimi: Simple Icons (scripts/logolar/ford.svg, CC0); Ford logosu Ford Motor Company'nin markasıdır.
@@ -55,7 +55,7 @@ OLCU = {
     "logo_en": 45.5,     # Ford ovalinin eni                     fotoğraftan (46 × 17 mm)
 }
 ZEMIN, MAVI = 0.6, 0.4                  # zemin derinliği, mavi oval kabartması (mm); beyaz yazı: cep - MAVI
-ZEMIN_RENK = A.SKIN                     # yuva zemini: ten rengi (yazı ve oval çizgisi beyaz kalır)
+ZEMIN_RENK = A.SKIN                     # yuva zemini: açık latte / ten rengi (yazı ve oval çizgisi beyaz kalır)
 YAZI_KALINLASTIR = 0.08                 # beyaz yazıyı her yandan kalınlaştır: ince kıvrımlar 0,4 nozulla basılsın
 RAMPA, DUZ, TUTUNMA = 1.6, 0.4, 0.6     # diş: uçtaki rampa, düz kısım, tutunma yüzü (eksenel, mm)
 SEG = 256
@@ -122,7 +122,7 @@ def ford_logo(width):
 
 
 def cap_parts(o):
-    """Renkli parçalar: gövde (siyah), zemin (ten rengi), oval (mavi), yazı ve çizgi (beyaz). Kendi ekseninde."""
+    """Renkli parçalar: gövde (siyah), zemin (latte), oval (mavi), yazı ve çizgi (beyaz). Kendi ekseninde."""
     T, cep, Rp = o["T"], o["cep"], o["D"] / 2 - o["rim"]
     floor = T - cep
     oval, white = ford_logo(o["logo_en"])

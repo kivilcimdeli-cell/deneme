@@ -51,11 +51,11 @@ OUT_DIR = os.path.join(ROOT, "anahtarlik")
 
 BLACK, YELLOW, WHITE, BLUE, RED, GOLD, SKIN = 1, 2, 3, 4, 5, 6, 7         # renk kimlikleri
 COLOURS = {BLACK: "#000000", YELLOW: "#F4EE2A", WHITE: "#FFFFFF", BLUE: "#0A2989",
-           RED: "#C12E1F", GOLD: "#E4BD68", SKIN: "#E9C5A4"}                 # Bambu PLA Basic renkleri (ten: bej/krem)
+           RED: "#C12E1F", GOLD: "#E4BD68", SKIN: "#E2CBB5"}                 # Bambu PLA Basic renkleri (ten: açık latte)
 COLOUR_NAMES = {BLACK: "siyah", YELLOW: "sarı", WHITE: "beyaz", BLUE: "mavi", RED: "kırmızı", GOLD: "altın",
-                SKIN: "ten rengi"}
+                SKIN: "latte"}
 SHOW = {BLACK: (40, 40, 43), YELLOW: (255, 222, 40), WHITE: (246, 246, 242), BLUE: (28, 66, 168),
-        RED: (214, 26, 36), GOLD: (196, 160, 82), SKIN: (233, 197, 164)}     # önizleme tonları
+        RED: (214, 26, 36), GOLD: (196, 160, 82), SKIN: (226, 203, 181)}     # önizleme tonları
 
 LAYER = 0.2
 BASE_H = 3.0         # siyah gövde (15 katman)

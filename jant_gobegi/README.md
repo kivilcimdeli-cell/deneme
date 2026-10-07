@@ -6,7 +6,7 @@
 
 | Dosya | Ne için |
 | --- | --- |
-| `ford_jant_gobegi.3mf` | Ford logolu jant göbeği, baskıya hazır (Ø53,3 × 15 mm). AMS: **1 siyah · 2 beyaz · 3 mavi · 4 ten rengi** |
+| `ford_jant_gobegi.3mf` | Ford logolu jant göbeği, baskıya hazır (Ø53,3 × 15 mm). AMS: **1 siyah · 2 beyaz · 3 mavi · 4 latte** |
 | `tirnak_deneme_halkasi.3mf` | **Önce bunu bas:** yalnız tırnaklar + ince halka. Jante takıp oturuşu dene (~15 dk) |
 
 ## Ölçüler
@@ -43,18 +43,19 @@ yeniden üretir.
 
 ## Ford logosu
 
-Logo yuvanın içinde, rozet gibi katman katman basılır: ten rengi zemin, mavi oval, beyaz yazı:
+Logo yuvanın içinde, rozet gibi katman katman basılır: açık latte (ten rengi) zemin, mavi oval, beyaz yazı:
 
 | Katman | Renk | Yükseklik |
 | --- | --- | --- |
-| Zemin (yuva tabanı) | ten rengi | 3 katman, yüzeye gömülü |
+| Zemin (yuva tabanı) | açık latte | 3 katman, yüzeye gömülü |
 | Oval (45,5 × 17 mm) | mavi | 0,4 mm kabarık |
 | "Ford" yazısı ve oval çizgisi | beyaz | 0,6 mm, kenar halkasıyla aynı hizada (kenar yazıyı korur) |
 
-- Renkler üst üste geldiği için her katmanda en fazla iki renk var: siyah bir nozulda, ten rengi, mavi ve beyaz
-  öbüründe; bütün baskıda yalnız **2 filament değişimi** (ten rengi→mavi→beyaz).
-- Ten rengi için bej/krem tonu bir filament (ör. Bambu PLA Basic Beige ya da aynı tonda ASA/PETG). Zemin rengi
-  `scripts/jant_gobegi.py` içindeki `ZEMIN_RENK` ile değişir.
+- Renkler üst üste geldiği için her katmanda en fazla iki renk var: siyah bir nozulda, latte, mavi ve beyaz
+  öbüründe; bütün baskıda yalnız **2 filament değişimi** (latte→mavi→beyaz).
+- Zemin: açık latte / sütlü kahve tonu (#E2CBB5). En yakın hazır filament **Bambu PLA Matte Latte Brown**
+  (biraz daha koyu); ASA/PETG basılacaksa aynı tonda krem/bej. Ton `scripts/anahtarlik.py` içindeki `COLOURS[SKIN]`,
+  zemin rengi `scripts/jant_gobegi.py` içindeki `ZEMIN_RENK` ile değişir.
 - Yazının ince kıvrımları 0,4 nozula göre 0,08 mm kalınlaştırıldı: 0,5 mm'den ince yer kalmadı, çizgi ~0,6 mm.
 - Mavi için koyu mavi filament (ör. Bambu ASA Blue / PLA Basic Blue) Ford mavisine en yakın sonucu verir.
 - Logo çizimi Simple Icons'tan (`scripts/logolar/ford.svg`, CC0). Ford logosu Ford Motor Company'nin markasıdır.
