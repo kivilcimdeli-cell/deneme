@@ -251,6 +251,26 @@ def k9_kose_serit():
     return c
 
 
+def k9_kose_serit_v2():
+    """Müşterinin seçtiği köşe şerit, düzenlenmiş: AUTO ile isim arasında ince altın çizgi; arka yüzde de köşe şeridi,
+    ön yüzdeki şeridin tam arkasında (kartın köşesini iki yüzden sarar; delik arkada öbür üst köşede kalır)."""
+    W, H = 66.0, 40.0
+    card = A.rrect(W, H, 6.0)
+    band = A.polygon([(-10, 48), (-2, 48), (56, -10), (48, -10)])          # x + y = 38 … 46: sağ üst köşe
+    c = Concept("9_kose_serit_v2", "Köşe şerit – düzenlenmiş",
+                "AUTO ile isim arasında ince altın çizgi; arka yüzde de aynı köşede altın şerit (köşeyi iki yüzden sarar).",
+                card, A.circle(2.5, -W / 2 + 7.0, H / 2 - 7.0))
+    name = wordmark(4.6, -W / 2 + 6.0, -10.6)
+    c.front += [(band ^ card, GOLD),
+                (auto_word(5.0, -W / 2 + 6.2, -1.6), GOLD),
+                (A.rect(-W / 2 + 6.0, -6.6, name.bounds()[2], -5.8), GOLD),     # 0,8 mm ince çizgi
+                (name, WHITE)]
+    c.back += [(band.mirror((1, 0)) ^ card, GOLD),                              # arkadan bakınca sol üst köşe
+               (outfit().text(PHONE, 4.4, -W / 2 + 6.0, -4.0, align="l", tracking=0.5), WHITE),
+               (descriptor(CITY, 3.0, -W / 2 + 6.0, -11.0), GOLD)]
+    return c
+
+
 def k10_damla():
     drop = A.circle(18.0, 0, -6.0, 160) + A.polygon([(-16.3, 1.6), (0, 27.0), (16.3, 1.6)])
     outline = drop.offset(-2.0, m3.JoinType.Round).offset(2.0, m3.JoinType.Round)
