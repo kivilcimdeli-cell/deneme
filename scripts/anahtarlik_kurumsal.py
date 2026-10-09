@@ -46,7 +46,8 @@ def clean(man, min_vol=0.05):
 
 
 class Keychain:
-    def __init__(self, concept):
+    def __init__(self, concept, keep_back_colours=False):
+        """keep_back_colours: arka yüz konseptteki renklerle basılır (yoksa tek renk: daha az renk değişimi)."""
         c = self.concept = concept
         self.key, self.title, self.desc = c.key, "AUTO_FIRAT_TUYGUN_" + c.key, c.desc
         self.body_col = COL[c.body]
@@ -55,7 +56,8 @@ class Keychain:
         self.shift = (-(x0 + x1) / 2, -(y0 + y1) / 2)          # tablada ortalamak için
         self.outline, self.holes = c.outline, c.holes
         self.front = [(cs, COL[col]) for cs, col in c.front]
-        self.back = [(cs.mirror((1, 0)), back_col) for cs, _ in c.back]   # tablaya bakan hâli (alttan)
+        self.back = [(cs.mirror((1, 0)), COL[col] if keep_back_colours else back_col)
+                     for cs, col in c.back]                                   # tablaya bakan hâli (alttan)
         self.keep = (self.outline - self.holes).offset(-A.EDGE_KEEP, J) - self.holes.offset(0.8, J)
 
     def size(self):

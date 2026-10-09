@@ -17,6 +17,26 @@ Tek parça, desteksiz basılır. Ayarlar: **Bambu Lab X2D 0.4, Bambu PLA Basic, 
 Gramajlar parçanın kendisi içindir; temizleme kulesi ve renk değişimi atığı hariç.
 Altın: **Bambu PLA Basic Gold**. Mat görünüm istenirse AMS'te PLA Matte siyah/beyaz da seçilebilir.
 
+## Müşterinin son seçimi: köşe şerit, düzenlenmiş, 43 × 25 mm — `kucuk/9_kose_serit_v2.3mf`
+
+![Köşe şerit, düzenlenmiş](kucuk/onizleme/9_kose_serit_v2.png)
+
+Boyut karşılaştırması (aynı ölçekte): [`kucuk/onizleme/boyut_karsilastirma.png`](kucuk/onizleme/boyut_karsilastirma.png)
+
+- Ön yüzde AUTO ile isim arasında ince altın çizgi; arka yüzde ön şeridin tam arkasında altın köşe şeridi
+  (kartın köşesini iki yüzden sarar, delik arkada öbür üst köşede).
+- **Ölçüler (mm):** kart 43 × 25 × 4,0 (gövde 3,2 + kabartma 0,8), köşe yarıçapı 4. AUTO 3,8 · isim 3,2 · telefon 3,2 ·
+  ANTALYA 2,8 (büyük harf yüksekliği), hepsi Outfit ExtraBold; harf çizgisi ~0,65 mm (AUTO ~0,75). Çizgi 0,8 × 35,6.
+  Yazılar kenardan 3,6 mm içeride; delik Ø4,4, çevresinde 3,1 mm et.
+- **Neden 43 × 25:** tek satır "FIRAT TUYGUN" ve telefon 3,2 mm'de 35–36 mm tutuyor; bu, 0,4 nozulla net basılan en
+  küçük yazı boyu. Kart daha küçülürse yazı küçülmek zorunda kalır (ya da isim iki satır olur).
+- **Kontrol:** kabartmada 0,6 mm'den ince kısım %1,0, arkada 0,5 mm'den ince %0,7 (yalnız harf köşeleri);
+  çakışan ya da kenara taşan öğe yok.
+- **Net yazı için baskı ayarları (dosyanın proje ayarına yazıldı):** dış duvar 60 mm/s, dış duvar ivmesi 2000 mm/s²,
+  üst yüzey 100 mm/s, hassas duvar (precise wall) açık, Arachne; katman 0,20 mm (renk katmanları buna göre).
+- AMS: **1 siyah · 2 beyaz · 3 altın**. Arka yüzde de altın olduğu için 5 filament değişimi (~2,8 g temizleme).
+  Bambu Studio'da siyah ile altını aynı nozula, beyazı öbürüne koy.
+
 ## Küçük boy (~45–50 mm): `kucuk/`
 
 ![Küçük boy](kucuk/onizleme/hepsi.png)

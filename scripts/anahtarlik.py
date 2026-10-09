@@ -799,10 +799,14 @@ FLUSH = [[0, 700, 900, 500, 600, 700, 800], [90, 0, 300, 200, 200, 200, 250], [9
          [90, 250, 300, 200, 200, 250, 0]]
 
 
-def project_settings(template_files, filaments):
+def project_settings(template_files, filaments, overrides=None):
     """Şablon (2 filamentli X2D) ayarlarını `filaments` listesindeki filamentlere uyarlar.
-    Ek filamentler 2. filamentin (Bambu PLA Basic) ayarlarını kopyalar."""
+    Ek filamentler 2. filamentin (Bambu PLA Basic) ayarlarını kopyalar. `overrides`: proje baskı ayarlarında
+    değiştirilecek değerler (liste olanlar şablondaki uzunlukta olmalı)."""
     cfg = json.loads(template_files["Metadata/project_settings.config"])
+    for k, v in (overrides or {}).items():
+        assert k in cfg and type(v) is type(cfg[k]) and (not isinstance(v, list) or len(v) == len(cfg[k])), k
+        cfg[k] = v
     n_old, n = len(cfg["filament_colour"]), len(filaments)
     self_idx = [int(v) for v in cfg["filament_self_index"]]
     n_var = len(self_idx)
@@ -918,7 +922,8 @@ def write_design(d, template_files, out_dir):
     for k in ("Metadata/slice_info.config", "Metadata/cut_information.xml"):
         files[k] = template_files[k]
     files["Metadata/filament_sequence.json"] = b'{"plate_1":{"nozzle_sequence":[],"optimal_assignment":[],"sequence":[]}}'
-    files["Metadata/project_settings.config"] = project_settings(template_files, filaments)
+    files["Metadata/project_settings.config"] = project_settings(template_files, filaments,
+                                                                 getattr(d, "project_overrides", None))
     files["3D/3dmodel.model"] = model_xml(d.title, parts, today).encode()
     head = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
             'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" '

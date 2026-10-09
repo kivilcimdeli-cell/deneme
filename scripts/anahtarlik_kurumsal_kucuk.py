@@ -132,7 +132,35 @@ def s9_kose_serit():
     return c
 
 
+def s9_kose_serit_v2():
+    """Müşterinin seçtiği köşe şerit, düzenlenmiş ve küçültülmüş (43 × 25 mm): AUTO ile isim arasında ince altın çizgi,
+    arka yüzde de aynı köşede altın şerit (ön şeridin tam arkasında). İsim ve telefon 3,2 mm, AUTO 3,8 mm:
+    tek satırda net basılan en büyük boy; daha küçük kartta yazı küçülmek zorunda kalır."""
+    W, H = 43.0, 25.0
+    card = A.rrect(W, H, 4.0)
+    lo, hi = W / 2 + H / 2 - 9.6, W / 2 + H / 2 - 4.6        # şerit sağ üst köşede: lo ≤ x + y ≤ hi
+    band = A.polygon([(lo + 30, -30), (hi + 30, -30), (-30, hi + 30), (-30, lo + 30)])
+    c = concept("9_kose_serit_v2", "Köşe şerit – düzenlenmiş",
+                "AUTO ile isim arasında ince altın çizgi; arka yüzde de aynı köşede altın şerit. 43 × 25 mm.",
+                card, A.circle(HOLE_R, -W / 2 + 5.3, H / 2 - 5.3))
+    x0 = -W / 2 + 3.6                                         # yazıların sol kenarı (görünen harf kenarı)
+    left = lambda cs: cs.translate((x0 - cs.bounds()[0], 0))  # noqa: E731
+    nm = left(name(3.2, 0, -6.9, align="l"))
+    c.front += [(band ^ card, GOLD),
+                (left(K.auto_word(3.8, 0, -0.2)), GOLD),
+                (A.rect(x0, -4.1, nm.bounds()[2], -3.3), GOLD),          # 0,8 mm ince çizgi, isim kadar
+                (nm, WHITE)]
+    c.back += [(band.mirror((1, 0)) ^ card, GOLD),                      # arkadan bakınca sol üst köşe
+               (left(phone(3.2, 0, -2.4, align="l")), WHITE),
+               (left(city(2.8, 0, -7.6, align="l")), GOLD)]
+    return c
+
+
 SMALL = [s1_kapsul, s2_logo_kare, s3_madalyon, s6_tek_cizgi, s7_altigen, s9_kose_serit]
+# küçük yazı için baskı ayarları (yalnız bu dosyaların proje ayarı): yavaş ve yumuşak dış duvar, hassas duvar
+NET_YAZI = {"outer_wall_speed": ["60", "60", "50", "50"], "outer_wall_acceleration": ["2000", "2000", "1000", "1000"],
+            "top_surface_speed": ["100", "100", "100", "100"], "precise_outer_wall": "1"}
+FINAL = [(s9_kose_serit_v2, {"keep_back_colours": True, "project_overrides": NET_YAZI})]
 
 
 # ---------------------------------------------------------------- kontrol
@@ -164,11 +192,12 @@ def main():
     template_files = {n: template.read(n) for n in template.namelist()}
     os.makedirs(os.path.join(OUT_DIR, "onizleme"), exist_ok=True)
     sheets = []
-    for fn in SMALL:
-        kc = P.Keychain(fn())
+    for fn, opts in [(fn, {}) for fn in SMALL] + FINAL:
+        kc = P.Keychain(fn(), keep_back_colours=opts.get("keep_back_colours", False))
         if only and not any(o in kc.key for o in only):
             continue
         kc.title = "AUTO_FIRAT_TUYGUN_kucuk_" + kc.key
+        kc.project_overrides = opts.get("project_overrides")
         path, _, filaments = A.write_design(kc, template_files, OUT_DIR)
         parts = kc.solids()
         mans = [m for _, m, _ in parts]
@@ -181,9 +210,9 @@ def main():
         print(f"  sağlam: {all(str(m.status()).endswith('NoError') for m in mans)}  örtüşme: {overlap:.4f} mm³  "
               f"tek gövde: {len(union.decompose()) == 1}  filament değişimi: {changes} (~{flush} mm³)")
         sheets.append(P.preview(kc, parts, filaments, os.path.join(OUT_DIR, "onizleme", kc.key + ".png"),
-                                title=kc.concept.title.upper() + " (KÜÇÜK) – BASKIYA HAZIR"))
+                                title=kc.concept.title.replace("i", "İ").upper() + " (KÜÇÜK) – BASKIYA HAZIR"))
     if not only:
-        K.stack(sheets, os.path.join(OUT_DIR, "onizleme", "hepsi.png"))
+        K.stack(sheets[:len(SMALL)], os.path.join(OUT_DIR, "onizleme", "hepsi.png"))
 
 
 if __name__ == "__main__":
