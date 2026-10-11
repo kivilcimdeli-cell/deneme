@@ -196,9 +196,12 @@ def s9_kose_serit_v5():
     card = A.rrect(W, H, 4.6)
     lo, hi = W / 2 + H / 2 - 9.5, W / 2 + H / 2 - 5.3         # şerit sağ üst köşede: lo ≤ x + y ≤ hi (3,0 mm)
     band = A.polygon([(lo + 30, -30), (hi + 30, -30), (-30, hi + 30), (-30, lo + 30)])
+    hx, hy = -W / 2 + 5.8, H / 2 - 5.8
     c = concept("9_kose_serit_v5", "Köşe şerit – son",
                 "AUTO / ince altın çizgi / FIRAT TUYGUN; arkada telefon / ANTALYA; iki yüzde köşe şeridi.",
-                card, A.circle(HOLE_R, -W / 2 + 5.8, H / 2 - 5.8))
+                card, A.circle(2.5, hx, hy))                   # Ø5,0 delik: halka kolay geçsin (et payı 3,3 mm)
+    # delik kulağı: köşe 1,8 mm'ye inceltilir (çelik halkanın telleri 3,2 mm'lik gövdeyi kavrayamıyordu)
+    c.lug = (A.union(A.circle(4.4, hx, hy, 96), A.rect(-W, hy - 4.4, hx, H), A.rect(hx, hy, hx + 4.4, H)) ^ card, 1.8)
     f = encode()
     x0, x1 = -W / 2 + 3.0, W / 2 - 3.0                        # yazı alanı: 43,5 mm
     at = lambda cs: cs.translate((x0 - cs.bounds()[0], 0))    # noqa: E731  görünen sol kenar x0'da
@@ -236,7 +239,7 @@ NET_YAZI = {
     # şablondaki Cool Plate (35 °C) yerine PEI tabla (PLA 55 °C); düz ya da dokulu PEI aynı sıcaklık
     "curr_bed_type": "Textured PEI Plate",
 }
-FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI, "raise_h": 1.2})]
+FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI, "raise_h": 1.2})]  # kulak: c.lug
 
 
 # ---------------------------------------------------------------- kontrol
@@ -258,8 +261,12 @@ def small_checks(kc):
     bt, bg = thin_and_gaps(back, 0.5, 0.45)              # ilk katman (0,5 mm hat): çizgi ≥ 0,5, boşluk ≥ 0,45
     lost = [i for i, (cs, _) in enumerate(kc.front + kc.back) if (cs ^ kc.keep).area() + 0.01 < cs.area() * 0.98]
     d = A.Design(kc.key, kc.title, kc.outline, kc.front, kc.holes)
-    return {"ön ince%": ft, "ön dar": fg, "arka ince%": bt, "arka dar": bg, "yakın öğe": d.check_pairs(),
-            "delik et payı": d.hole_wall(), "kırpılan": lost}
+    out = {"ön ince%": ft, "ön dar": fg, "arka ince%": bt, "arka dar": bg, "yakın öğe": d.check_pairs(),
+           "delik et payı": d.hole_wall(), "kırpılan": lost}
+    if kc.lug:                                           # ön kabartmalar inceltilen kulağa en az 0,6 mm uzak olmalı
+        out["kulağa yakın ön öğe"] = [i for i, (cs, _) in enumerate(kc.front)
+                                      if (cs ^ kc.lug[0].offset(0.6, J)).area() > 0.01]
+    return out
 
 
 def main():
@@ -269,8 +276,9 @@ def main():
     os.makedirs(os.path.join(OUT_DIR, "onizleme"), exist_ok=True)
     sheets = []
     for fn, opts in [(fn, {}) for fn in SMALL] + FINAL:
-        kc = P.Keychain(fn(), keep_back_colours=opts.get("keep_back_colours", False),
-                        raise_h=opts.get("raise_h", P.RAISE))
+        c = fn()
+        kc = P.Keychain(c, keep_back_colours=opts.get("keep_back_colours", False),
+                        raise_h=opts.get("raise_h", P.RAISE), lug=getattr(c, "lug", None))
         if only and not any(o in kc.key for o in only):
             continue
         kc.title = "AUTO_FIRAT_TUYGUN_kucuk_" + kc.key

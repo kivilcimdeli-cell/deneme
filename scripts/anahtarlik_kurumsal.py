@@ -46,11 +46,12 @@ def clean(man, min_vol=0.05):
 
 
 class Keychain:
-    def __init__(self, concept, keep_back_colours=False, raise_h=RAISE):
+    def __init__(self, concept, keep_back_colours=False, raise_h=RAISE, lug=None):
         """keep_back_colours: arka yüz konseptteki renklerle basılır (yoksa tek renk: daha az renk değişimi).
-        raise_h: ön yüz kabartma yüksekliği (mm, katman katı)."""
+        raise_h: ön yüz kabartma yüksekliği (mm, katman katı).
+        lug: (bölge, kalınlık): delik çevresi ön taraftan bu kalınlığa inceltilir (halka kolay takılsın)."""
         c = self.concept = concept
-        self.raise_h = raise_h
+        self.raise_h, self.lug = raise_h, lug
         self.key, self.title, self.desc = c.key, "AUTO_FIRAT_TUYGUN_" + c.key, c.desc
         self.body_col = COL[c.body]
         back_col = A.WHITE if self.body_col == A.BLACK else A.BLACK
@@ -88,6 +89,12 @@ class Keychain:
 
     def solids(self):
         body = self.body()
+        if self.lug:                                            # delik kulağı: ön taraftan incelt, üst kenarı pahla
+            region, t = self.lug
+            shape = self.outline - self.holes
+            edge = (shape - shape.offset(-0.4, J)) ^ region
+            body = body - region.extrude(BODY_H + 1.0).translate((0, 0, t))
+            body = clean(body - edge.extrude(A.LAYER + 0.01).translate((0, 0, t - A.LAYER)))
         parts = []
         back = self.regions(self.back)
         for ext, cs in sorted(back.items()):
