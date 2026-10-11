@@ -46,9 +46,11 @@ def clean(man, min_vol=0.05):
 
 
 class Keychain:
-    def __init__(self, concept, keep_back_colours=False):
-        """keep_back_colours: arka yüz konseptteki renklerle basılır (yoksa tek renk: daha az renk değişimi)."""
+    def __init__(self, concept, keep_back_colours=False, raise_h=RAISE):
+        """keep_back_colours: arka yüz konseptteki renklerle basılır (yoksa tek renk: daha az renk değişimi).
+        raise_h: ön yüz kabartma yüksekliği (mm, katman katı)."""
         c = self.concept = concept
+        self.raise_h = raise_h
         self.key, self.title, self.desc = c.key, "AUTO_FIRAT_TUYGUN_" + c.key, c.desc
         self.body_col = COL[c.body]
         back_col = A.WHITE if self.body_col == A.BLACK else A.BLACK
@@ -93,7 +95,7 @@ class Keychain:
             body = body - m
             parts.append((f"Arka yazı ({A.COLOUR_NAMES[ext]})", m, ext))
         for ext, cs in sorted(self.regions(self.front).items()):
-            parts.append((f"Ön kabartma ({A.COLOUR_NAMES[ext]})", cs.extrude(RAISE).translate((0, 0, BODY_H)), ext))
+            parts.append((f"Ön kabartma ({A.COLOUR_NAMES[ext]})", cs.extrude(self.raise_h).translate((0, 0, BODY_H)), ext))
         parts.insert(0, (f"Gövde ({A.COLOUR_NAMES[self.body_col]})", clean(body), self.body_col))
         dx, dy = self.shift
         return [(n, m.translate((dx, dy, 0)), e) for n, m, e in parts]
@@ -102,7 +104,7 @@ class Keychain:
 
     def layer_colours(self):
         """Katman başına kullanılan filamentler."""
-        n_body, n_back, n_top = round(BODY_H / A.LAYER), round(INLAY / A.LAYER), round(RAISE / A.LAYER)
+        n_body, n_back, n_top = round(BODY_H / A.LAYER), round(INLAY / A.LAYER), round(self.raise_h / A.LAYER)
         back = set(self.regions(self.back))
         front = set(self.regions(self.front))
         return [{self.body_col} | (back if i < n_back else set()) for i in range(n_body)] + [front] * n_top
@@ -155,7 +157,7 @@ def preview(kc, parts, filaments, path, title=None):
     dr = ImageDraw.Draw(canvas)
     dr.text((40, 26), title or kc.concept.title.upper() + " – BASKIYA HAZIR", fill=(24, 26, 30), font=K.fnt(34))
     w, h = kc.size()
-    dr.text((40, 72), f"{round(w, 2):g} × {round(h, 2):g} × {BODY_H + RAISE:.1f} mm  ·  ön yüz {RAISE:.1f} mm kabartma  ·  "
+    dr.text((40, 72), f"{round(w, 2):g} × {round(h, 2):g} × {BODY_H + kc.raise_h:.1f} mm  ·  ön yüz {kc.raise_h:.1f} mm kabartma  ·  "
                       f"arka yüz ilk {round(INLAY / A.LAYER)} katmanda gömme renk",
             fill=(96, 100, 110), font=K.fnt(20))
     for i, (label, R) in enumerate(views):

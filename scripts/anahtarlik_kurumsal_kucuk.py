@@ -236,7 +236,7 @@ NET_YAZI = {
     # şablondaki Cool Plate (35 °C) yerine PEI tabla (PLA 55 °C); düz ya da dokulu PEI aynı sıcaklık
     "curr_bed_type": "Textured PEI Plate",
 }
-FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI})]
+FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI, "raise_h": 1.2})]
 
 
 # ---------------------------------------------------------------- kontrol
@@ -269,7 +269,8 @@ def main():
     os.makedirs(os.path.join(OUT_DIR, "onizleme"), exist_ok=True)
     sheets = []
     for fn, opts in [(fn, {}) for fn in SMALL] + FINAL:
-        kc = P.Keychain(fn(), keep_back_colours=opts.get("keep_back_colours", False))
+        kc = P.Keychain(fn(), keep_back_colours=opts.get("keep_back_colours", False),
+                        raise_h=opts.get("raise_h", P.RAISE))
         if only and not any(o in kc.key for o in only):
             continue
         kc.title = "AUTO_FIRAT_TUYGUN_kucuk_" + kc.key

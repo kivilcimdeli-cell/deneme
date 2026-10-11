@@ -40,7 +40,9 @@ harfler daha uzun ve kalın, tasarım ve diziliş aynı.
 
 - Yazılar kenardan 3 mm içeride (43,5 mm yazı alanı); altın çizgi 1,0 mm, isim kadar uzun.
 - Kalan tek dar yer A harflerinin küçük üçgen içi (~0,5 mm); A'nın şekli bu boyda buna izin vermiyor, harf okunur.
-- Kart 49,5 × 28,75 × 4,0 mm (gövde 3,2 + kabartma 0,8), köşe yarıçapı 4,6; delik Ø4,4, çevresinde 3,6 mm et.
+- Kart 49,5 × 28,75 × 4,4 mm (gövde 3,2 + **ön kabartma 1,2 mm**, 6 katman), köşe yarıçapı 4,6; delik Ø4,4, çevresinde 3,6 mm et.
+- Arka yüz tablaya yattığı için kabartma olamaz (destek gerekir, yüzey bozulur). İki yüzde kabartma istenirse
+  anahtarlık iki ince yarım olarak basılıp sırt sırta yapıştırılabilir.
 
 **Dosyaya yazılan baskı ayarları (Bambu Studio'da açınca hazır):**
 
