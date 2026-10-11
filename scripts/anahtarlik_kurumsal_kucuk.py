@@ -188,6 +188,9 @@ NET_YAZI = {
     "outer_wall_speed": ["50", "50", "50", "50"], "outer_wall_acceleration": ["2000", "2000", "1000", "1000"],
     "inner_wall_speed": ["100", "100", "100", "100"], "gap_infill_speed": ["60", "60", "60", "60"],
     "top_surface_speed": ["80", "80", "80", "80"], "precise_outer_wall": "1", "reduce_crossing_wall": "1",
+    # dikiş: dış duvarlarda kademeli (scarf) dikiş; yuvarlak harflerde (O, U) dikiş izi kalmaz. Köşelerde dikiş
+    # hizalı kalır (köşede iz zaten saklanır). Önizlemedeki beyaz noktalar dikiş işaretidir, filament değil.
+    "seam_slope_type": "external",
     # arka yüz yazıları ilk katmanda: ince hat (0,42), yavaş ilk katman; gövdede zaten 0,6 mm ilk katman pahı var
     "initial_layer_line_width": "0.42", "initial_layer_speed": ["30", "30", "30", "30"],
     "initial_layer_infill_speed": ["40", "40", "40", "40"], "elefant_foot_compensation": "0",

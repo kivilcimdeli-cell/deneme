@@ -46,8 +46,11 @@ Boyut karşılaştırması (aynı ölçekte): [`kucuk/onizleme/boyut_karsilastir
 | İç duvar / boşluk dolgusu | 100 / 60 mm/s | İnce harflerin içi düzgün dolsun |
 | Üst yüzey | 80 mm/s | Harf üstleri düz |
 | Hassas duvar, duvarları geçmekten kaçın | açık | Ölçü hassasiyeti, harfler arasında ip/iz olmasın |
+| Dikiş | hizalı + dış duvarda kademeli (scarf) dikiş | Yuvarlak harflerde (O, U) dikiş izi kalmaz; köşelerde dikiş köşeye saklanır |
 | Katman | 0,20 mm | Renk katmanları buna göre |
 
+- Dilimledikten sonra önizlemede harflerin üstünde görülen **beyaz noktalar dikiş işaretidir** (her katmanda duvarın
+  başlayıp bittiği yer), beyaz filament değildir. Göstergedeki "Seams / Dikişler" seçeneğiyle gizlenebilir.
 - AMS: **1 siyah · 2 beyaz · 3 altın**. Siyah ile altın aynı nozulda, beyaz öbüründe. 5 filament değişimi (~2,8 g temizleme).
 - **En keskin arka yazı için düz PEI tabla** (Smooth PEI / High Temp Plate) kullanın: dokulu tablanın deseni küçük
   yazıya geçer. Düz tabla kullanacaksanız Bambu Studio'da tabla tipini "Smooth PEI Plate / High Temp Plate" seçin
