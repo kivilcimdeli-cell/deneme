@@ -46,12 +46,13 @@ def clean(man, min_vol=0.05):
 
 
 class Keychain:
-    def __init__(self, concept, keep_back_colours=False, raise_h=RAISE, lug=None):
+    def __init__(self, concept, keep_back_colours=False, raise_h=RAISE, lug=None, body_h=BODY_H):
         """keep_back_colours: arka yüz konseptteki renklerle basılır (yoksa tek renk: daha az renk değişimi).
         raise_h: ön yüz kabartma yüksekliği (mm, katman katı).
-        lug: (bölge, kalınlık): delik çevresi ön taraftan bu kalınlığa inceltilir (halka kolay takılsın)."""
+        lug: (bölge, kalınlık): delik çevresi ön taraftan bu kalınlığa inceltilir (halka kolay takılsın).
+        body_h: gövde kalınlığı (mm, katman katı; arka gömme yazılar dahil)."""
         c = self.concept = concept
-        self.raise_h, self.lug = raise_h, lug
+        self.raise_h, self.lug, self.body_h = raise_h, lug, body_h
         self.key, self.title, self.desc = c.key, "AUTO_FIRAT_TUYGUN_" + c.key, c.desc
         self.body_col = COL[c.body]
         back_col = A.WHITE if self.body_col == A.BLACK else A.BLACK
@@ -77,14 +78,14 @@ class Keychain:
 
     def body(self):
         shape = self.outline - self.holes
-        body = shape.extrude(BODY_H)
+        body = shape.extrude(self.body_h)
         rings = []
         for k in range(CHAMFER_STEPS):          # alt ve üst kenarda katmanlara oturan pah
             ring = shape - shape.offset(-A.CHAMFER * (CHAMFER_STEPS - k) / CHAMFER_STEPS, J)
             lo = -0.1 if k == 0 else 0.0
             rings.append(ring.extrude(A.LAYER - lo).translate((0, 0, k * A.LAYER + lo)))
             hi = 0.1 if k == 0 else 0.0
-            rings.append(ring.extrude(A.LAYER + hi).translate((0, 0, BODY_H - (k + 1) * A.LAYER)))
+            rings.append(ring.extrude(A.LAYER + hi).translate((0, 0, self.body_h - (k + 1) * A.LAYER)))
         return body - m3.Manifold.batch_boolean(rings, m3.OpType.Add)
 
     def solids(self):
@@ -93,7 +94,7 @@ class Keychain:
             region, t = self.lug
             shape = self.outline - self.holes
             edge = (shape - shape.offset(-0.4, J)) ^ region
-            body = body - region.extrude(BODY_H + 1.0).translate((0, 0, t))
+            body = body - region.extrude(self.body_h + 1.0).translate((0, 0, t))
             body = clean(body - edge.extrude(A.LAYER + 0.01).translate((0, 0, t - A.LAYER)))
         parts = []
         back = self.regions(self.back)
@@ -102,7 +103,7 @@ class Keychain:
             body = body - m
             parts.append((f"Arka yazı ({A.COLOUR_NAMES[ext]})", m, ext))
         for ext, cs in sorted(self.regions(self.front).items()):
-            parts.append((f"Ön kabartma ({A.COLOUR_NAMES[ext]})", cs.extrude(self.raise_h).translate((0, 0, BODY_H)), ext))
+            parts.append((f"Ön kabartma ({A.COLOUR_NAMES[ext]})", cs.extrude(self.raise_h).translate((0, 0, self.body_h)), ext))
         parts.insert(0, (f"Gövde ({A.COLOUR_NAMES[self.body_col]})", clean(body), self.body_col))
         dx, dy = self.shift
         return [(n, m.translate((dx, dy, 0)), e) for n, m, e in parts]
@@ -111,7 +112,7 @@ class Keychain:
 
     def layer_colours(self):
         """Katman başına kullanılan filamentler."""
-        n_body, n_back, n_top = round(BODY_H / A.LAYER), round(INLAY / A.LAYER), round(self.raise_h / A.LAYER)
+        n_body, n_back, n_top = round(self.body_h / A.LAYER), round(INLAY / A.LAYER), round(self.raise_h / A.LAYER)
         back = set(self.regions(self.back))
         front = set(self.regions(self.front))
         return [{self.body_col} | (back if i < n_back else set()) for i in range(n_body)] + [front] * n_top
@@ -164,7 +165,7 @@ def preview(kc, parts, filaments, path, title=None):
     dr = ImageDraw.Draw(canvas)
     dr.text((40, 26), title or kc.concept.title.upper() + " – BASKIYA HAZIR", fill=(24, 26, 30), font=K.fnt(34))
     w, h = kc.size()
-    dr.text((40, 72), f"{round(w, 2):g} × {round(h, 2):g} × {BODY_H + kc.raise_h:.1f} mm  ·  ön yüz {kc.raise_h:.1f} mm kabartma  ·  "
+    dr.text((40, 72), f"{round(w, 2):g} × {round(h, 2):g} × {kc.body_h + kc.raise_h:.1f} mm  ·  ön yüz {kc.raise_h:.1f} mm kabartma  ·  "
                       f"arka yüz ilk {round(INLAY / A.LAYER)} katmanda gömme renk",
             fill=(96, 100, 110), font=K.fnt(20))
     for i, (label, R) in enumerate(views):

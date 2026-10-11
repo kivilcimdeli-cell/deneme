@@ -200,8 +200,6 @@ def s9_kose_serit_v5():
     c = concept("9_kose_serit_v5", "Köşe şerit – son",
                 "AUTO / ince altın çizgi / FIRAT TUYGUN; arkada telefon / ANTALYA; iki yüzde köşe şeridi.",
                 card, A.circle(2.5, hx, hy))                   # Ø5,0 delik: halka kolay geçsin (et payı 3,3 mm)
-    # delik kulağı: köşe 1,8 mm'ye inceltilir (çelik halkanın telleri 3,2 mm'lik gövdeyi kavrayamıyordu)
-    c.lug = (A.union(A.circle(4.4, hx, hy, 96), A.rect(-W, hy - 4.4, hx, H), A.rect(hx, hy, hx + 4.4, H)) ^ card, 1.8)
     f = encode()
     x0, x1 = -W / 2 + 3.0, W / 2 - 3.0                        # yazı alanı: 43,5 mm
     at = lambda cs: cs.translate((x0 - cs.bounds()[0], 0))    # noqa: E731  görünen sol kenar x0'da
@@ -239,7 +237,8 @@ NET_YAZI = {
     # şablondaki Cool Plate (35 °C) yerine PEI tabla (PLA 55 °C); düz ya da dokulu PEI aynı sıcaklık
     "curr_bed_type": "Textured PEI Plate",
 }
-FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI, "raise_h": 1.2})]  # kulak: c.lug
+# gövde 3,2 -> 2,6 mm: çelik anahtarlık halkası 3,2 mm'lik gövdeyi kavrayamıyordu (kabartma 1,2 mm; toplam 3,8 mm)
+FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI, "raise_h": 1.2, "body_h": 2.6})]
 
 
 # ---------------------------------------------------------------- kontrol
@@ -278,7 +277,8 @@ def main():
     for fn, opts in [(fn, {}) for fn in SMALL] + FINAL:
         c = fn()
         kc = P.Keychain(c, keep_back_colours=opts.get("keep_back_colours", False),
-                        raise_h=opts.get("raise_h", P.RAISE), lug=getattr(c, "lug", None))
+                        raise_h=opts.get("raise_h", P.RAISE), lug=getattr(c, "lug", None),
+                        body_h=opts.get("body_h", P.BODY_H))
         if only and not any(o in kc.key for o in only):
             continue
         kc.title = "AUTO_FIRAT_TUYGUN_kucuk_" + kc.key
