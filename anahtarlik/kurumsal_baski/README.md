@@ -17,22 +17,27 @@ Tek parça, desteksiz basılır. Ayarlar: **Bambu Lab X2D 0.4, Bambu PLA Basic, 
 Gramajlar parçanın kendisi içindir; temizleme kulesi ve renk değişimi atığı hariç.
 Altın: **Bambu PLA Basic Gold**. Mat görünüm istenirse AMS'te PLA Matte siyah/beyaz da seçilebilir.
 
-## Müşterinin son seçimi: köşe şerit, düzenlenmiş, 49,5 × 28,75 mm — `kucuk/9_kose_serit_v3.3mf`
+## Müşterinin son seçimi: köşe şerit, son sürüm, 49,5 × 28,75 mm — `kucuk/9_kose_serit_v4.3mf`
 
-![Köşe şerit, düzenlenmiş](kucuk/onizleme/9_kose_serit_v3.png)
+![Köşe şerit, son](kucuk/onizleme/9_kose_serit_v4.png)
 
-Boyut karşılaştırması (aynı ölçekte): [`kucuk/onizleme/boyut_karsilastirma.png`](kucuk/onizleme/boyut_karsilastirma.png)
+Önce / sonra (aynı ölçekte): [`kucuk/onizleme/once_sonra.png`](kucuk/onizleme/once_sonra.png)
 
-43 × 25 mm deneme baskısında ön yazılar bulanık, arka yazılar çok kötü çıktı. Bu sürümde:
+**Neden değişti:** Önceki baskılarda ("FIRAT TUYGUN" ve telefon tek satırda) yazılar çorba gibi çıktı. Ölçüldü:
+tek satıra 12–13 harf sığdırınca harf başına ~3,2 mm düşüyor; harf çizgilerinin %43'ü (ön) ve %53'ü (arka)
+0,9 mm'den inceydi (0,4 nozulla iki hattan az), harf içleri 0,5 mm'ye iniyordu. Hiçbir yazı tipi bu genişlikte hem kalın
+çizgi hem açık harf içi veremiyor (Outfit, Lexend, Rubik, Montserrat, Barlow Condensed denendi). Çözüm satır başına harfi
+azaltmak oldu:
 
-- **%15 büyük:** 49,5 × 28,75 × 4,0 mm (gövde 3,2 + kabartma 0,8), köşe yarıçapı 4,6.
-- **Ön yüz (0,8 mm kabartma):** AUTO 4,4 · isim 3,7 (harf çizgisi ~0,75 mm) · ince altın çizgi 0,9 × 41,1.
-- **Arka yüz (ilk katmanda, tabla yüzeyinde):** telefon 3,8 (önce 3,2) · ANTALYA 3,4 (önce 2,8); harf aralıkları açıldı
-  (telefon 0,45 mm, ANTALYA 1,2 mm), harf çizgisi ~0,76 mm. İlk katman hattı 0,42 mm olduğu için harf içleri kapanmaz.
-- **Köşe şeridi (ön ve arka) inceltildi:** 3,0 mm; köşeye bakan kenarı yerinde. Arka şerit ön şeridin tam arkasında.
-- Yazılar kenardan 4,2 mm içeride; delik Ø4,4, çevresinde 3,6 mm et.
-- **Kontrol:** kabartmada 0,6 mm'den ince kısım %1,3, arkada 0,5 mm'den ince %1,0 (yalnız harf köşeleri); çakışan ya da
-  kenara taşan öğe yok.
+| Yüz | Satırlar | Yükseklik (büyük harf) |
+| --- | --- | --- |
+| Ön (0,8 mm kabartma) | AUTO / altın çizgi (1,0 mm) / FIRAT / TUYGUN | 5,5 / – / 5,0 / 5,0 mm |
+| Arka (ilk katmanda) | 0535 278 / 35 29 / ANTALYA | 5,0 / 5,0 / 4,4 mm |
+
+- Yazı tipi aynı (Outfit ExtraBold); 5 mm'de harf çizgisi ~1,0 mm, en dar harf içi 0,70–0,75 mm (A'nın içi).
+- **0,9 mm'den ince kısım:** ön %3,5, arka %5,2 (önce %43 ve %53); kalanlar harflerin sivri köşeleri.
+- Delik sol üstte (Ø4,4, 3,6 mm et); ön yazı bloğu deliğin yanından başlar. Köşe şeridi ön ve arkada 3,0 mm.
+- Kart 49,5 × 28,75 × 4,0 mm (gövde 3,2 + kabartma 0,8), köşe yarıçapı 4,6.
 
 **Dosyaya yazılan baskı ayarları (Bambu Studio'da açınca hazır):**
 
@@ -43,18 +48,17 @@ Boyut karşılaştırması (aynı ölçekte): [`kucuk/onizleme/boyut_karsilastir
 | İlk katman hızı / dolgu | 30 / 40 mm/s | Arka yazılar düzgün otursun |
 | Fil ayağı telafisi | 0 | Gövdede zaten 0,6 mm ilk katman pahı var; ilk katman yazıları incelmesin |
 | Dış duvar | 50 mm/s, ivme 2000 | Kabartma harf kenarları keskin |
-| İç duvar / boşluk dolgusu | 100 / 60 mm/s | İnce harflerin içi düzgün dolsun |
+| İç duvar / boşluk dolgusu | 100 / 60 mm/s | Harf içleri düzgün dolsun |
 | Üst yüzey | 80 mm/s | Harf üstleri düz |
+| Ütüleme | üst yüzeyler | Harf üstleri ve siyah yüz düz, parlak |
 | Hassas duvar, duvarları geçmekten kaçın | açık | Ölçü hassasiyeti, harfler arasında ip/iz olmasın |
-| Dikiş | hizalı + dış duvarda kademeli (scarf) dikiş | Yuvarlak harflerde (O, U) dikiş izi kalmaz; köşelerde dikiş köşeye saklanır |
+| Dikiş | hizalı + dış duvarda kademeli (scarf) dikiş | Yuvarlak harflerde dikiş izi kalmaz |
 | Katman | 0,20 mm | Renk katmanları buna göre |
 
-- Dilimledikten sonra önizlemede harflerin üstünde görülen **beyaz noktalar dikiş işaretidir** (her katmanda duvarın
-  başlayıp bittiği yer), beyaz filament değildir. Göstergedeki "Seams / Dikişler" seçeneğiyle gizlenebilir.
+- Önizlemedeki beyaz noktalar **dikiş işaretidir**, filament değildir.
 - AMS: **1 siyah · 2 beyaz · 3 altın**. Siyah ile altın aynı nozulda, beyaz öbüründe. 5 filament değişimi (~2,8 g temizleme).
-- **En keskin arka yazı için düz PEI tabla** (Smooth PEI / High Temp Plate) kullanın: dokulu tablanın deseni küçük
-  yazıya geçer. Düz tabla kullanacaksanız Bambu Studio'da tabla tipini "Smooth PEI Plate / High Temp Plate" seçin
-  (PLA sıcaklığı aynı, 55 °C). Tablayı bulaşık deterjanıyla yıkayın; yapıştırıcı sürmeyin.
+- **En keskin arka yazı için düz PEI tabla** (Smooth PEI / High Temp Plate); düz tabla kullanılacaksa Bambu Studio'da tabla
+  tipi "Smooth PEI Plate / High Temp Plate" seçilir (PLA 55 °C, aynı). Tabla deterjanla yıkanır, yapıştırıcı sürülmez.
 
 ## Küçük boy (~45–50 mm): `kucuk/`
 
