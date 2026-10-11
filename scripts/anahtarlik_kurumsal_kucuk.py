@@ -156,11 +156,45 @@ def s9_kose_serit_v2():
     return c
 
 
+def s9_kose_serit_v3():
+    """Köşe şerit, düzenlenmiş, %15 büyütülmüş (49,5 × 28,75 mm; 43 × 25'in 1,15 katı). Baskı denemesinde yazılar
+    bulanık, arka yazılar kötü çıktı: ön yazılar %15, arka (ilk katmanda basılan) yazılar %19-21 büyütüldü ve harf
+    aralığı açıldı. Ön: AUTO 4,4 · isim 3,7 · çizgi 0,9. Arka: telefon 3,8 · ANTALYA 3,4.
+    Köşe şeridi (ön ve arka) inceltildi: 3,0 mm; köşeye bakan kenarı yerinde, iç kenarı köşeye yaklaştı."""
+    W, H = 49.5, 28.75
+    card = A.rrect(W, H, 4.6)
+    lo, hi = W / 2 + H / 2 - 9.5, W / 2 + H / 2 - 5.3         # şerit sağ üst köşede: lo ≤ x + y ≤ hi (3,0 mm)
+    band = A.polygon([(lo + 30, -30), (hi + 30, -30), (-30, hi + 30), (-30, lo + 30)])
+    c = concept("9_kose_serit_v3", "Köşe şerit – düzenlenmiş",
+                "AUTO ile isim arasında ince altın çizgi; arka yüzde de aynı köşede altın şerit. 49,5 × 28,75 mm.",
+                card, A.circle(HOLE_R, -W / 2 + 5.8, H / 2 - 5.8))
+    x0 = -W / 2 + 4.2                                         # yazıların sol kenarı (görünen harf kenarı)
+    left = lambda cs: cs.translate((x0 - cs.bounds()[0], 0))  # noqa: E731
+    nm = left(name(3.7, 0, -7.55, align="l"))
+    c.front += [(band ^ card, GOLD),
+                (left(K.auto_word(4.4, 0, 0.2)), GOLD),
+                (A.rect(x0, -4.3, nm.bounds()[2], -3.4), GOLD),          # 0,9 mm ince çizgi, isim kadar
+                (nm, WHITE)]
+    c.back += [(band.mirror((1, 0)) ^ card, GOLD),                      # arkadan bakınca sol üst köşe
+               (left(K.outfit().text(PHONE, 3.8, 0, -2.6, align="l", tracking=0.45)), WHITE),
+               (left(K.outfit().text(CITY, 3.4, 0, -8.6, align="l", tracking=3.4 * 0.35)), GOLD)]
+    return c
+
+
 SMALL = [s1_kapsul, s2_logo_kare, s3_madalyon, s6_tek_cizgi, s7_altigen, s9_kose_serit]
-# küçük yazı için baskı ayarları (yalnız bu dosyaların proje ayarı): yavaş ve yumuşak dış duvar, hassas duvar
-NET_YAZI = {"outer_wall_speed": ["60", "60", "50", "50"], "outer_wall_acceleration": ["2000", "2000", "1000", "1000"],
-            "top_surface_speed": ["100", "100", "100", "100"], "precise_outer_wall": "1"}
-FINAL = [(s9_kose_serit_v2, {"keep_back_colours": True, "project_overrides": NET_YAZI})]
+# küçük yazı için baskı ayarları (yalnız bu dosyaların proje ayarı)
+NET_YAZI = {
+    # ön yüz kabartma yazılar: yavaş, yumuşak dış duvar; ince harf içleri (boşluk dolgusu) yavaş; hassas duvar
+    "outer_wall_speed": ["50", "50", "50", "50"], "outer_wall_acceleration": ["2000", "2000", "1000", "1000"],
+    "inner_wall_speed": ["100", "100", "100", "100"], "gap_infill_speed": ["60", "60", "60", "60"],
+    "top_surface_speed": ["80", "80", "80", "80"], "precise_outer_wall": "1", "reduce_crossing_wall": "1",
+    # arka yüz yazıları ilk katmanda: ince hat (0,42), yavaş ilk katman; gövdede zaten 0,6 mm ilk katman pahı var
+    "initial_layer_line_width": "0.42", "initial_layer_speed": ["30", "30", "30", "30"],
+    "initial_layer_infill_speed": ["40", "40", "40", "40"], "elefant_foot_compensation": "0",
+    # şablondaki Cool Plate (35 °C) yerine PEI tabla (PLA 55 °C); düz ya da dokulu PEI aynı sıcaklık
+    "curr_bed_type": "Textured PEI Plate",
+}
+FINAL = [(s9_kose_serit_v3, {"keep_back_colours": True, "project_overrides": NET_YAZI})]
 
 
 # ---------------------------------------------------------------- kontrol

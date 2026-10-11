@@ -155,7 +155,7 @@ def preview(kc, parts, filaments, path, title=None):
     dr = ImageDraw.Draw(canvas)
     dr.text((40, 26), title or kc.concept.title.upper() + " – BASKIYA HAZIR", fill=(24, 26, 30), font=K.fnt(34))
     w, h = kc.size()
-    dr.text((40, 72), f"{w:.0f} × {h:.0f} × {BODY_H + RAISE:.1f} mm  ·  ön yüz {RAISE:.1f} mm kabartma  ·  "
+    dr.text((40, 72), f"{round(w, 2):g} × {round(h, 2):g} × {BODY_H + RAISE:.1f} mm  ·  ön yüz {RAISE:.1f} mm kabartma  ·  "
                       f"arka yüz ilk {round(INLAY / A.LAYER)} katmanda gömme renk",
             fill=(96, 100, 110), font=K.fnt(20))
     for i, (label, R) in enumerate(views):
