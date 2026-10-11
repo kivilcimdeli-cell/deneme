@@ -181,36 +181,40 @@ def s9_kose_serit_v3():
     return c
 
 
-def s9_kose_serit_v4():
-    """Köşe şerit, son sürüm (49,5 × 28,75 mm). Önceki baskılarda tek satıra sıkışan yazılar (harf başına ~3,2 mm,
-    çizgi ~0,8 mm) 0,4 nozulla "çorba" gibi çıktı. Satır başına harf azaltıldı, yazılar ~5 mm'ye büyüdü:
-      ön: AUTO 5,5 / çizgi / FIRAT 5,0 / TUYGUN 5,0 (deliğin yanından başlayan sola yaslı blok)
-      arka: 0535 278 5,0 / 35 29 5,0 / ANTALYA 4,4
-    Outfit ExtraBold 5 mm'de harf çizgisi ~1,0 mm (0,4 nozulda 2,5 hat), harf içleri 0,75 mm ve üstü."""
+def encode():
+    """Encode Sans Condensed Black (OFL): tek satıra sığan en kalın ve harf içi en açık yazı tipi (ölçüldü:
+    Outfit, Lexend, Rubik, Montserrat, Barlow, Roboto/Fira/Saira/Sofia/Asap/Oswald Condensed ile karşılaştırıldı)."""
+    return A.Font("EncodeSansCondensed-Black.ttf")
+
+
+def s9_kose_serit_v5():
+    """Köşe şerit, son sürüm (49,5 × 28,75 mm), müşterinin onayladığı diziliş: önde AUTO / ince altın çizgi /
+    FIRAT TUYGUN (tek satır), arkada telefon (tek satır) / ANTALYA. Outfit'in tek satırda harf çizgilerinin %26-42'si
+    0,9 mm'den inceydi; Encode Sans Condensed Black ile harfler daha uzun (isim 4,33, telefon 4,29 mm) ve kalın:
+    0,9 mm'den ince isim %6, telefon %13; rakam içleri en az 0,8 mm. Yazılar kenardan 3 mm içeride."""
     W, H = 49.5, 28.75
     card = A.rrect(W, H, 4.6)
     lo, hi = W / 2 + H / 2 - 9.5, W / 2 + H / 2 - 5.3         # şerit sağ üst köşede: lo ≤ x + y ≤ hi (3,0 mm)
     band = A.polygon([(lo + 30, -30), (hi + 30, -30), (-30, hi + 30), (-30, lo + 30)])
-    hole_x, hole_y = -W / 2 + 5.8, H / 2 - 5.8
-    c = concept("9_kose_serit_v4", "Köşe şerit – son",
-                "AUTO / ince altın çizgi / FIRAT / TUYGUN; arkada 0535 278 / 35 29 / ANTALYA; iki yüzde köşe şeridi.",
-                card, A.circle(HOLE_R, hole_x, hole_y))
-    ob = K.outfit()
-    tx = lambda t, cap, y: ob.text(t, cap, 0, y, align="l", tracking=cap * 0.12)  # noqa: E731
-    at = lambda cs, x: cs.translate((x - cs.bounds()[0], 0))                      # noqa: E731  görünen sol kenar
-    # ön yüz: blok deliğin sağında, kalan genişlikte ortalı
-    auto, firat, tuygun = tx("AUTO", 5.5, 7.4), tx("FIRAT", 5.0, -1.15), tx("TUYGUN", 5.0, -7.75)
-    bw = max(cs.bounds()[2] - cs.bounds()[0] for cs in (auto, firat, tuygun))
-    free0, free1 = hole_x + HOLE_R + 0.8 + 1.5, W / 2 - 4.0
-    x0 = free0 + (free1 - free0 - bw) / 2
-    c.front += [(band ^ card, GOLD), (at(auto, x0), GOLD), (A.rect(x0, 2.5, x0 + bw, 3.5), GOLD),     # 1,0 mm çizgi
-                (at(firat, x0), WHITE), (at(tuygun, x0), WHITE)]
-    # arka yüz (arkadan bakınca: delik sağ üstte, şerit sol üstte): sola yaslı, şeridin altından başlar
-    tb = lambda t, cap, y: ob.text(t, cap, 0, y, align="l", tracking=cap * 0.15)  # noqa: E731  ilk katman: geniş aralık
-    xb = -W / 2 + 4.5
-    c.back += [(band.mirror((1, 0)) ^ card, GOLD),
-               (at(tb("0535 278", 5.0, 4.0), xb), WHITE), (at(tb("35 29", 5.0, -2.6), xb), WHITE),
-               (at(tb(CITY, 4.4, -8.9), xb), GOLD)]
+    c = concept("9_kose_serit_v5", "Köşe şerit – son",
+                "AUTO / ince altın çizgi / FIRAT TUYGUN; arkada telefon / ANTALYA; iki yüzde köşe şeridi.",
+                card, A.circle(HOLE_R, -W / 2 + 5.8, H / 2 - 5.8))
+    f = encode()
+    x0, x1 = -W / 2 + 3.0, W / 2 - 3.0                        # yazı alanı: 43,5 mm
+    at = lambda cs: cs.translate((x0 - cs.bounds()[0], 0))    # noqa: E731  görünen sol kenar x0'da
+
+    def fit(text, cap, y, trk):                                # 43,5 mm'ye sığan en büyük boy (en fazla `cap`)
+        for _ in range(6):
+            cap = min(cap, f.fit_cap(text, cap, x1 - x0, cap * trk))
+        return at(f.text(text, cap, 0, y, align="l", tracking=cap * trk))
+    nm = fit(NAME, 4.4, -7.6, 0.10)
+    c.front += [(band ^ card, GOLD),
+                (at(f.text("AUTO", 5.0, 0, 0.85, align="l", tracking=5.0 * 0.18)), GOLD),
+                (A.rect(x0, -4.05, nm.bounds()[2], -3.05), GOLD),          # 1,0 mm ince çizgi, isim kadar
+                (nm, WHITE)]
+    c.back += [(band.mirror((1, 0)) ^ card, GOLD),                      # arkadan bakınca sol üst köşe
+               (fit(PHONE, 4.4, -2.4, 0.12), WHITE),
+               (at(f.text(CITY, 4.2, 0, -8.7, align="l", tracking=4.2 * 0.22)), GOLD)]
     return c
 
 
@@ -232,7 +236,7 @@ NET_YAZI = {
     # şablondaki Cool Plate (35 °C) yerine PEI tabla (PLA 55 °C); düz ya da dokulu PEI aynı sıcaklık
     "curr_bed_type": "Textured PEI Plate",
 }
-FINAL = [(s9_kose_serit_v4, {"keep_back_colours": True, "project_overrides": NET_YAZI})]
+FINAL = [(s9_kose_serit_v5, {"keep_back_colours": True, "project_overrides": NET_YAZI})]
 
 
 # ---------------------------------------------------------------- kontrol

@@ -17,27 +17,30 @@ Tek parça, desteksiz basılır. Ayarlar: **Bambu Lab X2D 0.4, Bambu PLA Basic, 
 Gramajlar parçanın kendisi içindir; temizleme kulesi ve renk değişimi atığı hariç.
 Altın: **Bambu PLA Basic Gold**. Mat görünüm istenirse AMS'te PLA Matte siyah/beyaz da seçilebilir.
 
-## Müşterinin son seçimi: köşe şerit, son sürüm, 49,5 × 28,75 mm — `kucuk/9_kose_serit_v4.3mf`
+## Müşterinin son seçimi: köşe şerit, son sürüm, 49,5 × 28,75 mm — `kucuk/9_kose_serit_v5.3mf`
 
-![Köşe şerit, son](kucuk/onizleme/9_kose_serit_v4.png)
+![Köşe şerit, son](kucuk/onizleme/9_kose_serit_v5.png)
 
 Önce / sonra (aynı ölçekte): [`kucuk/onizleme/once_sonra.png`](kucuk/onizleme/once_sonra.png)
 
-**Neden değişti:** Önceki baskılarda ("FIRAT TUYGUN" ve telefon tek satırda) yazılar çorba gibi çıktı. Ölçüldü:
-tek satıra 12–13 harf sığdırınca harf başına ~3,2 mm düşüyor; harf çizgilerinin %43'ü (ön) ve %53'ü (arka)
-0,9 mm'den inceydi (0,4 nozulla iki hattan az), harf içleri 0,5 mm'ye iniyordu. Hiçbir yazı tipi bu genişlikte hem kalın
-çizgi hem açık harf içi veremiyor (Outfit, Lexend, Rubik, Montserrat, Barlow Condensed denendi). Çözüm satır başına harfi
-azaltmak oldu:
+Onaylanan diziliş aynen korundu: önde AUTO / ince altın çizgi / FIRAT TUYGUN (tek satır), arkada telefon (tek satır) /
+ANTALYA, delik sol üstte, iki yüzde köşe şeridi (3,0 mm).
 
-| Yüz | Satırlar | Yükseklik (büyük harf) |
+**Neden değişti:** Önceki baskılarda yazılar "çorba" gibi çıktı. Ölçüldü: Outfit ExtraBold'da tek satıra sığınca
+harf çizgilerinin isimde %34'ü, telefonda %49'u, ANTALYA'da %61'i 0,9 mm'den inceydi (0,4 nozulla iki hattan az).
+Tek satır sığdıran 50 yazı tipi/kalınlık denendi; en iyisi **Encode Sans Condensed Black** (OFL, `scripts/fonts/`):
+harfler daha uzun ve kalın, tasarım ve diziliş aynı.
+
+| Yazı | Önce (Outfit) | Son (Encode Sans Condensed Black) |
 | --- | --- | --- |
-| Ön (0,8 mm kabartma) | AUTO / altın çizgi (1,0 mm) / FIRAT / TUYGUN | 5,5 / – / 5,0 / 5,0 mm |
-| Arka (ilk katmanda) | 0535 278 / 35 29 / ANTALYA | 5,0 / 5,0 / 4,4 mm |
+| FIRAT TUYGUN | 3,8 mm · 0,9'dan ince %34 | **4,4 mm · %6** |
+| 0535 278 35 29 | 3,9 mm · %49 · rakam içleri ≥0,70 | **4,4 mm · %14 · rakam içleri ≥0,80** |
+| ANTALYA | 3,4 mm · %61 | **4,2 mm · %7** |
+| AUTO | Outfit 4,4 mm | Encode 5,0 mm |
 
-- Yazı tipi aynı (Outfit ExtraBold); 5 mm'de harf çizgisi ~1,0 mm, en dar harf içi 0,70–0,75 mm (A'nın içi).
-- **0,9 mm'den ince kısım:** ön %3,5, arka %5,2 (önce %43 ve %53); kalanlar harflerin sivri köşeleri.
-- Delik sol üstte (Ø4,4, 3,6 mm et); ön yazı bloğu deliğin yanından başlar. Köşe şeridi ön ve arkada 3,0 mm.
-- Kart 49,5 × 28,75 × 4,0 mm (gövde 3,2 + kabartma 0,8), köşe yarıçapı 4,6.
+- Yazılar kenardan 3 mm içeride (43,5 mm yazı alanı); altın çizgi 1,0 mm, isim kadar uzun.
+- Kalan tek dar yer A harflerinin küçük üçgen içi (~0,5 mm); A'nın şekli bu boyda buna izin vermiyor, harf okunur.
+- Kart 49,5 × 28,75 × 4,0 mm (gövde 3,2 + kabartma 0,8), köşe yarıçapı 4,6; delik Ø4,4, çevresinde 3,6 mm et.
 
 **Dosyaya yazılan baskı ayarları (Bambu Studio'da açınca hazır):**
 
