@@ -63,6 +63,13 @@ harfler daha uzun ve kalın, tasarım ve diziliş aynı.
 | Dikiş | hizalı + dış duvarda kademeli (scarf) dikiş | Yuvarlak harflerde dikiş izi kalmaz |
 | Katman | 0,20 mm | Renk katmanları buna göre |
 
+- **Ayarlar artık gerçekten uygulanıyor.** Önceki dosyalarda bu ayarlar 3MF'in içinde vardı ama "sistem profilinden
+  farklı" listesine (`different_settings_to_system`) yazılmamıştı; Bambu Studio dosyayı açarken listede olmayan her
+  ayarı **0.20mm Standard @BBL X2D** değerine geri döndürüyordu (ütüleme kapalı, dış duvar 200 mm/s, ilk katman
+  0,50 mm…). Yalnız tabla tipi (proje ayarı) kalıyordu. Şimdi 13 ayarın hepsi listede.
+- **Kontrol:** dosyayı proje olarak açın (çift tıklama ya da *Dosya → Proje aç*; *İçe aktar* yalnız modeli alır).
+  Baskı profili adının yanında *(değiştirildi)* görünür; *Kalite → Ütüleme türü* **Üst yüzeyler**, *Hız → Dış duvar*
+  **50**, *Kalite → Çizgi genişliği → İlk katman* **0,42** olmalı (değişen değerler turuncu).
 - Önizlemedeki beyaz noktalar **dikiş işaretidir**, filament değildir.
 - AMS: **1 siyah · 2 beyaz · 3 altın**. Siyah ile altın aynı nozulda, beyaz öbüründe. 5 filament değişimi (~2,8 g temizleme).
 - **En keskin arka yazı için düz PEI tabla** (Smooth PEI / High Temp Plate); düz tabla kullanılacaksa Bambu Studio'da tabla

@@ -799,6 +799,9 @@ FLUSH = [[0, 700, 900, 500, 600, 700, 800], [90, 0, 300, 200, 200, 200, 250], [9
          [90, 250, 300, 200, 200, 250, 0]]
 
 
+PROJECT_ONLY_KEYS = {"curr_bed_type"}     # baskı profiline değil projeye ait ayarlar
+
+
 def project_settings(template_files, filaments, overrides=None):
     """Şablon (2 filamentli X2D) ayarlarını `filaments` listesindeki filamentlere uyarlar.
     Ek filamentler 2. filamentin (Bambu PLA Basic) ayarlarını kopyalar. `overrides`: proje baskı ayarlarında
@@ -826,6 +829,12 @@ def project_settings(template_files, filaments, overrides=None):
     one = [str(FLUSH[a - 1][b - 1]) for a in filaments for b in filaments]
     cfg["flush_volumes_matrix"] = one * nozzles
     cfg["filament_colour"] = [COLOURS[f] + "FF" for f in filaments]
+    # Bambu Studio projeyi açarken baskı profili sistem profiliyse, "different_settings_to_system" listesinde olmayan
+    # bütün baskı ayarlarını sistem değerine döndürür. Değiştirilen baskı ayarları bu listeye yazılmalı:
+    # [baskı, filament 1..n, yazıcı], anahtarlar ";" ile ayrılır.
+    print_keys = sorted(k for k in (overrides or {}) if k not in PROJECT_ONLY_KEYS)
+    cfg["different_settings_to_system"] = [";".join(print_keys)] + [""] * len(filaments) + [""]
+    cfg["inherits_group"] = [""] * (len(filaments) + 2)
     return json.dumps(cfg, indent=4).encode()
 
 
