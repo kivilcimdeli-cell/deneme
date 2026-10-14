@@ -799,13 +799,30 @@ FLUSH = [[0, 700, 900, 500, 600, 700, 800], [90, 0, 300, 200, 200, 200, 250], [9
          [90, 250, 300, 200, 200, 250, 0]]
 
 
-PROJECT_ONLY_KEYS = {"curr_bed_type"}     # baskı profiline değil projeye ait ayarlar
+# baskı profiline değil projeye ait ayarlar (Bambu Studio PresetBundle.cpp: s_project_options)
+PROJECT_ONLY_KEYS = {"curr_bed_type", "wipe_tower_x", "wipe_tower_y", "filament_map_mode", "filament_map",
+                     "filament_volume_map"}
+# Bambu Studio "Generic PLA @BBL X2D 0.4 nozzle" sistem profilinin Bambu PLA Basic'ten farkları
+# (resources/profiles/BBL/filament). Bambu'nun başka marka PLA için önerdiği profil: eritme hızı 21 yerine 12 mm³/s,
+# geri çekme yazıcınınki (doğrudan sürücü 0,8 mm). Varyant listeleri (doğrudan sürücü / Bowden) tek değerle dolar.
+GENERIC_PLA = {
+    "filament_settings_id": "Generic PLA @BBL X2D 0.4 nozzle", "filament_ids": "GFL99", "filament_vendor": "Generic",
+    "filament_max_volumetric_speed": "12", "filament_retraction_length": "nil", "filament_wipe": "nil",
+    "filament_wipe_distance": "nil", "filament_z_hop_types": "nil", "filament_retraction_distances_when_cut": "nil",
+    "filament_change_length": "10", "filament_prime_volume": "45", "filament_density": "1.24", "filament_cost": "20",
+    "filament_scarf_gap": "15%", "slow_down_layer_time": "8", "supertack_plate_temp": "45",
+    "supertack_plate_temp_initial_layer": "45", "counter_coef_2": "0.008", "counter_coef_3": "-0.041",
+    "counter_limit_max": "0.033", "counter_limit_min": "-0.035", "hole_coef_2": "-0.008", "hole_coef_3": "0.23415",
+    "hole_limit_max": "0.22", "hole_limit_min": "0.088", "impact_strength_z": "10.0",
+}
 
 
-def project_settings(template_files, filaments, overrides=None):
+def project_settings(template_files, filaments, overrides=None, filament_profiles=None, nozzle_map=None):
     """Şablon (2 filamentli X2D) ayarlarını `filaments` listesindeki filamentlere uyarlar.
     Ek filamentler 2. filamentin (Bambu PLA Basic) ayarlarını kopyalar. `overrides`: proje baskı ayarlarında
-    değiştirilecek değerler (liste olanlar şablondaki uzunlukta olmalı)."""
+    değiştirilecek değerler (liste olanlar şablondaki uzunlukta olmalı). `filament_profiles`: {renk: profil}, o
+    filamentin sistem profili (ör. GENERIC_PLA). `nozzle_map`: {renk: 1 ana nozul | 2 yardımcı nozul}; verilirse
+    nozul ataması elle yapılır."""
     cfg = json.loads(template_files["Metadata/project_settings.config"])
     for k, v in (overrides or {}).items():
         assert k in cfg and type(v) is type(cfg[k]) and (not isinstance(v, list) or len(v) == len(cfg[k])), k
@@ -829,6 +846,18 @@ def project_settings(template_files, filaments, overrides=None):
     one = [str(FLUSH[a - 1][b - 1]) for a in filaments for b in filaments]
     cfg["flush_volumes_matrix"] = one * nozzles
     cfg["filament_colour"] = [COLOURS[f] + "FF" for f in filaments]
+    for i, f in enumerate(filaments):
+        for k, v in (filament_profiles or {}).get(f, {}).items():
+            cur = cfg[k]
+            if len(cur) == n:                                       # filament başına bir değer
+                cur[i] = v
+            else:                                                   # filament başına varyant blokları
+                assert len(cur) == n * per, k
+                cur[i * per:(i + 1) * per] = [v] * per
+    if nozzle_map:
+        cfg["filament_map_mode"] = "Manual"
+        cfg["filament_map"] = [str(nozzle_map[f]) for f in filaments]
+        cfg["filament_volume_map"] = ["0"] * n                       # standart nozul
     # Bambu Studio projeyi açarken baskı profili sistem profiliyse, "different_settings_to_system" listesinde olmayan
     # bütün baskı ayarlarını sistem değerine döndürür. Değiştirilen baskı ayarları bu listeye yazılmalı:
     # [baskı, filament 1..n, yazıcı], anahtarlar ";" ile ayrılır.
@@ -838,12 +867,14 @@ def project_settings(template_files, filaments, overrides=None):
     return json.dumps(cfg, indent=4).encode()
 
 
-def model_xml(title, parts, today):
+def model_xml(title, parts, today, instances):
     comps = "".join(
         f'    <component p:path="/3D/Objects/object_1.model" objectid="{i}" '
         f'p:UUID="000{i}0000-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>\n'
         for i in range(1, len(parts) + 1))
     pid = len(parts) + 1
+    items = "".join(f'  <item objectid="{pid}" p:UUID="{k + 2:08x}-b1ec-4553-aec9-835e5b724bb4" '
+                    f'transform="{item_transform(x, y, a)}" printable="1"/>\n' for k, (x, y, a) in enumerate(instances))
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" xmlns:BambuStudio="http://schemas.bambulab.com/package/2021" xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06" requiredextensions="p">
  <metadata name="Application">BambuStudio-02.07.01.57</metadata>
@@ -858,14 +889,25 @@ def model_xml(title, parts, today):
   </object>
  </resources>
  <build p:UUID="2c7c17d8-22b5-4d84-8835-1976022ea369">
-  <item objectid="{pid}" p:UUID="00000002-b1ec-4553-aec9-835e5b724bb4" transform="1 0 0 0 1 0 0 0 1 {BED_CENTER[0]} {BED_CENTER[1]} 0" printable="1"/>
- </build>
+{items} </build>
 </model>
 """
 
 
-def settings_xml(title, parts, extra=None):
-    """Bambu nesne ayarları. `extra`: nesneye özel ek baskı ayarları (ör. destek)."""
+def item_transform(x, y, angle):
+    """3MF yapı öğesi dönüşümü: z ekseninde `angle` derece döndür, tabla üzerinde (x, y)'ye taşı."""
+    c, s = (round(v, 12) + 0.0 for v in (np.cos(np.radians(angle)), np.sin(np.radians(angle))))
+    return f"{c:g} {s:g} 0 {-s + 0.0:g} {c:g} 0 0 0 1 {x:g} {y:g} 0"
+
+
+def placed(V, x, y, angle):
+    c, s = np.cos(np.radians(angle)), np.sin(np.radians(angle))
+    return V @ np.array([[c, s, 0], [-s, c, 0], [0, 0, 1]]) + (x, y, 0)
+
+
+def settings_xml(title, parts, extra=None, instances=1, filament_maps=None):
+    """Bambu nesne ayarları. `extra`: nesneye özel ek baskı ayarları (ör. destek). `instances`: tabladaki kopya
+    sayısı. `filament_maps`: elle nozul ataması (filament sırasıyla 1/2)."""
     pid = len(parts) + 1
     out = ['<?xml version="1.0" encoding="UTF-8"?>\n<config>\n', f'  <object id="{pid}">\n',
            f'    <metadata key="name" value="{title}"/>\n', '    <metadata key="extruder" value="1"/>\n',
@@ -881,15 +923,19 @@ def settings_xml(title, parts, extra=None):
                 'facets_removed="0" facets_reversed="0" backwards_edges="0"/>\n', '    </part>\n']
     out += ['  </object>\n', '  <plate>\n', '    <metadata key="plater_id" value="1"/>\n',
             '    <metadata key="plater_name" value="Plate 1"/>\n', '    <metadata key="locked" value="false"/>\n',
-            '    <metadata key="filament_map_mode" value="Auto For Flush"/>\n',
+            *(['    <metadata key="filament_map_mode" value="Manual"/>\n',
+               f'    <metadata key="filament_maps" value="{" ".join(map(str, filament_maps))}"/>\n',
+               f'    <metadata key="filament_volume_maps" value="{" ".join("0" * len(filament_maps))}"/>\n']
+              if filament_maps else ['    <metadata key="filament_map_mode" value="Auto For Flush"/>\n']),
             '    <metadata key="gcode_file" value=""/>\n',
             '    <metadata key="thumbnail_file" value="Metadata/plate_1.png"/>\n',
             '    <metadata key="thumbnail_no_light_file" value="Metadata/plate_no_light_1.png"/>\n',
             '    <metadata key="top_file" value="Metadata/top_1.png"/>\n',
             '    <metadata key="pick_file" value="Metadata/pick_1.png"/>\n',
-            '    <model_instance>\n', f'      <metadata key="object_id" value="{pid}"/>\n',
-            '      <metadata key="instance_id" value="0"/>\n',
-            f'      <metadata key="identify_id" value="{PICK_ID}"/>\n', '    </model_instance>\n',
+            *[f'    <model_instance>\n      <metadata key="object_id" value="{pid}"/>\n'
+              f'      <metadata key="instance_id" value="{k}"/>\n'
+              f'      <metadata key="identify_id" value="{PICK_ID + k}"/>\n    </model_instance>\n'
+              for k in range(instances)],
             '  </plate>\n', '  <assemble>\n  </assemble>\n</config>\n']
     return "".join(out)
 
@@ -917,13 +963,20 @@ def write_design(d, template_files, out_dir):
     fil_no = {f: i + 1 for i, f in enumerate(filaments)}            # projedeki filament sırası
     parts = [(name, *mesh_arrays(m), fil_no[ext]) for name, m, ext in solids]
     shaded = [(V, T, SHOW[ext]) for (_, V, T, _), ext in zip(parts, used)]
-    plate = render(shaded, 512, R_ISO)
-    world = [(V + (*BED_CENTER, 0), T, c) for V, T, c in shaded]
+    instances = getattr(d, "instances", None) or [(*BED_CENTER, 0)]
+    world = [(placed(V, *inst), T, c) for inst in instances for V, T, c in shaded]
+    if len(instances) == 1:
+        view = shaded
+        pick = [(V, T, (PICK_ID, 0, 0)) for V, T, _ in shaded]
+    else:
+        view = world
+        pick = [(placed(V, *inst), T, (PICK_ID + k, 0, 0)) for k, inst in enumerate(instances) for V, T, _ in shaded]
+    plate = render(view, 512, R_ISO)
     images = {
         "Metadata/plate_1.png": plate,
         "Metadata/plate_1_small.png": plate.resize((128, 128), Image.LANCZOS),
-        "Metadata/plate_no_light_1.png": render(shaded, 512, R_ISO, light=False),
-        "Metadata/pick_1.png": render([(V, T, (PICK_ID, 0, 0)) for V, T, _ in shaded], 512, R_ISO, light=False, ss=1),
+        "Metadata/plate_no_light_1.png": render(view, 512, R_ISO, light=False),
+        "Metadata/pick_1.png": render(pick, 512, R_ISO, light=False, ss=1),
         "Metadata/top_1.png": render(world, 512, R_TOP, flat=0.7, margin=0.2),
     }
     today = datetime.date.today().isoformat()
@@ -931,9 +984,11 @@ def write_design(d, template_files, out_dir):
     for k in ("Metadata/slice_info.config", "Metadata/cut_information.xml"):
         files[k] = template_files[k]
     files["Metadata/filament_sequence.json"] = b'{"plate_1":{"nozzle_sequence":[],"optimal_assignment":[],"sequence":[]}}'
+    nozzle_map = getattr(d, "nozzle_map", None)
     files["Metadata/project_settings.config"] = project_settings(template_files, filaments,
-                                                                 getattr(d, "project_overrides", None))
-    files["3D/3dmodel.model"] = model_xml(d.title, parts, today).encode()
+                                                                 getattr(d, "project_overrides", None),
+                                                                 getattr(d, "filament_profiles", None), nozzle_map)
+    files["3D/3dmodel.model"] = model_xml(d.title, parts, today, instances).encode()
     head = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="en-US" '
             'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" '
             'xmlns:BambuStudio="http://schemas.bambulab.com/package/2021" '
@@ -942,7 +997,9 @@ def write_design(d, template_files, out_dir):
     body = "".join(mesh_xml(i, f"000{i}0000-81cb-4c03-9d28-80fed5dfa1dc", V, T)
                    for i, (_, V, T, _) in enumerate(parts, 1))
     files["3D/Objects/object_1.model"] = (head + body + " </resources>\n <build/>\n</model>\n").encode()
-    files["Metadata/model_settings.config"] = settings_xml(d.title, parts, getattr(d, "object_settings", None)).encode()
+    files["Metadata/model_settings.config"] = settings_xml(
+        d.title, parts, getattr(d, "object_settings", None), len(instances),
+        [nozzle_map[f] for f in filaments] if nozzle_map else None).encode()
     for name, im in images.items():
         buf = io.BytesIO()
         im.save(buf, "PNG")

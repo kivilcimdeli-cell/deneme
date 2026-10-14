@@ -75,6 +75,28 @@ harfler daha uzun ve kalın, tasarım ve diziliş aynı.
 - **En keskin arka yazı için düz PEI tabla** (Smooth PEI / High Temp Plate); düz tabla kullanılacaksa Bambu Studio'da tabla
   tipi "Smooth PEI Plate / High Temp Plate" seçilir (PLA 55 °C, aynı). Tabla deterjanla yıkanır, yapıştırıcı sürülmez.
 
+### Dolu tabla: 28 adet — `kucuk/9_kose_serit_v5_dolu_tabla.3mf`
+
+![Dolu tabla](kucuk/onizleme/9_kose_serit_v5_dolu_tabla.png)
+
+Aynı anahtarlık, 7 × 4 = 28 adet (90° döndürülmüş, 4 mm ara), prime kulesi arkada ortada. Kartlar, yardımcı nozulun
+ulaşabildiği alanda (x ≥ 20,5 mm) ortalandı.
+
+- **Baskı ayarları: Bambu standart profili** (0.20mm Standard @BBL X2D, ütüleme yok). Tek baskıda en iyi sonucu bu verdi.
+  Dosyadan yalnız tabla tipi (Textured PEI) ve kule yeri geliyor.
+- **Nozul ataması elle sabit:** siyah ve beyaz **ana nozulda** (1. ekstrüder, doğrudan sürücü), altın **yardımcı
+  nozulda** (2. ekstrüder, Bowden). Otomatik gruplama siyahı yardımcı nozula koyuyordu. Bowden beslemenin geri çekmesi
+  zayıf ve yüksek akışta basıncı gecikir; gövdeyi basan siyahta ipliklenme ve tozlu, pürüzlü yüzey yapıyordu.
+- **Filament profili:** Elas PLA Pro (siyah, beyaz) için **Generic PLA @BBL X2D 0.4 nozzle**: eritme hızı 21 yerine
+  12 mm³/s, doğrudan sürücüde geri çekme 0,8 mm. Bambu PLA Basic profili hızlı PLA (ör. Porima XPLA) içindir; başka marka
+  PLA bu hızda tam eriyemez. Altın (Filamix Silk) değişmedi: Bambu PLA Basic, sorun yok.
+- Filament değişimi tabla başına 4–5 (yaklaşık 2,5–3,6 g temizleme, çoğu beyaz) + kule yaklaşık 1,2 g; adet başına
+  ~0,15 g.
+- Model: siyah 95,4 g · beyaz 5,9 g · altın 6,9 g (adet başına 3,9 g). Süre yaklaşık 5 saat 15 dakika (hazırlık ve
+  filament değişimleriyle; PrusaSlicer'da aynı ayarlarla tahmin).
+- Gönderirken **Akış dinamiği kalibrasyonu** işaretlenmeli (yeni filament). Yeni makaralar 50–55 °C'de 6–8 saat
+  kurutulursa ipliklenme daha da azalır.
+
 ## Küçük boy (~45–50 mm): `kucuk/`
 
 ![Küçük boy](kucuk/onizleme/hepsi.png)

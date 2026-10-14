@@ -117,12 +117,14 @@ class Keychain:
         front = set(self.regions(self.front))
         return [{self.body_col} | (back if i < n_back else set()) for i in range(n_body)] + [front] * n_top
 
-    def colour_changes(self):
-        """En iyi nozul gruplaması (X2D: 2 nozul) ve o gruplamada filament değişimi sayısı / temizleme hacmi."""
+    def colour_changes(self, fixed=None):
+        """En iyi nozul gruplaması (X2D: 2 nozul) ve o gruplamada filament değişimi sayısı / temizleme hacmi.
+        `fixed`: {filament: nozul} verilirse yalnız o gruplama hesaplanır."""
         layers = self.layer_colours()
         fils = sorted(set().union(*layers))
         best = None
-        for mask in itertools.product((1, 2), repeat=len(fils)):
+        masks = [tuple(fixed[f] for f in fils)] if fixed else itertools.product((1, 2), repeat=len(fils))
+        for mask in masks:
             group = dict(zip(fils, mask))
             changes, flush = 0, 0
             for nozzle in (1, 2):
