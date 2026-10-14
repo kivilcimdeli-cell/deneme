@@ -242,18 +242,36 @@ NET_YAZI = {
 V5 = {"keep_back_colours": True, "raise_h": 1.2, "body_h": 2.6}
 
 
-def plate_layout(w, h, cols=7, rows=4, gap=4.0, x_lo=20.5, x_hi=256.0, y0=6.0):
-    """Dolu tabla: kartlar 90° döndürülmüş (tablada en `h`, boy `w`), `gap` mm arayla. X2D'de yardımcı nozul
-    x < 20,5 mm'ye ulaşamaz; kartlar iki nozulun ortak alanında ortalanır."""
-    x1 = (x_lo + x_hi) / 2 - (cols * h + (cols - 1) * gap) / 2 + h / 2
-    return [(round(x1 + c * (h + gap), 3), round(y0 + w / 2 + r * (w + gap), 3), 90)
-            for r in range(rows) for c in range(cols)]
+def tower_size(n_fil=3, prime=45.0, change_len=10.0, layer=0.2, gap=1.5, rib=8.0, height=3.8):
+    """Bambu Studio'nun prime kulesi tahmini (PartPlate::estimate_wipe_tower_size; X2D, kaburgalı kule): kare kule
+    kenarı (mm) ve otomatik kenar (brim) genişliği. `prime`: en büyük filament_prime_volume (Generic PLA 45 mm³),
+    `change_len`: en büyük filament_change_length (10 mm)."""
+    volume = prime * n_fil + change_len * np.pi * 1.75 ** 2 / 4 * (n_fil // 2)
+    d = np.sqrt(volume / layer * gap)
+    d0 = max(5.0, d)                                       # 5 mm'den alçak kulede en az 5 mm
+    return min(rib, d0 / 2) / np.sqrt(2) + max(d0, d), height / 100 * 8
 
 
-PLATE = plate_layout(49.5, 28.75)
-TOWER_W = 35.0                                            # prime_tower_width (şablon)
-TOWER_XY = (round((20.5 + 256.0) / 2 - TOWER_W / 2, 3),   # kartların arkasında, ortada
-            round(max(y for _, y, _ in PLATE) + 49.5 / 2 + 6.0, 3))
+TOWER, TOWER_BRIM = tower_size()                           # ~40,2 mm kare, 0,3 mm kenar
+TOWER_MARGIN = 15.0                                        # Bambu kuleyi tabla kenarından en az 15 mm içeride tutar
+X_AUX = 20.5                                               # X2D yardımcı nozul x < 20,5 mm'ye ulaşamaz
+
+
+def plate_layout(w=49.5, h=28.75, gap=4.0, x_hi=256.0, y0=6.0):
+    """Dolu tabla, 27 adet: önde 3 sıra × 7 dik kart (90° döndürülmüş; en `h`, boy `w`), arkada solda prime kulesi,
+    sağında 2 sıra × 3 yatık kart. Kartlar ve kule iki nozulun ortak alanında (x ≥ 20,5). Kule arkadaki boş şeride
+    sığmaz: Bambu onu kenardan 15 mm içeri çeker, kartların üstüne biner."""
+    cols = 7
+    x1 = (X_AUX + x_hi) / 2 - (cols * h + (cols - 1) * gap) / 2       # dik kartların sol kenarı
+    right = x1 + cols * h + (cols - 1) * gap
+    out = [(x1 + h / 2 + c * (h + gap), y0 + w / 2 + r * (w + gap), 90) for r in range(3) for c in range(cols)]
+    yb = y0 + 3 * (w + gap)                                           # arka bölümün ön kenarı
+    out += [(right - w / 2 - c * (w + gap), yb + h / 2 + r * (h + gap), 0) for r in range(2) for c in range(3)]
+    tower = (max(X_AUX, TOWER_MARGIN) + 1.5, yb + gap)
+    return [(round(x, 3), round(y, 3), a) for x, y, a in out], tuple(round(v, 3) for v in tower)
+
+
+PLATE, TOWER_XY = plate_layout()
 # Dolu tabla: baskı ayarları Bambu standart profili (önceki dosya en iyi sonucu verdi), yalnız tabla tipi ve kule yeri.
 TABLA = {"curr_bed_type": "Textured PEI Plate",
          "wipe_tower_x": [f"{TOWER_XY[0]:g}"], "wipe_tower_y": [f"{TOWER_XY[1]:g}"]}
@@ -303,24 +321,29 @@ def plate_footprints(kc, parts):
     return out
 
 
-def plate_checks(kc, parts, tower_depth=30.0):
-    """Kopyalar tablanın iki nozulun da ulaştığı alanında mı, birbirine ve kuleye (derinlik payı `tower_depth`) çarpıyor mu."""
+def plate_checks(kc, parts, min_clear=5.0):
+    """Kopyalar iki nozulun ortak alanında mı, birbirine ve kuleye ne kadar yakın; kule Bambu'nun izin verdiği yerde mi
+    (yoksa Bambu onu kaydırır ve kartlara bindirir)."""
     boxes = plate_footprints(kc, parts)
-    inside = all(b[0] >= 20.5 and b[1] >= 0 and b[2] <= 256 and b[3] <= 256 for b in boxes)
-    gap = min(max(bj[0] - bi[2], bi[0] - bj[2], bj[1] - bi[3], bi[1] - bj[3])
-              for i, bi in enumerate(boxes) for bj in boxes[i + 1:])
+    inside = all(b[0] >= X_AUX and b[1] >= 0 and b[2] <= 256 and b[3] <= 256 for b in boxes)
+    sep = lambda a, b: max(b[0] - a[2], a[0] - b[2], b[1] - a[3], a[1] - b[3])  # noqa: E731
+    gap = min(sep(bi, bj) for i, bi in enumerate(boxes) for bj in boxes[i + 1:])
     tx, ty = TOWER_XY
-    tower = (tx, ty, tx + TOWER_W, ty + tower_depth)
-    clear = min(max(tower[0] - b[2], b[0] - tower[2], tower[1] - b[3], b[1] - tower[3]) for b in boxes)
+    lim = 256 - TOWER - TOWER_MARGIN - TOWER_BRIM                  # eski sürümler kenarı da düşer
+    allowed = TOWER_MARGIN <= tx <= lim and TOWER_MARGIN <= ty <= lim and tx - TOWER_BRIM >= X_AUX
+    tower = (tx - TOWER_BRIM, ty - TOWER_BRIM, tx + TOWER + TOWER_BRIM, ty + TOWER + TOWER_BRIM)
+    clear = min(sep(tower, b) for b in boxes)
+    ok = inside and gap >= 3.9 and allowed and clear >= min_clear
     return (f"tabla: {len(boxes)} adet, ortak alanda: {inside}, en yakın iki kart arası: {gap:.2f} mm, "
-            f"kule ({tx:g}, {ty:g}) – kartlara {clear:.2f} mm, kule için arkada {256 - ty:.1f} mm yer")
+            f"kule {TOWER:.1f} mm kare ({tx:g}, {ty:g}), Bambu sınırında: {allowed}, kartlara {clear:.2f} mm -> "
+            f"{'TAMAM' if ok else 'SORUN'}")
 
 
 def plate_preview(kc, parts, path):
     """Tablanın üstten görünüşü: 256 × 256 tabla, kartlar ve prime kulesi."""
     bed = m3.Manifold.cube((256, 256, 0.2)).translate((0, 0, -0.4))
     tx, ty = TOWER_XY
-    tower = m3.Manifold.cube((TOWER_W, 20, 3.8)).translate((tx, ty, 0))
+    tower = m3.Manifold.cube((TOWER, TOWER, 3.8)).translate((tx, ty, 0))
     items = [(*A.mesh_arrays(bed), (205, 208, 214)), (*A.mesh_arrays(tower), (150, 156, 168))]
     for inst in kc.instances:
         for _, m, e in parts:
@@ -333,7 +356,7 @@ def plate_preview(kc, parts, path):
     f = ImageFont.truetype(os.path.join(A.FONT_DIR, "Lexend-ExtraBold.ttf"), 30)
     fs = ImageFont.truetype(os.path.join(A.FONT_DIR, "Lexend-ExtraBold.ttf"), 19)
     dr.text((40, 18), f"DOLU TABLA – {len(kc.instances)} ADET (X2D 256 × 256)", fill=(30, 33, 40), font=f)
-    dr.text((40, 58), "siyah + beyaz: ana nozul · altın: yardımcı nozul · gri: prime kulesi (yaklaşık)",
+    dr.text((40, 58), "siyah + beyaz: ana nozul · altın: yardımcı nozul · gri: prime kulesi (Bambu tahmini, ~40 mm)",
             fill=(70, 76, 88), font=fs)
     canvas.save(path)
 

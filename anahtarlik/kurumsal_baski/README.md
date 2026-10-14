@@ -75,13 +75,17 @@ harfler daha uzun ve kalın, tasarım ve diziliş aynı.
 - **En keskin arka yazı için düz PEI tabla** (Smooth PEI / High Temp Plate); düz tabla kullanılacaksa Bambu Studio'da tabla
   tipi "Smooth PEI Plate / High Temp Plate" seçilir (PLA 55 °C, aynı). Tabla deterjanla yıkanır, yapıştırıcı sürülmez.
 
-### Dolu tabla: 28 adet — `kucuk/9_kose_serit_v5_dolu_tabla.3mf`
+### Dolu tabla: 27 adet — `kucuk/9_kose_serit_v5_dolu_tabla.3mf`
 
 ![Dolu tabla](kucuk/onizleme/9_kose_serit_v5_dolu_tabla.png)
 
-Aynı anahtarlık, 7 × 4 = 28 adet (90° döndürülmüş, 4 mm ara), prime kulesi arkada ortada. Kartlar, yardımcı nozulun
-ulaşabildiği alanda (x ≥ 20,5 mm) ortalandı.
+Aynı anahtarlık, 27 adet: önde 3 sıra × 7 dik kart (90° döndürülmüş), arkada solda prime kulesi, sağında 2 sıra × 3
+yatık kart; kartlar arası 4 mm. Kartlar ve kule, yardımcı nozulun ulaşabildiği alanda (x ≥ 20,5 mm).
 
+- **Prime kulesi:** Bambu Studio X2D'de kuleyi yaklaşık **40 × 40 mm kare** çizer (3 filament, Generic PLA'nın 45 mm³
+  hazırlama hacmi; `PartPlate::estimate_wipe_tower_size`) ve **tabla kenarından en az 15 mm içeride** tutar. Arkadaki
+  boş şeride konan kule bu yüzden içeri çekilip kartlara biniyordu (28'lik ilk sürüm). Kule (22; 170,5)'te, kartlara
+  7,7 mm uzakta; 28 adet bu kuralla sığmıyor.
 - **Baskı ayarları: Bambu standart profili** (0.20mm Standard @BBL X2D, ütüleme yok). Tek baskıda en iyi sonucu bu verdi.
   Dosyadan yalnız tabla tipi (Textured PEI) ve kule yeri geliyor.
 - **Nozul ataması elle sabit:** siyah ve beyaz **ana nozulda** (1. ekstrüder, doğrudan sürücü), altın **yardımcı
@@ -92,8 +96,8 @@ ulaşabildiği alanda (x ≥ 20,5 mm) ortalandı.
   PLA bu hızda tam eriyemez. Altın (Filamix Silk) değişmedi: Bambu PLA Basic, sorun yok.
 - Filament değişimi tabla başına 4–5 (yaklaşık 2,5–3,6 g temizleme, çoğu beyaz) + kule yaklaşık 1,2 g; adet başına
   ~0,15 g.
-- Model: siyah 95,4 g · beyaz 5,9 g · altın 6,9 g (adet başına 3,9 g). Süre yaklaşık 5 saat 15 dakika (hazırlık ve
-  filament değişimleriyle; PrusaSlicer'da aynı ayarlarla tahmin).
+- Model: siyah 84,5 g · beyaz 5,4 g · altın 6,4 g (adet başına 3,6 g). Süre yaklaşık 4 saat 35 dakika (hazırlık ve
+  filament değişimleriyle; PrusaSlicer'da aynı ayarlarla dilimlenip kartların G-kodda yerinde olduğu doğrulandı).
 - Gönderirken **Akış dinamiği kalibrasyonu** işaretlenmeli (yeni filament). Yeni makaralar 50–55 °C'de 6–8 saat
   kurutulursa ipliklenme daha da azalır.
 
