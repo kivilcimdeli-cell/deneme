@@ -42,12 +42,12 @@ R_OUT, R_RING, R_INNER, R_QUAD = 12.0, 11.219, 7.115, 6.185
 TOWER, TOWER_BRIM = tower_size(n_fil=3, prime=45.0, change_len=10.0, height=H)
 
 
-def svg_fill():
-    """Simgenin dolu bölgesi (NonZero), merkez (0, 0), y yukarı, çap D."""
+def svg_fill(svg=SVG):
+    """Simgenin dolu bölgesi (NonZero), merkez (0, 0), y yukarı, çap D (24 birimlik Simple Icons kutusu)."""
     import svgelements as se
     k = D / 24.0
     loops = []
-    for sp in se.Path(re.search(r' d="([^"]+)"', open(SVG).read()).group(1)).as_subpaths():
+    for sp in se.Path(re.search(r' d="([^"]+)"', open(svg).read()).group(1)).as_subpaths():
         pts = []
         for seg in se.Path(sp):
             if isinstance(seg, se.Move):
@@ -74,14 +74,18 @@ def regions():
     return {A.WHITE: clean(white), A.BLACK: clean(black), A.BLUE: clean(blue)}
 
 
-class Logo:
-    key = "bmw_logo_tisort"
-    title = "BMW_logo_tisort"
+BMW_NAMES = {A.WHITE: "Beyaz (harfler, halkalar, çeyrekler)", A.BLACK: "Siyah halka", A.BLUE: "Mavi çeyrekler"}
 
-    def __init__(self):
-        self.regions = regions()
+
+class Logo:
+    def __init__(self, key="bmw_logo_tisort", title="BMW_logo_tisort", regions_=None, names=None,
+                 nozzle_map=None, heading="BMW LOGOSU – TİŞÖRT İÇİN İNCE YAMA (X2D)",
+                 ams="AMS: 1 siyah · 2 beyaz · 3 mavi   ·   siyah: ana nozul, beyaz + mavi: yardımcı nozul"):
+        self.key, self.title, self.heading, self.ams = key, title, heading, ams
+        self.regions = regions_ if regions_ is not None else regions()
+        self.names = names or BMW_NAMES
         # siyah ana nozulda (doğrudan sürücü); beyaz ve mavi yardımcı nozulda (her katmanda tek değişim)
-        self.nozzle_map = {A.BLACK: 1, A.WHITE: 2, A.BLUE: 2}
+        self.nozzle_map = nozzle_map or {A.BLACK: 1, A.WHITE: 2, A.BLUE: 2}
         self.filament_profiles = {A.BLACK: A.GENERIC_PLA, A.WHITE: A.GENERIC_PLA}
         self.object_settings = {"enable_support": "0"}
         self.pause_at = PAUSE_Z
@@ -92,8 +96,8 @@ class Logo:
                                   "wipe_tower_x": [f"{tx:g}"], "wipe_tower_y": [f"{ty:g}"]}
 
     def solids(self):
-        names = {A.WHITE: "Beyaz (harfler, halkalar, çeyrekler)", A.BLACK: "Siyah halka", A.BLUE: "Mavi çeyrekler"}
-        return [(names[c], self.regions[c].extrude(H), c) for c in (A.BLACK, A.WHITE, A.BLUE)]
+        return [(self.names[c], self.regions[c].extrude(H), c) for c in (A.BLACK, A.WHITE, A.BLUE)
+                if c in self.regions]
 
     def size(self):
         return D, D
@@ -137,20 +141,19 @@ def preview(logo, parts, path):
         dr.rounded_rectangle((x0, y0, x1, y1), 22, fill=(146, 153, 166))
         canvas.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0 + 30 + (y1 - y0 - 30 - im.height) // 2), im)
         dr.text((x0 + 16, y0 + 8), label, fill=(236, 239, 244), font=fs)
-    dr.text((30, 18), "BMW LOGOSU – TİŞÖRT İÇİN İNCE YAMA (X2D)", fill=(30, 33, 40), font=f)
+    dr.text((30, 18), logo.heading, fill=(30, 33, 40), font=f)
     dr.text((30, 58), f"3 katman (0,6 mm), renkler boydan boya · 1. katmandan sonra durur: tülü ser, devam et · "
                       "destek yok", fill=(80, 86, 98), font=fs)
-    dr.text((30, 88), "AMS: 1 siyah · 2 beyaz · 3 mavi   ·   siyah: ana nozul, beyaz + mavi: yardımcı nozul",
-            fill=(22, 120, 60), font=fs)
+    dr.text((30, 88), logo.ams, fill=(22, 120, 60), font=fs)
     canvas.save(path)
 
 
-def main():
-    logo = Logo()
+def make(logo, out_dir):
+    """3MF'i yazar, kontrolleri basar, önizlemeyi çizer."""
     template = zipfile.ZipFile(A.TEMPLATE)
     template_files = {n: template.read(n) for n in template.namelist()}
-    os.makedirs(OUT_DIR, exist_ok=True)
-    path, _, filaments = A.write_design(logo, template_files, OUT_DIR)
+    os.makedirs(out_dir, exist_ok=True)
+    path, _, filaments = A.write_design(logo, template_files, out_dir)
     parts = logo.solids()
     mans = [m for _, m, _ in parts]
     overlap = max((mans[i] ^ mans[j]).volume() for i in range(len(mans)) for j in range(i + 1, len(mans)))
@@ -160,7 +163,11 @@ def main():
           f"tek gövde: {len(union.decompose()) == 1}  hacim: {union.volume():.0f} mm³ (dolu disk "
           f"{np.pi * (D / 2) ** 2 * H:.0f})")
     print("  " + checks(logo))
-    preview(logo, parts, os.path.join(OUT_DIR, "onizleme.png"))
+    preview(logo, parts, os.path.join(out_dir, "onizleme.png"))
+
+
+def main():
+    make(Logo(), OUT_DIR)
 
 
 if __name__ == "__main__":
