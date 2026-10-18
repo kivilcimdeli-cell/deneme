@@ -28,6 +28,32 @@ kalanlar yalnızca yıldızın ve harflerin sivri uçları.
 
 Yeniden üretme: `python3 scripts/capraz_blok.py`
 
+## İkinci tur: daha şık, daha büyük yazı, daha az filament — `yeni/`
+
+![Yeni tasarımlar](yeni/hepsi.png)
+
+Görseller tasarım seçimi içindir; seçilen 3MF'e çevrilir. Gram ve süre, her tasarım **baskı yönünde** PrusaSlicer'da
+Bambu X2D standart değerleriyle (0,20 mm, 2 duvar, %15 dolgu) dilimlenerek ölçüldü (`yeni/olcum.json`; süreye filament
+değişimi dahil değil). Çapraz blok aynı yöntemle: **126 g, 2 sa 11 dk**.
+
+| No | Tasarım | Ölçü | İsim | Filament | Süre |
+| --- | --- | --- | --- | --- | --- |
+| 1 | İnce çapraz blok (%5 dolgu) | 240 × 18 × 60 mm | 25 mm | 63 g (%50 az) | 1 sa 20 dk |
+| 2 | Çapraz panel + 2 ayak | 240 × 74 mm, 2,6 mm panel | 25 mm | 47 g (%62 az) | 1 sa 9 dk |
+| 3 | Siyah – altın panel + 2 ayak | 240 × 78 mm, 2,6 mm panel | 34 mm | 49 g (%61 az) | 1 sa 14 dk |
+| 4 | Beyaz panel, iki satır + 2 ayak | 240 × 84 mm, 2,6 mm panel | 2 × 30 mm | 53 g (%58 az) | 1 sa 16 dk |
+| 5 | Üçgen çadır (içi boş, 1,2 mm duvar) | 240 × 62 × 54 mm | 27 mm | 69 g (%45 az) | 1 sa 24 dk |
+| 6 | Ayakta harfler | 240 × 22 × 35 mm | 30 mm | 40 g (%68 az) | 1 sa 31 dk |
+
+- **Paneller (2–4) ön yüzü tablada basılır:** yazı ve bayrak yüzeye gömülü renk (0,8 mm, 4 katman). Tabla yüzünde
+  basıldığı için en keskin yüz; renk değişimi yalnız ilk 4 katmanda, temizleme atığı az. Panel ayakların yuvasına
+  takılır, 12° arkaya eğik durur.
+- Çadır (5) da ön yüzü tablada basılır; diğer iki yüz 60° yükselir, destek gerekmez.
+- **Tasarımı değiştirmeden tasarruf:** mevcut çapraz blok %15 yerine **%5 dolguyla** basılırsa 126 g → **79 g**,
+  2 sa 11 dk → **1 sa 36 dk** (dekoratif blok; dolgu yük taşımıyor).
+
+Yeniden üretme: `python3 scripts/masa_isimligi_yeni.py`
+
 ## İlk tasarım önerileri
 
 ![Tasarımlar](tasarimlar.png)
