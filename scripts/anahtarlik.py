@@ -1000,6 +1000,12 @@ def write_design(d, template_files, out_dir):
     files["Metadata/model_settings.config"] = settings_xml(
         d.title, parts, getattr(d, "object_settings", None), len(instances),
         [nozzle_map[f] for f in filaments] if nozzle_map else None).encode()
+    pause_z = getattr(d, "pause_at", None)
+    if pause_z:                          # bu katmandan önce baskı durur (Bambu: "Duraklat", X2D: M400 U1)
+        files["Metadata/custom_gcode_per_layer.xml"] = (
+            '<?xml version="1.0" encoding="utf-8"?>\n<custom_gcodes_per_layer>\n<plate>\n<plate_info id="1"/>\n'
+            f'<layer top_z="{pause_z:g}" type="1" extruder="1" color="" extra="" gcode="M400 U1"/>\n'
+            '<mode value="MultiExtruder"/>\n</plate>\n</custom_gcodes_per_layer>\n').encode()
     for name, im in images.items():
         buf = io.BytesIO()
         im.save(buf, "PNG")
