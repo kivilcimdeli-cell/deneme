@@ -534,17 +534,58 @@ def overview(concepts, path, cols=5):
     canvas.save(path)
 
 
+def front_back_pages(concepts, cols=3, per_page=13):
+    """Toplu görsel: her anahtarlığın ön ve arka yüzü yan yana; `per_page` adet bir sayfada (2 sayfa)."""
+    cw, ch, gap = 520, 320, 18
+    paths = []
+    for p0 in range(0, len(concepts), per_page):
+        page = concepts[p0:p0 + per_page]
+        rows = (len(page) + cols - 1) // cols
+        W, H = cols * cw + (cols + 1) * gap, rows * ch + (rows + 1) * gap + 96
+        canvas = Image.new("RGB", (W, H), (244, 245, 247))
+        dr = ImageDraw.Draw(canvas)
+        n0, n1 = p0 + 1, p0 + len(page)
+        dr.text((24, 22), f"UZAR OTO LASTİK – ANAHTARLIKLAR {n0:02d}–{n1:02d}  ·  ön yüz | arka yüz",
+                fill=(24, 26, 30), font=K.fnt(32))
+        dr.text((24, 62), f"Sayfa {p0 // per_page + 1}/{(len(concepts) + per_page - 1) // per_page}  ·  siyah, kırmızı, "
+                          "beyaz  ·  en çok 50 × 50 mm  ·  QR'lılar kırmızı etiketli (okutunca telefonu arar)",
+                fill=(110, 114, 124), font=K.fnt(18))
+        for k, c in enumerate(page):
+            x, y = gap + (k % cols) * (cw + gap), 96 + gap + (k // cols) * (ch + gap)
+            K.panel(dr, (x, y, x + cw, y + ch))
+            parts = K.mesh_parts(c)
+            for j, (R, label) in enumerate(((rotation(0, 0), "ÖN"), (rotation(180, 180), "ARKA"))):
+                im = A.fit_into(render(parts, 800, R, margin=0.02), 232, 200)
+                bx = x + 14 + j * 250
+                K.paste_center(canvas, im, (bx, y + 64, bx + 240, y + 274))
+                dr.text((bx + 4, y + 40), label, fill=(150, 154, 162), font=K.fnt(15))
+            dr.line((x + cw // 2, y + 64, x + cw // 2, y + 272), fill=(206, 208, 214), width=2)
+            dr.text((x + 16, y + 10), f"{n0 + k:02d}  {c.title}", fill=(30, 33, 40), font=K.fnt(22))
+            w, h = c.size()
+            tag = f"{w:.0f}×{h:.0f} mm" + ("  ·  QR" if getattr(c, "qr", False) else "")
+            dr.text((x + 16, y + ch - 38), tag, fill=(200, 30, 38) if getattr(c, "qr", False) else (110, 114, 124),
+                    font=K.fnt(17))
+        path = os.path.join(OUT_DIR, f"on_arka_sayfa_{p0 // per_page + 1}.png")
+        canvas.save(path)
+        paths.append(path)
+    return paths
+
+
 def main():
-    """Argümansız: tüm sayfalar ve genel görünüm. Anahtar verilirse yalnız o sayfalar; "genel": yalnız genel görünüm."""
+    """Argümansız: tüm sayfalar ve genel görünüm. Anahtar verilirse yalnız o sayfalar; "genel": yalnız genel görünüm;
+    "onarka": ön-arka toplu görsel (2 sayfa)."""
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[1:]
-    if only == ["genel"]:
+    if only in (["genel"], ["onarka"]):
         cs = []
         for fn in CONCEPTS:
             c = fn()
             c.front, c.back = resolve(c.front), resolve(c.back)
             cs.append(c)
-        overview(cs, os.path.join(OUT_DIR, "hepsi.png"))
+        if only == ["genel"]:
+            overview(cs, os.path.join(OUT_DIR, "hepsi.png"))
+        else:
+            print(front_back_pages(cs))
         return
     concepts = []
     for i, fn in enumerate(CONCEPTS, 1):

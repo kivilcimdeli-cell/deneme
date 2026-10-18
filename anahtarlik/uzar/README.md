@@ -18,4 +18,7 @@ Her sayfada ön yüz, arka yüz ve perspektif: `01_*.png` … `25_*.png`.
 - Görsellerdeki kalınlık 3,6 mm; baskı dosyasında maliyet için 2,6–3,0 mm gövde + ince ön kabartma yapılır
   (FIRAT TUYGUN anahtarlığındaki gibi). Türkçe İ için Barlow Condensed yazı tipi.
 
-Yeniden üretme: `pip install segno zxing-cpp` · `python3 scripts/uzar_anahtarlik.py` (yalnız genel sayfa: `genel`)
+Ön-arka toplu görsel (2 sayfa): `on_arka_sayfa_1.png` (01–13), `on_arka_sayfa_2.png` (14–25).
+
+Yeniden üretme: `pip install segno zxing-cpp` · `python3 scripts/uzar_anahtarlik.py` (yalnız genel sayfa: `genel`;
+ön-arka sayfalar: `onarka`)
