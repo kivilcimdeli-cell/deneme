@@ -296,7 +296,7 @@ def u09():
     c = card("09_kalkan", "Kalkan", "Kalkan biçimi; üstte kırmızı V şeridi, ortada büyük UZAR.",
              shield(40.0, 46.0), (0, 17.5))
     c.front += [(poly([(-20, 13), (0, 3.5), (20, 13), (20, 9.5), (0, 0), (-20, 9.5)]), RED),
-                (name(10.0, 0, -6.0, max_w=26.0), WHITE), (kind(2.8, 0, -13.6, max_w=20.0), RED)]
+                (name(10.0, 0, -3.0, max_w=26.0), WHITE), (kind(2.8, 0, -10.2, max_w=18.0), RED)]
     c.back += [(phone(3.8, 0, -2.0, max_w=32.0), WHITE), (city(2.6, 0, -8.0, max_w=20.0), RED)]
     return c
 
@@ -316,7 +316,7 @@ def u11():
     c = card("11_damali_kose", "Damalı köşe", "Sağ üstte damalı bayrak köşesi, alttan kırmızı şerit; beyaz UZAR.",
              A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5))
     c.front += [(checker(W / 2 - 13.5, H / 2 - 1.0, 5, 2.4), WHITE), (A.rect(-W / 2, -H / 2 + 3.0, W / 2, -H / 2 + 4.6), RED),
-                (name(10.5, -2.0, 1.8, max_w=28.0), WHITE), (kind(3.0, -2.0, -6.6, max_w=26.0), RED)]
+                (name(10.0, -3.5, 1.2, max_w=23.0), WHITE), (kind(3.0, -3.5, -6.8, max_w=23.0), RED)]
     back_std(c, W, H, y=-1.2, red_line=False)
     return c
 
@@ -437,7 +437,7 @@ def u22():
 def u23():
     W, H = 50.0, 30.0
     c = card("23_onde_qr", "Önde QR", "QR ön yüzde, solda; sağda UZAR. (Arka yüz QR'ı daha keskin basılır.)",
-             A.rrect(W, H, 4.0), (W / 2 - 5.0, -H / 2 + 5.0))
+             A.rrect(W, H, 4.0), (W / 2 - 5.5, -H / 2 + 5.5))
     q, size = qr(-W / 2 + 15.0, 0.0, 1.05, 2)
     c.front += [(q, WHITE), (name(9.5, 12.5, 4.0, max_w=18.0), WHITE), (kind(2.6, 12.5, -3.4, max_w=18.0), RED),
                 (A.rect(5.0, -8.6, 20.0, -7.4), RED)]
@@ -535,8 +535,17 @@ def overview(concepts, path, cols=5):
 
 
 def main():
+    """Argümansız: tüm sayfalar ve genel görünüm. Anahtar verilirse yalnız o sayfalar; "genel": yalnız genel görünüm."""
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[1:]
+    if only == ["genel"]:
+        cs = []
+        for fn in CONCEPTS:
+            c = fn()
+            c.front, c.back = resolve(c.front), resolve(c.back)
+            cs.append(c)
+        overview(cs, os.path.join(OUT_DIR, "hepsi.png"))
+        return
     concepts = []
     for i, fn in enumerate(CONCEPTS, 1):
         c = fn()
