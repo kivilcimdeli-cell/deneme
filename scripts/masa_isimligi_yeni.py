@@ -87,6 +87,49 @@ def panel_on_feet(c, outline, regions, base_col, feet_x, foot_col=BLACK):
     return c
 
 
+STAND_TILT = 15.0                                         # sehpada panel arkaya eğimi (derece)
+STAND_L, STAND_D, STAND_H = 200.0, 34.0, 10.0
+
+
+def stand(length=STAND_L, depth=STAND_D, height=STAND_H, r=9.0):
+    """Boydan sehpa: alçak kama profili (önde pah, arkaya doğru incelir), uçları planda yuvarlatılmış. Altında,
+    yuvanın arkasında boydan açık kanal (5 × 16 mm): görünmez, filamenti yarıya indirir; kanal tavanı köprü."""
+    prof = polygon([(-5.0, 0.0), (depth - 5.0, 0.0), (depth - 5.0, 1.6), (11.0, height),
+                    (-1.0, height), (-5.0, height - 4.0)])
+    channel = rect(9.0, -1.0, 25.0, 5.0)
+    bar = (prof - channel).extrude(length - 16.0).transform([[0, 0, 1, -(length - 16.0) / 2], [1, 0, 0, 0], [0, 1, 0, 0]])
+    bar = bar + prof.extrude(length).transform([[0, 0, 1, -length / 2], [1, 0, 0, 0], [0, 1, 0, 0]]) - \
+        channel.extrude(length - 16.0).transform([[0, 0, 1, -(length - 16.0) / 2], [1, 0, 0, 0], [0, 1, 0, 0]])
+    plan = rrect(length, depth, r, 0, depth / 2 - 5.0)
+    return bar ^ plan.extrude(height + 2.0).translate((0, 0, -1.0))
+
+
+def panel_on_stand(c, outline, regions, base_col, stand_col=BLACK):
+    """Paneli boydan sehpanın yuvasına, arkaya `STAND_TILT` derece eğik oturtur (yuva 0,3 mm boşluklu)."""
+    z0, y0 = 3.0, 2.0
+    flat = inlaid_panel(outline, regions, base_col)
+    slot = tilted(upright(outline, T + 0.3, -0.15), STAND_TILT, z0, y0)
+    base = stand() - slot
+    face_down = [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0]]          # baskı yönü: ön yüz tablada
+    c.print_parts = [(m.transform(face_down), col) for m, col in flat] + [(base.translate((0, -50.0, 0)), stand_col)]
+    c.add(base, stand_col)
+    for m, col in flat:
+        c.add(tilted(m, STAND_TILT, z0, y0), col)
+    c.grams = sum(grams(m) for m, _ in c.parts)
+    c.size = f"{outline.bounds()[2] - outline.bounds()[0]:.0f} mm panel, sehpa {STAND_L:.0f} × {STAND_D:.0f} mm"
+    return c
+
+
+def mount(c, outline, regions, base_col, feet_x, sehpa):
+    if not sehpa:
+        return panel_on_feet(c, outline, regions, base_col, feet_x)
+    c.key += "_sehpa"
+    c.title += " + sehpa"
+    c.desc = (f"Panel boydan siyah sehpanın yuvasına takılır, {STAND_TILT:.0f}° arkaya eğik. İki parça aynı "
+              "tablada basılır, tutkal gerekmez.")
+    return panel_on_stand(c, outline, regions, base_col)
+
+
 def name_shape(fnt, cap, max_w, x, y, tracking=0.0):
     f = font(fnt)
     cap = f.fit_cap(NAME, cap, max_w, tracking)
@@ -123,7 +166,7 @@ def y1_ince_capraz():
     return c
 
 
-def y2_capraz_panel():
+def y2_capraz_panel(sehpa=False):
     """Çapraz blok çizgisi, 3 mm ince panelde; iki küçük ayak."""
     W, H = 240.0, 74.0
     c = Concept("2_capraz_panel", "Çapraz panel",
@@ -141,10 +184,10 @@ def y2_capraz_panel():
     bx0, by0, bx1, _ = nm.bounds()
     regions = [(left, RED), (gap, WHITE), (ms, WHITE), (nm, WHITE), (rect(bx0, by0 - 7.0, bx1, by0 - 5.2), RED)]
     c.cap = cap
-    return panel_on_feet(c, outline, regions, BLACK, (-W / 2 + 40.0, W / 2 - 40.0))
+    return mount(c, outline, regions, BLACK, (-W / 2 + 40.0, W / 2 - 40.0), sehpa)
 
 
-def y3_altin():
+def y3_altin(sehpa=False):
     """Siyah panel: üstte amblem gibi küçük bayrak ve boydan ince altın çizgi, altında boydan büyük altın isim."""
     W, H = 240.0, 78.0
     c = Concept("3_siyah_altin_panel", "Siyah – altın panel",
@@ -157,10 +200,10 @@ def y3_altin():
     nm, cap = name_shape("bebas", 40.0, W - 2 * m, 0.0, (H - m - fh) / 2 + 1.0, tracking=1.4)
     regions = [(field, RED), (ms, WHITE), (line, GOLD), (nm, GOLD)]
     c.cap = cap
-    return panel_on_feet(c, outline, regions, BLACK, (-W / 2 + 40.0, W / 2 - 40.0))
+    return mount(c, outline, regions, BLACK, (-W / 2 + 40.0, W / 2 - 40.0), sehpa)
 
 
-def y4_beyaz():
+def y4_beyaz(sehpa=False):
     """Beyaz panel, iki satır kalın siyah isim (en okunaklı: koyu yazı açık zemin), solda kırmızı bayrak şeridi."""
     W, H = 240.0, 84.0
     c = Concept("4_beyaz_panel", "Beyaz panel – iki satır",
@@ -179,7 +222,7 @@ def y4_beyaz():
     l2 = f.text("TUYGUN", cap, nx0, H / 2 - cap / 2 + 1.0, align="l", tracking=0.8)
     regions = [(band, RED), (ms, WHITE), (l1, BLACK), (l2, BLACK)]
     c.cap = cap
-    return panel_on_feet(c, outline, regions, WHITE, (-W / 2 + 34.0, W / 2 - 26.0))
+    return mount(c, outline, regions, WHITE, (-W / 2 + 34.0, W / 2 - 26.0), sehpa)
 
 
 def y5_cadir():
@@ -250,22 +293,27 @@ MEASURED = os.path.join(OUT_DIR, "olcum.json")   # PrusaSlicer'da baskı yönün
 
 
 CONCEPTS = [y1_ince_capraz, y2_capraz_panel, y3_altin, y4_beyaz, y5_cadir, y6_ayakta_harfler]
+SEHPA = [lambda: y3_altin(True), lambda: y2_capraz_panel(True), lambda: y4_beyaz(True)]
 
 
 # ---------------------------------------------------------------- önizleme
 
-def draw(c, path):
+def draw(c, path, side=False):
     parts = [(*A.mesh_arrays(m), col) for m, col in c.parts]
-    front = fit_into(render(parts, 1100, rotation(0, -90), margin=0.02), 600, 330)
-    iso = fit_into(render(parts, 1100, rotation(-28, -68), margin=0.02), 600, 330)
+    views = [(rotation(0, -90), "Önden"), (rotation(-28, -68), "Maket (3/4 açı)")]
+    if side:
+        views.append((rotation(-90, -90), f"Yandan: {STAND_TILT:.0f}° eğim"))
     W, H = 1340, 540
+    n = len(views)
+    bw = (W - 60 - 30 * (n - 1)) // n
     canvas = Image.new("RGB", (W, H), (236, 239, 244))
     dr = ImageDraw.Draw(canvas)
     lab = ImageFont.truetype(os.path.join(FONT_DIR, "Lexend-ExtraBold.ttf"), 18)
-    for i, (im, label) in enumerate(((front, "Önden"), (iso, "Maket (3/4 açı)"))):
-        x = 30 + i * 655
-        dr.rounded_rectangle((x, 120, x + 625, 120 + 390), 22, fill=(146, 153, 166))
-        canvas.paste(im, (x + (625 - im.width) // 2, 120 + (390 - im.height) // 2), im)
+    for i, (R, label) in enumerate(views):
+        im = fit_into(render(parts, 1100, R, margin=0.02), bw - 25, 330)
+        x = 30 + i * (bw + 30)
+        dr.rounded_rectangle((x, 120, x + bw, 120 + 390), 22, fill=(146, 153, 166))
+        canvas.paste(im, (x + (bw - im.width) // 2, 120 + (390 - im.height) // 2 + 10), im)
         dr.text((x + 16, 128), label, fill=(236, 239, 244), font=lab)
     f = ImageFont.truetype(os.path.join(FONT_DIR, "Lexend-ExtraBold.ttf"), 30)
     fs = ImageFont.truetype(os.path.join(FONT_DIR, "Lexend-ExtraBold.ttf"), 19)
@@ -287,22 +335,23 @@ def draw(c, path):
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[1:]
-    sheets = []
-    for fn in CONCEPTS:
-        c = fn()
-        if only and not any(o in c.key for o in only):
-            continue
-        sheets.append(draw(c, os.path.join(OUT_DIR, c.key + ".png")))
-        bad = [i for i, (m, _) in enumerate(c.parts) if not str(m.status()).endswith("NoError") or m.volume() <= 0]
-        print(f"{c.key:24s} {c.size:32s} isim {c.cap:4.1f} mm  ~{c.grams:5.1f} g  bozuk parça: {bad}")
-    if not only:
-        W = sheets[0].width
-        sheet = Image.new("RGB", (W, sum(s.height for s in sheets) + 16 * (len(sheets) - 1)), (250, 250, 252))
-        y = 0
-        for s in sheets:
-            sheet.paste(s, (0, y))
-            y += s.height + 16
-        sheet.save(os.path.join(OUT_DIR, "hepsi.png"))
+    for group, out, side in ((CONCEPTS, "hepsi.png", False), (SEHPA, "sehpa_hepsi.png", True)):
+        sheets = []
+        for fn in group:
+            c = fn()
+            if only and not any(o in c.key for o in only):
+                continue
+            sheets.append(draw(c, os.path.join(OUT_DIR, c.key + ".png"), side))
+            bad = [i for i, (m, _) in enumerate(c.parts) if not str(m.status()).endswith("NoError") or m.volume() <= 0]
+            print(f"{c.key:28s} {c.size:40s} isim {c.cap:4.1f} mm  ~{c.grams:5.1f} g  bozuk parça: {bad}")
+        if sheets and len(sheets) == len(group):
+            W = sheets[0].width
+            sheet = Image.new("RGB", (W, sum(s.height for s in sheets) + 16 * (len(sheets) - 1)), (250, 250, 252))
+            y = 0
+            for s in sheets:
+                sheet.paste(s, (0, y))
+                y += s.height + 16
+            sheet.save(os.path.join(OUT_DIR, out))
 
 
 if __name__ == "__main__":

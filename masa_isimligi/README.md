@@ -52,6 +52,18 @@ değişimi dahil değil). Çapraz blok aynı yöntemle: **126 g, 2 sa 11 dk**.
 - **Tasarımı değiştirmeden tasarruf:** mevcut çapraz blok %15 yerine **%5 dolguyla** basılırsa 126 g → **79 g**,
   2 sa 11 dk → **1 sa 36 dk** (dekoratif blok; dolgu yük taşımıyor).
 
+### Boydan sehpalı paneller
+
+![Sehpalı paneller](yeni/sehpa_hepsi.png)
+
+Panel, iki küçük ayak yerine **boydan siyah sehpanın** yuvasına takılır ve **15° arkaya eğik** durur; oturan kişinin
+bakışına döner. İki parça aynı tablada basılır, tutkal gerekmez (yuva panelden 0,3 mm geniş).
+
+- Sehpa 200 × 34 × 10 mm: önü pahlı, arkaya doğru incelen alçak kama, uçları yuvarlatılmış. Altında yuvanın arkasında
+  görünmeyen boydan bir kanal (5 × 16 mm) var; filamenti yarıya indirir, tavanı köprüyle basılır. Sehpa ~21 g.
+- Ölçülen (sehpa dahil): siyah – altın **67 g, 1 sa 38 dk** · çapraz **65 g, 1 sa 33 dk** · beyaz **70 g, 1 sa 41 dk**
+  (çapraz blok 126 g, 2 sa 11 dk).
+
 Yeniden üretme: `python3 scripts/masa_isimligi_yeni.py`
 
 ## İlk tasarım önerileri

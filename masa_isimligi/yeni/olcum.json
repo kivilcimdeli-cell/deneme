@@ -1,9 +1,42 @@
 {
-"capraz_blok": {"g": 125.62, "sure": "2 sa 11 dk"},
-"1_ince_capraz_blok": {"g": 63.01, "sure": "1 sa 20 dk"},
-"2_capraz_panel": {"g": 47.15, "sure": "1 sa 9 dk"},
-"3_siyah_altin_panel": {"g": 49.42, "sure": "1 sa 14 dk"},
-"4_beyaz_panel": {"g": 52.58, "sure": "1 sa 16 dk"},
-"5_ucgen_cadir": {"g": 68.90, "sure": "1 sa 24 dk"},
-"6_ayakta_harfler": {"g": 39.62, "sure": "1 sa 31 dk"}
+ "capraz_blok": {
+  "g": 125.62,
+  "sure": "2 sa 11 dk"
+ },
+ "1_ince_capraz_blok": {
+  "g": 63.01,
+  "sure": "1 sa 20 dk"
+ },
+ "2_capraz_panel": {
+  "g": 47.15,
+  "sure": "1 sa 9 dk"
+ },
+ "3_siyah_altin_panel": {
+  "g": 49.42,
+  "sure": "1 sa 14 dk"
+ },
+ "4_beyaz_panel": {
+  "g": 52.58,
+  "sure": "1 sa 16 dk"
+ },
+ "5_ucgen_cadir": {
+  "g": 68.9,
+  "sure": "1 sa 24 dk"
+ },
+ "6_ayakta_harfler": {
+  "g": 39.62,
+  "sure": "1 sa 31 dk"
+ },
+ "3_siyah_altin_panel_sehpa": {
+  "g": 66.92,
+  "sure": "1 sa 38 dk"
+ },
+ "2_capraz_panel_sehpa": {
+  "g": 64.62,
+  "sure": "1 sa 33 dk"
+ },
+ "4_beyaz_panel_sehpa": {
+  "g": 70.18,
+  "sure": "1 sa 41 dk"
+ }
 }
