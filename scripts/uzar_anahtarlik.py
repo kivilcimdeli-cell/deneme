@@ -529,11 +529,15 @@ def u28():
 
 def u29():
     W, H = 50.0, 28.0
-    c = card("29_simsek_bolen", "İsmi bölen şimşek", "Büyük UZAR'ı çapraz kesen kırmızı şimşek; harfler şimşeğin etrafından ayrılır.",
+    c = card("29_simsek_bolen", "İsmi bölen şimşek", "UZ ve AR arasından geçen, yazıdan uzun kırmızı şimşek.",
              A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5))
-    nm = name(13.0, 3.0, 2.0, max_w=36.0)
-    b = bolt(26.0, 4.0, 1.0, angle=-8.0)
-    c.front += [(nm - b.offset(0.9, J), WHITE), (b, RED), (kind(2.8, 3.0, -9.6, max_w=30.0), WHITE)]
+    f, cap, gap = heavy(), 12.0, 7.0
+    t = cap * 0.06
+    wl, wr = f.width("UZ", cap, t), f.width("AR", cap, t)
+    x0 = 5.0 - (wl + gap + wr) / 2
+    nm = f.text("UZ", cap, x0, 2.6, align="l", tracking=t) + f.text("AR", cap, x0 + wl + gap, 2.6, align="l", tracking=t)
+    b = bolt(22.0, x0 + wl + gap / 2, 1.2, angle=-6.0)
+    c.front += [(nm - b.offset(0.8, J), WHITE), (b, RED), (kind(2.8, 3.5, -9.4, max_w=30.0), WHITE)]
     back_std(c, W, H)
     return c
 
@@ -578,11 +582,12 @@ def u33():
 
 def u34():
     R = 23.0
+    hx = (R - 5.6) * np.cos(np.radians(145))
     c = card("34_rozet", "Yazılı rozet", "Yuvarlak rozet: üst yayda UZAR, alt yayda OTO LASTİK, ortada şimşek.",
-             A.circle(R), (0, R - 5.6))
+             A.circle(R), (hx, (R - 5.6) * np.sin(np.radians(145))))
     f, fb = heavy(), bold()
     c.front += [(A.circle(R - 2.4) - A.circle(R - 3.4), WHITE), (A.circle(11.6) - A.circle(10.6), WHITE),
-                (f.arc(NAME, 6.0, 0, 0, 13.6, 90.0, top=True, tracking=1.6) - A.circle(3.2, 0, R - 5.6).offset(0.6, J), WHITE),
+                (f.arc(NAME, 6.0, 0, 0, 13.6, 90.0, top=True, tracking=1.6), WHITE),
                 (fb.arc(KIND, 3.4, 0, 0, 14.4, 270.0, top=False, tracking=0.9), RED), (bolt(15.0, 0, 0), RED)]
     c.back += [(phone(4.0, 0, 1.6, max_w=34.0), WHITE), (city(2.8, 0, -5.0, max_w=22.0), RED),
                (A.circle(R - 2.4) - A.circle(R - 3.4), RED)]
@@ -702,13 +707,14 @@ def u44():
 
 def u45():
     R = 24.0
+    hx = (R - 5.6) * np.cos(np.radians(145))
     c = card("45_rozet_qr", "Rozet + QR", "Yazılı rozet (üstte UZAR, altta OTO LASTİK, ortada şimşek); arka yüzde QR.",
-             A.circle(R), (0, R - 5.6))
+             A.circle(R), (hx, (R - 5.6) * np.sin(np.radians(145))))
     f, fb = heavy(), bold()
     c.front += [(A.circle(R - 2.4) - A.circle(R - 3.4), WHITE), (A.circle(12.0) - A.circle(11.0), WHITE),
-                (f.arc(NAME, 6.2, 0, 0, 14.2, 90.0, top=True, tracking=1.6) - A.circle(3.2, 0, R - 5.6).offset(0.6, J), WHITE),
+                (f.arc(NAME, 6.2, 0, 0, 14.2, 90.0, top=True, tracking=1.6), WHITE),
                 (fb.arc(KIND, 3.5, 0, 0, 15.0, 270.0, top=False, tracking=0.9), RED), (bolt(15.5, 0, 0), RED)]
-    back_qr(c, cx=0.0, cy=-1.6, module=1.0)
+    back_qr(c, cx=-2.0, cy=-3.0, module=1.0)               # arka yüzde delik sağ üst çaprazda
     return c
 
 
@@ -824,6 +830,16 @@ def main():
     "onarka": ön-arka toplu görsel (2 sayfa)."""
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[1:]
+    if only == ["seri2_sayfa"]:                            # 26–45: yalnız genel görünüm ve ön-arka sayfalar
+        cs = []
+        for fn in CONCEPTS2:
+            c = fn()
+            c.front, c.back = resolve(c.front), resolve(c.back)
+            cs.append(c)
+        overview(cs, os.path.join(OUT_DIR, "hepsi_2.png"), start=26,
+                 title="UZAR OTO LASTİK – ŞİMŞEK SERİSİ 26–45 (ön yüz · QR'lılarda arka yüz)")
+        print(front_back_pages(cs, per_page=10, start=26, first_page=3))
+        return
     if only == ["seri2"]:                                  # 26–45: şimşek serisi, tümü
         cs = []
         for i, fn in enumerate(CONCEPTS2, 26):
@@ -852,7 +868,7 @@ def main():
             print(front_back_pages(cs))
         return
     concepts = []
-    for i, fn in enumerate(CONCEPTS, 1):
+    for i, fn in enumerate(CONCEPTS + (CONCEPTS2 if only else []), 1):
         c = fn()
         if only and not any(o in c.key for o in only):
             continue

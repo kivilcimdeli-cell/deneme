@@ -20,5 +20,15 @@ Her sayfada ön yüz, arka yüz ve perspektif: `01_*.png` … `25_*.png`.
 
 Ön-arka toplu görsel (2 sayfa): `on_arka_sayfa_1.png` (01–13), `on_arka_sayfa_2.png` (14–25).
 
+## Şimşek serisi (26–45)
+
+![Şimşek serisi](hepsi_2.png)
+
+Kırmızı şimşek amblemli 20 öneri: şimşek amblem, Z yerine şimşek (U⚡AR), UZ ⚡ AR, lastik / bijon somunu / kalkan
+içinde şimşek, çift şimşek, zikzak şerit, yay üstünde yazılı rozet, kanatlı şimşek, kırmızı negatif, damalı,
+güç düğmesi, dikey etiket, şimşekle bölünmüş gövde. **QR'lı: 40, 44, 45** (hepsi görüntüden okundu).
+Şimşeğin en ince yeri yüksekliğinin ~%20'si (en küçüğünde 1,6 mm). Ön-arka: `on_arka_sayfa_3.png` (26–35),
+`on_arka_sayfa_4.png` (36–45).
+
 Yeniden üretme: `pip install segno zxing-cpp` · `python3 scripts/uzar_anahtarlik.py` (yalnız genel sayfa: `genel`;
-ön-arka sayfalar: `onarka`)
+ön-arka sayfalar: `onarka`; şimşek serisi: `seri2`, yalnız sayfaları: `seri2_sayfa`)
