@@ -64,6 +64,24 @@ bakışına döner. İki parça aynı tablada basılır, tutkal gerekmez (yuva p
 - Ölçülen (sehpa dahil): siyah – altın **67 g, 1 sa 38 dk** · çapraz **65 g, 1 sa 33 dk** · beyaz **70 g, 1 sa 41 dk**
   (çapraz blok 126 g, 2 sa 11 dk).
 
+### Çapraz blok + sehpa, tek tabla — `capraz_blok_sehpa.3mf`
+
+![Tek tabla](onizleme/capraz_blok_sehpa_tabla.png)
+
+Blok (ön yüz yukarıda yatık) ve sehpa (dik) aynı tablada, ikisi de boylamasına; destek yok.
+
+- **AMS: 1 siyah · 2 beyaz · 3 kırmızı.** Nozullar elle sabit: siyah ve beyaz **ana nozulda**, kırmızı **yardımcı
+  nozulda**. Siyah ile kırmızı her katmanda birlikte basılır; ayrı nozulda oldukları için katman başına temizleme yok.
+  Beyaz yalnız son 10 katmanda: tüm baskıda tek filament değişimi (siyah → beyaz).
+- Elas PLA Pro (siyah, beyaz) için Generic PLA profili; kırmızı Bambu PLA Basic. Baskı ayarları Bambu standart profili;
+  dosyadan tabla tipi (Textured PEI), kule yeri ve nesnede destek kapalı gelir.
+- Prime kulesi sehpanın sağında (193; 108), Bambu'nun kenar kuralı içinde, parçalara 8 mm uzakta.
+- Model (PrusaSlicer, aynı ayarlar): siyah 114 g (blok 83 + sehpa 31) · kırmızı 39 g · beyaz 4 g = **157 g**, baskı
+  ~3 sa 40 dk; üstüne her katmandaki nozul değişimi ve kule (~12 g) eklenir. Kesin süreyi Bambu Studio dilimleyince
+  gösterir.
+
+Yeniden üretme: `python3 scripts/capraz_blok_sehpa.py`
+
 ### Mevcut çapraz bloğa sehpa
 
 ![Çapraz blok + sehpa](yeni/7_capraz_blok_sehpa.png)
