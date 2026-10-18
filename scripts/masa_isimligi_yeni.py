@@ -130,6 +130,34 @@ def mount(c, outline, regions, base_col, feet_x, sehpa):
     return panel_on_stand(c, outline, regions, base_col)
 
 
+BLOCK_TILT = 12.0                                         # çapraz blok sehpasında arkaya eğim (derece)
+
+
+def block_stand(D, length=200.0, h_f=10.5, wall=12.0, t=3.0, c=0.4, tilt=BLOCK_TILT):
+    """Dolu blok için sehpa (y-z profili, x'te `length`). Oturak arkaya doğru `tilt` derece alçalır; blok kendi
+    ağırlığıyla arkadaki alçak duvara yaslanır. Önde dudak yok: ön yüz kabartmaları (ayraç, alt çizgi) takılmaz,
+    yazının hiçbir yeri kapanmaz. Bloğun ön alt kenarı masadan `h_f` yukarıda. Altta görünmeyen boydan kanal."""
+    a = np.radians(tilt)
+    ca, sa = np.cos(a), np.sin(a)
+    up, back = np.array([sa, ca]), np.array([ca, -sa])
+    B = np.array([D * ca, h_f - D * sa])                 # bloğun arka alt kenarı
+    inner_top = B + c * back + wall * up
+    outer_top = inner_top + t * back
+    outer_bot = outer_top - outer_top[1] / ca * up
+    outer = polygon([(-4.0, 0.0), tuple(outer_bot), tuple(outer_top), tuple(inner_top), (0.0, h_f + 1.0),
+                     (-4.0, h_f - 4.0)])
+    blk = polygon([(ca * y + sa * z, -sa * y + ca * z + h_f) for y, z in
+                   ((-10.0, 0.0), (D + c, 0.0), (D + c, 200.0), (-10.0, 200.0))])
+    prof = outer - blk
+    channel = rect(1.5, -1.0, 18.0, 4.0)                  # oturak kanalın üstünde en az 2,6 mm
+    along = [[0, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0]]
+    bar = prof.extrude(length).transform(along).translate((-length / 2, 0, 0))
+    bar = bar - channel.extrude(length - 16.0).transform(along).translate((-(length - 16.0) / 2, 0, 0))
+    y0, _, y1, _ = prof.bounds()
+    plan = rrect(length, y1 - y0, 8.0, 0, (y0 + y1) / 2)
+    return bar ^ plan.extrude(40.0).translate((0, 0, -1.0)), h_f
+
+
 def name_shape(fnt, cap, max_w, x, y, tracking=0.0):
     f = font(fnt)
     cap = f.fit_cap(NAME, cap, max_w, tracking)
@@ -289,11 +317,35 @@ def y6_ayakta_harfler():
     return c
 
 
+def y7_capraz_blok_sehpa():
+    """Mevcut çapraz blok (240 × 56 × 32 mm, basılmış olan) ve ona göre sehpa; blok 12° arkaya eğik."""
+    import capraz_blok as CB
+    block = CB.Block()
+    tilt = BLOCK_TILT
+    base, h_f = block_stand(CB.D)
+    c = Concept("7_capraz_blok_sehpa", "Çapraz blok + sehpa",
+                f"Mevcut çapraz blok aynen kalır; altına {tilt:.0f}° arkaya eğik siyah sehpa. Blok oturağa konur, "
+                "arkadaki alçak duvara yaslanır.",
+                f"blok 240 × 32 × 56 mm, sehpa 200 × {base.bounding_box()[4] - base.bounding_box()[1]:.0f} × "
+                f"{base.bounding_box()[5]:.0f} mm")
+    col = {A.BLACK: BLACK, A.RED: RED, A.WHITE: WHITE}
+    c.add(base, BLACK)
+    for _, m, e in block.flat_parts():
+        c.add(tilted(CB.standing(m), tilt, h_f, 0.0), col[e])
+    c.cap = block.cap
+    c.tilt = tilt
+    c.grams = grams(base)
+    c.print_parts = [(base, BLACK)]                       # yalnız sehpa basılır
+    c.stand_only = True
+    return c
+
+
 MEASURED = os.path.join(OUT_DIR, "olcum.json")   # PrusaSlicer'da baskı yönünde dilimlenen gram ve süre
 
 
 CONCEPTS = [y1_ince_capraz, y2_capraz_panel, y3_altin, y4_beyaz, y5_cadir, y6_ayakta_harfler]
 SEHPA = [lambda: y3_altin(True), lambda: y2_capraz_panel(True), lambda: y4_beyaz(True)]
+BLOK_SEHPA = [y7_capraz_blok_sehpa]
 
 
 # ---------------------------------------------------------------- önizleme
@@ -302,7 +354,7 @@ def draw(c, path, side=False):
     parts = [(*A.mesh_arrays(m), col) for m, col in c.parts]
     views = [(rotation(0, -90), "Önden"), (rotation(-28, -68), "Maket (3/4 açı)")]
     if side:
-        views.append((rotation(-90, -90), f"Yandan: {STAND_TILT:.0f}° eğim"))
+        views.append((rotation(-90, -90), f"Yandan: {getattr(c, 'tilt', STAND_TILT):.0f}° eğim"))
     W, H = 1340, 540
     n = len(views)
     bw = (W - 60 - 30 * (n - 1)) // n
@@ -326,6 +378,9 @@ def draw(c, path, side=False):
         extra = f", {meas[c.key]['sure']} (çapraz blok {meas['capraz_blok']['sure']})"
     info = (f"İsim {c.cap:.0f} mm (çapraz blok 21)  ·  {g:.0f} g filament (çapraz blok {base:.0f} g, "
             f"%{100 * (1 - g / base):.0f} az){extra}")
+    if getattr(c, "stand_only", False):
+        sure = f", {meas[c.key]['sure']}" if c.key in meas else ""
+        info = f"Yalnız sehpa basılır: ~{g:.0f} g siyah filament{sure}. Blok aynı (basılmış olan kullanılır)."
     dr.text((30, 84), info, fill=(22, 120, 60), font=fs)
     dr.text((W - 30 - dr.textlength(c.size, font=fs), 22), c.size, fill=(80, 86, 98), font=fs)
     canvas.save(path)
@@ -335,7 +390,8 @@ def draw(c, path, side=False):
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[1:]
-    for group, out, side in ((CONCEPTS, "hepsi.png", False), (SEHPA, "sehpa_hepsi.png", True)):
+    for group, out, side in ((CONCEPTS, "hepsi.png", False), (SEHPA, "sehpa_hepsi.png", True),
+                             (BLOK_SEHPA, None, True)):
         sheets = []
         for fn in group:
             c = fn()
@@ -344,7 +400,7 @@ def main():
             sheets.append(draw(c, os.path.join(OUT_DIR, c.key + ".png"), side))
             bad = [i for i, (m, _) in enumerate(c.parts) if not str(m.status()).endswith("NoError") or m.volume() <= 0]
             print(f"{c.key:28s} {c.size:40s} isim {c.cap:4.1f} mm  ~{c.grams:5.1f} g  bozuk parça: {bad}")
-        if sheets and len(sheets) == len(group):
+        if out and sheets and len(sheets) == len(group):
             W = sheets[0].width
             sheet = Image.new("RGB", (W, sum(s.height for s in sheets) + 16 * (len(sheets) - 1)), (250, 250, 252))
             y = 0

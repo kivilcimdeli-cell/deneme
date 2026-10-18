@@ -64,6 +64,17 @@ bakışına döner. İki parça aynı tablada basılır, tutkal gerekmez (yuva p
 - Ölçülen (sehpa dahil): siyah – altın **67 g, 1 sa 38 dk** · çapraz **65 g, 1 sa 33 dk** · beyaz **70 g, 1 sa 41 dk**
   (çapraz blok 126 g, 2 sa 11 dk).
 
+### Mevcut çapraz bloğa sehpa
+
+![Çapraz blok + sehpa](yeni/7_capraz_blok_sehpa.png)
+
+Basılmış çapraz blok (240 × 56 × 32 mm) aynen kullanılır; yalnız siyah sehpa basılır: **~31 g, 49 dk**.
+
+- Sehpa 200 × 41 × 16 mm. Oturak arkaya doğru **12°** alçalır; blok kendi ağırlığıyla arkadaki alçak duvara (12 mm)
+  yaslanır, duvar önden görünmez. Bloğun ön alt kenarı masadan 10,5 mm yukarıda.
+- **Önde dudak yok:** ön yüzdeki kabartmalar (beyaz ayraç, kırmızı alt çizgi) takılmaz, yazının hiçbir yeri kapanmaz.
+- Duvarla blok arasında 0,4 mm boşluk; altta görünmeyen boydan kanal (köprüyle basılır). Destek gerekmez.
+
 Yeniden üretme: `python3 scripts/masa_isimligi_yeni.py`
 
 ## İlk tasarım önerileri
