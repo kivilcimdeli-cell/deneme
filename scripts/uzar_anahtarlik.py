@@ -468,6 +468,253 @@ def u25():
     return c
 
 
+# ---------------------------------------------------------------- 26–45: şimşek serisi
+
+def bolt(h, cx=0.0, cy=0.0, angle=0.0):
+    """Kırmızı şimşek: yüksekliği `h`, en ince yeri ~0,2 h (8 mm'de bile 1,6 mm)."""
+    pts = [(0.06, 0.5), (0.46, 0.5), (0.24, 0.10), (0.56, 0.10), (-0.10, -0.5), (0.08, -0.04), (-0.20, -0.04)]
+    cs = poly([((x - 0.18) * h, y * h) for x, y in pts])
+    return (cs.rotate(angle) if angle else cs).translate((cx, cy))
+
+
+def name_zbolt(cap, x, y, tracking=None):
+    """U⚡AR: Z harfi yerine kırmızı şimşek. Döner: (harfler, şimşek)."""
+    f = heavy()
+    t = cap * 0.06 if tracking is None else tracking
+    wu, wz, war = f.width("U", cap), f.width("Z", cap), f.width("AR", cap, t)
+    total = wu + wz + war + 2 * t
+    x0 = x - total / 2
+    letters = f.text("U", cap, x0, y, align="l") + f.text("AR", cap, x0 + wu + wz + 2 * t, y, align="l", tracking=t)
+    return letters, bolt(cap * 1.25, x0 + wu + t + wz / 2, y)
+
+
+def zigzag(x0, x1, y, amp, n, w):
+    """Yatay şimşek çizgisi (zikzak), kalınlık `w`."""
+    xs = np.linspace(x0, x1, n + 1)
+    pts = [(xv, y + (amp if i % 2 else -amp)) for i, xv in enumerate(xs)]
+    segs = [poly([(a[0], a[1] - w / 2), (b[0], b[1] - w / 2), (b[0], b[1] + w / 2), (a[0], a[1] + w / 2)])
+            for a, b in zip(pts[:-1], pts[1:])]
+    return A.union(*segs, *[A.circle(w / 2, px, py, 16) for px, py in pts[1:-1]])
+
+
+def u26():
+    W, H = 50.0, 28.0
+    c = card("26_simsek_amblem", "Şimşek amblem", "Solda büyük kırmızı şimşek, sağda UZAR ve OTO LASTİK.",
+             A.rrect(W, H, 4.0), (W / 2 - 5.5, H / 2 - 5.5))
+    c.front += [(bolt(21.0, -W / 2 + 11.0, 0), RED), (name(10.5, 5.0, 1.6, max_w=23.0), WHITE),
+                (kind(3.0, 5.0, -7.6, max_w=23.0), RED)]
+    back_std(c, W, H, y=-1.4)
+    return c
+
+
+def u27():
+    W, H = 50.0, 24.0
+    c = card("27_z_simsek", "Z yerine şimşek", "UZAR'ın Z harfi kırmızı şimşek: U⚡AR. Altında ince OTO LASTİK.",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, 0))
+    letters, b = name_zbolt(11.0, 4.0, 2.4)
+    c.front += [(letters, WHITE), (b, RED), (kind(2.8, 4.0, -7.0, max_w=28.0), WHITE)]
+    c.back += [(phone(4.4, -2.5, 1.6, max_w=32.0), WHITE), (city(2.8, -2.5, -4.8, max_w=22.0), RED)]
+    return c
+
+
+def u28():
+    R = 22.0
+    c = card("28_lastik_simsek", "Lastik + şimşek", "Lastik biçimli dişli kenar, ortada büyük kırmızı şimşek; isim arka yüzde.",
+             gear_outline(R), (0, R - 6.0))
+    c.front += [(A.circle(R - 3.0) - A.circle(R - 4.8), WHITE), (bolt(24.0, 0, -1.5), RED)]
+    c.back += [(name(9.0, 0, 3.4, max_w=26.0), WHITE), (kind(2.6, 0, -3.4, max_w=22.0), RED),
+               (phone(3.4, 0, -9.2, max_w=28.0), WHITE)]
+    return c
+
+
+def u29():
+    W, H = 50.0, 28.0
+    c = card("29_simsek_bolen", "İsmi bölen şimşek", "Büyük UZAR'ı çapraz kesen kırmızı şimşek; harfler şimşeğin etrafından ayrılır.",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5))
+    nm = name(13.0, 3.0, 2.0, max_w=36.0)
+    b = bolt(26.0, 4.0, 1.0, angle=-8.0)
+    c.front += [(nm - b.offset(0.9, J), WHITE), (b, RED), (kind(2.8, 3.0, -9.6, max_w=30.0), WHITE)]
+    back_std(c, W, H)
+    return c
+
+
+def u30():
+    c = card("30_kalkan_simsek", "Kalkan şimşek", "Kalkan; üstte kırmızı şimşek amblemi, altında UZAR.",
+             shield(40.0, 46.0), (0, 17.5))
+    c.front += [(bolt(15.0, 0, 6.0), RED), (name(9.0, 0, -5.4, max_w=26.0), WHITE),
+                (kind(2.6, 0, -11.4, max_w=17.0), RED)]
+    c.back += [(phone(3.8, 0, -2.0, max_w=32.0), WHITE), (city(2.6, 0, -8.0, max_w=20.0), RED)]
+    return c
+
+
+def u31():
+    c = card("31_somun_simsek", "Somun + şimşek", "Bijon somunu biçimi; kırmızı halka içinde şimşek, altında UZAR.",
+             hexagon(43.0), (18.3, 0))
+    c.front += [(A.circle(17.0, -1.5, 0) - A.circle(15.4, -1.5, 0), RED), (bolt(13.0, -1.5, 6.4), RED),
+                (name(8.0, -1.5, -4.0, max_w=20.0), WHITE), (kind(2.4, -1.5, -10.0, max_w=16.0), WHITE)]
+    c.back += [(phone(3.6, 2.0, 1.0, max_w=28.0), WHITE), (city(2.6, 2.0, -5.0, max_w=18.0), RED)]
+    return c
+
+
+def u32():
+    W, H = 50.0, 22.0
+    c = card("32_cift_simsek", "Çift şimşek", "İnce kapsül; UZAR iki kırmızı şimşeğin arasında.",
+             A.rrect(W, H, H / 2), (-W / 2 + 6.0, 0))
+    c.front += [(bolt(14.0, -9.5, 0), RED), (bolt(14.0, 19.0, 0), RED), (name(10.0, 4.2, 1.6, max_w=19.0), WHITE),
+                (kind(2.4, 4.2, -6.2, max_w=19.0), RED)]
+    c.back += [(phone(4.2, -3.0, 1.6, max_w=30.0), WHITE), (city(2.6, -3.0, -4.6, max_w=20.0), RED)]
+    return c
+
+
+def u33():
+    W, H = 50.0, 28.0
+    c = card("33_zikzak_serit", "Zikzak şerit", "Alt kenar boyunca kırmızı şimşek zikzağı; üstte UZAR.",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5))
+    c.front += [(zigzag(-W / 2 + 2.0, W / 2 - 2.0, -H / 2 + 6.0, 2.0, 10, 1.4), RED),
+                (name(11.0, 3.0, 4.0, max_w=32.0), WHITE), (kind(3.0, 3.0, -4.6, max_w=30.0), WHITE)]
+    back_std(c, W, H)
+    return c
+
+
+def u34():
+    R = 23.0
+    c = card("34_rozet", "Yazılı rozet", "Yuvarlak rozet: üst yayda UZAR, alt yayda OTO LASTİK, ortada şimşek.",
+             A.circle(R), (0, R - 5.6))
+    f, fb = heavy(), bold()
+    c.front += [(A.circle(R - 2.4) - A.circle(R - 3.4), WHITE), (A.circle(11.6) - A.circle(10.6), WHITE),
+                (f.arc(NAME, 6.0, 0, 0, 13.6, 90.0, top=True, tracking=1.6) - A.circle(3.2, 0, R - 5.6).offset(0.6, J), WHITE),
+                (fb.arc(KIND, 3.4, 0, 0, 14.4, 270.0, top=False, tracking=0.9), RED), (bolt(15.0, 0, 0), RED)]
+    c.back += [(phone(4.0, 0, 1.6, max_w=34.0), WHITE), (city(2.8, 0, -5.0, max_w=22.0), RED),
+               (A.circle(R - 2.4) - A.circle(R - 3.4), RED)]
+    return c
+
+
+def u35():
+    W, H = 50.0, 26.0
+    c = card("35_kanatli_simsek", "Kanatlı şimşek", "Hız çizgileriyle uçan şimşek; yanında UZAR.",
+             A.rrect(W, H, 4.0), (W / 2 - 5.5, H / 2 - 5.5))
+    c.front += [(A.rect(-W / 2, 3.2, -14.0, 4.4), WHITE), (A.rect(-W / 2, -0.4, -12.0, 0.8), WHITE),
+                (A.rect(-W / 2, -4.0, -14.0, -2.8), WHITE), (bolt(18.0, -9.0, 0, angle=-12.0), RED),
+                (name(10.5, 6.5, 1.4, max_w=20.0), WHITE), (kind(2.6, 6.5, -6.8, max_w=20.0), RED)]
+    c.back += [(phone(4.4, 2.0, 1.8, max_w=36.0), WHITE), (city(2.8, 2.0, -5.0, max_w=22.0), RED)]
+    return c
+
+
+def u36():
+    W, H = 50.0, 28.0
+    c = card("36_kirmizi_negatif", "Kırmızı negatif", "Kırmızı gövde, büyük siyah şimşek, beyaz UZAR. Göz alıcı.",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5), body=RED)
+    c.front += [(bolt(24.0, -11.0, -1.0), BLACK), (name(11.0, 8.0, 2.6, max_w=24.0), WHITE),
+                (kind(3.0, 8.0, -7.2, max_w=24.0), BLACK)]
+    c.back += [(phone(4.6, 0, 2.6, max_w=42.0), WHITE), (city(3.0, 0, -4.2, max_w=24.0), BLACK)]
+    return c
+
+
+def u37():
+    W, H = 50.0, 28.0
+    c = card("37_simsek_damali", "Şimşek + damalı", "Sağ üstte damalı köşe, solda kırmızı şimşek, ortada UZAR.",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, -H / 2 + 5.5))
+    c.front += [(checker(W / 2 - 11.5, H / 2 - 1.0, 4, 2.4), WHITE), (bolt(16.0, -14.5, 3.0), RED),
+                (name(10.0, 4.5, 0.4, max_w=24.0), WHITE), (kind(2.8, 4.5, -8.0, max_w=24.0), RED)]
+    back_std(c, W, H)
+    return c
+
+
+def u38():
+    R = 21.0
+    c = card("38_guc_dugmesi", "Güç düğmesi", "Yuvarlak; açma düğmesi gibi beyaz halka ve ortada şimşek. İsim arka yüzde.",
+             A.circle(R), (0, R - 5.2))
+    ring = (A.circle(13.0) - A.circle(10.6)) - poly([(0, 0), (-7.0, 20), (7.0, 20)])
+    c.front += [(ring, WHITE), (bolt(15.0, 0, -1.0), RED)]
+    c.back += [(name(9.0, 0, 3.6, max_w=26.0), WHITE), (kind(2.6, 0, -3.2, max_w=22.0), RED),
+               (phone(3.4, 0, -9.0, max_w=28.0), WHITE)]
+    return c
+
+
+def u39():
+    W, H = 26.0, 50.0
+    c = card("39_dikey_etiket", "Dikey etiket", "Dikey ince etiket: üstte şimşek, isim dikine okunur.",
+             A.rrect(W, H, 4.0), (0, H / 2 - 5.5))
+    f = heavy()
+    c.front += [(bolt(10.0, 0, 9.5), RED),
+                (f.text(NAME, f.fit_cap(NAME, 11.0, 24.0, 0.6), -2.0, -9.5, tracking=0.6, angle=90), WHITE),
+                (bold().text(KIND, 2.8, 7.4, -9.5, tracking=0.5, angle=90), RED)]
+    c.back += [(heavy().text(PHONE, 3.6, -1.5, -3.0, tracking=0.2, angle=90), WHITE),
+               (bold().text(CITY, 2.6, 5.0, -3.0, tracking=0.6, angle=90), RED)]
+    return c
+
+
+def u40():
+    W, H = 50.0, 32.0
+    c = card("40_simsek_qr", "Şimşek + QR", "Ön yüzde şimşek amblem; arka yüzde telefon QR'ı ve numara.",
+             A.rrect(W, H, 4.0), (W / 2 - 5.5, H / 2 - 5.5))
+    c.front += [(bolt(22.0, -W / 2 + 11.0, 0), RED), (name(11.0, 6.5, 2.6, max_w=26.0), WHITE),
+                (kind(3.0, 6.5, -7.2, max_w=26.0), RED)]
+    back_qr(c, cx=8.0, cy=0.0, module=1.12)                 # delik arka yüzde solda görünür
+    c.back += [(bolt(7.0, -14.5, 7.0), RED), (text(heavy(), "0542", 3.0, -14.5, -0.6), WHITE),
+               (text(heavy(), "611 69 87", 3.0, -14.5, -5.4, max_w=13.0), WHITE)]
+    return c
+
+
+def u41():
+    W, H = 50.0, 30.0
+    c = card("41_lastik_disi_simsek", "Lastik dişi + şimşek", "Altta lastik dişi bandı, üstte şimşekli UZAR (U⚡AR).",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5))
+    letters, b = name_zbolt(10.5, 3.0, 5.0)
+    c.front += [(tread_band(-W / 2, W / 2, -H / 2 + 2.6, -H / 2 + 7.6, 4.2), WHITE), (letters, WHITE), (b, RED),
+                (kind(2.8, 3.0, -3.6, max_w=30.0), RED)]
+    back_std(c, W, H)
+    return c
+
+
+def u42():
+    W, H = 50.0, 24.0
+    c = card("42_egik_simsek", "Eğik kart + şimşek", "Hızlı eğik kart; sol uçta kırmızı şimşek, beyaz UZAR.",
+             parallelogram(W, H, 7.0), (W / 2 - 8.0, 0))
+    c.front += [(bolt(17.0, -15.0, 0, angle=-10.0), RED), (name(10.0, 2.0, 1.8, max_w=20.0), WHITE),
+                (kind(2.6, 2.0, -6.2, max_w=20.0), RED)]
+    c.back += [(phone(4.2, 3.5, 2.0, max_w=29.0), WHITE), (city(2.8, 3.5, -5.0, max_w=20.0), RED)]
+    return c
+
+
+def u43():
+    W, H = 50.0, 28.0
+    c = card("43_zikzak_bolunmus", "Şimşekle bölünmüş", "Gövde şimşek biçimli beyaz çizgiyle ikiye: sol kırmızı, sağ siyah.",
+             A.rrect(W, H, 4.0), (-W / 2 + 5.5, -H / 2 + 5.5))
+    edge = [(-6.0, 16), (-12.5, 2.0), (-7.0, 2.0), (-14.0, -16)]
+    left = poly([(-30, 16)] + edge + [(-30, -16)])
+    line = A.union(*[poly([(a[0], a[1]), (b[0], b[1]), (b[0] + 1.6, b[1]), (a[0] + 1.6, a[1])])
+                     for a, b in zip(edge[:-1], edge[1:])])
+    c.front += [(left, RED), (line, WHITE), (name(10.5, 8.5, 2.6, max_w=22.0), WHITE), (kind(2.8, 8.5, -7.0, max_w=22.0), RED)]
+    back_std(c, W, H)
+    return c
+
+
+def u44():
+    S = 46.0
+    c = card("44_kare_simsek_qr", "Kare şimşek + QR", "Kare; ön yüzde lastik içinde şimşek ve UZAR, arka yüzde büyük QR.",
+             A.rrect(S, S, 5.0), (S / 2 - 5.5, S / 2 - 5.5))
+    c.front += [(gear_outline(10.5).translate((0, 7.0)) - A.circle(8.0, 0, 7.0), WHITE), (bolt(11.0, 0, 7.0), RED),
+                (name(9.0, 0, -9.0, max_w=30.0), WHITE), (kind(2.8, 0, -16.4, max_w=24.0), RED)]
+    back_qr(c, cx=0.0, cy=2.6, module=1.15, text_y=-16.4, text_w=34.0)
+    return c
+
+
+def u45():
+    R = 24.0
+    c = card("45_rozet_qr", "Rozet + QR", "Yazılı rozet (üstte UZAR, altta OTO LASTİK, ortada şimşek); arka yüzde QR.",
+             A.circle(R), (0, R - 5.6))
+    f, fb = heavy(), bold()
+    c.front += [(A.circle(R - 2.4) - A.circle(R - 3.4), WHITE), (A.circle(12.0) - A.circle(11.0), WHITE),
+                (f.arc(NAME, 6.2, 0, 0, 14.2, 90.0, top=True, tracking=1.6) - A.circle(3.2, 0, R - 5.6).offset(0.6, J), WHITE),
+                (fb.arc(KIND, 3.5, 0, 0, 15.0, 270.0, top=False, tracking=0.9), RED), (bolt(15.5, 0, 0), RED)]
+    back_qr(c, cx=0.0, cy=-1.6, module=1.0)
+    return c
+
+
+CONCEPTS2 = [u26, u27, u28, u29, u30, u31, u32, u33, u34, u35, u36, u37, u38, u39, u40, u41, u42, u43, u44, u45]
+
+
 CONCEPTS = [u01, u02, u03, u04, u05, u06, u07, u08, u09, u10, u11, u12, u13, u14, u15, u16, u17, u18, u19, u20,
             u21, u22, u23, u24, u25]
 
@@ -511,14 +758,14 @@ def sheet(c, path, i):
     return canvas
 
 
-def overview(concepts, path, cols=5):
+def overview(concepts, path, cols=5, start=1,
+             title="UZAR OTO LASTİK – ANAHTARLIK ÖNERİLERİ (ön yüz · QR'lılarda arka yüz)"):
     cw, ch = 300, 300
     rows = (len(concepts) + cols - 1) // cols
     W, H = cols * cw + (cols + 1) * 18, rows * ch + (rows + 1) * 18 + 90
     canvas = Image.new("RGB", (W, H), (244, 245, 247))
     dr = ImageDraw.Draw(canvas)
-    dr.text((24, 24), "UZAR OTO LASTİK – ANAHTARLIK ÖNERİLERİ (ön yüz · QR'lılarda arka yüz)", fill=(24, 26, 30),
-            font=K.fnt(30))
+    dr.text((24, 24), title, fill=(24, 26, 30), font=K.fnt(30))
     for i, c in enumerate(concepts):
         x, y = 18 + (i % cols) * (cw + 18), 90 + (i // cols) * (ch + 18)
         K.panel(dr, (x, y, x + cw, y + ch))
@@ -530,11 +777,11 @@ def overview(concepts, path, cols=5):
         tag = f"{w:.0f}×{h:.0f} mm" + ("  · QR" if getattr(c, "qr", False) else "")
         dr.text((x + 14, y + ch - 22), tag, fill=(200, 30, 38) if getattr(c, "qr", False) else (110, 114, 124),
                 font=K.fnt(15))
-        dr.text((x + 14, y + 10), f"{i + 1:02d}", fill=(150, 154, 162), font=K.fnt(20))
+        dr.text((x + 14, y + 10), f"{i + start:02d}", fill=(150, 154, 162), font=K.fnt(20))
     canvas.save(path)
 
 
-def front_back_pages(concepts, cols=3, per_page=13):
+def front_back_pages(concepts, cols=3, per_page=13, start=1, first_page=1, pages_total=None):
     """Toplu görsel: her anahtarlığın ön ve arka yüzü yan yana; `per_page` adet bir sayfada (2 sayfa)."""
     cw, ch, gap = 520, 320, 18
     paths = []
@@ -544,10 +791,11 @@ def front_back_pages(concepts, cols=3, per_page=13):
         W, H = cols * cw + (cols + 1) * gap, rows * ch + (rows + 1) * gap + 96
         canvas = Image.new("RGB", (W, H), (244, 245, 247))
         dr = ImageDraw.Draw(canvas)
-        n0, n1 = p0 + 1, p0 + len(page)
+        n0, n1 = start + p0, start + p0 + len(page) - 1
         dr.text((24, 22), f"UZAR OTO LASTİK – ANAHTARLIKLAR {n0:02d}–{n1:02d}  ·  ön yüz | arka yüz",
                 fill=(24, 26, 30), font=K.fnt(32))
-        dr.text((24, 62), f"Sayfa {p0 // per_page + 1}/{(len(concepts) + per_page - 1) // per_page}  ·  siyah, kırmızı, "
+        total = pages_total or (len(concepts) + per_page - 1) // per_page
+        dr.text((24, 62), f"Sayfa {p0 // per_page + 1}/{total}  ·  siyah, kırmızı, "
                           "beyaz  ·  en çok 50 × 50 mm  ·  QR'lılar kırmızı etiketli (okutunca telefonu arar)",
                 fill=(110, 114, 124), font=K.fnt(18))
         for k, c in enumerate(page):
@@ -565,7 +813,7 @@ def front_back_pages(concepts, cols=3, per_page=13):
             tag = f"{w:.0f}×{h:.0f} mm" + ("  ·  QR" if getattr(c, "qr", False) else "")
             dr.text((x + 16, y + ch - 38), tag, fill=(200, 30, 38) if getattr(c, "qr", False) else (110, 114, 124),
                     font=K.fnt(17))
-        path = os.path.join(OUT_DIR, f"on_arka_sayfa_{p0 // per_page + 1}.png")
+        path = os.path.join(OUT_DIR, f"on_arka_sayfa_{first_page + p0 // per_page}.png")
         canvas.save(path)
         paths.append(path)
     return paths
@@ -576,6 +824,22 @@ def main():
     "onarka": ön-arka toplu görsel (2 sayfa)."""
     os.makedirs(OUT_DIR, exist_ok=True)
     only = sys.argv[1:]
+    if only == ["seri2"]:                                  # 26–45: şimşek serisi, tümü
+        cs = []
+        for i, fn in enumerate(CONCEPTS2, 26):
+            c = fn()
+            c.front, c.back = resolve(c.front), resolve(c.back)
+            w, h = c.size()
+            assert w <= 50.01 and h <= 50.01, (c.key, w, h)
+            if getattr(c, "qr", False):
+                c.qr_read = qr_check(c)
+            sheet(c, os.path.join(OUT_DIR, c.key + ".png"), i)
+            cs.append(c)
+            print(f"{c.key:24s} {w:4.1f} × {h:4.1f} mm" + (f"  QR: {c.qr_read}" if getattr(c, "qr", False) else ""))
+        overview(cs, os.path.join(OUT_DIR, "hepsi_2.png"), start=26,
+                 title="UZAR OTO LASTİK – ŞİMŞEK SERİSİ 26–45 (ön yüz · QR'lılarda arka yüz)")
+        print(front_back_pages(cs, per_page=10, start=26, first_page=3))
+        return
     if only in (["genel"], ["onarka"]):
         cs = []
         for fn in CONCEPTS:
