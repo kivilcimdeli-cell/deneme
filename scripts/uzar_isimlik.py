@@ -15,7 +15,8 @@ QR kare boyu en az 0,9 mm (scripts/qr_sistemi.py).
 
 Her tasarımda QR'lar ön görünüşün görüntüsünden (ve baskı hatası benzetiminden) okunarak doğrulanır.
 
-Çıktı : uzar_isimlik/<tasarım>.png, uzar_isimlik/hepsi.png
+Çıktı : uzar_isimlik/<tasarım>.png, uzar_isimlik/hepsi.png; müşteriye: musteri_1.png, musteri_2.png,
+        musteri_katalog.pdf (10 öneri)
 
 Kullanım:
   pip install segno zxing-cpp opencv-python-headless
@@ -114,10 +115,10 @@ def two_tiles(y0, light=True):
     return out
 
 
-def labels(y, cap=3.8):
+def labels(y, cap=3.8, cx=(-CX, CX)):
     f = bold()
-    return [text(f, "TARA · BİZE ULAŞ", cap, -CX, y, "c", cap * 0.1, TILE),
-            text(f, "KAREKOD İLE ÖDE", cap, CX, y, "c", cap * 0.1, TILE)]
+    return [text(f, "TARA · BİZE ULAŞ", cap, cx[0], y, "c", cap * 0.1, TILE),
+            text(f, "KAREKOD İLE ÖDE", cap, cx[1], y, "c", cap * 0.1, TILE)]
 
 
 def soften(body, out, depth=0.6, steps=3):
@@ -184,7 +185,106 @@ def s4_tek_qr():
     return c, reg, BLACK
 
 
-DESIGNS = [s1_sade, s2_beyaz, s3_ortali, s4_tek_qr]
+def s5_kirmizi_bant():
+    """Üstte boydan kırmızı bant: beyaz UZAR, gövde renginde (siyah) şimşek; altta iki QR."""
+    c = Concept("5_kirmizi_bant", "Kırmızı bant", "Üstte boydan kırmızı bant, içinde beyaz UZAR ve siyah şimşek; "
+                "altta iki QR.", "")
+    x0, x1 = -CX - TILE / 2, CX + TILE / 2
+    letters, b = wordmark(14.0, x0, 78.5)
+    room = x1 - (b.bounds()[2] + 7.0)
+    band = A.rect(-70, 66.0, 70, 100) ^ outline()
+    reg = [(band - b, RED), (letters, WHITE),
+           (text(bold(), "OTO LASTİK", 5.0, x1, 82.0, "r", 1.2, room), WHITE),
+           (text(bold(), INFO.city, 3.6, x1, 74.2, "r", 1.3, room), WHITE)]
+    reg += [(t, WHITE) for t in two_tiles(16.5)]
+    reg += [(t, WHITE) for t in labels(12.0)]
+    return c, reg, BLACK
+
+
+def s6_cerceve():
+    """İnce kırmızı çerçeve (görünen yüzün içinde); solda UZAR, sağda OTO LASTİK; iki QR."""
+    c = Concept("6_cerceve", "Kırmızı çerçeve", "Kenardan içeride ince kırmızı çerçeve; içinde UZAR, OTO LASTİK ve "
+                "iki QR.", "")
+    w, h, cy = 114.0, 79.0, 48.1
+    frame = A.rrect(w, h, 5.0, 0, cy) - A.rrect(w - 1.8, h - 1.8, 4.1, 0, cy)
+    x0, x1 = -CX - TILE / 2, CX + TILE / 2
+    letters, b = wordmark(13.0, x0, 75.5)
+    room = x1 - (b.bounds()[2] + 7.0)
+    reg = [(frame, RED), (letters, WHITE), (b, RED),
+           (text(bold(), "OTO LASTİK", 4.8, x1, 78.6, "r", 1.15, room), RED),
+           (text(bold(), INFO.city, 3.4, x1, 71.4, "r", 1.25, room), WHITE)]
+    reg += [(t, WHITE) for t in two_tiles(17.5)]
+    reg += [(t, WHITE) for t in labels(13.1, 3.6)]
+    return c, reg, BLACK
+
+
+def s7_dikey_serit():
+    """Solda dikey kırmızı şerit, içinde yukarı doğru beyaz UZAR ve siyah şimşek; sağda iki QR."""
+    c = Concept("7_dikey_serit", "Dikey şerit", "Solda dikey kırmızı şerit, içinde yukarı doğru UZAR; sağda başlık "
+                "ve iki QR.", "")
+    band = A.rect(-70, -1, -45.0, 100) ^ outline()
+    up = text(heavy(), "UZAR", 10.5, 0, 0, "c", 0.6).rotate(90).translate((-52.5, 54.0))
+    b = U.bolt(12.0, -52.5, 25.0)
+    xl, xr = -40.5, 53.5
+    cl, cr = xl + TILE / 2, xr - TILE / 2
+    reg = [(band - b, RED), (up, WHITE),
+           (text(heavy(), "OTO LASTİK", 9.0, xl, 77.5, "l", 0.6), WHITE),
+           (text(bold(), f"{INFO.city}  ·  {INFO.phone}", 3.6, xl, 68.4, "l", 0.8), RED)]
+    for key, cx in (("sayfa", cl), ("karekod", cr)):
+        white, _, _ = tile(key, cx, 16.5 + TILE / 2)
+        reg.append((white, WHITE))
+    reg += [(t, WHITE) for t in labels(12.0, cx=(cl, cr))]
+    return c, reg, BLACK
+
+
+def s8_beyaz_siyah_bant():
+    """Beyaz panel, üstte boydan siyah bant: içinde beyaz UZAR, kırmızı şimşek; QR'lar beyaz gövdede siyah kare."""
+    c = Concept("8_beyaz_siyah_bant", "Beyaz, siyah başlık", "Beyaz panel, üstte siyah bant içinde beyaz UZAR ve "
+                "kırmızı şimşek; QR'lar beyaz gövdede siyah kare.", "")
+    x0, x1 = -CX - TILE / 2, CX + TILE / 2
+    letters, b = wordmark(14.0, x0, 78.5)
+    room = x1 - (b.bounds()[2] + 7.0)
+    band = A.rect(-70, 66.0, 70, 100) ^ outline()
+    city = text(bold(), INFO.city, 3.6, x1, 74.2, "r", 1.3, room)
+    reg = [(band - letters - city, BLACK), (b, RED),
+           (text(bold(), "OTO LASTİK", 5.0, x1, 82.0, "r", 1.2, room), RED)]
+    reg += [(t, BLACK) for t in two_tiles(16.5, light=False)]
+    reg += [(t, BLACK) for t in labels(12.0)]
+    return c, reg, WHITE
+
+
+def s9_lastik_izi():
+    """Sade düzen; başlığın altında sitedeki gibi kırmızı lastik dişi şeridi."""
+    c = Concept("9_lastik_izi", "Lastik izi", "Sade düzen; başlıkla QR'lar arasında sitedeki gibi kırmızı lastik "
+                "dişi şeridi.", "")
+    reg = header_lr(WHITE)
+    x0, x1 = -CX - TILE / 2, CX + TILE / 2
+    reg.append((U.tread_band(x0, x1, 63.0, 66.2, pitch=3.6), RED))
+    reg += [(t, WHITE) for t in two_tiles(16.5)]
+    reg += [(t, WHITE) for t in labels(12.0)]
+    return c, reg, BLACK
+
+
+def s10_site_gibi():
+    """Sitenin üst kısmı gibi: UZAR + şimşek, altında kırmızı OTO LASTİK, sağ üstte üç eğik kırmızı şerit."""
+    c = Concept("10_site_gibi", "Siteyle aynı", "Sitenin açılışındaki gibi: UZAR, şimşek, kırmızı OTO LASTİK ve sağ "
+                "üstte üç eğik şerit.", "")
+    x0 = -CX - TILE / 2
+    letters, b = wordmark(13.5, x0, 80.0)
+    k = 0.53                                         # şerit eğimi (sitedeki 28°)
+    stripes = []
+    for xb, w in ((22.0, 1.8), (29.0, 4.0), (39.0, 9.0)):
+        y0, y1 = 64.0, 100.0
+        stripes.append(A.polygon([(xb, y0), (xb + w, y0), (xb + w + k * (y1 - y0), y1), (xb + k * (y1 - y0), y1)]))
+    reg = [(A.union(*stripes) ^ outline(), RED), (letters, WHITE), (b, RED),
+           (text(bold(), "OTO LASTİK", 4.6, x0, 68.8, "l", 1.6), RED)]
+    reg += [(t, WHITE) for t in two_tiles(16.5)]
+    reg += [(t, WHITE) for t in labels(12.0)]
+    return c, reg, BLACK
+
+
+DESIGNS = [s1_sade, s2_beyaz, s3_ortali, s4_tek_qr, s5_kirmizi_bant, s6_cerceve, s7_dikey_serit,
+           s8_beyaz_siyah_bant, s9_lastik_izi, s10_site_gibi]
 
 
 # ---------------------------------------------------------------- yapım, kontrol, çizim
@@ -280,7 +380,8 @@ def sheet(c, i):
 
 def overview(cs, path):
     cw, ch, gap = 760, 500, 20
-    W, H = 2 * cw + 3 * gap, 2 * ch + 3 * gap + 110
+    rows = (len(cs) + 1) // 2
+    W, H = 2 * cw + 3 * gap, rows * ch + (rows + 1) * gap + 110
     canvas = Image.new("RGB", (W, H), (244, 245, 247))
     dr = ImageDraw.Draw(canvas)
     dr.text((24, 20), "UZAR OTO LASTİK – QR'LI TEZGÂH İSİMLİĞİ (4:3, 120 × 90 mm)", fill=(24, 26, 30),
@@ -303,6 +404,85 @@ def overview(cs, path):
     canvas.save(path)
 
 
+CUSTOMER = {"1_sade": "Siyah zemin, beyaz yazı, kırmızı şimşek. En sade hâli.",
+            "2_beyaz": "Beyaz zemin, siyah yazı, kırmızı şimşek.",
+            "3_ortali": "Başlık ortada, etiketler kırmızı.",
+            "4_tek_qr": "Tek büyük QR: sayfayı açar, ödeme (IBAN, karekod) sayfanın içinde.",
+            "5_kirmizi_bant": "Üstte kırmızı bant, içinde beyaz UZAR.",
+            "6_cerceve": "İnce kırmızı çerçeve, dengeli ve şık.",
+            "7_dikey_serit": "Solda dikey kırmızı şerit, yukarı doğru UZAR.",
+            "8_beyaz_siyah_bant": "Beyaz zemin, üstte siyah bant.",
+            "9_lastik_izi": "Başlığın altında kırmızı lastik izi şeridi.",
+            "10_site_gibi": "Web sitesiyle aynı görünüm: eğik kırmızı şeritler."}
+
+
+def wrap(dr, s, font, width):
+    lines, cur = [], ""
+    for w in s.split():
+        t = (cur + " " + w).strip()
+        if dr.textlength(t, font=font) <= width:
+            cur = t
+        else:
+            lines.append(cur)
+            cur = w
+    return lines + [cur] if cur else lines
+
+
+def catalog(cs):
+    """Müşteriye gönderilecek sayfalar (A4 dikey, 200 dpi): musteri_1.png (1–6), musteri_2.png (7–10) ve
+    ikisi birlikte musteri_katalog.pdf. Teknik bilgi yok; yalnız tasarım, numara ve QR'ların ne yaptığı."""
+    W, H = 1654, 2339
+    big = ImageFont.truetype(os.path.join(A.FONT_DIR, "BarlowCondensed-Black.ttf"), 118)
+    mid = ImageFont.truetype(os.path.join(A.FONT_DIR, "BarlowCondensed-ExtraBold.ttf"), 44)
+    f = lambda n: ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), n)  # noqa: E731
+    ink, muted, paper = (20, 20, 22), (96, 98, 106), (245, 245, 243)
+    groups = [cs[:6], cs[6:]]
+    pages = []
+    for p, group in enumerate(groups):
+        im = Image.new("RGB", (W, H), paper)
+        dr = ImageDraw.Draw(im)
+        dr.rectangle((0, 0, W, 250), fill=(16, 16, 18))
+        for x, w in ((1180, 22), (1250, 50), (1350, 120)):
+            dr.polygon([(x, 250), (x + w, 250), (x + w + 133, 0), (x + 133, 0)], fill=RED)
+        dr.text((70, 40), "UZAR", font=big, fill=(244, 244, 242))
+        dr.text((76 + dr.textlength("UZAR", font=big) + 18, 70), "OTO LASTİK", font=mid, fill=RED)
+        dr.text((76 + dr.textlength("UZAR", font=big) + 18, 128), "ANTALYA", font=f(26), fill=(170, 170, 176))
+        dr.text((70, 186), "QR'lı tezgâh isimliği · tasarım önerileri", font=f(30), fill=(220, 220, 224))
+        dr.text((W - 70 - dr.textlength(f"{p + 1}/2", font=f(28)), 196), f"{p + 1}/2", font=f(28),
+                fill=(170, 170, 176))
+        y = 285
+        for line in ("TARA · BİZE ULAŞ: telefonla okutunca işletme sayfası açılır (ara, WhatsApp, Instagram, Google, IBAN).",
+                     "KAREKOD İLE ÖDE: banka uygulamasıyla okutunca ödeme ekranı ENES UZAR adına hazır açılır."):
+            dr.text((70, y), line, font=f(27), fill=ink)
+            y += 40
+        top, gap, cw = 395, 50, (W - 3 * 60) // 2
+        ch = (H - top - 190 - 2 * gap) // 3
+        for k, c in enumerate(group):
+            x0, y0 = 60 + (k % 2) * (cw + 60), top + (k // 2) * (ch + gap)
+            dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 28, fill=(255, 255, 255), outline=(226, 226, 230))
+            n = cs.index(c) + 1
+            dr.ellipse((x0 + 26, y0 + 24, x0 + 86, y0 + 84), fill=RED)
+            num = str(n)
+            dr.text((x0 + 56 - dr.textlength(num, font=f(34)) / 2, y0 + 34), num, font=f(34), fill=(255, 255, 255))
+            dr.text((x0 + 104, y0 + 30), c.title, font=f(38), fill=ink)
+            img = A.fit_into(render(mesh(c.parts), 1300, rotation(0, -90), flat=0.85, margin=0.02), cw - 70, ch - 190)
+            im.paste(img, (x0 + (cw - img.width) // 2, y0 + 100 + (ch - 190 - img.height) // 2), img)
+            ty = y0 + ch - 78
+            for line in wrap(dr, CUSTOMER.get(c.key, c.desc), f(26), cw - 60)[:2]:
+                dr.text((x0 + 30, ty), line, font=f(26), fill=muted)
+                ty += 34
+        foot = ("Ölçü 12 × 9 cm · tezgâh sehpası dahil · siyah, kırmızı, beyaz" if p == 0 else
+                "Beğendiğiniz tasarımın numarasını yazmanız yeterli. Ölçü 12 × 9 cm, tezgâh sehpası dahil.")
+        dr.rounded_rectangle((60, H - 150, W - 60, H - 70), 22, fill=(16, 16, 18))
+        dr.text((W / 2 - dr.textlength(foot, font=f(30)) / 2, H - 128), foot, font=f(30), fill=(244, 244, 242))
+        path = os.path.join(OUT_DIR, f"musteri_{p + 1}.png")
+        im.save(path, optimize=True)
+        pages.append(im)
+    pages[0].save(os.path.join(OUT_DIR, "musteri_katalog.pdf"), save_all=True, append_images=pages[1:],
+                  resolution=200)
+    return pages
+
+
 def main():
     only = sys.argv[1:]
     cs = []
@@ -319,6 +499,7 @@ def main():
               f"0,8 mm'den ince (%): {thin(c)}  kare: {mods}  bozuk: {bad}")
     if not only:
         overview(cs, os.path.join(OUT_DIR, "hepsi.png"))
+        catalog(cs)
 
 
 if __name__ == "__main__":

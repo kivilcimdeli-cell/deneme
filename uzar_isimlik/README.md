@@ -9,7 +9,8 @@
 | **TARA · BİZE ULAŞ** | işletme sayfası açılır: Hemen Ara (telefon uygulaması numarayla açılır), WhatsApp, Instagram (@enesuzar9794), Google'da değerlendir, IBAN (tek dokunuşla kopyala), karekod, Rehbere Kaydet |
 | **KAREKOD İLE ÖDE** | banka uygulamasıyla okutulunca para gönderme ekranı ENES UZAR ve IBAN'ı dolu açılır (Yapı Kredi karekodunun içeriği fotoğraftan okundu, birebir yeniden çizildi) |
 
-- Sayfa adresi: **https://uzarotolastik.pages.dev/** (Cloudflare Pages, işletmenin kendi ücretsiz hesabı).
+- Sayfa adresi: **https://flat-cake-6737.uzarotolastik.workers.dev/** (Cloudflare Workers, ücretsiz hesap).
+  `pages.dev` adresleri Türkiye'de erişime kapalı (Kasım 2025), bu yüzden `workers.dev` kullanılıyor.
 - Tüm bilgiler tek dosyada: `bilgiler.json`. IBAN mod-97 ile doğrulanır; karekodun CRC'si ve içindeki IBAN/alıcı
   bu IBAN'la karşılaştırılır (tutmazsa üretim durur).
 - Sayfa adresi değişmediği sürece Instagram, Google bağlantısı, IBAN vb. **isimlik yeniden basılmadan** değişebilir:
@@ -19,38 +20,26 @@
 
 ![Sayfa](sayfa_onizleme.png)
 
-## Sayfayı yayınlama: Cloudflare Pages (bir kez, ücretsiz)
+## Sayfayı güncelleme (Cloudflare)
 
-`uzar_site.zip` hazır (içinde `index.html` en üstte). Bilgisayardan en rahatı; telefondan da olur.
+Site Cloudflare'de `flat-cake-6737` adlı Worker olarak yayında (hesabın workers.dev alt alanı `uzarotolastik`).
+Bilgi değişirse: `python3 scripts/uzar_sayfa.py` → yeni `uzar_site.zip` (içinde `index.html` en üstte) →
+Cloudflare'de Workers & Pages → `flat-cake-6737` → **New deployment** / dosyaları yükle. Adres aynı kalır,
+isimlik yeniden basılmaz. Worker'ın adı ya da hesabın alt alanı değiştirilirse adres (ve QR) değişir.
 
-1. **Hesap:** dash.cloudflare.com → *Sign up* → e-posta ve şifre (işletmenin ya da kendi e-postan; adres hiçbir
-   yerde görünmez) → e-postadaki doğrulama bağlantısına bas. Kart bilgisi gerekmez; ilk açılışta alan adı (domain)
-   eklemeyi önerirse atla.
-2. **Proje:** soldaki menüden **Workers & Pages** (bazen *Compute* altında) → **Create** (*Create application*) →
-   **Pages** sekmesi → **Upload assets** / *Use direct upload* → **Get started**.
-3. **Ad:** *Project name* kutusuna **uzarotolastik** yaz → **Create project**. Adres `uzarotolastik.pages.dev` olur;
-   ad başkasındaysa Cloudflare uyarır, `uzarotolastikantalya` gibi bir ad seç ve bana yaz.
-4. **Yükle:** *Drag and drop your files here* alanına `uzar_site.zip` dosyasını sürükle ya da *select from computer*
-   ile seç (telefonda dosyayı Dosyalar'dan seç). Liste çıkınca **Deploy site** (ya da *Save and Deploy*).
-5. **Dene:** bir iki dakika sonra telefonda `https://uzarotolastik.pages.dev` aç: Hemen Ara telefon uygulamasını
-   numarayla açmalı; WhatsApp, Instagram, Google, IBAN kopyala ve karekod çalışmalı.
-6. Adres farklı çıktıysa bana yaz: QR'ı o adresle yeniden üretirim. **İsimlik, site açılmadan basılmaz.**
+## İsimlik (10 öneri, 4:3)
 
-Sonra bilgi değişirse: aynı projede **Create deployment** (*Upload new version*) → yeni zip → Deploy. Adres aynı
-kalır, isimlik yeniden basılmaz.
-
-## İsimlik (4 öneri, 4:3)
+Müşteriye gönderilecek katalog: **`musteri_1.png`** (1–6), **`musteri_2.png`** (7–10), ikisi birlikte
+**`musteri_katalog.pdf`**. Ayrıntılı sayfalar: `<numara>_<ad>.png` (ön, tezgâhta, yandan; filament; QR okuma).
 
 Panel **120 × 90 × 2,6 mm**, köşeler R8, kenarlar iki yüzde 0,6 mm basamaklı pahla yumuşatılmış. Ön yüzü tablada
 basılır: yazılar ve QR'ın beyaz zemini ilk 4 katmanda yüzeye gömülü renkli dolgu (0,8 mm), QR'ın siyah kareleri
 gövdenin kendisi. Tablada basılan yüz düz ve keskin; Textured PEI ile mat olur (QR parlamaz). Panel 100 mm'lik
 siyah sehpanın yuvasına 15° eğik takılır; ikisi aynı tablada, tutkalsız. Filament ~40 g (~20 TL, 500 TL/kg);
-seçilen tasarım PrusaSlicer'da ölçülür.
+seçilen tasarım X2D dosyasına çevrilirken PrusaSlicer'da ölçülür.
 
-1. **Sade** – solda UZAR ve şimşek, sağda OTO LASTİK / ANTALYA, altta iki QR.
-2. **Beyaz** – aynı düzen beyaz zeminde; QR'lar beyaz gövdede siyah kare.
-3. **Ortalı** – başlık ortada, etiketler kırmızı.
-4. **Tek QR** – yalnız sayfa QR'ı (karekod sayfada), solda marka, TARA ve telefon.
+1. **Sade** · 2. **Beyaz** · 3. **Ortalı** · 4. **Tek QR** (karekod sayfada) · 5. **Kırmızı bant** ·
+6. **Kırmızı çerçeve** · 7. **Dikey şerit** · 8. **Beyaz, siyah başlık** · 9. **Lastik izi** · 10. **Siteyle aynı**
 
 Claude'daki önizleme sayfası (`sayfa_artifact.html`) yalnız önizleme içindir; orada "Claude" yazısı görünür ve
 telefon bağlantısı çalışmaz, isimliğe bağlanmaz.
