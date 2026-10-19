@@ -48,18 +48,19 @@ telefon bağlantısı çalışmaz, isimliğe bağlanmaz.
 
 ![Baskı](baski/onizleme.png)
 
-**`baski/uzar_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır.
+**`baski/uzar_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Tablada **iki takım**
+(panel + sehpa); biri silinirse tek takım basılır.
 
 | | |
 | --- | --- |
-| Panel | 120 × 90 × **4 mm** (önerilerde 2,6), köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
-| Kabartma | **1,0 mm** (5 katman): UZAR, ANTALYA, TARA, BİZE ULAŞ · ÖDE, telefon beyaz; şimşek, OTO LASTİK, ok kırmızı |
+| Panel | 120 × 90 mm, siyah gövde **1 cm**, köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
+| Kabartma | **2 mm** (10 katman): UZAR, ANTALYA, TARA, BİZE ULAŞ · ÖDE, telefon beyaz; şimşek, OTO LASTİK, ok kırmızı |
 | QR | yüzeyle aynı hizada beyaz dolgu (0,8 mm), 48 mm, kare 1,29 mm; görüntüden ve baskı hatası benzetiminden okundu |
 | Yazılar | küçük satırlar Outfit ExtraBold (sitedeki yazı tipi): rakam / harf içi boşluklar ≥ 0,65 mm, İ ve Ö noktaları harften ayrık |
 | AMS | 1 siyah (Elas, ana nozul) · 2 beyaz (Elas, yardımcı nozul) · 3 kırmızı (ana nozul, siyah bitince bir kez geçer) |
 | Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Elas için Generic PLA |
-| Filament | ~39 g (siyah 36, beyaz 2,5, kırmızı 0,4) + kule ~3–4 g; PrusaSlicer ~1 sa 25 dk (Bambu Studio kendi süresini gösterir) |
-| Sehpa | aynı tablada; panel yuvaya (4,3 mm) 15° eğik takılır, tutkal gerekmez |
+| Filament | iki takım ~119 g (siyah 110, beyaz 7,4, kırmızı 1,5) + kule; takım başına ~60 g; PrusaSlicer ~3 sa 50 dk (Bambu Studio kendi süresini gösterir) |
+| Sehpa | 100 × 40 × 10 mm, aynı tablada; panel yuvaya (10,3 mm) 15° eğik takılır, tutkal gerekmez |
 
 Önerideki düzen korundu; baskı için QR 54 → 48 mm küçülüp sağa kaydı, sol sütundaki yazılar büyüdü.
 

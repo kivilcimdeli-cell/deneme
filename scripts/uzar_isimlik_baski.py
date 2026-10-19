@@ -3,15 +3,16 @@
 Müşteri isteği: panel ince olmasın, yazı ve logo kabartmalı ve belirgin olsun, yazılar sorunsuz basılsın, ütüleme
 olmasın.
 
-  * Panel 120 × 90 × 4 mm (önerilerde 2,6), köşeler R8, alt ve üst kenar 0,6 mm basamaklı pah. Yüzü yukarı basılır
-    (arkası tablada), destek gerekmez.
-  * Kabartma 1,0 mm (5 katman): UZAR, ANTALYA, TARA, BİZE ULAŞ · ÖDE ve telefon beyaz; şimşek, OTO LASTİK ve
+  * Tablada iki takım (panel + sehpa). Panel 120 × 90 mm, siyah gövde 1 cm (müşteri isteği; önerilerde 2,6 mm),
+    köşeler R8, alt ve üst kenar 0,6 mm basamaklı pah. Yüzü yukarı basılır (arkası tablada), destek gerekmez.
+  * Kabartma 2 mm (10 katman): UZAR, ANTALYA, TARA, BİZE ULAŞ · ÖDE ve telefon beyaz; şimşek, OTO LASTİK ve
     ok kırmızı. Küçük satırlar sitedeki yazı tipiyle (Outfit ExtraBold) ve büyütüldü: rakam ve harf içi
     boşlukları ≥ 0,7 mm (kabartmada dolmaz), İ / Ö noktaları harften ayrık; ölçümler her üretimde yazdırılır.
   * QR (TARA → işletme sayfası) yüzeyle aynı hizada: beyaz dolgu üst 4 katmanda (0,8 mm), siyah kareler gövdenin
     kendisi. Kabartma QR'da kare kenarlarının gölgesi ve köşe yuvarlanması okumayı bozar; düz QR keskin çıkar.
     Kare 1,29 mm (QR 48 mm; sol sütuna yer açmak için önerideki 54 mm'den küçültüldü).
-  * Sehpa (siyah) aynı tablada; panel yuvaya (4,3 mm) 15° arkaya eğik oturur, tutkal gerekmez.
+  * Sehpa (siyah) aynı tablada: 100 × 40 × 10 mm, 1 cm'lik panel için derin; panel yuvaya (10,3 mm) 15° arkaya
+    eğik oturur, tutkal gerekmez.
   * Nozullar elle: siyah ve kırmızı ana nozulda (siyah gövde bitince kırmızıya bir kez geçer), beyaz yardımcı
     nozulda. Katman başına filament değişimi yok; renkli katmanlarda yalnız nozul değişir (kule).
   * Bambu standart profili (0,20 mm Standard @BBL X2D): ütüleme kapalı, destek kapalı, tabla Textured PEI.
@@ -39,12 +40,14 @@ from anahtarlik_kurumsal_kucuk import TOWER_MARGIN, X_AUX, tower_size  # noqa: E
 from cift_tarafli_isimlik import render, rotation  # noqa: E402
 
 OUT_DIR = os.path.join(A.ROOT, "uzar_isimlik", "baski")
-T = 4.0                          # panel kalınlığı (20 katman)
-RELIEF = 1.0                     # kabartma (5 katman)
+T = 10.0                         # panel kalınlığı: siyah gövde 1 cm (50 katman)
+RELIEF = 2.0                     # kabartma (10 katman)
 INLAY = 0.8                      # QR'ın beyaz dolgusu (4 katman)
 GAP = 12.0                       # panel ile sehpa arası
 J = m3.JoinType.Round
-TOWER, TOWER_BRIM = tower_size(n_fil=3, prime=45.0, change_len=10.0, height=10.0)
+TOWER, TOWER_BRIM = tower_size(n_fil=3, prime=45.0, change_len=10.0, height=T + RELIEF)
+COPIES = [(74.0, 99.0, 0), (182.0, 99.0, 0)]        # iki takım (panel + sehpa), tabla koordinatı (nesne merkezi)
+TOWER_XY = (40.0, 195.0)                            # kule: takımların arkasında, solda
 SHOW = {A.BLACK: (40, 40, 43), A.WHITE: (246, 246, 242), A.RED: (206, 28, 38)}
 
 
@@ -146,11 +149,16 @@ def panel(f):
              A.RED)]
 
 
-def stand():
-    """Sehpa (baskı yönünde, tabanı tablada) ve paneli sehpada gösteren dönüşüm."""
-    z0, y0 = 3.0, 2.0
+def stand(length=100.0, depth=40.0, height=10.0, r=8.0, z0=3.0, y0=2.0):
+    """Sehpa (baskı yönünde, tabanı tablada): alçak kama profili, 1 cm'lik panel için derin üst yüz, panelin 15° eğik
+    yuvası (10,3 mm); altında boydan kanal (görünmez, filament tasarrufu; tavanı köprü). Döner: (sehpa, (z0, y0))."""
+    prof = A.polygon([(-5.0, 0.0), (depth - 5.0, 0.0), (depth - 5.0, 2.0), (21.0, height), (-1.0, height),
+                      (-5.0, height - 4.0)])
+    along = lambda cs, L: cs.extrude(L).transform([[0, 0, 1, -L / 2], [1, 0, 0, 0], [0, 1, 0, 0]])  # noqa: E731
+    bar = along(prof, length) - along(A.rect(17.5, -1.0, 27.0, 5.0), length - 16.0)
+    bar = bar ^ A.rrect(length, depth, r, 0, depth / 2 - 5.0).extrude(height + 2.0).translate((0, 0, -1.0))
     slot = Y.tilted(I.upright(I.outline(), T + 0.3, -0.15), I.TILT, z0, y0)
-    return Y.stand(**I.STAND) - slot, (z0, y0)
+    return bar - slot, (z0, y0)
 
 
 def assembled(parts, z0, y0):
@@ -162,6 +170,7 @@ def assembled(parts, z0, y0):
 class Plate:
     key = "uzar_isimlik_x2d"
     title = "UZAR_OTO_LASTIK_isimlik"
+    instances = COPIES
 
     def __init__(self):
         self.face = face()
@@ -170,24 +179,20 @@ class Plate:
         self.nozzle_map = {A.BLACK: 1, A.RED: 1, A.WHITE: 2}
         self.filament_profiles = {A.BLACK: A.GENERIC_PLA, A.WHITE: A.GENERIC_PLA}
         self.object_settings = {"enable_support": "0", "ironing_type": "no ironing"}
-        parts = self.solids()
-        x1 = max(m.bounding_box()[3] for _, m, _ in parts) + A.BED_CENTER[0]
-        tx = round(x1 + TOWER_BRIM + 10.0, 2)
-        ty = round(A.BED_CENTER[1] - TOWER / 2, 2)
-        self.tower_xy = (tx, ty)
+        self.tower_xy = TOWER_XY
         self.project_overrides = {"curr_bed_type": "Textured PEI Plate",
-                                  "wipe_tower_x": [f"{tx:g}"], "wipe_tower_y": [f"{ty:g}"]}
+                                  "wipe_tower_x": [f"{TOWER_XY[0]:g}"], "wipe_tower_y": [f"{TOWER_XY[1]:g}"]}
 
     def solids(self):
-        """Tablada, nesne merkezi (0, 0) civarı: panel üstte, sehpa altta; grup tablanın solunda (kuleye yer)."""
-        parts = list(self.panel)
+        """Bir takım, nesne merkezi (0, 0): panel 90° çevrik (yüzü yukarı), sehpa altında. Tablada iki kopya
+        (`instances`)."""
+        parts = [(n, m.rotate((0, 0, 90)), c) for n, m, c in self.panel]
         pb = m3.Manifold.batch_boolean([m for _, m, _ in parts], m3.OpType.Add).bounding_box()
         sb = self.stand.bounding_box()
         st = self.stand.translate(((pb[0] + pb[3]) / 2 - (sb[0] + sb[3]) / 2, pb[1] - GAP - sb[4], -sb[2]))
         parts.append(("Sehpa (siyah)", st, A.BLACK))
         allb = m3.Manifold.batch_boolean([m for _, m, _ in parts], m3.OpType.Add).bounding_box()
-        dx = -allb[0] + (X_AUX + 12.0) - A.BED_CENTER[0]          # sol kenar x = 32,5 (yardımcı nozul sınırı + pay)
-        dy = -(allb[1] + allb[4]) / 2
+        dx, dy = -(allb[0] + allb[3]) / 2, -(allb[1] + allb[4]) / 2
         return [(n, m.translate((dx, dy, 0)), c) for n, m, c in parts]
 
     def size(self):
@@ -198,8 +203,12 @@ class Plate:
 # ---------------------------------------------------------------- kontroller ve önizleme
 
 def checks(plate, parts):
-    cx, cy = A.BED_CENTER
-    boxes = [(b[0] + cx, b[1] + cy, b[3] + cx, b[4] + cy) for b in (m.bounding_box() for _, m, _ in parts)]
+    """İki takım iki nozulun ortak alanında, birbirinden ve kuleden uzak; kule Bambu'nun izin verdiği yerde."""
+    boxes = []
+    for x, y, _ in plate.instances:
+        for _, m, _ in parts:
+            b = m.bounding_box()
+            boxes.append((b[0] + x, b[1] + y, b[3] + x, b[4] + y))
     inside = all(b[0] >= X_AUX and b[1] >= 0 and b[2] <= 256 and b[3] <= 256 for b in boxes)
     tx, ty = plate.tower_xy
     lim = 256 - TOWER - TOWER_MARGIN - TOWER_BRIM
@@ -207,10 +216,13 @@ def checks(plate, parts):
     tower = (tx - TOWER_BRIM, ty - TOWER_BRIM, tx + TOWER + TOWER_BRIM, ty + TOWER + TOWER_BRIM)
     sep = lambda a, b: max(b[0] - a[2], a[0] - b[2], b[1] - a[3], a[1] - b[3])  # noqa: E731
     clear = min(sep(tower, b) for b in boxes)
-    ok = inside and allowed and clear >= 5.0
+    n = len(parts)
+    between = min(sep(a, b) for a in boxes[:n] for b in boxes[n:])
+    ok = inside and allowed and clear >= 5.0 and between >= 5.0
     return ok, (f"parçalar iki nozulun ortak alanında: {inside} (x {min(b[0] for b in boxes):.1f}.."
                 f"{max(b[2] for b in boxes):.1f}, y {min(b[1] for b in boxes):.1f}..{max(b[3] for b in boxes):.1f}), "
-                f"kule {TOWER:.1f} mm ({tx:g}, {ty:g}), Bambu sınırında: {allowed}, parçalara {clear:.1f} mm")
+                f"takımlar arası {between:.1f} mm, kule {TOWER:.1f} mm ({tx:g}, {ty:g}), Bambu sınırında: {allowed}, "
+                f"parçalara {clear:.1f} mm")
 
 
 def top_view(parts, size=1600):
@@ -230,12 +242,12 @@ def qr_check(plate):
 
 
 def preview(plate, parts, path, info_lines):
-    cx, cy = A.BED_CENTER
     bed = m3.Manifold.cube((256, 256, 0.2)).translate((0, 0, -0.4))
     tx, ty = plate.tower_xy
-    tower = m3.Manifold.cube((TOWER, TOWER, 6.0)).translate((tx, ty, 0))
+    tower = m3.Manifold.cube((TOWER, TOWER, T + RELIEF)).translate((tx, ty, 0))
     on_bed = [(*A.mesh_arrays(bed), (205, 208, 214)), (*A.mesh_arrays(tower), (150, 156, 168))]
-    on_bed += [(*A.mesh_arrays(m.translate((cx, cy, 0))), SHOW[c]) for _, m, c in parts]
+    on_bed += [(*A.mesh_arrays(m.translate((x, y, 0))), SHOW[c]) for x, y, _ in plate.instances
+               for _, m, c in parts]
     bed_im = A.fit_into(render(on_bed, 1000, A.R_TOP, flat=0.75, margin=0.02), 470, 470)
     close = A.fit_into(render([(*A.mesh_arrays(m), SHOW[c]) for _, m, c in plate.panel], 1300, rotation(-18, -42),
                               margin=0.02), 520, 470)
@@ -278,8 +290,9 @@ def main():
         print(f"  {k:16s} en dar iç boşluk {inner:.2f} mm, en dar ara {gap:.2f} mm, 0,8 mm'den ince %{thin}, "
               f"en {cs.bounds()[2] - cs.bounds()[0]:.1f} mm")
     w, h = plate.size()
-    g = {A.COLOUR_NAMES[c]: round(sum(Y.grams(m) for _, m, cc in parts if cc == c), 1) for c in filaments}
-    print(f"{os.path.relpath(path, A.ROOT)}  tabla {w:.1f} × {h:.1f} mm  AMS: "
+    g = {A.COLOUR_NAMES[c]: round(len(plate.instances) * sum(Y.grams(m) for _, m, cc in parts if cc == c), 1)
+         for c in filaments}
+    print(f"{os.path.relpath(path, A.ROOT)}  {len(plate.instances)} takım, her biri {w:.1f} × {h:.1f} mm  AMS: "
           f"{', '.join(A.COLOUR_NAMES[x] for x in filaments)}  nozul: {plate.nozzle_map}")
     print(f"  sağlam: {all(str(m.status()).endswith('NoError') for m in mans)}  örtüşme: {overlap:.4f} mm³  "
           f"parçalar: {[n for n, _, _ in parts]}")
@@ -293,11 +306,11 @@ def main():
         m = json.load(open(meas, encoding="utf-8"))
         g = {k: round(v, 1) for k, v in m["g"].items()}
         print(f"  ölçüm ({m['kaynak']}): {g}, toplam {m['toplam_g']} g, {m['sure']}")
-    info = [f"Panel 120 × 90 × {T:.0f} mm, kabartma {RELIEF:.1f} mm (beyaz yazılar, kırmızı şimşek / OTO LASTİK / ok), "
-            "QR yüzeyle aynı hizada beyaz dolgu",
+    info = [f"{len(plate.instances)} takım · panel 120 × 90 mm, siyah gövde {T / 10:.0f} cm, kabartma {RELIEF:.0f} mm "
+            "(beyaz yazılar, kırmızı şimşek / OTO LASTİK / ok), QR yüzeyle aynı hizada beyaz dolgu",
             "AMS: 1 siyah (Elas, ana nozul) · 2 beyaz (Elas, yardımcı nozul) · 3 kırmızı (ana nozul, siyahtan sonra)",
             "Bambu standart 0,20 mm · ütüleme kapalı · destek yok · Textured PEI · panel yüzü yukarı, sehpa yanında",
-            f"Filament ~{sum(g.values()):.0f} g (siyah {g.get('siyah', 0):.0f}, beyaz {g.get('beyaz', 0):.1f}, kırmızı "
+            f"Filament (iki takım) ~{sum(g.values()):.0f} g (siyah {g.get('siyah', 0):.0f}, beyaz {g.get('beyaz', 0):.1f}, kırmızı "
             f"{g.get('kirmizi', g.get('kırmızı', 0)):.1f}) + kule · QR okundu"
             f"{' (baskı hatası benzetiminde de)' if qr_sim else ', benzetimde OKUNMADI'} · yerleşim "
             f"{'tamam' if ok_place else 'SORUN'}"]
