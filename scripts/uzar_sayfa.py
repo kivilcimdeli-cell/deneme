@@ -7,10 +7,9 @@ galeriden okutulur) ve Rehbere Kaydet (vCard). Dış bağlantı yok: yazı tiple
 Bilgiler `uzar_isimlik/bilgiler.json`dan okunur (scripts/qr_sistemi.py doğrular); bilgi değişince sayfa bu
 komutla yeniden üretilir. Sayfa adresi değişmediği sürece basılmış isimlik aynen çalışır.
 
-Yayın: işletmenin kendi (ücretsiz) hesabıyla, bu depodan bağımsız. Netlify Drop: app.netlify.com/drop sayfasına
-`uzar_isimlik/site` klasörü sürüklenir, hesap açılıp site sahiplenilir, site adı `uzarotolastik` yapılır →
-https://uzarotolastik.netlify.app/ (Cloudflare Pages "Direct Upload" de olur: uzarotolastik.pages.dev). Kesin adres
-`bilgiler.json` → `sayfa_url`a yazılır; isimlikteki QR o adresten üretilir.
+Yayın: işletmenin kendi (ücretsiz) Cloudflare hesabıyla, bu depodan bağımsız: Workers & Pages → Pages → doğrudan
+yükleme, proje adı `uzarotolastik`, `uzar_site.zip` yüklenir → https://uzarotolastik.pages.dev/ (adımlar:
+uzar_isimlik/README.md). Kesin adres `bilgiler.json` → `sayfa_url`a yazılır; isimlikteki QR o adresten üretilir.
 
 Çıktı : uzar_isimlik/site/ (index.html, karekod.png, uzar.vcf, og.png, fonts/*.woff), uzar_isimlik/uzar_site.zip,
         uzar_isimlik/sayfa_onizleme.png
@@ -395,13 +394,13 @@ def screenshot(path=PREVIEW):
 
 
 def pack():
-    """Yüklemeye hazır zip: içinde `uzar_site/` klasörü (index.html en üstte)."""
+    """Yüklemeye hazır zip: index.html en üstte (Cloudflare Pages / Netlify doğrudan yükleme)."""
     import zipfile
     with zipfile.ZipFile(ZIP, "w", zipfile.ZIP_DEFLATED) as z:
         for d, _, files in os.walk(OUT):
             for fn in sorted(files):
                 full = os.path.join(d, fn)
-                z.write(full, os.path.join("uzar_site", os.path.relpath(full, OUT)))
+                z.write(full, os.path.relpath(full, OUT))
 
 
 def data_uri(fn, mime):
