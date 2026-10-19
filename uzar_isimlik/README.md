@@ -19,6 +19,11 @@
 
 ![Sayfa](sayfa_onizleme.png)
 
+Hareketler: açılışta şeritler kayarak gelir, UZAR yükselir, şimşek çakar (sonra arada bir yeniden çakar),
+OTO LASTİK açılır, düğmeler sırayla gelir; lastik dişi şeridi döner, Hemen Ara düğmesinde parıltı ve telefon
+simgesi titrer, aşağıdakiler kaydırınca belirir, IBAN kopyalanınca kutu parlar. Telefonda "hareketi azalt" açıksa
+hepsi kapanır. Kayıt: `sayfa_animasyon.gif`.
+
 ## Sayfanın yayına alınması (bu depodan bağımsız, işletmenin kendi hesabıyla)
 
 Sayfa, isimliği yapanın hesabıyla bağlantılı olmasın diye işletmenin kendi ücretsiz hesabında yayınlanır:

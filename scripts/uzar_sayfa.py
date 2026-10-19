@@ -73,9 +73,9 @@ def bolt_svg(cls="bolt"):
 def tread_svg():
     """Lastik dişi şeridi (isimlikteki gibi ok biçimli bloklar)."""
     blocks = "".join(f'<polygon points="{x},0 {x + 7},0 {x + 14},7 {x + 7},14 {x},14 {x + 7},7"/>'
-                     for x in range(0, 400, 18))
+                     for x in range(-18, 436, 18))
     return (f'<svg class="tread" viewBox="0 0 400 14" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
-            f'{blocks}</svg>')
+            f'<g class="roll">{blocks}</g></svg>')
 
 
 def subset_fonts():
@@ -209,7 +209,49 @@ footer .bolt{height:14px;width:auto;fill:var(--red);vertical-align:-2px;margin:0
   font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.45);transition:transform .25s,opacity .25s;white-space:nowrap;
   opacity:0;pointer-events:none}
 .toast.show{transform:translate(-50%,0);opacity:1}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ---- animasyonlar: açılışta sırayla gelir, şimşek arada çakar, lastik dişi döner ---- */
+@keyframes stripe{from{transform:translateX(170px) skewX(-28deg)}to{transform:skewX(-28deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes strike{0%{opacity:0;transform:translateY(-40%) scale(.5) rotate(-14deg)}
+  55%{opacity:1;transform:translateY(4%) scale(1.12) rotate(3deg);filter:drop-shadow(0 0 34px rgba(255,80,80,.95)) brightness(1.6)}
+  100%{opacity:1;transform:none}}
+@keyframes flicker{0%,88%,100%{opacity:1}89%{opacity:.25}90%{opacity:1;filter:drop-shadow(0 0 30px rgba(255,70,70,.95)) brightness(1.5)}
+  92%{opacity:.4}93.5%{opacity:1}}
+@keyframes spread{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:.34em}}
+@keyframes roll{to{transform:translateX(-18px)}}
+@keyframes shine{0%{transform:translateX(-130%) skewX(-20deg)}28%,100%{transform:translateX(230%) skewX(-20deg)}}
+@keyframes ring{0%,8%,100%{transform:none}1%,5%{transform:rotate(-16deg)}3%,7%{transform:rotate(16deg)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes flash{0%{background:#ffe3e5;border-color:var(--red)}100%{background:#fff}}
+@keyframes open{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:none}}
+.hero::before{animation:stripe .7s cubic-bezier(.2,.8,.2,1) both}
+.hero::after{animation:stripe .7s .07s cubic-bezier(.2,.8,.2,1) both}
+.hero i{animation:stripe .7s .14s cubic-bezier(.2,.8,.2,1) both}
+.logo{animation:rise .6s .05s cubic-bezier(.2,.8,.2,1) both}
+.logo .bolt{transform-origin:50% 60%;animation:strike .55s .3s cubic-bezier(.3,1.4,.5,1) both,flicker 5.5s 2.2s infinite}
+.kind{animation:spread .8s .35s cubic-bezier(.2,.8,.2,1) both}
+.city,.lead{animation:fade .6s .5s both}
+.tread{animation:fade .5s .45s both}
+.tread .roll{animation:roll 1.1s linear infinite}
+.list .btn{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.list .btn:nth-child(1){animation-delay:.4s}.list .btn:nth-child(2){animation-delay:.48s}
+.list .btn:nth-child(3){animation-delay:.56s}.list .btn:nth-child(4){animation-delay:.64s}
+.btn.primary{position:relative;overflow:hidden}
+.btn.primary::after{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);animation:shine 4.5s 1.4s infinite}
+.btn.primary .ic{animation:ring 4.5s 1.4s infinite}
+.btn:active .ib{transform:scale(.9)}
+.btn .ib{transition:transform .12s}
+.copy.ok{animation:pop .35s}
+.iban.flash{animation:flash .9s ease-out}
+details.kk[open] .kk-body{animation:open .35s cubic-bezier(.2,.8,.2,1)}
+.js .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
+.js .pay::after{transform:translateX(80px) skewX(-28deg);transition:transform .7s .25s cubic-bezier(.2,.8,.2,1)}
+.js .pay.in::after{transform:skewX(-28deg)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
+  .js .reveal{opacity:1;transform:none}.js .pay::after{transform:skewX(-28deg)}}
 """
 
 JS = """
@@ -222,9 +264,14 @@ async function copy(t){
   a.remove();return ok}
 document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{
   const ok=await copy(b.dataset.copy);const l=b.querySelector('span');const o=l.textContent;
-  if(ok){b.classList.add('ok');l.textContent='KOPYALANDI';say('IBAN kopyalandı – banka uygulamanıza yapıştırın')}
+  if(ok){b.classList.add('ok');l.textContent='KOPYALANDI';say('IBAN kopyalandı – banka uygulamanıza yapıştırın');
+    const ib=document.querySelector('.iban');ib.classList.remove('flash');void ib.offsetWidth;ib.classList.add('flash')}
   else say('Kopyalanamadı: IBAN yazısına basılı tutun');
   setTimeout(()=>{b.classList.remove('ok');l.textContent=o},2000)}));
+const rv=document.querySelectorAll('.reveal');
+if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){
+  x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});rv.forEach(x=>io.observe(x))}
+else rv.forEach(x=>x.classList.add('in'));
 """
 
 
@@ -256,6 +303,7 @@ def page(info):
 <meta property="og:url" content="{e(info.page)}">
 <meta property="og:image" content="{e(info.page)}og.png">
 <link rel="icon" href="{favicon}">
+<script>document.documentElement.classList.add('js')</script>
 <style>{CSS}</style>
 </head>
 <body>
@@ -273,7 +321,7 @@ def page(info):
   {btn(insta, svg(logo_path("instagram")), "Instagram", "@" + info.instagram)}
   {btn(info.google, svg(ICON["star"]), "Google'da Değerlendirin", "Yorumlar · konum · yol tarifi")}
 </nav>
-<section class="pay" aria-labelledby="odeme">
+<section class="pay reveal" aria-labelledby="odeme">
   <h2 id="odeme">{svg(ICON["bank"])}ÖDEME BİLGİLERİ</h2>
   <dl class="rows"><dt>Alıcı</dt><dd>{e(info.holder)}</dd><dt>Banka</dt><dd>{e(info.bank)}</dd></dl>
   <div class="iban" aria-label="IBAN">{e(Q.iban_display(info.iban))}</div>
@@ -288,8 +336,8 @@ def page(info):
     </div>
   </details>
 </section>
-<a class="ghost" href="uzar.vcf" download="Uzar Oto Lastik.vcf">{svg(ICON["person"])}Rehbere Kaydet</a>
-<footer>UZAR{bolt_svg()}OTO LASTİK · {e(info.city.upper())}</footer>
+<a class="ghost reveal" href="uzar.vcf" download="Uzar Oto Lastik.vcf">{svg(ICON["person"])}Rehbere Kaydet</a>
+<footer class="reveal">UZAR{bolt_svg()}OTO LASTİK · {e(info.city.upper())}</footer>
 </div>
 <div class="toast" role="status" aria-live="polite"></div>
 <script>{JS}</script>
@@ -305,7 +353,7 @@ def screenshot(path=PREVIEW):
     shots = []
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
-        pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2)
+        pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, reduced_motion="reduce")
         pg.goto(url)
         pg.wait_for_timeout(300)
         top = path.replace(".png", "_ust.png")
