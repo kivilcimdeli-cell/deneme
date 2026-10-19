@@ -1,17 +1,17 @@
-"""UZAR OTO LASTİK – QR'lı tezgâh isimliği önerileri: 4:3 yatay (120 × 90 mm), köşeleri yuvarlak, sade.
+"""UZAR OTO LASTİK – QR'lı tezgâh isimliği önerileri: 4:3 yatay (128 × 96 mm), köşeleri yuvarlak, sade. Site yok.
 
-İki QR (tek baskıda, panelin ön yüzünde):
-  * TARA · BİZE ULAŞ  → işletme sayfası (ara, WhatsApp, Instagram, Google'da değerlendir, IBAN kopyala, karekod,
-                        rehbere kaydet); sayfa: scripts/uzar_sayfa.py, bilgiler: uzar_isimlik/bilgiler.json
-  * KAREKOD İLE ÖDE   → bankanın karekodu (ENES UZAR, Yapı Kredi IBAN'ı): banka uygulamasıyla okutunca para
-                        gönderme ekranı alıcısı ve IBAN'ı dolu açılır
-Sayfa adresi sabit kaldıkça bilgiler (Instagram, Google bağlantısı, IBAN) isimlik yeniden basılmadan değişebilir.
+Üç QR, her biri doğrudan işini yapar (internet sitesi gerekmez, araya başka sayfa girmez):
+  * ARA              → TEL:+905426116987: okutunca telefon uygulaması numarayla açılır
+  * WHATSAPP         → https://wa.me/905426116987: WhatsApp sohbeti açılır
+  * KAREKOD İLE ÖDE  → bankanın karekodu (ENES UZAR, Yapı Kredi IBAN'ı): banka uygulamasıyla okutunca para gönderme
+                       ekranı alıcısı ve IBAN'ı dolu açılır
+Instagram adı yazıyla (@enesuzar9794), telefon numarası başlıkta. Bilgiler: uzar_isimlik/bilgiler.json.
 
-Panel 120 × 90 × 2,6 mm (4:3), köşeler R8, kenarlar iki yüzde 0,6 mm basamaklı pahla yumuşatılmış. Ön yüzü tablada
+Panel 128 × 96 × 2,6 mm (4:3), köşeler R8, kenarlar iki yüzde 0,6 mm basamaklı pahla yumuşatılmış. Ön yüzü tablada
 basılır: yazılar ve QR'ın beyaz zemini ilk 4 katmanda yüzeye gömülü renkli dolgu (0,8 mm); QR'ın siyah kareleri
-gövdenin kendisi. Tablada basılan yüz düz ve keskin; Textured PEI ile mat (QR'da parlama olmaz). Panel 100 mm'lik
+gövdenin kendisi. Tablada basılan yüz düz ve keskin; Textured PEI ile mat (QR'da parlama olmaz). Panel 104 mm'lik
 siyah sehpanın yuvasına 15° arkaya eğik takılır (ortada alttaki ~7 mm yuvada kalır); iki parça aynı tablada.
-QR kare boyu en az 0,9 mm (scripts/qr_sistemi.py).
+QR kare boyu en az 0,9 mm (scripts/qr_sistemi.py): karekod 0,90 mm, ARA ve WHATSAPP 0,96 mm.
 
 Her tasarımda QR'lar ön görünüşün görüntüsünden (ve baskı hatası benzetiminden) okunarak doğrulanır.
 
@@ -38,17 +38,20 @@ from masa_isimligi import Concept, upright  # noqa: E402
 OUT_DIR = os.path.join(A.ROOT, "uzar_isimlik")
 BLACK, WHITE, RED = (36, 36, 39), (246, 246, 242), (206, 28, 38)
 NAMES = {BLACK: "siyah", WHITE: "beyaz", RED: "kırmızı"}
-PW, PH = 120.0, 90.0             # panel 4:3 (x −60..60, y 0..90)
+PW, PH = 128.0, 96.0             # panel 4:3 (x −64..64, y 0..96)
 RADIUS = 8.0                     # köşe yuvarlatma
 HIDDEN = 7.5                     # ortada sehpanın yuvasında kalan alt şerit
 T = 2.6                          # panel kalınlığı (13 katman)
 TILT = 15.0
-STAND = dict(length=100.0, depth=30.0, height=10.0, r=8.0)
-TILE = 44.1                      # QR karosu (karekod 45 + 2×2 kare × 0,9 mm)
-CX = 26.0                        # karoların orta noktası (±x)
+STAND = dict(length=104.0, depth=30.0, height=10.0, r=8.0)
+XM = 57.0                        # içerik kenarları (±x)
+KK = 44.1                        # karekod karosu (45 + 2×2 kare × 0,9 mm)
+SM = 28.0                        # ARA / WHATSAPP karosu (25 + 2×2 kare × 0,96 mm)
+TOP = 68.0                       # karoların üst kenarı
 J = m3.JoinType.Round
 INFO = Q.load()
-QRS = {e.key: e for e in Q.qr_set(INFO, ["sayfa", "karekod"])}
+QRS = {e.key: e for e in Q.qr_set(INFO, ["telefon", "whatsapp", "karekod"])}
+QR_NAMES = {"telefon": "ARA (telefon)", "whatsapp": "WHATSAPP", "karekod": "banka karekodu"}
 
 
 # ---------------------------------------------------------------- parçalar
@@ -65,7 +68,7 @@ def outline():
     return A.rrect(PW, PH, RADIUS, 0, PH / 2)
 
 
-def tile(key, cx, cy, s=TILE, r=1.2):
+def tile(key, cx, cy, s, r=1.2):
     """QR karosu: köşeleri yuvarlak beyaz kare eksi koyu kareler. Döner: (beyaz, koyu, kare boyu)."""
     e = QRS[key]
     module = Q.module_for(e, s)
@@ -90,34 +93,46 @@ def wordmark(cap, x, y, align="l"):
     return letters.translate((dx, 0)), b.translate((dx, 0))
 
 
-def wordmark_width(cap):
-    letters, b = wordmark(cap, 0, 0)
-    return b.bounds()[2] - letters.bounds()[0]
-
-
 def header_lr(fg):
-    """Solda UZAR + şimşek, sağda OTO LASTİK / şehir (karoların dış kenarlarına hizalı, arada en az 7 mm)."""
-    x0, x1 = -CX - TILE / 2, CX + TILE / 2
-    letters, b = wordmark(14.0, x0, 76.5)
-    room = x1 - (b.bounds()[2] + 7.0)
+    """Solda UZAR + şimşek, sağda OTO LASTİK / telefon (içerik kenarlarına hizalı, arada en az 8 mm)."""
+    letters, b = wordmark(15.0, -XM, 83.0)
+    room = XM - (b.bounds()[2] + 8.0)
     return [(letters, fg), (b, RED),
-            (text(bold(), "OTO LASTİK", 5.0, x1, 80.0, "r", 1.2, room), RED),
-            (text(bold(), INFO.city, 3.6, x1, 72.2, "r", 1.3, room), fg)]
+            (text(bold(), "OTO LASTİK", 5.2, XM, 86.6, "r", 1.25, room), RED),
+            (text(bold(), INFO.phone, 4.6, XM, 78.4, "r", 0.5, room), fg)]
 
 
-def two_tiles(y0, light=True):
-    """Yan yana iki QR karosu (alt kenar y0). light: beyaz karo (siyah gövdede); False: siyah kareler (beyaz gövdede)."""
+def instagram(x, y, cap=4.4, size=7.6, align="l"):
+    """Instagram simgesi (sade: yuvarlak kare, halka, nokta; çizgiler ≥0,85 mm) ve @kullanıcı adı, y = orta."""
+    h = size / 2
+    w = 0.9
+    ring = A.rrect(size, size, size * 0.26, 0, 0) - A.rrect(size - 2 * w, size - 2 * w, size * 0.26 - w, 0, 0)
+    ro = size * 0.245
+    icon = ring + (A.circle(ro, 0, 0) - A.circle(ro - 0.85, 0, 0)) + A.circle(0.5, size * 0.27, size * 0.27)
+    words = text(bold(), "@" + INFO.instagram, cap, 0, 0, "l", 0.35)
+    gap = 2.2
+    total = size + gap + words.bounds()[2]
+    x0 = {"l": x, "c": x - total / 2, "r": x - total}[align]
+    return icon.translate((x0 + h, y)) + words.translate((x0 + size + gap, y))
+
+
+def qr_group(kk_left, light):
+    """Karekod (büyük) bir yanda, ARA ve WHATSAPP öbür yanda. Döner: [(şekil, rol)] rol: tile / label."""
+    if kk_left:
+        kx, sx = -XM + KK / 2, (XM - SM / 2 - SM - 7.0, XM - SM / 2)
+    else:
+        kx, sx = XM - KK / 2, (-XM + SM / 2, -XM + SM / 2 + SM + 7.0)
     out = []
-    for key, cx in (("sayfa", -CX), ("karekod", CX)):
-        white, dark, _ = tile(key, cx, y0 + TILE / 2)
-        out.append(white if light else dark)
+    white, dark, _ = tile("karekod", kx, TOP - KK / 2, KK)
+    out.append((white if light else dark, "tile"))
+    out.append((text(bold(), "KAREKOD İLE ÖDE", 3.8, kx, TOP - KK - 5.4, "c", 0.38, KK), "label"))
+    for key, x, word in (("telefon", sx[0], "ARA"), ("whatsapp", sx[1], "WHATSAPP")):
+        white, dark, _ = tile(key, x, TOP - SM / 2, SM)
+        out.append((white if light else dark, "tile"))
+        out.append((text(bold(), word, 3.8, x, TOP - SM - 5.0, "c", 0.38, SM), "label"))
+    side_c = (sx[0] + sx[1]) / 2
+    out.append((instagram(side_c, TOP - KK - 5.4, align="c"), "insta"))
     return out
-
-
-def labels(y, cap=3.8):
-    f = bold()
-    return [text(f, "TARA · BİZE ULAŞ", cap, -CX, y, "c", cap * 0.1, TILE),
-            text(f, "KAREKOD İLE ÖDE", cap, CX, y, "c", cap * 0.1, TILE)]
 
 
 def soften(body, out, depth=0.6, steps=3):
@@ -133,58 +148,36 @@ def soften(body, out, depth=0.6, steps=3):
 # ---------------------------------------------------------------- tasarımlar
 
 def s1_sade():
-    """Siyah zemin; solda UZAR + şimşek, sağda OTO LASTİK / ANTALYA; altta iki QR."""
-    c = Concept("1_sade", "Sade", "Siyah zemin, beyaz UZAR ve kırmızı şimşek; altta iki QR. Süs yok, bol boşluk.", "")
+    """Siyah zemin; solda UZAR + şimşek, sağda OTO LASTİK / telefon; altta ARA, WHATSAPP ve karekod."""
+    c = Concept("1_sade", "Sade", "Siyah zemin, beyaz UZAR ve kırmızı şimşek. Solda ARA ve WHATSAPP, sağda karekod; "
+                "altta Instagram adı.", "")
     reg = header_lr(WHITE)
-    reg += [(t, WHITE) for t in two_tiles(16.5)]
-    reg += [(t, WHITE) for t in labels(12.0)]
+    reg += [(cs, WHITE) for cs, _ in qr_group(False, True)]
     return c, reg, BLACK
 
 
 def s2_beyaz():
-    """Beyaz zemin; siyah UZAR, kırmızı şimşek; QR'lar beyaz gövde üstünde siyah kare."""
-    c = Concept("2_beyaz", "Beyaz", "Beyaz zemin, siyah UZAR ve kırmızı şimşek; QR'lar beyaz gövdede siyah kare.", "")
+    """Beyaz zemin; siyah yazılar, kırmızı şimşek; QR'lar beyaz gövde üstünde siyah kare."""
+    c = Concept("2_beyaz", "Beyaz", "Aynı düzen beyaz zeminde: siyah yazı, kırmızı şimşek; QR'lar beyaz gövdede siyah "
+                "kare.", "")
     reg = header_lr(BLACK)
-    reg += [(t, BLACK) for t in two_tiles(16.5, light=False)]
-    reg += [(t, BLACK) for t in labels(12.0)]
+    reg += [(cs, BLACK) for cs, _ in qr_group(False, False)]
     return c, reg, WHITE
 
 
-def s3_ortali():
-    """Ortalanmış başlık: UZAR + şimşek, altında kırmızı OTO LASTİK · ANTALYA; etiketler kırmızı."""
-    c = Concept("3_ortali", "Ortalı", "Başlık ortada: UZAR ve şimşek, altında kırmızı OTO LASTİK · ANTALYA; "
-                "etiketler kırmızı.", "")
-    letters, b = wordmark(14.0, 0.0, 78.0, "c")
+def s3_odeme_solda():
+    """Karekod solda (ödeme önde), ARA ve WHATSAPP sağda; başlık ortada, etiketler kırmızı."""
+    c = Concept("3_odeme_solda", "Ödeme solda", "Başlık ortada; karekod solda, ARA ve WHATSAPP sağda; etiketler "
+                "kırmızı.", "")
+    letters, b = wordmark(13.0, 0.0, 86.0, "c")
     reg = [(letters, WHITE), (b, RED),
-           (text(bold(), f"OTO LASTİK  ·  {INFO.city}", 4.2, 0.0, 66.4, "c", 1.25), RED)]
-    reg += [(t, WHITE) for t in two_tiles(16.0)]
-    reg += [(t, RED) for t in labels(11.6)]
+           (text(bold(), f"OTO LASTİK  ·  {INFO.phone}", 4.2, 0.0, 73.2, "c", 1.0), RED)]
+    for cs, role in qr_group(True, True):
+        reg.append((cs, RED if role == "label" else WHITE))
     return c, reg, BLACK
 
 
-def s4_tek_qr():
-    """Tek büyük QR (sayfa) sağda; solda marka, TARA ve telefon. Karekod sayfada."""
-    c = Concept("4_tek_qr", "Tek QR", "Tek büyük QR sağda (sayfayı açar, karekod sayfada); solda marka, TARA ve "
-                "telefon. En sade.", "")
-    c.uses = ("sayfa",)
-    s, qx, qy = 54.0, 25.0, 47.0
-    x0, x1 = -50.0, qx - s / 2 - 7.0
-    cap = min(13.0, 10.0 * (x1 - x0) / wordmark_width(10.0))
-    letters, b = wordmark(cap, x0, 71.0)
-    white, _, _ = tile("sayfa", qx, qy, s, r=1.6)
-    reg = [(letters, WHITE), (b, RED),
-           (text(bold(), "OTO LASTİK", 4.6, x0, 58.6, "l", 1.25, x1 - x0), RED),
-           (text(bold(), INFO.city, 3.4, x0, 52.2, "l", 1.2), WHITE),
-           (text(heavy(), "TARA", 8.5, x0, 35.0, "l", 0.5), WHITE)]
-    tx = reg[-1][0].bounds()[2] + 3.0
-    reg.append((A.polygon([(tx, 31.8), (tx + 5.2, 35.0), (tx, 38.2)]), RED))
-    reg += [(text(bold(), "BİZE ULAŞ · ÖDE", 3.8, x0, 25.5, "l", 0.45, x1 - x0), WHITE),
-            (text(bold(), INFO.phone, 4.4, x0, 15.0, "l", 0.45, x1 - x0), WHITE),
-            (white, WHITE)]
-    return c, reg, BLACK
-
-
-DESIGNS = [s1_sade, s2_beyaz, s3_ortali, s4_tek_qr]
+DESIGNS = [s1_sade, s2_beyaz, s3_odeme_solda]
 
 
 # ---------------------------------------------------------------- yapım, kontrol, çizim
@@ -205,7 +198,7 @@ def build(fn):
     for m, col in c.parts:
         g[col] = g.get(col, 0.0) + Y.grams(m)
     c.g = g
-    c.expected = [QRS[k].content for k in getattr(c, "uses", ("sayfa", "karekod"))]
+    c.expected = [QRS[k].content for k in ("telefon", "whatsapp", "karekod")]
     return c
 
 
@@ -248,7 +241,7 @@ def mesh(parts):
 
 
 def sheet(c, i):
-    views = [(rotation(0, -90), "Önden, sehpada (120 × 90 mm)"), (rotation(-28, -68), "Tezgâhta (3/4)"),
+    views = [(rotation(0, -90), f"Önden, sehpada ({PW:.0f} × {PH:.0f} mm)"), (rotation(-28, -68), "Tezgâhta (3/4)"),
              (rotation(-90, -90), f"Yandan: {TILT:.0f}° eğik")]
     W, H = 1500, 700
     canvas = Image.new("RGB", (W, H), (236, 239, 244))
@@ -269,7 +262,7 @@ def sheet(c, i):
             fill=(22, 120, 60), font=font_ui(19))
     y = 644
     for content, ok, ok_sim in c.qr:
-        label = "sayfa" if content == QRS["sayfa"].content else "banka karekodu"
+        label = next(QR_NAMES[k] for k, e in QRS.items() if e.content == content)
         dr.text((30, y), f"QR {label}: " + ("okundu" if ok else "OKUNMADI") +
                 (", baskı hatası benzetiminde de okundu" if ok_sim else ", benzetimde OKUNMADI"),
                 fill=(22, 120, 60) if ok and ok_sim else (200, 30, 38), font=font_ui(17))
@@ -283,10 +276,11 @@ def overview(cs, path):
     W, H = 2 * cw + 3 * gap, 2 * ch + 3 * gap + 110
     canvas = Image.new("RGB", (W, H), (244, 245, 247))
     dr = ImageDraw.Draw(canvas)
-    dr.text((24, 20), "UZAR OTO LASTİK – QR'LI TEZGÂH İSİMLİĞİ (4:3, 120 × 90 mm)", fill=(24, 26, 30),
+    dr.text((24, 20), f"UZAR OTO LASTİK – QR'LI TEZGÂH İSİMLİĞİ (4:3, {PW:.0f} × {PH:.0f} mm)", fill=(24, 26, 30),
             font=font_ui(34))
-    dr.text((24, 66), "Sol QR: sayfa (ara · WhatsApp · Instagram · Google · IBAN)  ·  sağ QR: banka karekodu "
-                      "(ENES UZAR, Yapı Kredi)  ·  hepsi görüntüden okundu", fill=(110, 114, 124), font=font_ui(19))
+    dr.text((24, 66), "Site yok, QR'lar doğrudan açar: ARA → telefon uygulaması  ·  WHATSAPP → sohbet  ·  KAREKOD İLE "
+                      "ÖDE → banka uygulaması (ENES UZAR, Yapı Kredi)  ·  hepsi görüntüden okundu",
+            fill=(110, 114, 124), font=font_ui(19))
     for k, c in enumerate(cs):
         x, y = gap + (k % 2) * (cw + gap), 110 + gap + (k // 2) * (ch + gap)
         dr.rounded_rectangle((x, y, x + cw, y + ch), 24, fill=(226, 228, 232))
@@ -314,7 +308,7 @@ def main():
         sheet(c, i)
         cs.append(c)
         bad = [k for k, (m, _) in enumerate(c.parts) if not str(m.status()).endswith("NoError") or m.volume() <= 0]
-        mods = {k: float(Q.module_for(e, TILE)) for k, e in QRS.items()}
+        mods = {k: float(Q.module_for(e, KK if k == "karekod" else SM)) for k, e in QRS.items()}
         print(f"{c.key:12s} ~{sum(c.g.values()):4.0f} g  QR: {[(ok, sim) for _, ok, sim in c.qr]}  "
               f"0,8 mm'den ince (%): {thin(c)}  kare: {mods}  bozuk: {bad}")
     if not only:
