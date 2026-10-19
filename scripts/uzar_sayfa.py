@@ -234,9 +234,10 @@ def page(info):
     insta = f"https://www.instagram.com/{info.instagram}/"
     title = "Uzar Oto Lastik – Antalya"
     desc = "Uzar Oto Lastik, Antalya: hemen arayın, WhatsApp'tan yazın, Instagram'da takip edin, ödeme bilgileri."
-    blank = ' target="_blank" rel="noopener"'
-    btn = lambda href, icon, t, s, cls="", ext=True: (  # noqa: E731
-        f'<a class="btn {cls}" href="{e(href)}"{blank if ext else ""}>'
+    # aynı sekmede açılır: yeni sekme (target=_blank) QR okuyucu uygulamaların iç tarayıcılarında ve korumalı
+    # önizlemelerde çoğu zaman hiç açılmaz; WhatsApp ve Instagram bağlantıları uygulamayı doğrudan açar
+    btn = lambda href, icon, t, s, cls="": (  # noqa: E731
+        f'<a class="btn {cls}" href="{e(href)}">'
         f'<span class="ib">{icon}</span><span class="t"><b>{e(t)}</b><small>{e(s)}</small></span>'
         f'<span class="chev"></span></a>')
     favicon = ("data:image/svg+xml," + f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='-40 -50 80 100'>"
@@ -267,7 +268,7 @@ def page(info):
 {tread_svg()}
 <p class="lead">Bize tek dokunuşla ulaşın.</p>
 <nav class="list">
-  {btn("tel:+" + info.tel, svg(ICON["phone"]), "Hemen Ara", info.phone, "primary", ext=False)}
+  {btn("tel:+" + info.tel, svg(ICON["phone"]), "Hemen Ara", info.phone, "primary")}
   {btn(wa, svg(logo_path("whatsapp")), "WhatsApp'tan Yaz", "Mesaj gönderin · " + info.phone)}
   {btn(insta, svg(logo_path("instagram")), "Instagram", "@" + info.instagram)}
   {btn(info.google, svg(ICON["star"]), "Google'da Değerlendirin", "Yorumlar · konum · yol tarifi")}
