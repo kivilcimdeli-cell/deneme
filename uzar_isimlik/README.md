@@ -24,7 +24,15 @@ OTO LASTİK açılır, düğmeler sırayla gelir; lastik dişi şeridi döner, H
 simgesi titrer, aşağıdakiler kaydırınca belirir, IBAN kopyalanınca kutu parlar. Telefonda "hareketi azalt" açıksa
 hepsi kapanır. Kayıt: `sayfa_animasyon.gif`.
 
-## Sayfanın yayına alınması (bu depodan bağımsız, işletmenin kendi hesabıyla)
+## Yayında: Claude sayfası
+
+`sayfa_artifact.html` → https://claude.ai/artifact/HUbQzyvbWQyaWsyoYZ6x9C (önce özel; sayfanın **Paylaş**
+menüsünden bağlantıya sahip herkese açılır). Bu biçimde yazı tipleri ve karekod sayfanın içinde; oradaki çerçeve
+dosya indirmeyi engellediği için "Rehbere Kaydet" yok, karekod basılı tutularak kaydedilir; telefon bağlantısı her
+izleyicide çalışmayabildiği için "Hemen Ara" numarayı da panoya kopyalar. Herkese açılınca adres isimlik QR'ına
+yazılır (`bilgiler.json` → `sayfa_url`).
+
+## Başka yol: kendi sitesi (bu depodan bağımsız, işletmenin kendi hesabıyla)
 
 Sayfa, isimliği yapanın hesabıyla bağlantılı olmasın diye işletmenin kendi ücretsiz hesabında yayınlanır:
 

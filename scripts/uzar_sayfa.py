@@ -34,6 +34,7 @@ OUT = os.path.join(A.ROOT, "uzar_isimlik", "site")
 ZIP = os.path.join(A.ROOT, "uzar_isimlik", "uzar_site.zip")
 PREVIEW = os.path.join(A.ROOT, "uzar_isimlik", "sayfa_onizleme.png")
 STANDALONE = os.path.join(A.ROOT, "uzar_isimlik", "sayfa_onizleme.html")
+ARTIFACT = os.path.join(A.ROOT, "uzar_isimlik", "sayfa_artifact.html")
 RED, INK = "#d01c26", "#0d0d0f"
 FONTS = {"barlow-black": "BarlowCondensed-Black.ttf", "barlow-xbold": "BarlowCondensed-ExtraBold.ttf",
          "outfit": "Outfit-SemiBold.ttf"}
@@ -135,15 +136,17 @@ CSS = """
 @font-face{font-family:"Barlow Condensed";font-weight:900;font-display:swap;src:url(fonts/barlow-black.woff) format("woff")}
 @font-face{font-family:"Barlow Condensed";font-weight:800;font-display:swap;src:url(fonts/barlow-xbold.woff) format("woff")}
 @font-face{font-family:"Outfit";font-weight:600;font-display:swap;src:url(fonts/outfit.woff) format("woff")}
-:root{--red:#d01c26;--red2:#a5121b;--ink:#0d0d0f;--card:#18181b;--line:#2b2b30;--text:#f4f4f2;--muted:#a2a2a8;
+:root{color-scheme:dark;--red:#d01c26;--red2:#a5121b;--ink:#0d0d0f;--card:#18181b;--line:#2b2b30;--text:#f4f4f2;--muted:#a2a2a8;
   --paper:#f4f4f2;--cond:"Barlow Condensed","Arial Narrow",sans-serif;--ui:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif}
 *{box-sizing:border-box;margin:0}
 html{background:var(--ink);-webkit-text-size-adjust:100%}
 body{background:var(--ink);color:var(--text);font:600 16px/1.35 var(--ui);min-height:100vh;
   padding-bottom:env(safe-area-inset-bottom)}
-.wrap{max-width:460px;margin:0 auto;padding:0 16px 28px}
+.wrap{--gl:max(16px,env(safe-area-inset-left,0px));--gr:max(16px,env(safe-area-inset-right,0px));
+  max-width:460px;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr);padding-block:0 28px}
 a{color:inherit;-webkit-tap-highlight-color:transparent}
-.hero{position:relative;overflow:hidden;padding:44px 22px 30px;margin:0 -16px;isolation:isolate}
+.hero{position:relative;overflow:hidden;padding:44px 22px 30px;margin:0 calc(var(--gr) * -1) 0 calc(var(--gl) * -1);
+  isolation:isolate}
 .hero::before,.hero::after,.hero i{content:"";position:absolute;top:-40px;bottom:-40px;background:var(--red);
   transform:skewX(-28deg);z-index:-1}
 .hero::before{right:-34px;width:58px}
@@ -154,7 +157,8 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 .logo .bolt{height:.86em;width:auto;margin-left:.04em;fill:var(--red);filter:drop-shadow(0 0 18px rgba(208,28,38,.45))}
 .kind{margin-top:12px;font:800 26px/1 var(--cond);letter-spacing:.34em;color:var(--red)}
 .city{margin-top:8px;font-size:13px;letter-spacing:.42em;color:var(--muted)}
-.tread{display:block;width:calc(100% + 32px);height:14px;margin:0 -16px 22px;fill:var(--red)}
+.tread{display:block;width:calc(100% + var(--gl) + var(--gr));height:14px;
+  margin:0 calc(var(--gr) * -1) 22px calc(var(--gl) * -1);fill:var(--red)}
 .lead{color:var(--muted);font-size:15px;margin:0 2px 14px}
 .list{display:grid;gap:12px}
 .btn{display:flex;align-items:center;gap:14px;min-height:72px;padding:12px 14px;border-radius:18px;
@@ -246,12 +250,10 @@ footer .bolt{height:14px;width:auto;fill:var(--red);vertical-align:-2px;margin:0
 .copy.ok{animation:pop .35s}
 .iban.flash{animation:flash .9s ease-out}
 details.kk[open] .kk-body{animation:open .35s cubic-bezier(.2,.8,.2,1)}
-.js .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.2,1)}
-.js .reveal.in{opacity:1;transform:none}
-.js .pay::after{transform:translateX(80px) skewX(-28deg);transition:transform .7s .25s cubic-bezier(.2,.8,.2,1)}
-.js .pay.in::after{transform:skewX(-28deg)}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
-  .js .reveal{opacity:1;transform:none}.js .pay::after{transform:skewX(-28deg)}}
+@keyframes slash{from{transform:translateX(90px) skewX(-28deg)}to{transform:skewX(-28deg)}}
+.reveal{animation:rise .6s .7s cubic-bezier(.2,.8,.2,1) both}
+.pay::after{animation:slash .7s 1s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 """
 
 JS = """
@@ -268,14 +270,15 @@ document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',a
     const ib=document.querySelector('.iban');ib.classList.remove('flash');void ib.offsetWidth;ib.classList.add('flash')}
   else say('Kopyalanamadı: IBAN yazısına basılı tutun');
   setTimeout(()=>{b.classList.remove('ok');l.textContent=o},2000)}));
-const rv=document.querySelectorAll('.reveal');
-if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){
-  x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});rv.forEach(x=>io.observe(x))}
-else rv.forEach(x=>x.classList.add('in'));
+document.querySelectorAll('[data-tel]').forEach(a=>a.addEventListener('click',()=>{
+  copy(a.dataset.tel).then(ok=>{if(ok)say('Numara kopyalandı: '+a.dataset.tel)})}));
 """
 
 
-def page(info):
+def page(info, artifact=False):
+    """Site (`uzar_isimlik/site`) ya da Claude sayfası (artifact=True: yazı tipi ve karekod gömülü, indirme
+    bağlantısı yok – oradaki çerçeve indirmeyi engeller; telefon bağlantısı her izleyicide çalışmayabildiği için
+    Hemen Ara numarayı da kopyalar; belge iskeleti yayında eklenir)."""
     e = html.escape
     wa = Q.whatsapp_link(info)
     insta = f"https://www.instagram.com/{info.instagram}/"
@@ -283,12 +286,61 @@ def page(info):
     desc = "Uzar Oto Lastik, Antalya: hemen arayın, WhatsApp'tan yazın, Instagram'da takip edin, ödeme bilgileri."
     # aynı sekmede açılır: yeni sekme (target=_blank) QR okuyucu uygulamaların iç tarayıcılarında ve korumalı
     # önizlemelerde çoğu zaman hiç açılmaz; WhatsApp ve Instagram bağlantıları uygulamayı doğrudan açar
-    btn = lambda href, icon, t, s, cls="": (  # noqa: E731
-        f'<a class="btn {cls}" href="{e(href)}">'
+    btn = lambda href, icon, t, s, cls="", extra="": (  # noqa: E731
+        f'<a class="btn {cls}" href="{e(href)}"{extra}>'
         f'<span class="ib">{icon}</span><span class="t"><b>{e(t)}</b><small>{e(s)}</small></span>'
         f'<span class="chev"></span></a>')
+    css, kk = CSS, "karekod.png"
+    if artifact:
+        for key in FONTS:
+            css = css.replace(f"url(fonts/{key}.woff)", f"url({data_uri('fonts/' + key + '.woff', 'font/woff')})")
+        kk = data_uri("karekod.png", "image/png")
+    tel_extra = f' data-tel="{e(info.phone)}"' if artifact else ""
+    save = ("Karekoda basılı tutup kaydedin" if artifact else "Karekodu kaydedin") + \
+        "; banka uygulamanızda <b>Karekod ile Öde</b> → <b>Galeriden seç</b>."
+    save_link = "" if artifact else '\n      <a href="karekod.png" download="uzar-karekod.png">Karekodu kaydet</a>'
+    vcf = "" if artifact else (f'\n<a class="ghost reveal" href="uzar.vcf" download="Uzar Oto Lastik.vcf">'
+                               f'{svg(ICON["person"])}Rehbere Kaydet</a>')
     favicon = ("data:image/svg+xml," + f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='-40 -50 80 100'>"
                f"<polygon fill='%23d01c26' points='{BOLT}'/></svg>")
+    body = f"""<div class="wrap">
+<header class="hero"><i></i>
+  <h1 class="logo" aria-label="Uzar">UZAR{bolt_svg()}</h1>
+  <p class="kind">OTO LASTİK</p>
+  <p class="city">{e(info.city.upper())}</p>
+</header>
+{tread_svg()}
+<p class="lead">Bize tek dokunuşla ulaşın.</p>
+<nav class="list">
+  {btn("tel:+" + info.tel, svg(ICON["phone"]), "Hemen Ara", info.phone, "primary", tel_extra)}
+  {btn(wa, svg(logo_path("whatsapp")), "WhatsApp'tan Yaz", "Mesaj gönderin · " + info.phone)}
+  {btn(insta, svg(logo_path("instagram")), "Instagram", "@" + info.instagram)}
+  {btn(info.google, svg(ICON["star"]), "Google'da Değerlendirin", "Yorumlar · konum · yol tarifi")}
+</nav>
+<section class="pay reveal" aria-labelledby="odeme">
+  <h2 id="odeme">{svg(ICON["bank"])}ÖDEME BİLGİLERİ</h2>
+  <dl class="rows"><dt>Alıcı</dt><dd>{e(info.holder)}</dd><dt>Banka</dt><dd>{e(info.bank)}</dd></dl>
+  <div class="iban" aria-label="IBAN">{e(Q.iban_display(info.iban))}</div>
+  <button class="copy" type="button" data-copy="{e(info.iban)}">{svg(ICON["copy"])}<span>IBAN'ı Kopyala</span></button>
+  <details class="kk">
+    <summary class="kk-open">{svg(ICON["qr"])}Karekod ile Öde</summary>
+    <div class="kk-body">
+      <img src="{kk}" width="636" height="636" alt="{e(info.bank)} karekodu – {e(info.holder)}">
+      <p>{save}
+         Dükkândaysanız isimlikteki <b>KAREKOD İLE ÖDE</b> kodunu doğrudan okutun.</p>{save_link}
+    </div>
+  </details>
+</section>{vcf}
+<footer class="reveal">UZAR{bolt_svg()}OTO LASTİK · {e(info.city.upper())}</footer>
+</div>
+<div class="toast" role="status" aria-live="polite"></div>
+<script>{JS}</script>
+"""
+    if artifact:
+        return f"""<title>Uzar Oto Lastik</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>{css}</style>
+{body}"""
     return f"""<!doctype html>
 <html lang="tr">
 <head>
@@ -303,45 +355,10 @@ def page(info):
 <meta property="og:url" content="{e(info.page)}">
 <meta property="og:image" content="{e(info.page)}og.png">
 <link rel="icon" href="{favicon}">
-<script>document.documentElement.classList.add('js')</script>
-<style>{CSS}</style>
+<style>{css}</style>
 </head>
 <body>
-<div class="wrap">
-<header class="hero"><i></i>
-  <h1 class="logo" aria-label="Uzar">UZAR{bolt_svg()}</h1>
-  <p class="kind">OTO LASTİK</p>
-  <p class="city">{e(info.city.upper())}</p>
-</header>
-{tread_svg()}
-<p class="lead">Bize tek dokunuşla ulaşın.</p>
-<nav class="list">
-  {btn("tel:+" + info.tel, svg(ICON["phone"]), "Hemen Ara", info.phone, "primary")}
-  {btn(wa, svg(logo_path("whatsapp")), "WhatsApp'tan Yaz", "Mesaj gönderin · " + info.phone)}
-  {btn(insta, svg(logo_path("instagram")), "Instagram", "@" + info.instagram)}
-  {btn(info.google, svg(ICON["star"]), "Google'da Değerlendirin", "Yorumlar · konum · yol tarifi")}
-</nav>
-<section class="pay reveal" aria-labelledby="odeme">
-  <h2 id="odeme">{svg(ICON["bank"])}ÖDEME BİLGİLERİ</h2>
-  <dl class="rows"><dt>Alıcı</dt><dd>{e(info.holder)}</dd><dt>Banka</dt><dd>{e(info.bank)}</dd></dl>
-  <div class="iban" aria-label="IBAN">{e(Q.iban_display(info.iban))}</div>
-  <button class="copy" type="button" data-copy="{e(info.iban)}">{svg(ICON["copy"])}<span>IBAN'ı Kopyala</span></button>
-  <details class="kk">
-    <summary class="kk-open">{svg(ICON["qr"])}Karekod ile Öde</summary>
-    <div class="kk-body">
-      <img src="karekod.png" width="636" height="636" alt="{e(info.bank)} karekodu – {e(info.holder)}">
-      <p>Karekodu kaydedin; banka uygulamanızda <b>Karekod ile Öde</b> → <b>Galeriden seç</b>.
-         Dükkândaysanız isimlikteki <b>KAREKOD İLE ÖDE</b> kodunu doğrudan okutun.</p>
-      <a href="karekod.png" download="uzar-karekod.png">Karekodu kaydet</a>
-    </div>
-  </details>
-</section>
-<a class="ghost reveal" href="uzar.vcf" download="Uzar Oto Lastik.vcf">{svg(ICON["person"])}Rehbere Kaydet</a>
-<footer class="reveal">UZAR{bolt_svg()}OTO LASTİK · {e(info.city.upper())}</footer>
-</div>
-<div class="toast" role="status" aria-live="polite"></div>
-<script>{JS}</script>
-</body>
+{body}</body>
 </html>
 """
 
@@ -387,21 +404,21 @@ def pack():
                 z.write(full, os.path.join("uzar_site", os.path.relpath(full, OUT)))
 
 
-def standalone(path=STANDALONE):
-    """Tek dosyalık önizleme: yazı tipleri, karekod ve kartvizit sayfanın içine gömülü (yayın için değil)."""
+def data_uri(fn, mime):
     import base64
-    import urllib.parse
-    data = lambda fn, mime: f"data:{mime};base64," + base64.b64encode(  # noqa: E731
-        open(os.path.join(OUT, fn), "rb").read()).decode()
-    page_html = open(os.path.join(OUT, "index.html"), encoding="utf-8").read()
-    for key in FONTS:
-        page_html = page_html.replace(f"url(fonts/{key}.woff)", f"url({data('fonts/' + key + '.woff', 'font/woff')})")
-    kk = data("karekod.png", "image/png")
-    page_html = page_html.replace('src="karekod.png"', f'src="{kk}"').replace('href="karekod.png"', f'href="{kk}"')
-    vcf = "data:text/vcard;charset=utf-8," + urllib.parse.quote(open(os.path.join(OUT, "uzar.vcf"), encoding="utf-8").read())
-    page_html = page_html.replace('href="uzar.vcf"', f'href="{vcf}"')
+    return f"data:{mime};base64," + base64.b64encode(open(os.path.join(OUT, fn), "rb").read()).decode()
+
+
+def standalone(info, path=STANDALONE):
+    """Claude sayfası (artifact) biçimi: `sayfa_artifact.html` yayınlanan dosya; `sayfa_onizleme.html` aynısının
+    tam belge hâli (uygulamada önizleme için)."""
+    art = page(info, artifact=True)
+    with open(ARTIFACT, "w", encoding="utf-8") as f:
+        f.write(art)
     with open(path, "w", encoding="utf-8") as f:
-        f.write(page_html)
+        f.write('<!doctype html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n'
+                '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
+                f'</head>\n<body>\n{art}</body>\n</html>\n')
     return path
 
 
@@ -415,7 +432,7 @@ def main():
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(page(info))
     pack()
-    standalone()
+    standalone(info)
     print("sayfa:", os.path.relpath(os.path.join(OUT, "index.html"), A.ROOT), "→", info.page)
     print("önizleme:", os.path.relpath(screenshot(), A.ROOT))
 
