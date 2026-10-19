@@ -44,6 +44,25 @@ seçilen tasarım X2D dosyasına çevrilirken PrusaSlicer'da ölçülür.
 Claude'daki önizleme sayfası (`sayfa_artifact.html`) yalnız önizleme içindir; orada "Claude" yazısı görünür ve
 telefon bağlantısı çalışmaz, isimliğe bağlanmaz.
 
+## Baskı dosyası: seçilen 4 · Tek QR (X2D)
+
+![Baskı](baski/onizleme.png)
+
+**`baski/uzar_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır.
+
+| | |
+| --- | --- |
+| Panel | 120 × 90 × **4 mm** (önerilerde 2,6), köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
+| Kabartma | **1,0 mm** (5 katman): UZAR, ANTALYA, TARA, BİZE ULAŞ · ÖDE, telefon beyaz; şimşek, OTO LASTİK, ok kırmızı |
+| QR | yüzeyle aynı hizada beyaz dolgu (0,8 mm), 48 mm, kare 1,29 mm; görüntüden ve baskı hatası benzetiminden okundu |
+| Yazılar | küçük satırlar Outfit ExtraBold (sitedeki yazı tipi): rakam / harf içi boşluklar ≥ 0,65 mm, İ ve Ö noktaları harften ayrık |
+| AMS | 1 siyah (Elas, ana nozul) · 2 beyaz (Elas, yardımcı nozul) · 3 kırmızı (ana nozul, siyah bitince bir kez geçer) |
+| Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Elas için Generic PLA |
+| Filament | ~39 g (siyah 36, beyaz 2,5, kırmızı 0,4) + kule ~3–4 g; PrusaSlicer ~1 sa 25 dk (Bambu Studio kendi süresini gösterir) |
+| Sehpa | aynı tablada; panel yuvaya (4,3 mm) 15° eğik takılır, tutkal gerekmez |
+
+Önerideki düzen korundu; baskı için QR 54 → 48 mm küçülüp sağa kaydı, sol sütundaki yazılar büyüdü.
+
 ## Yeniden üretme
 
 ```bash
@@ -52,4 +71,5 @@ python3 scripts/qr_sistemi.py            # QR kontrolü → qr_kontrol.png
 python3 scripts/qr_sistemi.py oku resim.png   # banka karekodu ekran görüntüsünü okur
 python3 scripts/uzar_sayfa.py            # sayfa → site/, uzar_site.zip, sayfa_onizleme.png
 python3 scripts/uzar_isimlik.py          # isimlik görselleri → <tasarım>.png, hepsi.png
+python3 scripts/uzar_isimlik_baski.py    # seçilen tasarımın X2D dosyası → baski/
 ```
