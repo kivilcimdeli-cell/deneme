@@ -33,6 +33,7 @@ import qr_sistemi as Q  # noqa: E402
 OUT = os.path.join(A.ROOT, "uzar_isimlik", "site")
 ZIP = os.path.join(A.ROOT, "uzar_isimlik", "uzar_site.zip")
 PREVIEW = os.path.join(A.ROOT, "uzar_isimlik", "sayfa_onizleme.png")
+STANDALONE = os.path.join(A.ROOT, "uzar_isimlik", "sayfa_onizleme.html")
 RED, INK = "#d01c26", "#0d0d0f"
 FONTS = {"barlow-black": "BarlowCondensed-Black.ttf", "barlow-xbold": "BarlowCondensed-ExtraBold.ttf",
          "outfit": "Outfit-SemiBold.ttf"}
@@ -337,6 +338,24 @@ def pack():
                 z.write(full, os.path.join("uzar_site", os.path.relpath(full, OUT)))
 
 
+def standalone(path=STANDALONE):
+    """Tek dosyalık önizleme: yazı tipleri, karekod ve kartvizit sayfanın içine gömülü (yayın için değil)."""
+    import base64
+    import urllib.parse
+    data = lambda fn, mime: f"data:{mime};base64," + base64.b64encode(  # noqa: E731
+        open(os.path.join(OUT, fn), "rb").read()).decode()
+    page_html = open(os.path.join(OUT, "index.html"), encoding="utf-8").read()
+    for key in FONTS:
+        page_html = page_html.replace(f"url(fonts/{key}.woff)", f"url({data('fonts/' + key + '.woff', 'font/woff')})")
+    kk = data("karekod.png", "image/png")
+    page_html = page_html.replace('src="karekod.png"', f'src="{kk}"').replace('href="karekod.png"', f'href="{kk}"')
+    vcf = "data:text/vcard;charset=utf-8," + urllib.parse.quote(open(os.path.join(OUT, "uzar.vcf"), encoding="utf-8").read())
+    page_html = page_html.replace('href="uzar.vcf"', f'href="{vcf}"')
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(page_html)
+    return path
+
+
 def main():
     info = Q.load()
     os.makedirs(OUT, exist_ok=True)
@@ -347,6 +366,7 @@ def main():
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(page(info))
     pack()
+    standalone()
     print("sayfa:", os.path.relpath(os.path.join(OUT, "index.html"), A.ROOT), "→", info.page)
     print("önizleme:", os.path.relpath(screenshot(), A.ROOT))
 
