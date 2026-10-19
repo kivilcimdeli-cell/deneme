@@ -7,10 +7,13 @@ galeriden okutulur) ve Rehbere Kaydet (vCard). Dış bağlantı yok: yazı tiple
 Bilgiler `uzar_isimlik/bilgiler.json`dan okunur (scripts/qr_sistemi.py doğrular); bilgi değişince sayfa bu
 komutla yeniden üretilir. Sayfa adresi değişmediği sürece basılmış isimlik aynen çalışır.
 
-Yayın: GitHub Pages (depo ayarı Settings → Pages → Branch: bu dal, klasör /docs) →
-https://kivilcimdeli-cell.github.io/deneme/uzar/
+Yayın: işletmenin kendi (ücretsiz) hesabıyla, bu depodan bağımsız. Netlify Drop: app.netlify.com/drop sayfasına
+`uzar_isimlik/site` klasörü sürüklenir, hesap açılıp site sahiplenilir, site adı `uzarotolastik` yapılır →
+https://uzarotolastik.netlify.app/ (Cloudflare Pages "Direct Upload" de olur: uzarotolastik.pages.dev). Kesin adres
+`bilgiler.json` → `sayfa_url`a yazılır; isimlikteki QR o adresten üretilir.
 
-Çıktı : docs/uzar/index.html, karekod.png, uzar.vcf, og.png, fonts/*.woff; uzar_isimlik/sayfa_onizleme.png
+Çıktı : uzar_isimlik/site/ (index.html, karekod.png, uzar.vcf, og.png, fonts/*.woff), uzar_isimlik/uzar_site.zip,
+        uzar_isimlik/sayfa_onizleme.png
 
 Kullanım:
   pip install segno zxing-cpp playwright fonttools
@@ -27,7 +30,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
 import qr_sistemi as Q  # noqa: E402
 
-OUT = os.path.join(A.ROOT, "docs", "uzar")
+OUT = os.path.join(A.ROOT, "uzar_isimlik", "site")
+ZIP = os.path.join(A.ROOT, "uzar_isimlik", "uzar_site.zip")
 PREVIEW = os.path.join(A.ROOT, "uzar_isimlik", "sayfa_onizleme.png")
 RED, INK = "#d01c26", "#0d0d0f"
 FONTS = {"barlow-black": "BarlowCondensed-Black.ttf", "barlow-xbold": "BarlowCondensed-ExtraBold.ttf",
@@ -323,6 +327,16 @@ def screenshot(path=PREVIEW):
     return path
 
 
+def pack():
+    """Yüklemeye hazır zip: içinde `uzar_site/` klasörü (index.html en üstte)."""
+    import zipfile
+    with zipfile.ZipFile(ZIP, "w", zipfile.ZIP_DEFLATED) as z:
+        for d, _, files in os.walk(OUT):
+            for fn in sorted(files):
+                full = os.path.join(d, fn)
+                z.write(full, os.path.join("uzar_site", os.path.relpath(full, OUT)))
+
+
 def main():
     info = Q.load()
     os.makedirs(OUT, exist_ok=True)
@@ -332,7 +346,7 @@ def main():
     og_image(info)
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(page(info))
-    open(os.path.join(A.ROOT, "docs", ".nojekyll"), "w").close()
+    pack()
     print("sayfa:", os.path.relpath(os.path.join(OUT, "index.html"), A.ROOT), "→", info.page)
     print("önizleme:", os.path.relpath(screenshot(), A.ROOT))
 

@@ -5,7 +5,7 @@ Bilgiler `uzar_isimlik/bilgiler.json` dosyasında; bilgi değişince yalnız o d
 koddan yeniden çıkar.
 
   * sayfa     : isimliğin ana QR'ı; okutunca kırmızı-siyah-beyaz işletme sayfası açılır (ara, WhatsApp, Instagram,
-                Google, IBAN kopyala, karekod, rehbere kaydet). Sayfa: scripts/uzar_sayfa.py → docs/uzar/
+                Google, IBAN kopyala, karekod, rehbere kaydet). Sayfa: scripts/uzar_sayfa.py → uzar_isimlik/site/
   * karekod   : bankanın "karekod ile para transferi" kodu (TCMB karekod, alıcı + IBAN). Ekran görüntüsünden
                 okunur (`oku`), CRC'si ve içindeki IBAN doğrulanır, aynı içerik siyah-beyaz yeniden çizilir: banka
                 uygulamasıyla okutunca alıcısı ve IBAN'ı dolu para gönderme ekranı açılır.
