@@ -428,6 +428,32 @@ def wrap(dr, s, font, width):
     return lines + [cur] if cur else lines
 
 
+def phone_shots(width=390):
+    """Sitenin telefon görüntüleri (hareketsiz son hâl): üst kısım ve ödeme kartı (karekod açık)."""
+    import io
+    from playwright.sync_api import sync_playwright
+    url = "file://" + os.path.join(OUT_DIR, "site", "index.html")
+    with sync_playwright() as p:
+        b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
+        pg = b.new_page(viewport={"width": width, "height": 760}, device_scale_factor=2, reduced_motion="reduce")
+        pg.goto(url)
+        pg.wait_for_timeout(300)
+        top = Image.open(io.BytesIO(pg.screenshot()))
+        pg.click("details.kk summary")
+        pg.wait_for_timeout(200)
+        pay = Image.open(io.BytesIO(pg.locator("section.pay").screenshot()))
+        b.close()
+    return top, pay
+
+
+def rounded(im, r):
+    mask = Image.new("L", im.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, im.width - 1, im.height - 1), r, fill=255)
+    out = im.convert("RGBA")
+    out.putalpha(mask)
+    return out
+
+
 def catalog(cs):
     """Müşteriye gönderilecek sayfalar (A4 dikey, 200 dpi): musteri_1.png (1–6), musteri_2.png (7–10) ve
     ikisi birlikte musteri_katalog.pdf. Teknik bilgi yok; yalnız tasarım, numara ve QR'ların ne yaptığı."""
@@ -471,6 +497,29 @@ def catalog(cs):
             for line in wrap(dr, CUSTOMER.get(c.key, c.desc), f(26), cw - 60)[:2]:
                 dr.text((x0 + 30, ty), line, font=f(26), fill=muted)
                 ty += 34
+        rows = (len(group) + 1) // 2
+        if p == 1 and rows < 3:                         # boş kalan yere: okutunca açılan sayfa
+            y0, y1 = top + rows * (ch + gap), H - 190
+            dr.rounded_rectangle((60, y0, W - 60, y1), 28, fill=(255, 255, 255), outline=(226, 226, 230))
+            dr.text((100, y0 + 40), "TARA ile telefonda", font=f(38), fill=ink)
+            dr.text((100, y0 + 88), "açılan sayfa", font=f(38), fill=ink)
+            ty = y0 + 170
+            for line in ("Hemen Ara: telefon uygulaması açılır", "WhatsApp: hazır mesajla yazışma",
+                         "Instagram ve Google yorumları", "IBAN tek dokunuşla kopyalanır",
+                         "Karekod ile ödeme"):
+                dr.ellipse((100, ty + 10, 114, ty + 24), fill=RED)
+                dr.text((130, ty), line, font=f(27), fill=muted)
+                ty += 48
+            top_shot, pay_shot = phone_shots()
+            top_shot = top_shot.crop((0, 0, top_shot.width, min(top_shot.height, 1240)))
+            box_h = y1 - y0 - 60
+            x = W - 100
+            for shot in (pay_shot, top_shot):           # sağdan sola
+                k = box_h / shot.height
+                sh = rounded(shot.resize((int(shot.width * k), int(shot.height * k)), Image.LANCZOS), 22)
+                x -= sh.width
+                im.paste(sh, (x, y0 + 30), sh)
+                x -= 40
         foot = ("Ölçü 12 × 9 cm · tezgâh sehpası dahil · siyah, kırmızı, beyaz" if p == 0 else
                 "Beğendiğiniz tasarımın numarasını yazmanız yeterli. Ölçü 12 × 9 cm, tezgâh sehpası dahil.")
         dr.rounded_rectangle((60, H - 150, W - 60, H - 70), 22, fill=(16, 16, 18))
@@ -485,6 +534,9 @@ def catalog(cs):
 
 def main():
     only = sys.argv[1:]
+    if only == ["katalog"]:                              # yalnız müşteri kataloğu (QR denetimi ve sayfalar yok)
+        catalog([build(fn) for fn in DESIGNS])
+        return
     cs = []
     for i, fn in enumerate(DESIGNS, 1):
         c = build(fn)
