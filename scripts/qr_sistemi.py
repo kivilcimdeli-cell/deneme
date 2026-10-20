@@ -211,8 +211,9 @@ def load(path=DATA):
         if k["alici"] and holder and k["alici"].upper() != holder:
             raise QRError(f"karekoddaki alıcı ({k['alici']}) ile iban_alici ({holder}) farklı")
     info = Info(d.get("isletme", ""), d.get("sehir", ""), tel, wa, d.get("whatsapp_mesaj", ""), handle,
-                google_url(d["google"]), iban, holder, d.get("banka", ""), karekod, https_url(d["sayfa_url"]), {})
-    E = [Entry("sayfa", "TARA · BİZE ULAŞ", info.page, info.page.split("://")[1]),
+                google_url(d["google"]), iban, holder, d.get("banka", ""), karekod,
+                https_url(d["sayfa_url"]) if d.get("sayfa_url") else "", {})   # adres yayından sonra yazılır
+    E = [Entry("sayfa", "TARA · BİZE ULAŞ", info.page, info.page.split("://")[-1]),
          Entry("karekod", "KAREKOD İLE ÖDE", karekod, holder),
          Entry("telefon", "ARA", f"TEL:+{tel}", phone_display(tel)),     # büyük harf: alfasayısal kip
          Entry("whatsapp", "WHATSAPP", f"https://wa.me/{wa}", phone_display(wa)),

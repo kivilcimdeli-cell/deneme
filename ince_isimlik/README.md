@@ -19,3 +19,38 @@ Müşteriye gönderilecek katalog: **`musteri_1.png`** (1–6), **`musteri_2.png
 python3 scripts/ince_isimlik.py           # 10 öneri ve katalog
 python3 scripts/ince_isimlik.py klasik    # yalnız eşleşen tasarımlar
 ```
+
+## İşletme sayfası (QR'ın açacağı site)
+
+![Sayfa](sayfa_onizleme.png)
+
+Uzar'ın sayfasıyla aynı işleri yapar ama tasarımı ayrıdır: açık zemin, asfalt başlık, lastik teması.
+
+**Animasyonlar** (`sayfa_animasyon.gif`):
+
+- Lastik yola yuvarlanarak gelir, sonra yolda döner. Yanağında İNCE OTO LASTİK yazısı var; kırmızı kaliper dönmez.
+- Yol çizgileri akar, lastiğin ardında iz çizilir.
+- Düğme simgeleri küçük lastiklerin içindedir ve dokununca döner.
+
+**İçerik:**
+
+- Hemen Ara: 0545 853 30 70
+- WhatsApp: aynı numara, hazır mesajla açılır.
+- Instagram: @enesssahin.7
+- Google yorum: işletmenin `share.google` bağlantısı.
+- Ödeme bilgileri: HAFİSE İNCE, DenizBank. IBAN tek dokunuşla kopyalanır; karekod kaydedilip banka uygulamasında
+  galeriden okutulur.
+- Rehbere Kaydet.
+
+**Karekod:** fotoğraftaki DenizBank karekodundan okundu. CRC tutuyor, içindeki IBAN ve alıcı `bilgiler.json` ile
+aynı. Sayfadaki karekod bankanınkiyle aynı baytlarla çizilir (UTF-8, hata düzeltme Q), bu yüzden İ harfleri banka
+uygulamasında bozulmaz. Karekodun içinde 19.10.2029 tarihi var; geçerlilik süresi olabilir.
+
+**Yayın:** Uzar'daki gibi işletmenin Cloudflare hesabında yeni bir Worker açılır ve `ince_site.zip` yüklenir.
+Sonra:
+
+1. Adresi (`…workers.dev`) `bilgiler.json` → `sayfa_url` alanına yaz.
+2. `python3 scripts/ince_sayfa.py` çalıştır; paylaşım kartı adresi kullanır.
+3. `python3 scripts/ince_isimlik.py` çalıştır; isimlikteki QR siteye döner.
+
+`sayfa_onizleme.html` tek dosyalık önizlemedir (yazı tipleri ve karekod gömülü).
