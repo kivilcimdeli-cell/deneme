@@ -9,8 +9,9 @@ yeri ≥ 1,2 mm, makinede kolay basılır.
 kabartma, QR yüzeyle aynı hizada beyaz karo, 15° eğik sehpa. Küçük satırlar Outfit ExtraBold; her yazı satırının en
 dar harf içi boşluğu ölçülür.
 
-QR: işletmenin sitesi henüz yok. Örneklerde QR telefonu arar (TEL:+905432721670); `calik_isimlik/bilgiler.json`
-→ `sayfa_url` yazılınca site adresine döner.
+QR: Google yorum QR'ı (üstünde beş sarı yıldız, altında GOOGLE / YORUM YAP). Bağlantı `calik_isimlik/bilgiler.json`
+→ `google`: işletmenin "yorum iste" bağlantısı (g.page/r/…/review) gelene kadar Google'da "çalık oto lastik"
+araması.
 
 Çıktı : calik_isimlik/<tasarım>.png, calik_isimlik/musteri_1.png, musteri_2.png, musteri_katalog.pdf
 
@@ -51,20 +52,44 @@ SC = {"body": BLACK, "fg": WHITE, "dark": True}
 
 
 def make_qr():
+    """Google yorum QR'ı (sürüm ≥ 4; hata düzeltmesi sığdığı kadar yükseltilir)."""
     import segno
-    content = Q.https_url(DATA["sayfa_url"]) if DATA.get("sayfa_url") else f"TEL:+{TEL}"
+    content = Q.google_url(DATA["google"])
     natural = segno.make(content, error="m", micro=False).version
     q = segno.make(content, error="m", version=max(4, natural), micro=False, boost_error=True)
-    return Q.Entry("sayfa", "TARA", content, PHONE, qr=q)
+    return Q.Entry("google", "GOOGLE YORUM", content, "GOOGLE YORUM", qr=q)
 
 
 QR = make_qr()
+SAMPLE_LINK = "/search?" in QR.content          # işletmenin yorum bağlantısı gelene kadar Google araması
 
 
 def qr_block(cx, cy, s):
     """QR: yüzeyle aynı hizada beyaz karo, siyah kareler gövdenin kendisi."""
     _, dark, _ = Q.shapes(QR, Q.module_for(QR, s), cx, cy)
     return [(A.rrect(s, s, 1.6, cx, cy) - dark, WHITE)]
+
+
+def stars(cx, cy, r=3.0, n=5, gap=1.0):
+    """Beş sarı yıldız (Google puanı); kollar kalın, uçlar yuvarlatılmış (1,2 mm'den ince alan < %5)."""
+    pitch = 2 * r * np.cos(np.radians(18)) + gap
+    out = []
+    for i in range(n):
+        x = cx + (i - (n - 1) / 2) * pitch
+        out.append(A.polygon([(x + (r if k % 2 == 0 else r * 0.58) * np.cos(np.radians(90 + 36 * k)),
+                               cy + (r if k % 2 == 0 else r * 0.58) * np.sin(np.radians(90 + 36 * k)))
+                              for k in range(10)]))
+    return A.union(*out).offset(-0.55, J).offset(0.55, J)
+
+
+def review(d, cx, cy, s, top=True):
+    """Google yorum QR'ı: üstünde beş sarı yıldız (top), altında GOOGLE / YORUM YAP."""
+    d.inlay += qr_block(cx, cy, s)
+    if top:
+        d.add(None, stars(cx, cy + s / 2 + 4.6), YELLOW)
+    y = cy - s / 2 - 4.6
+    d.add("GOOGLE", t("outfit", "GOOGLE", 4.2, cx, y, "c", 0.8), WHITE)
+    d.add("YORUM YAP", t("outfit", "YORUM YAP", 4.2, cx, y - 6.5, "c", 0.3), YELLOW)
 
 
 # ---------------------------------------------------------------- simgeler (kalın, sade)
@@ -144,23 +169,22 @@ def hazard(x0, x1, y0, y1, w=4.0):
 # ---------------------------------------------------------------- tasarımlar
 
 def c1_jant():
-    d = Design("1_jant", "Jant", "Sade jant simgesi (beyaz lastik, sarı jant); yanında ÇALIK OTO LASTİK.", SC)
-    for cs, col in wheel(-41.0, 68.0, 13.0):
+    d = Design("1_jant", "Jant", "Jant simgesi (beyaz lastik, sarı jant) ve ÇALIK; sağda yıldızlı Google yorum QR'ı.", SC)
+    for cs, col in wheel(-42.0, 71.0, 12.0):
         d.add(None, cs, col)
-    d.add("ÇALIK", t("russo", "ÇALIK", 11.0, -24.0, 75.0, "l", 0.6, 50.0), WHITE)
-    d.add("OTO LASTİK", t("russo", "OTO LASTİK", 5.4, -24.0, 60.5, "l", 0.6, 54.0), YELLOW)
+    d.add("ÇALIK", t("russo", "ÇALIK", 11.0, -26.0, 74.5, "l", 0.6, 38.0), WHITE)
+    d.add("OTO LASTİK", t("russo", "OTO LASTİK", 5.4, X0, 52.0, "l", 0.6, 60.0), YELLOW)
     d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 37.0, "l", 0.9), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 5.4, X0, 26.0, "l", 0.4, 64.0), WHITE)
-    d.inlay += qr_block(36.0, 36.5, 36.0)
+    d.add("telefon", t("outfit", PHONE, 5.4, X0, 26.0, "l", 0.4, 60.0), WHITE)
+    review(d, 35.0, 50.0, 38.0)
     return d
 
 
 def c2_anahtar():
-    d = Design("2_anahtar", "Anahtar", "Solda sarı İngiliz anahtarı ve QR; sağda ÇALIK, OTO LASTİK ve telefon.", SC)
+    d = Design("2_anahtar", "Anahtar", "Solda sarı İngiliz anahtarı ve Google yorum QR'ı; sağda ÇALIK ve telefon.", SC)
     x0 = -6.0
     d.add(None, wrench(-33.0, 77.0, 40.0, 0.0), YELLOW)
-    d.inlay += qr_block(-33.0, 45.0, 42.0)
-    d.add("QR'I OKUTUN", t("outfit", "QR'I OKUTUN", 4.2, -33.0, 16.5, "c", 0.9), WHITE)
+    review(d, -33.0, 46.0, 40.0, top=False)
     d.add("ÇALIK", t("archivo", "ÇALIK", 12.0, x0, 74.0, "l", 0.5, X1 - x0), WHITE)
     d.add("OTO LASTİK", t("archivo", "OTO LASTİK", 5.6, x0, 57.5, "l", 0.6, X1 - x0), YELLOW)
     d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, x0, 38.5, "l", 0.9), YELLOW)
@@ -173,57 +197,57 @@ def c3_telefon():
     d.add("ÇALIK", t("bebas", "ÇALIK", 28.0, X0, 66.5, "l", 1.2, 64.0), WHITE)
     d.add(None, bar(X0, -14.0, 45.8, 1.6), YELLOW)
     d.add("OTO LASTİK", t("outfit", "OTO LASTİK", 5.0, X0, 38.5, "l", 1.9), YELLOW)
-    d.add(None, phone_icon(10.0, X0 + 5.0, 18.0), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 6.0, X0 + 12.0, 18.0, "l", 0.4, 62.0), WHITE)
-    d.inlay += qr_block(34.0, 50.0, 40.0)
+    d.add(None, phone_icon(10.0, X0 + 5.0, 17.0), YELLOW)
+    d.add("telefon", t("outfit", PHONE, 6.0, X0 + 12.0, 17.0, "l", 0.4, 56.0), WHITE)
+    review(d, 35.0, 52.0, 38.0)
     return d
 
 
 def c4_ikaz():
-    d = Design("4_ikaz", "İkaz şeridi", "Üstte sarı-siyah ikaz şeridi; geniş, sağlam yazılar.", SC)
-    d.add(None, hazard(X0, X1, 77.5, 86.0), YELLOW)
-    d.add("ÇALIK", t("lexend", "ÇALIK", 12.0, X0, 65.0, "l", 0.6, 64.0), WHITE)
-    d.add("OTO LASTİK", t("lexend", "OTO LASTİK", 5.0, X0, 48.5, "l", 0.6, 64.0), YELLOW)
+    d = Design("4_ikaz", "İkaz şeridi", "Üstte ve altta sarı-siyah ikaz şeridi; geniş, sağlam yazılar.", SC)
+    d.add(None, hazard(X0, X1, 79.0, 86.0), YELLOW)
+    d.add("ÇALIK", t("lexend", "ÇALIK", 12.0, X0, 65.0, "l", 0.6, 62.0), WHITE)
+    d.add("OTO LASTİK", t("lexend", "OTO LASTİK", 5.0, X0, 48.5, "l", 0.6, 62.0), YELLOW)
     d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 35.5, "l", 0.9), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 5.2, X0, 25.0, "l", 0.4, 64.0), WHITE)
-    d.inlay += qr_block(34.0, 47.0, 40.0)
-    d.add(None, hazard(X0, X1, 10.0, 15.0), YELLOW)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 25.0, "l", 0.4, 62.0), WHITE)
+    d.add(None, hazard(X0, 9.0, 10.0, 15.0), YELLOW)
+    review(d, 35.0, 49.0, 38.0)
     return d
 
 
 def c5_gosterge():
     d = Design("5_gosterge", "Hız göstergesi", "Solda sarı hız göstergesi simgesi; uzun, sportif ÇALIK.", SC)
-    for cs, col in gauge(-40.0, 64.0):
+    for cs, col in gauge(-40.0, 66.0):
         d.add(None, cs, col)
-    d.add("ÇALIK", t("teko", "ÇALIK", 20.0, -22.0, 71.0, "l", 0.8, 40.0), WHITE)
-    d.add("OTO LASTİK", t("teko", "OTO LASTİK", 6.8, -22.0, 56.0, "l", 1.0, 72.0), YELLOW)
-    d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 35.0, "l", 0.9), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 5.2, X0, 24.5, "l", 0.4, 66.0), WHITE)
-    d.inlay += qr_block(36.0, 31.0, 36.0)
+    d.add("ÇALIK", t("teko", "ÇALIK", 20.0, -22.0, 72.0, "l", 0.8, 36.0), WHITE)
+    d.add("OTO LASTİK", t("teko", "OTO LASTİK", 6.8, X0, 46.5, "l", 1.0, 60.0), YELLOW)
+    d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 34.0, "l", 0.9), YELLOW)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 23.5, "l", 0.4, 62.0), WHITE)
+    review(d, 35.0, 44.0, 38.0)
     return d
 
 
 def c6_araba():
-    d = Design("6_araba", "Araba", "Ortada büyük başlık; altta sarı yolda giden araba, telefon ve QR.", SC)
-    d.add("ÇALIK", t("oswald", "ÇALIK", 14.0, 0.0, 76.0, "c", 1.6), WHITE)
-    d.add("OTO LASTİK", t("oswald", "OTO LASTİK", 7.0, 0.0, 58.0, "c", 2.0), YELLOW)
-    for cs, col in car(X0, 35.5, 44.0):
+    d = Design("6_araba", "Araba", "Sarı yolda giden araba; sağda yıldızlı Google yorum QR'ı.", SC)
+    d.add("ÇALIK", t("oswald", "ÇALIK", 14.0, X0, 76.0, "l", 1.2, 60.0), WHITE)
+    d.add("OTO LASTİK", t("oswald", "OTO LASTİK", 7.0, X0, 56.8, "l", 1.0, 60.0), YELLOW)
+    for cs, col in car(X0, 37.0, 40.0):
         d.add(None, cs, col)
-    d.add(None, A.union(*[bar(x, x + 6.0, 32.5, 1.4) for x in np.arange(X0, -12.0, 9.0)]), YELLOW)
-    d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.4, X0, 25.0, "l", 0.9), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 5.2, X0, 15.5, "l", 0.4, 64.0), WHITE)
-    d.inlay += qr_block(34.0, 29.5, 37.0)
+    d.add(None, A.union(*[bar(x, x + 6.0, 34.0, 1.4) for x in np.arange(X0, -8.0, 9.0)]), YELLOW)
+    d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.4, X0, 26.5, "l", 0.9), YELLOW)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 17.0, "l", 0.4, 62.0), WHITE)
+    review(d, 35.0, 49.0, 38.0)
     return d
 
 
 def c7_lastik_izi():
     d = Design("7_lastik_izi", "Lastik izi", "Üstte boydan kalın sarı lastik izi okları; altında ÇALIK OTO LASTİK.", SC)
     d.add(None, U.chevrons(X0, 80.5, 8.0, 12, 8.9, 2.6).offset(-0.5, J).offset(0.5, J), YELLOW)   # uçlar yuvarlak
-    d.add("ÇALIK", t("barlow", "ÇALIK", 18.0, X0, 64.0, "l", 0.8, 62.0), WHITE)
-    d.add("OTO LASTİK", t("barlow", "OTO LASTİK", 8.6, X0, 40.6, "l", 0.7, 63.0), YELLOW)
+    d.add("ÇALIK", t("barlow", "ÇALIK", 18.0, X0, 64.0, "l", 0.8, 60.0), WHITE)
+    d.add("OTO LASTİK", t("barlow", "OTO LASTİK", 8.6, X0, 40.6, "l", 0.7, 61.0), YELLOW)
     d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 27.0, "l", 0.9), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 5.2, X0, 17.0, "l", 0.4, 62.0), WHITE)
-    d.inlay += qr_block(33.0, 47.0, 42.0)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 17.0, "l", 0.4, 60.0), WHITE)
+    review(d, 34.0, 46.0, 40.0)
     return d
 
 
@@ -233,8 +257,8 @@ def c8_simsek():
     d.add("ÇALIK", t("saira", "ÇALIK", 19.0, -31.0, 66.0, "l", 0.8, 41.0, shear=10.0), WHITE)
     d.add("OTO LASTİK", t("saira", "OTO LASTİK", 6.4, -31.0, 49.0, "l", 0.6, 43.0, shear=10.0), YELLOW)
     d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 31.0, "l", 0.9), YELLOW)
-    d.add("telefon", t("outfit", PHONE, 5.2, X0, 20.0, "l", 0.4, 64.0), WHITE)
-    d.inlay += qr_block(35.0, 44.0, 38.0)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 20.0, "l", 0.4, 60.0), WHITE)
+    review(d, 35.0, 44.0, 38.0)
     return d
 
 
@@ -245,8 +269,7 @@ def c9_dama():
                for i in range(24) for j in range(2) if (i + j) % 2 == 0]
     d.add(None, A.union(*squares), WHITE)
     cx = 24.0
-    d.inlay += qr_block(-33.0, 45.0, 42.0)
-    d.add("QR'I OKUTUN", t("outfit", "QR'I OKUTUN", 4.2, -33.0, 16.5, "c", 0.9), WHITE)
+    review(d, -33.0, 44.0, 40.0)
     d.add("ÇALIK", t("outfit", "ÇALIK", 12.0, cx, 63.0, "c", 1.0, 58.0), WHITE)
     d.add("OTO LASTİK", t("outfit", "OTO LASTİK", 5.0, cx, 47.5, "c", 1.6, 58.0), YELLOW)
     d.add(None, bar(cx - 10.0, cx + 10.0, 39.5, 1.4), WHITE)
@@ -256,18 +279,18 @@ def c9_dama():
 
 
 def c10_sari_blok():
-    d = Design("10_sari_blok", "Sarı blok", "Solda sarı blok, içinde oyma yazılar ve telefon simgesi; sağda QR.", SC)
+    d = Design("10_sari_blok", "Sarı blok", "Solda sarı blok, içinde oyma yazılar ve telefon; sağda Google yorum QR'ı.",
+               SC)
     cx = -31.0
-    block = A.rrect(46.0, 74.0, 4.0, cx, 47.0)
-    cut = A.union(t("archivo", "ÇALIK", 10.5, cx, 73.0, "c", 0.4, 40.0),
-                  t("archivo", "OTO", 6.6, cx, 57.0, "c", 0.6),
-                  t("archivo", "LASTİK", 6.6, cx, 47.0, "c", 0.6, 40.0),
-                  phone_icon(13.0, cx, 28.0),
-                  t("outfit", "HEMEN ARA", 4.2, cx, 15.5, "c", 0.8))
+    block = A.rrect(46.0, 75.0, 4.0, cx, 47.5)
+    cut = A.union(t("archivo", "ÇALIK", 10.5, cx, 74.0, "c", 0.4, 40.0),
+                  t("archivo", "OTO", 6.6, cx, 58.5, "c", 0.6),
+                  t("archivo", "LASTİK", 6.6, cx, 48.5, "c", 0.6, 40.0),
+                  phone_icon(11.0, cx, 33.5),
+                  t("outfit", "HEMEN ARA", 4.2, cx, 22.0, "c", 0.8),
+                  t("outfit", PHONE, 4.2, cx, 15.0, "c", 0.0, 41.0))
     d.add("blok yazıları", block - cut, YELLOW)
-    d.add("QR'I OKUTUN", t("outfit", "QR'I OKUTUN", 4.2, 31.0, 79.5, "c", 0.6, 44.0), YELLOW)
-    d.inlay += qr_block(31.0, 50.0, 44.0)
-    d.add("telefon", t("outfit", PHONE, 5.0, 31.0, 18.5, "c", 0.3, 47.0), WHITE)
+    review(d, 31.0, 50.0, 42.0)
     return d
 
 
@@ -387,10 +410,10 @@ def catalog(ds):
         dr.text((70, 40), "ÇALIK", font=big, fill=(244, 244, 242))
         x = 76 + dr.textlength("ÇALIK", font=big) + 22
         dr.text((x, 72), "OTO LASTİK", font=mid, fill=yellow)
-        dr.text((70, 180), "Tek QR'lı tezgâh isimliği · tasarım önerileri", font=f(30), fill=(210, 210, 214))
+        dr.text((70, 180), "Google yorum QR'lı tezgâh isimliği · tasarım önerileri", font=f(30), fill=(210, 210, 214))
         dr.text((W - 70 - dr.textlength(f"{p + 1}/2", font=f(28)), 40), f"{p + 1}/2", font=f(28), fill=(170, 170, 176))
         y = 285
-        for line in ("QR: telefonla okutunca işletme sayfası açılır (site hazırlanınca). Örneklerde şimdilik arar.",
+        for line in ("QR: telefonla okutunca Google'da işletmenin yorum sayfası açılır (beş yıldız, yorum yaz).",
                      "Hepsi siyah zemin, sarı ve beyaz yazı; her birinde farklı simge"):
             dr.text((70, y), line, font=f(27), fill=ink)
             y += 40
@@ -415,7 +438,7 @@ def catalog(ds):
             dr.text((100, y0 + 40), "Ürün", font=f(38), fill=ink)
             ty = y0 + 110
             for line in ("Ölçü 12 × 9 cm, gövde 1 cm kalınlığında, köşeler yuvarlak",
-                         "Yazılar ve simgeler 2 mm kabartma; QR düz ve keskin",
+                         "Yazılar ve simgeler 2 mm kabartma; Google yorum QR'ı düz ve keskin",
                          "Tezgâh sehpası dahil, panel 15° eğik durur",
                          f"Telefon: {PHONE}"):
                 dr.ellipse((100, ty + 10, 114, ty + 24), fill=(16, 16, 18))
@@ -434,6 +457,8 @@ def catalog(ds):
 
 
 def main():
+    if SAMPLE_LINK:
+        print("Not: Google bağlantısı şimdilik arama sayfası; işletmenin yorum bağlantısı bilgiler.json → google")
     only = sys.argv[1:]
     if only == ["katalog"]:
         catalog([build(fn) for fn in DESIGNS])

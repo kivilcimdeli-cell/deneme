@@ -1,4 +1,4 @@
-# ÇALIK OTO LASTİK – tek QR'lı tezgâh isimliği önerileri
+# ÇALIK OTO LASTİK – Google yorum QR'lı tezgâh isimliği önerileri
 
 Müşteriye gönderilecek katalog: **`musteri_1.png`** (1–6), **`musteri_2.png`** (7–10), ikisi birlikte
 **`musteri_katalog.pdf`**. Ayrıntılı sayfalar: `<numara>_<ad>.png` (önden, tezgâhta, yandan).
@@ -6,17 +6,24 @@ Müşteriye gönderilecek katalog: **`musteri_1.png`** (1–6), **`musteri_2.png
 - Hepsi siyah zemin, sarı ve beyaz yazı. Her birinde ayrı simge, yerleşim ve yazı tipi:
   1 Jant · 2 Anahtar · 3 Telefon · 4 İkaz şeridi · 5 Hız göstergesi · 6 Araba · 7 Lastik izi · 8 Şimşek ·
   9 Dama bayrağı · 10 Sarı blok (oyma yazı).
-- İçerik: ÇALIK, OTO LASTİK, HEMEN ARA, telefon **0543 272 16 70**, tek QR.
-- Simgeler kalın ve sade (en ince yeri ≥ 1,2 mm), makinede kolay basılır.
+- İçerik: ÇALIK, OTO LASTİK, HEMEN ARA, telefon **0543 272 16 70**.
+- **Tek QR: Google yorum.** Üstünde beş sarı yıldız, altında GOOGLE / YORUM YAP.
+- Simgeler kalın ve sade: en ince yeri ≥ 1,2 mm, yıldızların uçları yuvarlatılmış. Makinede kolay basılır.
 - Yapı Uzar ve İNCE isimlikleriyle aynı: 120 × 90 mm, köşeler R8, siyah gövde 1 cm, yazılar ve simgeler 2 mm
   kabartma, QR yüzeyle aynı hizada beyaz karo, 15° eğik sehpa.
 - Küçük satırlar Outfit ExtraBold ile yazılır. Her satırın en dar harf içi boşluğu ölçülür (≥ 0,6 mm).
 - Satırlar arası, simge ve QR çevresi ≥ 2 mm; sehpanın örttüğü alt şerit boş bırakılır.
 
-**QR:** işletmenin sitesi henüz yok, bu yüzden örneklerde QR telefonu arar (`TEL:+905432721670`). Site hazır olunca:
+## Google bağlantısı
 
-1. Adresi `bilgiler.json` → `sayfa_url` alanına yazın; QR site adresine döner.
-2. Seçilen tasarım o zaman X2D dosyasına çevrilir (örnek: `scripts/uzar_isimlik_baski.py`).
+Bağlantı `bilgiler.json` dosyasının `google` alanında tutulur. Örneklerde şimdilik Google'da "çalık oto lastik"
+araması açılıyor. Baskıdan önce işletmenin yorum bağlantısı buraya yazılmalı:
+
+1. Google İşletme Profili'nde **Yorum iste** (Ask for reviews) bölümüne gir.
+2. Oradaki bağlantıyı kopyala (`https://g.page/r/…/review`) ve `google` alanına yaz.
+3. Tasarımlar aynı kalır; QR'ı yeniden üretmek yeterli.
+
+Seçilen tasarım X2D dosyasına çevrilirken `scripts/uzar_isimlik_baski.py` örnek alınır.
 
 ```bash
 pip install segno zxing-cpp svgelements
