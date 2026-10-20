@@ -1,10 +1,12 @@
 """İNCE OTO LASTİK – tek QR'lı tezgâh isimliği önerileri (10): 7 beyaz zemin (siyah, kırmızı yazı), 3 siyah zemin
-(beyaz, kırmızı yazı).
+(beyaz, kırmızı yazı). Her biri ayrı fikir ve ayrı yazı tipiyle: plaka (Barlow Condensed), minimal (Bebas Neue),
+kırmızı blok (Archivo Black, oyma yazı), yol (Russo One, asfalt şerit), dama bayrağı (Saira Condensed), hız
+çizgileri (Teko, italik), jant (Oswald, sade jant simgesi), kırmızı köşe, kırmızı çerçeve, oklar.
 
 Uzar Oto Lastik'in basılan isimliğiyle aynı yapı: 120 × 90 mm (4:3), köşeler R8, siyah ya da beyaz gövde 1 cm,
-yazılar ve lastik simgesi 2 mm kabartma, QR yüzeyle aynı hizada (beyaz zeminde siyah kareler, siyah zeminde beyaz
-karo), 15° eğik sehpa. Küçük satırlar Outfit ExtraBold (harf içi boşlukları kabartmada dolmaz); her yazı satırının
-en dar iç boşluğu ölçülür.
+yazılar ve şekiller 2 mm kabartma, QR yüzeyle aynı hizada (beyaz zeminde siyah kareler, siyah zeminde beyaz karo),
+15° eğik sehpa. Süsler kalın ve sade (en ince yeri ≥ 1,2 mm); küçük satırlar Outfit ExtraBold; her yazı satırının
+en dar harf içi boşluğu ölçülür.
 
 QR: işletmenin sitesi henüz yok. Örneklerde QR telefonu arar (TEL:+905458533070); `ince_isimlik/bilgiler.json`
 → `sayfa_url` yazılınca site adresine döner. Yoğunluğu son hâline benzesin diye en az sürüm 4.
@@ -19,6 +21,7 @@ import os
 import sys
 
 import manifold3d as m3
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -76,12 +79,6 @@ def scheme(dark):
     return {"body": BLACK if dark else WHITE, "fg": WHITE if dark else BLACK, "dark": dark}
 
 
-def tire(r, cx, cy, sc, mono=False):
-    """Lastik simgesi: dişli lastik (yazı renginde) ve 5 kollu jant (kırmızı); mono: hepsi kırmızı."""
-    tyre, rim = U.tire(r, cx, cy, teeth=20, depth=r * 0.14)
-    return [(tyre, RED if mono else sc["fg"]), (rim, RED)]
-
-
 def arrow(x, y, h=7.8):
     return A.polygon([(x, y - h / 2), (x + h * 0.82, y), (x, y + h / 2)])
 
@@ -112,133 +109,179 @@ class Design:
         return cs
 
 
-# ---------------------------------------------------------------- ortak düzen: sol sütun yazılar, sağda QR
+# ---------------------------------------------------------------- yazı tipleri ve sade şekiller
 
-def left_column(d, x0=X0, x1=0.0, top=74.0, header="lastik", phone_y=13.5, hemen=True):
-    sc = d.sc
-    r = 9.5
-    if header == "lastik":                                   # İNCE + lastik simgesi
-        w = d.add("İNCE", ince(18.0, x0, top, max_w=x1 - x0 - 2 * r - 4.0), sc["fg"])
-        for cs, col in tire(r, w.bounds()[2] + 4.0 + r, top, sc):
-            d.add(None, cs, col)
-    elif header == "rozet":                                  # kırmızı 7/24 rozeti + İNCE
-        disk = A.circle(10.5, x0 + 10.5, top)
-        txt = I.text(heavy(), "7/24", 6.0, x0 + 10.5, top, "c", 0.1)
-        d.add("7/24 rozet", disk - txt.offset(0.05, J), RED)
-        d.add("İNCE", ince(18.0, x0 + 25.0, top, max_w=x1 - x0 - 25.0), sc["fg"])
-    elif header == "cizgi":                                  # İNCE + altında kalın kırmızı çizgi, kırmızı lastik
-        w = d.add("İNCE", ince(18.0, x0, top + 1.5, max_w=x1 - x0 - 2 * r - 4.0), sc["fg"])
-        d.add(None, A.rrect(w.bounds()[2] - x0, 2.0, 1.0, (x0 + w.bounds()[2]) / 2, w.bounds()[1] - 3.2), RED)
-        for cs, col in tire(r, w.bounds()[2] + 4.0 + r, top, sc, mono=True):
-            d.add(None, cs, col)
-    d.add("OTO LASTİK", word("OTO LASTİK", bold(), 7.2, x0, top - 16.5, "l", 1.0, x1 - x0), RED)
-    if header != "rozet":
-        d.add("7/24 HİZMET", word("7/24 HİZMET", SMALL, 4.6, x0, top - 25.5, "l", 0.9), sc["fg"])
-    tara = d.add("TARA", I.text(heavy(), "TARA", 10.5, x0, 33.0, "l", 0.7), sc["fg"])
-    d.add(None, arrow(tara.bounds()[2] + 3.2, 33.0), RED)
-    if hemen:
-        d.add("HEMEN ARA", word("HEMEN ARA", SMALL, 4.4, x0, phone_y + 8.2, "l", 0.9), RED)
-    d.add("telefon", word(PHONE, SMALL, 5.0, x0, phone_y, "l", 0.4, x1 - x0), sc["fg"])
+FONT_FILES = {"russo": "RussoOne-Regular.ttf", "teko": "Teko-Bold.ttf", "archivo": "ArchivoBlack-Regular.ttf",
+              "saira": "SairaCondensed-Black.ttf", "oswald": "Oswald-Bold.ttf", "bebas": "BebasNeue-Regular.ttf",
+              "barlow": "BarlowCondensed-Black.ttf", "outfit": "Outfit-ExtraBold.ttf", "lexend": "Lexend-ExtraBold.ttf"}
+_FONTS = {}
 
 
-def w1_klasik(dark=False):
-    d = Design("1_klasik", "Klasik", "İNCE ve lastik simgesi, altında kırmızı OTO LASTİK; QR sağda.", scheme(dark))
-    left_column(d)
-    d.inlay += qr_block(30.0, 46.0, 48.0, d.sc)
+def font(k):
+    if k not in _FONTS:
+        _FONTS[k] = A.Font(FONT_FILES[k])
+    return _FONTS[k]
+
+
+def t(k, s, cap, x, y, align="l", tr=0.0, max_w=None, shear=0.0):
+    """Yazı (İ / Ö noktaları harften ayrık). shear: italik (derece, yazının orta çizgisi etrafında)."""
+    cs = I.text(font(k), s, cap, x, y, align, tr, max_w)
+    if shear:
+        cs = A.shear(cs.translate((0, -y)), shear).translate((0, y))
+    return B.loosen_dots(cs)
+
+
+def bar(x0, x1, y, h):
+    """Yuvarlak uçlu kalın çizgi."""
+    return A.rrect(x1 - x0, h, h / 2 - 0.01, (x0 + x1) / 2, y)
+
+
+# ---------------------------------------------------------------- beyaz zemin (siyah, kırmızı yazı)
+
+def d1_plaka():
+    d = Design("1_plaka", "Plaka", "Araç plakası gibi: siyah çerçeve, solda kırmızı şerit, içinde İNCE OTO LASTİK.",
+               scheme(False))
+    cy = 68.0
+    d.add(None, A.rrect(108, 32, 4.0, 0, cy) - A.rrect(104.4, 28.4, 2.4, 0, cy), BLACK)
+    strip = A.rrect(12.0, 25.6, 1.6, -45.4, cy)
+    d.add("7/24 şerit", strip - t("barlow", "7/24", 6.6, 0, 0, "c", 0.3).rotate(90).translate((-45.4, cy)), RED)
+    d.add("plaka", t("barlow", "İNCE OTO LASTİK", 12.5, 7.0, cy, "c", 0.7, 84.0), BLACK)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 5.0, X0, 41.0, "l", 0.9), RED)
+    d.add("telefon", t("outfit", PHONE, 5.6, X0, 29.0, "l", 0.4, 64.0), BLACK)
+    d.add("QR'I OKUTUN", t("outfit", "QR'I OKUTUN", 4.4, X0, 17.0, "l", 0.9), BLACK)
+    d.add(None, arrow(t("outfit", "QR'I OKUTUN", 4.4, X0, 17.0, "l", 0.9).bounds()[2] + 2.5, 17.0, 5.0), RED)
+    d.inlay += qr_block(35.0, 29.0, 38.0, d.sc)
     return d
 
 
-def w2_rozet(dark=False):
-    d = Design("2_rozet", "7/24 rozeti", "Solda kırmızı 7/24 rozeti, yanında İNCE; QR sağda.", scheme(dark))
-    left_column(d, header="rozet")
-    d.inlay += qr_block(30.0, 46.0, 48.0, d.sc)
+def d2_minimal():
+    d = Design("2_minimal", "Minimal", "Bol boşluk: büyük ince uzun İNCE, kırmızı çizgi, harf aralıklı OTO LASTİK.",
+               scheme(False))
+    d.add("İNCE", t("bebas", "İNCE", 28.0, X0, 64.0, "l", 1.2), BLACK)
+    d.add(None, bar(X0, -16.0, 43.0, 1.6), RED)
+    d.add("OTO LASTİK", t("outfit", "OTO LASTİK", 5.0, X0, 35.5, "l", 2.0), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.4, X0, 24.5, "l", 1.2), BLACK)
+    d.add("telefon", t("outfit", PHONE, 5.0, X0, 15.0, "l", 0.4), BLACK)
+    d.inlay += qr_block(32.0, 44.0, 44.0, d.sc)
+    d.add("TARA", t("bebas", "TARA", 6.4, 32.0, 15.0, "c", 1.6), BLACK)
     return d
 
 
-def w3_lastik_izi(dark=False):
-    """Üstte boydan başlık, altında kırmızı lastik izi şeridi; altta solda yazılar, sağda QR."""
-    d = Design("3_lastik_izi", "Lastik izi", "Boydan başlık ve kırmızı lastik izi şeridi; altta TARA, telefon ve QR.",
-               scheme(dark))
-    sc, r = d.sc, 9.5
-    w = d.add("İNCE", ince(15.5, X0, 75.0, max_w=40.0), sc["fg"])
-    xo = w.bounds()[2] + 5.0                               # İNCE'nin yanında alt alta OTO / LASTİK
-    d.add("OTO", word("OTO", bold(), 7.2, xo, 79.6, "l", 1.0), RED)
-    d.add("LASTİK", word("LASTİK", bold(), 7.2, xo, 70.4, "l", 1.0), RED)
-    for cs, col in tire(r, X1 - r, 75.0, sc):              # lastik sağ üstte
-        d.add(None, cs, col)
-    d.add(None, U.tread_band(X0, X1, 61.2, 64.6, pitch=3.8), RED)
-    d.add("7/24 HİZMET", word("7/24 HİZMET", SMALL, 4.6, X0, 53.5, "l", 0.9), sc["fg"])
-    tara = d.add("TARA", I.text(heavy(), "TARA", 10.5, X0, 41.0, "l", 0.7), sc["fg"])
-    d.add(None, arrow(tara.bounds()[2] + 3.2, 41.0), RED)
-    d.add("HEMEN ARA", word("HEMEN ARA", SMALL, 4.4, X0, 27.0, "l", 0.9), RED)
-    d.add("telefon", word(PHONE, SMALL, 5.0, X0, 18.5, "l", 0.4, 58.0), sc["fg"])
-    d.inlay += qr_block(31.0, 33.5, 45.0, sc)
+def d3_kirmizi_blok():
+    d = Design("3_kirmizi_blok", "Kırmızı blok", "Solda kırmızı blok, içinde oyma beyaz yazılar; sağda QR ve telefon.",
+               scheme(False))
+    cx = -31.0
+    block = A.rrect(46.0, 74.0, 4.0, cx, 47.0)
+    cut = A.union(t("archivo", "İNCE", 12.0, cx, 72.0, "c", 0.4, 40.0),
+                  t("archivo", "OTO", 6.6, cx, 56.5, "c", 0.6),
+                  t("archivo", "LASTİK", 6.6, cx, 46.5, "c", 0.6, 40.0),
+                  t("archivo", "7/24", 11.0, cx, 28.5, "c", 0.4),
+                  t("outfit", "HİZMET", 4.4, cx, 17.5, "c", 1.0))
+    d.add("blok yazıları", block - cut, RED)
+    d.add("QR'I OKUTUN", t("outfit", "QR'I OKUTUN", 4.2, 31.0, 79.5, "c", 0.6, 44.0), RED)
+    d.inlay += qr_block(31.0, 50.0, 44.0, d.sc)
+    d.add("telefon", t("outfit", PHONE, 5.0, 31.0, 18.5, "c", 0.3, 47.0), BLACK)
     return d
 
 
-def w4_qr_solda(dark=False):
-    d = Design("4_qr_solda", "QR solda", "QR solda, yazılar ve lastik simgesi sağda.", scheme(dark))
-    left_column(d, x0=0.0, x1=X1)
-    d.inlay += qr_block(-30.0, 46.0, 48.0, d.sc)
+def d4_yol():
+    d = Design("4_yol", "Yol", "Altta asfalt şerit: kesik yol çizgileri arasında telefon; üstte İNCE OTO LASTİK.",
+               scheme(False))
+    road, y = A.rrect(108.0, 12.0, 2.6, 0, 16.0), 16.0
+    phone = t("outfit", PHONE, 5.4, 0.0, y, "c", 0.5)
+    w = phone.bounds()[2]
+    dashes = A.union(*[A.rect(x0, y - 0.8, x0 + 6.5, y + 0.8) for x0 in (-w - 19.0, -w - 9.5, w + 3.0, w + 12.5)])
+    d.add("yol + telefon", road - phone - dashes, BLACK)
+    d.add("İNCE", t("russo", "İNCE", 15.0, X0, 70.0, "l", 0.6), BLACK)
+    d.add("OTO LASTİK", t("russo", "OTO LASTİK", 6.0, X0, 53.5, "l", 0.6, 60.0), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.6, X0, 42.5, "l", 0.9), BLACK)
+    d.inlay += qr_block(34.0, 48.0, 40.0, d.sc)
     return d
 
 
-def w5_cerceve(dark=False):
-    d = Design("5_cerceve", "Kırmızı çerçeve", "Kenardan içeride ince kırmızı çerçeve; içinde klasik düzen.",
-               scheme(dark))
-    w, h, cy = 114.0, 79.0, 48.1
-    d.add(None, A.rrect(w, h, 5.0, 0, cy) - A.rrect(w - 2.4, h - 2.4, 3.8, 0, cy), RED)
-    left_column(d, x0=-50.0, x1=0.0, top=73.0, phone_y=15.5)
-    d.inlay += qr_block(28.0, 47.0, 46.0, d.sc)
+def d5_dama():
+    d = Design("5_dama", "Dama bayrağı", "Solda yarış bayrağı damaları; İNCE ve OTO LASTİK yarış yazısıyla.",
+               scheme(False))
+    s, n = 4.6, 16
+    squares = [A.rect(X0 + i * s, 10.4 + j * s, X0 + (i + 1) * s, 10.4 + (j + 1) * s).offset(-0.12, J)
+               for i in range(2) for j in range(n) if (i + j) % 2 == 0]
+    d.add(None, A.union(*squares), BLACK)
+    x0 = X0 + 2 * s + 4.8
+    d.add("İNCE", t("saira", "İNCE", 19.0, x0, 70.0, "l", 0.6), BLACK)
+    d.add("OTO LASTİK", t("saira", "OTO LASTİK", 8.0, x0, 52.5, "l", 0.8, 10.0 - x0), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.4, x0, 34.0, "l", 0.9), RED)
+    d.add("telefon", t("outfit", PHONE, 5.0, x0, 21.0, "l", 0.3, 9.0 - x0), BLACK)
+    d.inlay += qr_block(34.0, 42.0, 40.0, d.sc)
     return d
 
 
-def w6_buyuk_baslik(dark=False):
-    """Üstte boydan büyük İNCE ve kırmızı OTO LASTİK; altta solda büyük lastik ve telefon, sağda QR."""
-    d = Design("6_buyuk_baslik", "Büyük başlık", "Üstte boydan büyük İNCE OTO LASTİK; altta büyük lastik, telefon ve QR.",
-               scheme(dark))
-    sc = d.sc
-    w = d.add("İNCE", ince(15.0, X0, 73.5), sc["fg"])
-    d.add("OTO LASTİK", word("OTO LASTİK", bold(), 9.0, w.bounds()[2] + 6.0, 73.5, "l", 1.2, X1 - w.bounds()[2] - 6.0),
-          RED)
-    d.add(None, A.rect(X0, 62.4, X1, 63.6), RED)
-    for cs, col in tire(13.0, X0 + 13.0, 41.5, sc):
-        d.add(None, cs, col)
-    d.add("7/24", I.text(heavy(), "7/24", 10.0, X0 + 31.0, 46.0, "l", 0.4), RED)
-    d.add("HİZMET", word("HİZMET", SMALL, 4.4, X0 + 31.0, 35.5, "l", 0.9), sc["fg"])
-    d.add("telefon", word(PHONE, SMALL, 5.0, X0, 16.5, "l", 0.4, 58.0), sc["fg"])
-    d.inlay += qr_block(32.0, 33.0, 44.0, sc)
+def d6_hiz():
+    d = Design("6_hiz", "Hız çizgileri", "Eğik İNCE ve solunda kırmızı hız çizgileri; dinamik, sportif.", scheme(False))
+    x0 = -37.0
+    d.add(None, A.union(bar(X0, -42.0, 72.0, 2.4), bar(X0 + 4.0, -43.0, 65.0, 2.4), bar(X0, -44.0, 58.0, 2.4)), RED)
+    d.add("İNCE", t("teko", "İNCE", 26.0, x0, 64.0, "l", 0.8, 41.0, shear=12.0), BLACK)
+    d.add("OTO LASTİK", t("teko", "OTO LASTİK", 10.0, x0, 44.5, "l", 1.0, 45.0, shear=12.0), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.6, X0, 30.0, "l", 0.9), BLACK)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 17.5, "l", 0.4), BLACK)
+    d.inlay += qr_block(33.0, 45.0, 42.0, d.sc)
     return d
 
 
-def w7_kirmizi_cizgi(dark=False):
-    d = Design("7_kirmizi_cizgi", "Kırmızı çizgi", "İNCE'nin altında kalın kırmızı çizgi, kırmızı lastik; QR çerçeveli.",
-               scheme(dark))
-    left_column(d, header="cizgi")
-    d.inlay += qr_block(30.0, 46.0, 46.0, d.sc, frame=True)
+def d7_jant():
+    d = Design("7_jant", "Jant", "Sade, kalın jant simgesi; yanında İNCE OTO LASTİK.", scheme(False))
+    cx, cy = -40.0, 66.0
+    d.add(None, A.circle(13.5, cx, cy) - A.circle(8.9, cx, cy), BLACK)          # lastik
+    holes = A.union(A.circle(1.5, cx, cy), *[A.circle(1.25, cx + 4.3 * np.cos(a), cy + 4.3 * np.sin(a))
+                                             for a in np.radians(np.arange(5) * 72 + 90)])
+    d.add(None, A.circle(7.6, cx, cy) - holes, RED)                                # jant: 5 bijon deliği
+    d.add("İNCE", t("oswald", "İNCE", 16.0, -21.5, 71.5, "l", 0.6), BLACK)
+    d.add("OTO LASTİK", t("oswald", "OTO LASTİK", 7.4, -21.5, 56.5, "l", 0.8), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.8, X0, 38.0, "l", 0.9), RED)
+    d.add("telefon", t("outfit", PHONE, 5.2, X0, 25.0, "l", 0.4, 66.0), BLACK)
+    d.add("TARA", t("oswald", "TARA", 6.0, X0, 13.0, "l", 1.2), BLACK)
+    d.inlay += qr_block(35.0, 29.0, 38.0, d.sc)
     return d
 
 
-def b1_gece():
-    d = w1_klasik(dark=True)
-    d.key, d.title, d.desc = "8_gece", "Gece", "Siyah zemin: beyaz İNCE ve lastik, kırmızı OTO LASTİK; QR beyaz karoda."
+# ---------------------------------------------------------------- siyah zemin (beyaz, kırmızı yazı)
+
+def d8_kose():
+    d = Design("8_kose", "Kırmızı köşe", "Siyah zemin, sol üst köşede kırmızı üçgen ve 7/24; QR beyaz karoda.",
+               scheme(True))
+    tri = A.polygon([(-70, 100), (-70, 42), (-12, 100)]) ^ I.outline()
+    d.add("7/24 köşe", tri - t("archivo", "7/24", 6.6, -47.5, 79.5, "c", 0.4), RED)
+    d.add("İNCE", t("archivo", "İNCE", 13.0, X0, 43.5, "l", 0.5), WHITE)
+    d.add("OTO LASTİK", t("archivo", "OTO LASTİK", 5.6, X0, 29.5, "l", 0.6, 60.0), RED)
+    d.add("telefon", t("outfit", PHONE, 5.0, X0, 16.0, "l", 0.4, 60.0), WHITE)
+    d.inlay += qr_block(33.0, 45.0, 42.0, d.sc)
     return d
 
 
-def b2_rozet_siyah():
-    d = w2_rozet(dark=True)
-    d.key, d.title, d.desc = "9_rozet_siyah", "Siyah, 7/24 rozeti", "Siyah zemin, kırmızı 7/24 rozeti; QR beyaz karoda."
+def d9_cerceve():
+    d = Design("9_cerceve", "Kırmızı çerçeve", "Siyah zemin, ince kırmızı çerçeve; ortalı, sade yazılar.", scheme(True))
+    d.add(None, A.rrect(112.0, 78.0, 5.0, 0, 48.5) - A.rrect(109.2, 75.2, 3.6, 0, 48.5), RED)
+    cx = -24.0
+    d.add("İNCE", t("bebas", "İNCE", 27.0, cx, 63.0, "c", 1.2), WHITE)
+    d.add("OTO LASTİK", t("outfit", "OTO LASTİK", 4.8, cx, 42.5, "c", 1.6), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.2, cx, 32.0, "c", 1.2), WHITE)
+    d.add("telefon", t("outfit", PHONE, 4.8, cx, 21.0, "c", 0.3, 54.0), WHITE)
+    d.inlay += qr_block(28.0, 48.0, 42.0, d.sc)
     return d
 
 
-def b3_lastik_izi_siyah():
-    d = w3_lastik_izi(dark=True)
-    d.key, d.title, d.desc = "10_lastik_izi_siyah", "Siyah, lastik izi", "Siyah zemin, kırmızı lastik izi şeridi."
+def d10_oklar():
+    d = Design("10_oklar", "Oklar", "Siyah zemin, QR'ı gösteren kalın kırmızı oklar; İNCE ve OTO LASTİK.",
+               scheme(True))
+    d.add("İNCE", t("russo", "İNCE", 15.0, X0, 72.0, "l", 0.6), WHITE)
+    d.add("OTO LASTİK", t("russo", "OTO LASTİK", 6.0, X0, 56.0, "l", 0.6, 60.0), RED)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.6, X0, 45.5, "l", 0.9), WHITE)
+    d.add(None, U.chevrons(X0, 32.0, 9.0, 3, 10.0, 3.0), RED)
+    d.add("telefon", t("outfit", PHONE, 5.0, X0, 17.0, "l", 0.4, 60.0), WHITE)
+    d.inlay += qr_block(32.0, 44.0, 44.0, d.sc)
     return d
 
 
-DESIGNS = [w1_klasik, w2_rozet, w3_lastik_izi, w4_qr_solda, w5_cerceve, w6_buyuk_baslik, w7_kirmizi_cizgi,
-           b1_gece, b2_rozet_siyah, b3_lastik_izi_siyah]
+DESIGNS = [d1_plaka, d2_minimal, d3_kirmizi_blok, d4_yol, d5_dama, d6_hiz, d7_jant, d8_kose, d9_cerceve, d10_oklar]
 
 
 # ---------------------------------------------------------------- katılar, kontrol, çizim
