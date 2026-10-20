@@ -123,7 +123,7 @@ def left_column(d, x0=X0, x1=0.0, top=74.0, header="lastik", phone_y=13.5, hemen
             d.add(None, cs, col)
     elif header == "rozet":                                  # kırmızı 7/24 rozeti + İNCE
         disk = A.circle(10.5, x0 + 10.5, top)
-        txt = I.text(heavy(), "7/24", 7.6, x0 + 10.5, top, "c", 0.2)
+        txt = I.text(heavy(), "7/24", 6.0, x0 + 10.5, top, "c", 0.1)
         d.add("7/24 rozet", disk - txt.offset(0.05, J), RED)
         d.add("İNCE", ince(18.0, x0 + 25.0, top, max_w=x1 - x0 - 25.0), sc["fg"])
     elif header == "cizgi":                                  # İNCE + altında kalın kırmızı çizgi, kırmızı lastik
@@ -198,14 +198,14 @@ def w6_buyuk_baslik(dark=False):
     d = Design("6_buyuk_baslik", "Büyük başlık", "Üstte boydan büyük İNCE OTO LASTİK; altta büyük lastik, telefon ve QR.",
                scheme(dark))
     sc = d.sc
-    w = d.add("İNCE", ince(17.5, X0, 74.0), sc["fg"])
-    d.add("OTO LASTİK", word("OTO LASTİK", bold(), 9.0, w.bounds()[2] + 6.0, 74.0, "l", 1.2, X1 - w.bounds()[2] - 6.0),
+    w = d.add("İNCE", ince(15.0, X0, 73.5), sc["fg"])
+    d.add("OTO LASTİK", word("OTO LASTİK", bold(), 9.0, w.bounds()[2] + 6.0, 73.5, "l", 1.2, X1 - w.bounds()[2] - 6.0),
           RED)
     d.add(None, A.rect(X0, 62.4, X1, 63.6), RED)
     for cs, col in tire(13.0, X0 + 13.0, 41.5, sc):
         d.add(None, cs, col)
-    d.add("7/24 HİZMET", word("7/24 HİZMET", SMALL, 4.6, X0 + 30.0, 45.0, "l", 0.8), sc["fg"])
-    d.add("HEMEN ARA", word("HEMEN ARA", SMALL, 4.4, X0 + 30.0, 36.0, "l", 0.9), RED)
+    d.add("7/24", I.text(heavy(), "7/24", 10.0, X0 + 31.0, 46.0, "l", 0.4), RED)
+    d.add("HİZMET", word("HİZMET", SMALL, 4.4, X0 + 31.0, 35.5, "l", 0.9), sc["fg"])
     d.add("telefon", word(PHONE, SMALL, 5.0, X0, 16.5, "l", 0.4, 58.0), sc["fg"])
     d.inlay += qr_block(32.0, 33.0, 44.0, sc)
     return d
@@ -389,6 +389,9 @@ def catalog(ds):
 
 def main():
     only = sys.argv[1:]
+    if only == ["katalog"]:                              # yalnız müşteri kataloğu
+        catalog([build(fn) for fn in DESIGNS])
+        return
     ds = []
     for i, fn in enumerate(DESIGNS, 1):
         d = build(fn)
