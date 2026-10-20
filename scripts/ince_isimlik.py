@@ -220,7 +220,7 @@ def d6_hiz():
     x0 = -37.0
     d.add(None, A.union(bar(X0, -42.0, 72.0, 2.4), bar(X0 + 4.0, -43.0, 65.0, 2.4), bar(X0, -44.0, 58.0, 2.4)), RED)
     d.add("İNCE", t("teko", "İNCE", 26.0, x0, 64.0, "l", 0.8, 41.0, shear=12.0), BLACK)
-    d.add("OTO LASTİK", t("teko", "OTO LASTİK", 10.0, x0, 44.5, "l", 1.0, 45.0, shear=12.0), RED)
+    d.add("OTO LASTİK", t("outfit", "OTO LASTİK", 6.8, x0 + 1.0, 45.0, "l", 0.8, 44.0, shear=10.0), RED)
     d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.6, X0, 30.0, "l", 0.9), BLACK)
     d.add("telefon", t("outfit", PHONE, 5.2, X0, 17.5, "l", 0.4), BLACK)
     d.inlay += qr_block(33.0, 45.0, 42.0, d.sc)
@@ -238,7 +238,7 @@ def d7_jant():
     d.add("OTO LASTİK", t("oswald", "OTO LASTİK", 7.4, -21.5, 56.5, "l", 0.8), RED)
     d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.8, X0, 38.0, "l", 0.9), RED)
     d.add("telefon", t("outfit", PHONE, 5.2, X0, 25.0, "l", 0.4, 66.0), BLACK)
-    d.add("TARA", t("oswald", "TARA", 6.0, X0, 13.0, "l", 1.2), BLACK)
+    d.add("TARA", t("oswald", "TARA", 7.4, X0, 13.6, "l", 1.4), BLACK)
     d.inlay += qr_block(35.0, 29.0, 38.0, d.sc)
     return d
 
@@ -249,7 +249,7 @@ def d8_kose():
     d = Design("8_kose", "Kırmızı köşe", "Siyah zemin, sol üst köşede kırmızı üçgen ve 7/24; QR beyaz karoda.",
                scheme(True))
     tri = A.polygon([(-70, 100), (-70, 42), (-12, 100)]) ^ I.outline()
-    d.add("7/24 köşe", tri - t("archivo", "7/24", 6.6, -47.5, 79.5, "c", 0.4), RED)
+    d.add("7/24 köşe", tri - t("archivo", "7/24", 6.0, -48.5, 80.5, "c", 0.4), RED)
     d.add("İNCE", t("archivo", "İNCE", 13.0, X0, 43.5, "l", 0.5), WHITE)
     d.add("OTO LASTİK", t("archivo", "OTO LASTİK", 5.6, X0, 29.5, "l", 0.6, 60.0), RED)
     d.add("telefon", t("outfit", PHONE, 5.0, X0, 16.0, "l", 0.4, 60.0), WHITE)
@@ -263,7 +263,7 @@ def d9_cerceve():
     cx = -24.0
     d.add("İNCE", t("bebas", "İNCE", 27.0, cx, 63.0, "c", 1.2), WHITE)
     d.add("OTO LASTİK", t("outfit", "OTO LASTİK", 4.8, cx, 42.5, "c", 1.6), RED)
-    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.2, cx, 32.0, "c", 1.2), WHITE)
+    d.add("7/24 HİZMET", t("outfit", "7/24 HİZMET", 4.6, cx, 32.0, "c", 1.0), WHITE)
     d.add("telefon", t("outfit", PHONE, 4.8, cx, 21.0, "c", 0.3, 54.0), WHITE)
     d.inlay += qr_block(28.0, 48.0, 42.0, d.sc)
     return d
@@ -411,7 +411,7 @@ def catalog(ds):
             dr.text((100, y0 + 40), "Ürün", font=f(38), fill=ink)
             ty = y0 + 110
             for line in ("Ölçü 12 × 9 cm, gövde 1 cm kalınlığında, köşeler yuvarlak",
-                         "Yazılar ve lastik simgesi 2 mm kabartma; QR düz ve keskin",
+                         "Yazılar ve şekiller 2 mm kabartma; QR düz ve keskin",
                          "Tezgâh sehpası dahil, panel 15° eğik durur",
                          f"Telefon: {PHONE}"):
                 dr.ellipse((100, ty + 10, 114, ty + 24), fill=red)
