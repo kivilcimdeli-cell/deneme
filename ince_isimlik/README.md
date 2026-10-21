@@ -72,3 +72,25 @@ hesabında** durur; her işletme o hesapta ayrı bir Worker'dır, adres `<işlet
 
 **Claude önizlemesi:** `sayfa_artifact.html` yalnız kontrol içindir; sitenin kendisi değildir.
 Orada üstte Claude yazar, Hemen Ara numarayı kopyalar, karekod ve rehber indirme bağlantıları yoktur.
+
+## Baskı dosyası: seçilen 8 · Kırmızı köşe (X2D)
+
+![Baskı](baski/onizleme.png)
+
+**`baski/ince_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Tablada **iki takım**
+(panel + sehpa) var; biri silinirse tek takım basılır. Ölçüler ve ayarlar Uzar'ın isimliğiyle aynı.
+
+| | |
+| --- | --- |
+| Panel | 120 × 90 mm, siyah gövde **1 cm**, köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
+| Kabartma | **2 mm** (10 katman): İNCE ve telefon beyaz; köşe üçgeni (içinde oyma 7/24) ve OTO LASTİK kırmızı |
+| Yazılar | sol sütunda ortalı, QR'la aynı yükseklikte; harf içi boşluklar ≥ 0,9 mm, İ noktaları harften ayrık |
+| QR | yüzeyle aynı hizada beyaz dolgu (0,8 mm), 42 mm, kare 1,13 mm; siteyi açar, görüntüden ve baskı hatası benzetiminden okundu |
+| AMS | 1 siyah (Elas, ana nozul) · 2 beyaz (Elas, yardımcı nozul) · 3 kırmızı (ana nozul) |
+| Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Elas için Generic PLA |
+| Filament | iki takım ~118 g (siyah 110, beyaz 4,7, kırmızı 3,1) + kule; PrusaSlicer ~3 sa 30 dk (Bambu Studio kendi süresini gösterir) |
+| Sehpa | 100 × 40 × 10 mm, aynı tablada; panel yuvaya (10,3 mm) 15° eğik takılır, tutkal gerekmez |
+
+```bash
+python3 scripts/ince_isimlik_baski.py    # baski/ince_isimlik_x2d.3mf, baski/onizleme.png
+```

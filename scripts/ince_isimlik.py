@@ -246,14 +246,16 @@ def d7_jant():
 # ---------------------------------------------------------------- siyah zemin (beyaz, kırmızı yazı)
 
 def d8_kose():
-    d = Design("8_kose", "Kırmızı köşe", "Siyah zemin, sol üst köşede kırmızı üçgen ve 7/24; QR beyaz karoda.",
+    d = Design("8_kose", "Kırmızı köşe", "Siyah zemin, sol üst köşede kırmızı üçgen ve 7/24; ortalı yazılar, QR beyaz karoda.",
                scheme(True))
     tri = A.polygon([(-70, 100), (-70, 42), (-12, 100)]) ^ I.outline()
-    d.add("7/24 köşe", tri - t("archivo", "7/24", 6.0, -48.5, 80.5, "c", 0.4), RED)
-    d.add("İNCE", t("archivo", "İNCE", 13.0, X0, 43.5, "l", 0.5), WHITE)
-    d.add("OTO LASTİK", t("archivo", "OTO LASTİK", 5.6, X0, 29.5, "l", 0.6, 60.0), RED)
-    d.add("telefon", t("outfit", PHONE, 5.0, X0, 16.0, "l", 0.4, 60.0), WHITE)
-    d.inlay += qr_block(33.0, 45.0, 42.0, d.sc)
+    d.add("7/24 köşe", tri - t("archivo", "7/24", 5.4, -46.5, 80.5, "c", 0.4), RED)   # köşe içinde ortalı
+    # yazılar sol sütunda ortalı (QR'a 6 mm) ve QR'la aynı yükseklikte ortalı; İ'nin noktası üçgene ≥ 2,9 mm
+    cx, qy = -23.5, 41.0
+    d.add("İNCE", t("archivo", "İNCE", 13.0, cx, 49.9, "c", 0.5), WHITE)
+    d.add("OTO LASTİK", t("archivo", "OTO LASTİK", 5.6, cx, 34.9, "c", 0.5, 60.0), RED)
+    d.add("telefon", t("outfit", PHONE, 5.0, cx, 24.4, "c", 0.4, 60.0), WHITE)
+    d.inlay += qr_block(33.0, qy, 42.0, d.sc)
     return d
 
 

@@ -241,7 +241,7 @@ def qr_check(plate):
     return want in Q.decode(im), want in Q.decode(sim)
 
 
-def preview(plate, parts, path, info_lines):
+def preview(plate, parts, path, info_lines, title="UZAR OTO LASTİK – İSİMLİK (4 · TEK QR) · X2D BASKI DOSYASI"):
     bed = m3.Manifold.cube((256, 256, 0.2)).translate((0, 0, -0.4))
     tx, ty = plate.tower_xy
     tower = m3.Manifold.cube((TOWER, TOWER, T + RELIEF)).translate((tx, ty, 0))
@@ -267,7 +267,7 @@ def preview(plate, parts, path, info_lines):
         dr.rounded_rectangle((x0, y0_, x1, y1), 22, fill=(146, 153, 166))
         canvas.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0_ + 30 + (y1 - y0_ - 30 - im.height) // 2), im)
         dr.text((x0 + 16, y0_ + 10), label, fill=(236, 239, 244), font=fs)
-    dr.text((30, 18), "UZAR OTO LASTİK – İSİMLİK (4 · TEK QR) · X2D BASKI DOSYASI", fill=(24, 26, 30), font=f)
+    dr.text((30, 18), title, fill=(24, 26, 30), font=f)
     for k, line in enumerate(info_lines):
         dr.text((30, 66 + k * 28), line, fill=(22, 120, 60) if k == len(info_lines) - 1 else (70, 74, 84), font=fs)
     canvas.save(path)
