@@ -99,11 +99,12 @@ def instagram_handle(s):
 
 
 def google_url(s):
-    """Google arama bağlantısından yalnız aramayı bırakır; Haritalar / kısa bağlantılar olduğu gibi kalır."""
+    """Google arama bağlantısından yalnız aramayı bırakır; Haritalar / kısa bağlantılar ve # ile belirli bir
+    pencereyi (ör. işletmenin yorumları) açan arama bağlantıları olduğu gibi kalır."""
     u = urllib.parse.urlsplit(s.strip())
     if not u.scheme.startswith("http"):
         raise QRError(f"bağlantı değil: {s!r}")
-    if u.path == "/search":
+    if u.path == "/search" and not u.fragment:
         q = urllib.parse.parse_qs(u.query).get("q", [""])[0].strip()
         if not q:
             raise QRError("Google bağlantısında arama (q) yok")
