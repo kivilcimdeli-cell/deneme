@@ -199,8 +199,9 @@ def rotation(azim, elev):
     return rx @ rz  # kamera -z yönüne bakar; y yukarı
 
 
-def render(parts, size, R, light=True, flat=None, margin=0.08, ss=3):
-    """Basit z-buffer rasterleştirici. parts: [(V, T, rgb)]. Şeffaf arka planlı RGBA döner."""
+def render(parts, size, R, light=True, flat=None, margin=0.08, ss=3, ldir=(0.35, 0.55, 0.76), ambient=0.38):
+    """Basit z-buffer rasterleştirici. parts: [(V, T, rgb)]. Şeffaf arka planlı RGBA döner.
+    ldir: kameraya göre ışık yönü (x sağ, y yukarı, z kameraya doğru); ambient: en karanlık yüzün parlaklığı."""
     W = size * ss
     allv = np.vstack([V for V, _, _ in parts]) @ R.T
     lo, hi = allv[:, :2].min(0), allv[:, :2].max(0)
@@ -208,8 +209,7 @@ def render(parts, size, R, light=True, flat=None, margin=0.08, ss=3):
     off = W / 2 - scale * (lo + hi) / 2
     zbuf = np.full((W, W), -np.inf)
     img = np.zeros((W, W, 3))
-    ldir = np.array([0.35, 0.55, 0.76])
-    ldir /= np.linalg.norm(ldir)
+    ldir = np.asarray(ldir, float) / np.linalg.norm(ldir)
     for V, T, rgb in parts:
         P = V @ R.T
         S = np.c_[P[:, 0] * scale + off[0], W - (P[:, 1] * scale + off[1]), P[:, 2]]
@@ -221,7 +221,7 @@ def render(parts, size, R, light=True, flat=None, margin=0.08, ss=3):
         if flat is not None:
             shade = np.where(np.abs(n[:, 2]) > 0.5, 1.0, flat)
         elif light:
-            shade = 0.38 + 0.62 * np.clip(n @ ldir, 0, 1)
+            shade = ambient + (1 - ambient) * np.clip(n @ ldir, 0, 1)
         else:
             shade = np.ones(len(T))
         col = np.asarray(rgb) / 255.0

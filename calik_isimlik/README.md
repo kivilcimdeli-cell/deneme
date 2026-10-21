@@ -86,3 +86,28 @@ Sayfadaki karekod bankanınkiyle aynı baytlarla ve aynı hata düzeltmeyle (H) 
 ```bash
 python3 scripts/calik_isimlik_baski.py    # baski/calik_isimlik_x2d.3mf, baski/onizleme.png
 ```
+
+## Kartvizitlik önerileri
+
+![Kartvizitlik](kartvizitlik/musteri_kartvizitlik.png)
+
+Müşteriye gönderilecek katalog: **`kartvizitlik/musteri_kartvizitlik.png`** (ve `.pdf`). Ayrıntılı sayfalar:
+`kartvizitlik/<numara>_<ad>.png` (3/4 kartlarla, önden, yandan).
+
+| | Model | Biçim ve süs |
+| --- | --- | --- |
+| 1 | Sade | alçak L gövde; ön dudakta ÇALIK OTO LASTİK |
+| 2 | Rampa | önü 45° rampa; üstünde ÇALIK ve isimlikteki lastik izi okları |
+| 3 | Blok | dolu blok, kartlar üstteki eğik yarıkta; önde büyük ÇALIK ve telefon |
+| 4 | QR'lı | yanında 15° yaslı QR levhası (siteyi açar, TARA); QR sarı dolgu, yüzeyle aynı hizada, 36 mm, kare 0,97 mm |
+| 5 | İkaz şeridi | dört duvarlı tepsi; önde sarı-siyah ikaz şeridi ve ÇALIK |
+| 6 | Lastik yanaklı | iki yanı diş izli lastik, yan yüzünde sarı jant; önde ÇALIK OTO LASTİK |
+
+- Kart cebi 92 mm geniş: 85 × 55 ve 90 × 50 kartlar sığar, ~50 kart alır; kartlar 15° arkaya yaslanır.
+- Siyah gövde (ana nozul), sarı yazı ve süs (yardımcı nozul), 1 mm kabartma. Tabana oturarak dik basılır, destek
+  gerekmez (lastik yanaklarının altı dolu). Model başına ~30–42 g.
+
+```bash
+python3 scripts/calik_kartvizitlik.py          # 6 model ve katalog
+python3 scripts/calik_kartvizitlik.py 6_       # yalnız eşleşen modeller
+```
