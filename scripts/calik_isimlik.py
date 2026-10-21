@@ -52,10 +52,10 @@ SC = {"body": BLACK, "fg": WHITE, "dark": True}
 
 
 def make_qr():
-    """İşletme sayfası yayındaysa onun, değilse Google yorumlarının QR'ı (sürüm ≥ 4; hata düzeltmesi sığdığı kadar
-    yükseltilir)."""
+    """İsimlikteki QR: `bilgiler.json` → `isimlik_qr` "google" ise Google yorumları, "sayfa" ise işletme sayfası
+    (verilmemişse sayfa yayındaysa sayfa). Sürüm ≥ 4; hata düzeltmesi sığdığı kadar yükseltilir."""
     import segno
-    if DATA.get("sayfa_url"):
+    if DATA.get("isimlik_qr", "sayfa" if DATA.get("sayfa_url") else "google") == "sayfa":
         content, key, label = Q.https_url(DATA["sayfa_url"]), "sayfa", "TARA"
     else:
         content, key, label = Q.google_url(DATA["google"]), "google", "GOOGLE YORUM"
@@ -250,8 +250,8 @@ def c6_araba():
 
 def c7_lastik_izi():
     d = Design("7_lastik_izi", "Lastik izi", "Üstte boydan kalın sarı lastik izi okları; altında ÇALIK OTO LASTİK.", SC)
-    # hiza: okların ucu QR'ın sağ kenarında (X1); QR'ın üstü ÇALIK'ın üstüyle, alt satırı telefonla aynı hizada
-    s = 44.0
+    # hiza: okların ucu QR'ın sağ kenarında (X1); alt satır telefonla aynı hizada, yıldızların üstü ÇALIK'la
+    s = 44.0 if SITE else 38.0
     n, w, h = 12, 2.6, 8.0
     pitch = (X1 - X0 - w - h / 2) / (n - 1)
     d.add(None, U.chevrons(X0, 80.5, h, n, pitch, w).offset(-0.5, J).offset(0.5, J), YELLOW)   # uçlar yuvarlak

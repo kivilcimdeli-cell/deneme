@@ -3,10 +3,12 @@
 Uzar ve İnce'nin basılan isimlikleriyle aynı ölçüler ve ayarlar (scripts/uzar_isimlik_baski.py):
   * Tablada iki takım (panel + sehpa). Panel 120 × 90 mm, siyah gövde 1 cm, köşeler R8, alt ve üst kenar 0,6 mm
     basamaklı pah. Yüzü yukarı basılır (arkası tablada), destek gerekmez.
-  * Kabartma 2 mm (10 katman): ÇALIK, telefon, TARA beyaz; lastik izi okları, OTO LASTİK, HEMEN ARA, BİZE ULAŞIN
-    sarı. Hiza: okların ucu QR'ın sağ kenarında; QR'ın üstü ÇALIK'ın üstüyle, alt satırı telefonla aynı hizada.
-  * QR (TARA → https://calikotolastik.qrsistem.workers.dev/) yüzeyle aynı hizada: beyaz dolgu üst 4 katmanda
-    (0,8 mm), siyah kareler gövdenin kendisi; 44 mm, kare 1,18 mm.
+  * Kabartma 2 mm (10 katman): ÇALIK, telefon, GOOGLE beyaz; lastik izi okları, OTO LASTİK, HEMEN ARA, beş yıldız,
+    YORUM YAP sarı. Hiza: okların ucu QR'ın sağ kenarında; yıldızların üstü ÇALIK'ın üstüyle, YORUM YAP telefonla
+    aynı hizada.
+  * QR müşterinin istediği gibi katalogdaki hâliyle Google yorumlarını açar (bilgiler.json → isimlik_qr "google",
+    `google` bağlantısı; işletme sayfası ayrıca yayında). Yüzeyle aynı hizada: beyaz dolgu üst 4 katmanda (0,8 mm),
+    siyah kareler gövdenin kendisi; 38 mm, kare 1,02 mm.
   * Sehpa (siyah) aynı tablada: 100 × 40 × 10 mm; panel yuvaya (10,3 mm) 15° arkaya eğik oturur, tutkal gerekmez.
   * Nozullar: siyah ve sarı ana nozulda, beyaz yardımcı nozulda. AMS 1 siyah, 2 sarı, 3 beyaz.
   * Bambu standart profili (0,20 mm Standard @BBL X2D): ütüleme kapalı, destek kapalı, tabla Textured PEI.
@@ -31,7 +33,7 @@ import uzar_isimlik as I  # noqa: E402
 import uzar_isimlik_baski as B  # noqa: E402
 
 OUT_DIR = os.path.join(C.OUT_DIR, "baski")
-QR_SIDE = 44.0
+QR_SIDE = 38.0
 
 
 class Plate(B.Plate):
@@ -39,7 +41,6 @@ class Plate(B.Plate):
     title = "CALIK_OTO_LASTIK_isimlik"
 
     def __init__(self):
-        assert C.SITE, "bilgiler.json → sayfa_url boş: QR siteye gitmeli"
         self.design = C.c7_lastik_izi()
         self.panel = C.solids(self.design)
         self.module = Q.module_for(C.QR, QR_SIDE)
@@ -95,7 +96,7 @@ def main():
         when = f" · PrusaSlicer ~{m['sure']}"
         print(f"  ölçüm ({m['kaynak']}): {g}, toplam {m['toplam_g']} g, {m['sure']}")
     info = [f"{len(plate.instances)} takım · panel 120 × 90 mm, siyah gövde {B.T / 10:.0f} cm, kabartma {B.RELIEF:.0f} mm "
-            "(beyaz ÇALIK / telefon / TARA, sarı oklar / OTO LASTİK / HEMEN ARA), QR yüzeyle aynı hizada beyaz dolgu",
+            "(beyaz ÇALIK / telefon / GOOGLE, sarı oklar / OTO LASTİK / yıldızlar / YORUM YAP), QR Google yorumlarını açar",
             "AMS: 1 siyah (Elas, ana nozul) · 2 sarı (ana nozul, siyahtan sonra) · 3 beyaz (Elas, yardımcı nozul)",
             "Bambu standart 0,20 mm · ütüleme kapalı · destek yok · Textured PEI · panel yüzü yukarı, sehpa yanında",
             f"Filament (iki takım) ~{sum(g.values()):.0f} g (siyah {g.get('siyah', 0):.0f}, beyaz {g.get('beyaz', 0):.1f}, "

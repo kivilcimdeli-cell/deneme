@@ -75,12 +75,12 @@ Sayfadaki karekod bankanınkiyle aynı baytlarla ve aynı hata düzeltmeyle (H) 
 | | |
 | --- | --- |
 | Panel | 120 × 90 mm, siyah gövde **1 cm**, köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
-| Kabartma | **2 mm** (10 katman): ÇALIK, telefon, TARA beyaz; lastik izi okları, OTO LASTİK, HEMEN ARA, BİZE ULAŞIN sarı |
-| QR | siteyi açar (**https://calikotolastik.qrsistem.workers.dev/**); yüzeyle aynı hizada beyaz dolgu (0,8 mm), 44 mm, kare 1,18 mm; görüntüden ve baskı hatası benzetiminden okundu. Katalogdaki yıldızlar ve GOOGLE / YORUM YAP yerine TARA / BİZE ULAŞIN yazar; Google yorumu sitedeki düğmeden yapılır |
-| Hiza | okların ucu QR'ın sağ kenarında; QR'ın üstü ÇALIK'ın üstüyle, alt satır telefonla aynı hizada |
+| Kabartma | **2 mm** (10 katman): ÇALIK, telefon, GOOGLE beyaz; lastik izi okları, OTO LASTİK, HEMEN ARA, beş yıldız, YORUM YAP sarı |
+| QR | müşteri isteğiyle katalogdaki gibi **Google yorumlarını** açar (`bilgiler.json` → `isimlik_qr: "google"`, `google` bağlantısı); yüzeyle aynı hizada beyaz dolgu (0,8 mm), 38 mm, kare 1,02 mm; görüntüden ve baskı hatası benzetiminden okundu. İşletme sayfası ayrıca yayında |
+| Hiza | okların ucu QR'ın sağ kenarında; yıldızların üstü ÇALIK'ın üstüyle, YORUM YAP telefonla aynı hizada (`baski/on_yuz.png`) |
 | AMS | 1 siyah (Elas, ana nozul) · 2 sarı (ana nozul) · 3 beyaz (Elas, yardımcı nozul) |
 | Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Generic PLA |
-| Filament | iki takım ~120 g (siyah 110, beyaz 5,9, sarı 3,6) + kule; PrusaSlicer ~3 sa 45 dk (Bambu Studio kendi süresini gösterir) |
+| Filament | iki takım ~120 g (siyah 111, beyaz 5,5, sarı 3,9) + kule; PrusaSlicer ~3 sa 38 dk (Bambu Studio kendi süresini gösterir) |
 | Sehpa | 100 × 40 × 10 mm, aynı tablada; panel yuvaya (10,3 mm) 15° eğik takılır, tutkal gerekmez |
 
 ```bash
