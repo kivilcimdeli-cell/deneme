@@ -66,6 +66,8 @@ def make_qr():
 
 QR = make_qr()
 SITE = QR.key == "sayfa"
+# QR'ın çevresi: "google" yıldızlar + GOOGLE / YORUM YAP (katalogdaki görünüş; QR siteyi de açsa), "tara" TARA / BİZE ULAŞIN
+GOOGLE_LOOK = DATA.get("isimlik_etiket", "tara" if SITE else "google") == "google"
 SAMPLE_LINK = "/search?" in QR.content          # işletmenin yorum bağlantısı gelene kadar Google araması
 
 
@@ -88,14 +90,14 @@ def stars(cx, cy, r=3.0, n=5, gap=1.0):
 
 
 def review(d, cx, cy, s, top=True):
-    """QR ve altında iki satır. Site QR'ı: TARA / BİZE ULAŞIN. Google yorum QR'ı: üstünde beş sarı yıldız (top),
-    altında GOOGLE / YORUM YAP."""
+    """QR ve altında iki satır: Google görünüşünde üstünde beş sarı yıldız (top), altında GOOGLE / YORUM YAP;
+    öbüründe TARA / BİZE ULAŞIN."""
     d.inlay += qr_block(cx, cy, s)
-    if top and not SITE:
+    if top and GOOGLE_LOOK:
         d.add(None, stars(cx, cy + s / 2 + 4.6), YELLOW)
     y = cy - s / 2 - 4.6
-    (a, ta), (b, tb) = ((("TARA", 1.2), ("BİZE ULAŞIN", 0.3)) if SITE else (("GOOGLE", 0.8), ("YORUM YAP", 0.3)))
-    cap = 4.4 if SITE else 4.2                      # BİZE ULAŞIN'ın Ş / Ğ'si 4,2'de ince kalıyor
+    (a, ta), (b, tb) = ((("GOOGLE", 0.8), ("YORUM YAP", 0.3)) if GOOGLE_LOOK else (("TARA", 1.2), ("BİZE ULAŞIN", 0.3)))
+    cap = 4.2 if GOOGLE_LOOK else 4.4               # BİZE ULAŞIN'ın Ş / Ğ'si 4,2'de ince kalıyor
     d.add(a, t("outfit", a, cap, cx, y, "c", ta), WHITE)
     d.add(b, t("outfit", b, cap, cx, y - 6.5, "c", tb), YELLOW)
 
@@ -251,7 +253,7 @@ def c6_araba():
 def c7_lastik_izi():
     d = Design("7_lastik_izi", "Lastik izi", "Üstte boydan kalın sarı lastik izi okları; altında ÇALIK OTO LASTİK.", SC)
     # hiza: okların ucu QR'ın sağ kenarında (X1); alt satır telefonla aynı hizada, yıldızların üstü ÇALIK'la
-    s = 44.0 if SITE else 38.0
+    s = 38.0 if GOOGLE_LOOK else 44.0
     n, w, h = 12, 2.6, 8.0
     pitch = (X1 - X0 - w - h / 2) / (n - 1)
     d.add(None, U.chevrons(X0, 80.5, h, n, pitch, w).offset(-0.5, J).offset(0.5, J), YELLOW)   # uçlar yuvarlak
