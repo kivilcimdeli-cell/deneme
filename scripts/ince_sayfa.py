@@ -21,9 +21,10 @@ Bilgiler `ince_isimlik/bilgiler.json`dan okunur (scripts/qr_sistemi.py doğrular
 içindeki IBAN ve alıcı). Banka karekodu bankanın verdiğiyle aynı baytlarla (UTF-8, ECI'siz, hata düzeltme Q)
 yeniden çizilir; "HAFİSE İNCE"deki İ harfleri banka uygulamasında da aynı okunur.
 
-Yayın: Uzar'daki gibi işletmenin Cloudflare hesabında bir Worker'a `ince_site.zip` yüklenir (pages.dev
-Türkiye'de kapalı, workers.dev açık). Kesin adres `bilgiler.json` → `sayfa_url`a yazılır, bu komut yeniden
-çalıştırılır (paylaşım kartı adresi kullanır) ve isimlikteki QR o adrese döner.
+Yayın: Uzar'dan sonraki bütün işletmelerin sitelerinin durduğu ortak Cloudflare hesabında `ince` adlı Worker'a
+`ince_site.zip` yüklenir (pages.dev Türkiye'de kapalı, workers.dev açık; adres `ince.<ortak alt alan>.workers.dev`).
+Kesin adres `bilgiler.json` → `sayfa_url`a yazılır, bu komut yeniden çalıştırılır (paylaşım kartı adresi kullanır)
+ve isimlikteki QR o adrese döner.
 
 Çıktı : ince_isimlik/site/ (index.html, karekod.png, ince.vcf, og.png, fonts/*.woff), ince_isimlik/ince_site.zip,
         ince_isimlik/sayfa_onizleme.png (telefon ekranı), sayfa_animasyon.gif (açılış), sayfa_tur.gif (kaydırma,

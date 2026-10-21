@@ -57,8 +57,12 @@ Dönen bir şey yok. Telefonda "hareketi azalt" açıksa animasyonlar oynamaz.
 aynı. Sayfadaki karekod bankanınkiyle aynı baytlarla çizilir (UTF-8, hata düzeltme Q), bu yüzden İ harfleri banka
 uygulamasında bozulmaz. Karekodun içinde 19.10.2029 tarihi var; geçerlilik süresi olabilir.
 
-**Yayın:** Uzar'daki gibi işletmenin Cloudflare hesabında yeni bir Worker açılır ve `ince_site.zip` yüklenir.
-Sonra:
+**Yayın:** Uzar kendi hesabında kalır. İnce, Çalık ve sonraki bütün işletmeler bir kez açılan **ortak Cloudflare
+hesabında** durur; her işletme o hesapta ayrı bir Worker'dır, adres `<işletme>.<ortak alt alan>.workers.dev` olur.
+
+- Ortak hesabın alt alanı (Workers & Pages → Account details → Subdomain) bir kez seçilir ve bir daha
+  değiştirilmez. Değişirse oradaki bütün basılı QR'lar çalışmaz.
+- İnce'nin Worker'ı `ince` adıyla açılır ve `ince_site.zip` yüklenir. Sonra:
 
 1. Adresi (`…workers.dev`) `bilgiler.json` → `sayfa_url` alanına yaz.
 2. `python3 scripts/ince_sayfa.py` çalıştır; paylaşım kartı adresi kullanır.
