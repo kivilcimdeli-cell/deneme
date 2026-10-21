@@ -35,22 +35,21 @@ python3 scripts/calik_isimlik.py araba     # yalnız eşleşen tasarımlar
 
 ![Sayfa](sayfa_onizleme.png)
 
-Uzar ve İnce'nin sayfalarıyla aynı işleri yapar; tasarımı farklıdır. Konsept tabela: sarı, siyah, beyaz.
+Uzar ve İnce'nin sayfalarıyla aynı işleri yapar; tasarımı farklıdır. Koyu tema, sade ve kurumsal:
 
-- **Başlık:** sarı zemin. ÇALIK, havalimanı panosu gibi harf harf dönen siyah kapaklarda yazar. Altında OTO LASTİK
-  ve ikaz şeridi var.
-- **İletişim:** beyaz zemin. Kalın siyah çerçeveli, gölgeli düğmeler basınca içeri göçer: Hemen Ara (sarı),
-  WhatsApp, Instagram, Google, Rehber.
-- **Ödeme:** siyah zemin üzerinde sarı bilet. Üstünde banka, IBAN ve alıcı yazar; altında Kopyala ve Karekod
-  düğmeleri var.
+- **Yazı:** tek yazı tipi (Manrope), her şey aynı sol hizada.
+- **Sarı yalnız vurgu:** ÇALIK'ın sonundaki nokta, OTO LASTİK, Hemen Ara düğmesi ve IBAN çizgisi.
+- **İkaz şeridi:** isimliklerdeki şerit sayfanın en üstünde ve altbilgide ince bir şerit olarak durur.
+- **İletişim:** sarı Hemen Ara düğmesi; altında WhatsApp, Instagram, Google ve Rehbere kaydet kutuları.
+- **Ödeme:** banka, alıcı ve IBAN tek kartta; altında Kopyala ve Karekod düğmeleri.
 
 **Animasyon** (`sayfa_tur.gif`):
 
-- **Açılış:** pano kapakları rastgele harflerden geçip ÇALIK'ta durur.
-- **Kaydırma:** ikaz şeritleri kaydırdıkça akar. Bilet görününce yazar makineden çıkar gibi açılır. Hemen Ara
-  ekrandan çıkınca altta sarı arama şeridi belirir.
-- **Sürekli:** birkaç saniyede bir panoda tek bir kapak dönüp geri gelir.
-- **Dokununca:** panoya dokunulunca harfler yeniden karışır.
+- **Açılış:** ikaz şeridi kayarak gelir, arkada sarı ışık süzülür. ÇALIK harf harf maskeden yükselir ve sarı nokta
+  belirir. OTO LASTİK harf aralığı daralarak oturur, düğmeler sırayla gelir.
+- **Kaydırma:** şeritler kaydırdıkça akar. Ödeme kartı görününce IBAN çizgisi uzar. Hemen Ara ekrandan çıkınca altta
+  arama şeridi belirir.
+- **Sürekli:** Hemen Ara birkaç saniyede bir hafifçe parlar ve telefon simgesi çalar.
 
 **Bilgiler** (`bilgiler.json`):
 

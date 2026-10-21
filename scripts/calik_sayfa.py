@@ -1,16 +1,16 @@
-"""ÇALIK OTO LASTİK – işletme sayfası (sarı, siyah, beyaz; telefona göre).
+"""ÇALIK OTO LASTİK – işletme sayfası (koyu tema, sarı vurgu; telefona göre).
 
-Uzar ve İnce'nin sayfalarıyla aynı işler, ayrı tasarım: tabela. Sarı başlıkta havalimanı panosu gibi harf harf
-dönen ÇALIK (siyah kapaklar, beyaz harfler), altında ikaz şeridi. İletişim beyaz zeminde kalın siyah çerçeveli,
-gölgeli düğmeler (basınca içeri göçer); ödeme siyah zeminde sarı bilet: IBAN, alıcı, banka.
+Uzar ve İnce'nin sayfalarıyla aynı işler, ayrı tasarım: sade ve kurumsal. Koyu zemin, tek yazı tipi (Manrope),
+her şey aynı sol hizada; sarı yalnız vurgu: ÇALIK'ın sonundaki nokta, OTO LASTİK, Hemen Ara düğmesi, IBAN çizgisi.
+İsimliklerdeki ikaz şeridi sayfanın en üstünde ve altbilgide ince bir şerit olarak.
 
 Animasyon:
-  açılış   pano kapakları rastgele harflerden geçip ÇALIK'ta durur, OTO LASTİK soldan açılır, düğmeler sırayla gelir
-  kaydırma ikaz şeritleri kaydırdıkça akar; bilet göründüğünde yazar makineden çıkar gibi açılır; Hemen Ara ekrandan
-           çıkınca altta sarı arama şeridi belirir
-  sürekli  birkaç saniyede bir panoda tek bir kapak dönüp geri gelir, Hemen Ara'daki telefon çalar; panoya dokununca
-           harfler yeniden karışır
-"Hareketi azalt" açıksa hiçbiri oynamaz; JavaScript olmasa da sayfa tam görünür.
+  açılış   ikaz şeridi kayarak gelir, arkada sarı ışık süzülür, ÇALIK harf harf maskeden yükselir, sarı nokta belirir,
+           OTO LASTİK harf aralığı daralarak oturur, düğmeler sırayla gelir
+  kaydırma ikaz şeritleri kaydırdıkça akar; ödeme kartı görünce IBAN çizgisi uzar; Hemen Ara ekrandan çıkınca altta
+           arama şeridi belirir
+  sürekli  Hemen Ara birkaç saniyede bir hafifçe parlar ve telefon simgesi çalar
+"Hareketi azalt" açıksa hiçbiri oynamaz.
 
 Sayfada: Hemen Ara, WhatsApp (hazır mesajlı), Instagram, Google yorumları (işletmenin paylaşım bağlantısı), ödeme
 bilgileri (alıcı, banka, IBAN + tek dokunuşla kopyala, banka karekodu: kaydedip banka uygulamasında galeriden
@@ -41,7 +41,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
 import qr_sistemi as Q  # noqa: E402
 import uzar_sayfa as S  # noqa: E402
-from ince_sayfa import _finish, _gif  # noqa: E402
+from ince_sayfa import _finish, _gif, _seek  # noqa: E402
 
 BASE = os.path.join(A.ROOT, "calik_isimlik")
 DATA = os.path.join(BASE, "bilgiler.json")
@@ -51,10 +51,9 @@ PREVIEW = os.path.join(BASE, "sayfa_onizleme.png")
 TOUR = os.path.join(BASE, "sayfa_tur.gif")
 STANDALONE = os.path.join(BASE, "sayfa_onizleme.html")
 ARTIFACT = os.path.join(BASE, "sayfa_artifact.html")
-# Oswald ve Manrope (OFL): değişken yazı tiplerinden sabit kesimler, latin + latin-ext birleşik
-FONTS = {"display": "Oswald-Bold.ttf", "display-sb": "Oswald-SemiBold.ttf", "text": "Manrope-SemiBold.ttf",
-         "text-xb": "Manrope-ExtraBold.ttf"}
-LICENSES = ("OFL-oswald.txt", "OFL-manrope.txt")
+# Manrope (OFL): değişken yazı tipinden sabit kesimler, latin + latin-ext birleşik
+FONTS = {"text": "Manrope-Medium.ttf", "text-sb": "Manrope-SemiBold.ttf", "text-xb": "Manrope-ExtraBold.ttf"}
+LICENSES = ("OFL-manrope.txt",)
 CHROMIUM = "/opt/pw-browsers/chromium"
 NAME = "ÇALIK"
 
@@ -111,209 +110,179 @@ def embed_fonts(css):
     return css
 
 
-def board(text=NAME):
-    """Pano: her harf bir kapak (üst ve alt yarım). JavaScript yoksa harfler olduğu gibi görünür."""
-    return "".join(f'<span class="flap" data-ch="{c}"><span class="half top"><b>{c}</b></span>'
-                   f'<span class="half bot"><b>{c}</b></span></span>' for c in text)
+def wordmark(text=NAME):
+    """ÇALIK: her harf maskenin altından yükselir; sonunda sarı nokta."""
+    return "".join(f'<span class="ch"><span>{c}</span></span>' for c in text) + '<i class="dot"></i>'
 
 
 # ---------------------------------------------------------------- sayfa
 
 CSS = """
-@font-face{font-family:"Oswald";font-weight:700;font-display:swap;src:url(fonts/display.woff) format("woff")}
-@font-face{font-family:"Oswald";font-weight:600;font-display:swap;src:url(fonts/display-sb.woff) format("woff")}
-@font-face{font-family:"Manrope";font-weight:600;font-display:swap;src:url(fonts/text.woff) format("woff")}
+@font-face{font-family:"Manrope";font-weight:500;font-display:swap;src:url(fonts/text.woff) format("woff")}
+@font-face{font-family:"Manrope";font-weight:600;font-display:swap;src:url(fonts/text-sb.woff) format("woff")}
 @font-face{font-family:"Manrope";font-weight:800;font-display:swap;src:url(fonts/text-xb.woff) format("woff")}
-/* tabela: sarı başlık (dönen harf panosu), beyaz iletişim (kalın çerçeveli düğmeler), siyah ödeme (sarı bilet) */
-:root{color-scheme:light;--yellow:#ffc814;--yellow2:#f0b400;--ink:#0d0d0d;--ink2:#1a1a1a;--paper:#ffffff;
-  --cream:#fff7d6;--muted:#5d5a52;--onink:#b9b6ad;--line:#2a2a2a;--ok:#1f9d55;
-  --display:"Oswald","Arial Narrow",sans-serif;--ui:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --stripe:repeating-linear-gradient(-45deg,var(--ink) 0 13px,var(--yellow) 13px 26px);--roll:0px}
+/* koyu, tek sütun, sol hizalı; sarı yalnız vurgu (nokta, çizgi, Hemen Ara). Ölçek: 12 · 14 · 16 · 20 · 26 · büyük */
+:root{color-scheme:dark;--bg:#0b0b0c;--surface:#141416;--raise:#1b1b1e;--line:#26262a;--line2:#36363b;
+  --text:#f4f4f1;--muted:#9a9aa1;--dim:#66666d;--yellow:#ffc814;--yellow-ink:#1a1400;--ok:#1f9d55;--white:#fff;
+  --ui:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --stripe:repeating-linear-gradient(-45deg,#0b0b0c 0 9px,var(--yellow) 9px 18px);--roll:0px}
 *{box-sizing:border-box;margin:0}
-html{background:var(--ink);-webkit-text-size-adjust:100%}
-body{background:var(--ink);color:var(--ink);font:600 16px/1.45 var(--ui);min-height:100vh;overflow-x:hidden}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:500 16px/1.5 var(--ui);min-height:100vh;overflow-x:hidden}
 a{color:inherit;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit}
-:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.in{max-width:460px;margin:0 auto}
-/* ---- başlık: sarı tabela ---- */
-.hero{background:var(--yellow);padding-block:34px 30px;position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(120% 70% at 0% 0%,rgba(255,255,255,.35),transparent 60%)}
-.hero .in{position:relative}
-.top{display:flex;justify-content:space-between;align-items:center;font:600 13px/1 var(--display);letter-spacing:.24em}
-.top span:last-child{display:inline-flex;align-items:center;gap:7px}
-.top span:last-child::before{content:"";width:9px;height:9px;background:var(--ink);transform:rotate(45deg)}
-.board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:20px;cursor:pointer;
-  -webkit-tap-highlight-color:transparent}
-.flap{position:relative;height:clamp(92px,29vw,128px);border-radius:9px;perspective:420px;
-  box-shadow:0 7px 0 rgba(0,0,0,.28),0 14px 24px -12px rgba(0,0,0,.5)}
-.half{position:absolute;left:0;right:0;height:50%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.half.top{top:0;border-radius:9px 9px 0 0;background:linear-gradient(#232323,#191919)}
-.half.bot{bottom:0;border-radius:0 0 9px 9px;background:linear-gradient(#141414,#0f0f0f)}
-.half b{position:absolute;left:0;right:0;height:200%;display:flex;align-items:center;justify-content:center;
-  font:700 clamp(66px,21vw,92px)/1 var(--display);color:#fbfbf7}
-.half.top b{top:0}
-.half.bot b{bottom:0}
-.flap::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:#000;z-index:4;
-  box-shadow:0 1px 0 rgba(255,255,255,.06)}
-.flap::before{content:"";position:absolute;z-index:5;top:calc(50% - 5px);left:-2px;right:-2px;height:10px;
-  background:linear-gradient(90deg,var(--yellow2) 0 4px,transparent 4px calc(100% - 4px),var(--yellow2) calc(100% - 4px))}
-.leaf{z-index:3}
-.leaf.top{transform-origin:50% 100%}
-.leaf.bot{transform-origin:50% 0}
-.sub{display:flex;align-items:center;gap:12px;margin-top:22px}
-.sub b{font:700 clamp(34px,11.5vw,50px)/1 var(--display);letter-spacing:.015em}
-.sub::after{content:"";flex:1;height:6px;background:var(--ink)}
-.stripe{height:18px;background:var(--stripe);background-position:calc(var(--roll) * -1) 0;border-block:3px solid var(--ink)}
-/* ---- iletişim: beyaz, kalın çerçeve ---- */
-.contact{background:var(--paper);padding-block:30px 34px}
-.label{font:600 14px/1 var(--display);letter-spacing:.24em;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.label::before{content:"";width:14px;height:14px;background:var(--yellow);border:3px solid var(--ink)}
-.box{border:3px solid var(--ink);border-radius:12px;box-shadow:6px 6px 0 var(--ink);
-  transition:transform .12s cubic-bezier(.3,.7,.3,1),box-shadow .12s cubic-bezier(.3,.7,.3,1)}
-.box:active{transform:translate(5px,5px);box-shadow:1px 1px 0 var(--ink)}
-.call{display:flex;align-items:center;gap:14px;padding:18px 16px 18px 20px;text-decoration:none;background:var(--yellow)}
+:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+.wrap{max-width:480px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:0 calc(110px + env(safe-area-inset-bottom,0px))}
+.stripe{height:6px;background:var(--stripe);background-position:calc(var(--roll) * -1) 0}
+/* ---- başlık ---- */
+.hero{position:relative;isolation:isolate;padding-block:40px 34px}
+.hero::before{content:"";position:absolute;z-index:-1;inset:-40px -20px 0;pointer-events:none;
+  background:radial-gradient(55% 55% at 85% 20%,rgba(255,200,20,.16),transparent 70%)}
+.mark{display:flex;align-items:flex-end;margin-top:0;font:800 clamp(78px,25vw,112px)/.86 var(--ui);
+  letter-spacing:-.04em}
+.mark .ch{display:block;overflow:hidden;padding-top:.06em;padding-bottom:.2em;margin-bottom:-.2em}
+.mark .ch span{display:block}
+.mark .dot{width:.16em;height:.16em;margin:0 0 .02em .06em;background:var(--yellow);flex:none}
+.kind{display:flex;align-items:center;gap:14px;margin-top:max(26px,.3em);font:800 15px/1 var(--ui);letter-spacing:.5em;
+  color:var(--yellow)}
+.kind::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+.lead{margin-top:18px;max-width:30ch;color:var(--muted);font-size:16px}
+/* ---- Hemen Ara ---- */
+.call{position:relative;display:flex;align-items:center;gap:14px;margin-top:6px;padding:18px 16px 18px 22px;
+  border-radius:16px;background:var(--yellow);color:var(--yellow-ink);text-decoration:none;
+  box-shadow:0 18px 40px -22px rgba(255,200,20,.7);transition:transform .15s,filter .15s}
+.call:active{transform:scale(.985);filter:brightness(.96)}
 .call .t{flex:1;min-width:0}
-.call small{display:block;font:600 14px/1 var(--display);letter-spacing:.2em}
-.call b{display:block;margin-top:7px;font:700 clamp(30px,9.2vw,40px)/1 var(--display);letter-spacing:.01em;
+.call small{display:block;font:800 12px/1 var(--ui);letter-spacing:.22em;opacity:.72}
+.call b{display:block;margin-top:8px;font:800 clamp(25px,7.6vw,31px)/1 var(--ui);letter-spacing:-.01em;
   font-variant-numeric:tabular-nums;white-space:nowrap}
-.call .ib{flex:none;display:grid;place-items:center;width:54px;height:54px;border-radius:50%;background:var(--ink)}
-.call .ib .ic{width:25px;height:25px;fill:var(--yellow)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
-.tile{position:relative;display:flex;flex-direction:column;gap:22px;min-height:118px;padding:14px 14px 13px;
-  text-decoration:none;background:var(--paper);overflow:hidden}
-.tile::after{content:"";position:absolute;top:0;right:0;width:26px;height:26px;background:var(--yellow);
-  border-left:3px solid var(--ink);border-bottom:3px solid var(--ink);border-bottom-left-radius:8px}
-.tile .ib{display:grid;place-items:center;width:42px;height:42px;border-radius:9px;background:var(--ink)}
-.tile .ic{width:22px;height:22px;fill:var(--yellow)}
-.tile b{display:block;font:600 20px/1 var(--display);letter-spacing:.03em;text-transform:uppercase}
-.tile small{display:block;margin-top:5px;font-size:12.5px;line-height:1.2;color:var(--muted);overflow:hidden;
+.call .ib{flex:none;display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:var(--bg)}
+.call .ib .ic{width:23px;height:23px;fill:var(--yellow)}
+/* ---- bağlantılar ---- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.tile{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:26px;min-height:124px;
+  padding:16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-decoration:none;
+  transition:background .15s,border-color .15s,transform .15s}
+.tile:active{transform:scale(.98);background:var(--raise);border-color:var(--line2)}
+.tile .ib{display:grid;place-items:center;width:40px;height:40px;border-radius:11px;background:var(--raise);
+  border:1px solid var(--line2)}
+.tile .ic{width:21px;height:21px;fill:var(--yellow)}
+.tile .go{position:absolute;top:16px;right:16px;width:16px;height:16px;fill:none;stroke:var(--dim);stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s,transform .15s}
+.tile:active .go{stroke:var(--yellow);transform:translate(2px,-2px)}
+.tile b{display:block;font:800 16px/1.2 var(--ui)}
+.tile small{display:block;margin-top:3px;font-size:13px;line-height:1.3;color:var(--muted);overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
-.tile.save{background:var(--cream)}
-/* ---- ödeme: siyah zemin, sarı bilet ---- */
-.pay{background:var(--ink);color:var(--paper);padding-block:34px 36px}
-.pay .label{color:var(--paper)}
-.pay .label::before{border-color:var(--yellow)}
-.ticket{position:relative;padding:22px 22px 20px;border-radius:14px;background:var(--yellow);color:var(--ink);
-  container-type:inline-size;
-  -webkit-mask:radial-gradient(circle 13px at 0 66%,transparent 12px,#000 13px) left/51% 100% no-repeat,
-               radial-gradient(circle 13px at 100% 66%,transparent 12px,#000 13px) right/51% 100% no-repeat;
-          mask:radial-gradient(circle 13px at 0 66%,transparent 12px,#000 13px) left/51% 100% no-repeat,
-               radial-gradient(circle 13px at 100% 66%,transparent 12px,#000 13px) right/51% 100% no-repeat}
-.ticket .head{display:flex;justify-content:space-between;align-items:baseline}
-.ticket .head b{font:700 22px/1 var(--display);letter-spacing:.04em}
-.ticket .head span{font:600 14px/1 var(--display);letter-spacing:.16em}
-.iban-l{margin-top:20px;font:600 11px/1 var(--display);letter-spacing:.3em;opacity:.7}
-.iban{margin-top:8px;font:800 18px/1.15 var(--ui);font-size:min(21px,5.2cqi);letter-spacing:.015em;word-spacing:.06em;
-  font-variant-numeric:tabular-nums;white-space:nowrap;user-select:all;-webkit-user-select:all}
-.perf{margin:18px -22px 14px;border-top:3px dashed rgba(13,13,13,.55)}
-.who{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.who small{font:600 11px/1 var(--display);letter-spacing:.3em;opacity:.7}
-.who b{font:700 22px/1 var(--display);letter-spacing:.05em}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:56px;border-radius:12px;cursor:pointer;
-  font:600 17px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;
-  transition:transform .12s,box-shadow .12s,background .2s}
-.btn .ic{width:20px;height:20px}
-.copy{border:3px solid var(--paper);background:var(--paper);color:var(--ink);box-shadow:5px 5px 0 var(--yellow)}
-.copy .ic{fill:var(--ink)}
-.copy:active,.ghost:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--yellow)}
-.copy.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+/* ---- ödeme ---- */
+.sec{display:flex;align-items:center;gap:12px;margin:40px 0 14px;font:800 12px/1 var(--ui);letter-spacing:.32em;
+  color:var(--muted)}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.pay{padding:20px;border-radius:18px;background:var(--surface);border:1px solid var(--line);container-type:inline-size}
+.rows{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;font-size:15px}
+.rows dt{color:var(--muted)}
+.rows dd{font-weight:800;text-align:right}
+.ibanbox{position:relative;margin-top:18px;padding:14px 14px 15px 18px;border-radius:12px;background:var(--bg);
+  border:1px solid var(--line2);overflow:hidden}
+.ibanbox::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--yellow);transform-origin:top}
+.ibanbox span{display:block;font:800 11px/1 var(--ui);letter-spacing:.3em;color:var(--dim)}
+.iban{display:block;margin-top:8px;font:800 18px/1.2 var(--ui);font-size:min(19px,4.85cqi);letter-spacing:.005em;
+  word-spacing:.05em;font-variant-numeric:tabular-nums;white-space:nowrap;user-select:all;-webkit-user-select:all}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;border-radius:12px;cursor:pointer;
+  font:800 15px/1 var(--ui);text-decoration:none;transition:transform .15s,background .2s,border-color .2s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:19px;height:19px}
+.copy{border:0;background:var(--yellow);color:var(--yellow-ink)}
+.copy .ic{fill:var(--yellow-ink)}
+.copy.ok{background:var(--ok);color:#fff}
 .copy.ok .ic{fill:#fff}
-.ghost{border:3px solid var(--yellow);background:transparent;color:var(--yellow);box-shadow:5px 5px 0 var(--yellow2)}
-.ghost .ic{fill:var(--yellow)}
-.ghost[aria-expanded="true"]{background:var(--yellow);color:var(--ink)}
-.ghost[aria-expanded="true"] .ic{fill:var(--ink)}
-.kk{margin-top:18px;padding:18px 16px 16px;border-radius:14px;background:var(--paper);color:var(--ink);text-align:center}
-.kk img{display:block;width:min(240px,64vw);height:auto;margin:0 auto;image-rendering:pixelated}
+.ghost{border:1px solid var(--line2);background:transparent;color:var(--text)}
+.ghost .ic{fill:var(--text)}
+.ghost[aria-expanded="true"]{border-color:var(--yellow);color:var(--yellow)}
+.ghost[aria-expanded="true"] .ic{fill:var(--yellow)}
+.kk{margin-top:12px;padding:18px 16px 14px;border-radius:14px;background:var(--raise);border:1px solid var(--line);
+  text-align:center}
+.kk .qr{display:inline-block;padding:12px;border-radius:12px;background:var(--white)}
+.kk img{display:block;width:min(220px,58vw);height:auto;image-rendering:pixelated}
 .kk p{margin:12px 4px 8px;font-size:14px;color:var(--muted)}
-.kk p b{color:var(--ink)}
-.kk a{font-weight:800;text-underline-offset:3px}
+.kk p b{color:var(--text)}
+.kk a{color:var(--yellow);font-weight:800;text-underline-offset:3px}
 /* ---- altbilgi ---- */
-footer{background:var(--ink);color:var(--onink);padding-block:0 calc(96px + env(safe-area-inset-bottom))}
-footer .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-top:18px;font-size:13px}
-footer b{font:700 18px/1 var(--display);letter-spacing:.06em;color:var(--paper)}
-footer b span{color:var(--yellow)}
+footer{margin-top:44px}
+footer .row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;color:var(--dim);font-size:13px}
+footer b{display:flex;align-items:flex-end;font:800 18px/1 var(--ui);letter-spacing:-.02em;color:var(--text)}
+footer b i{width:.22em;height:.22em;margin-left:.08em;background:var(--yellow)}
 /* ---- alttaki arama şeridi, bildirim ---- */
-.callbar{position:fixed;z-index:20;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;gap:12px;
-  padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
-  background:var(--yellow);border-top:3px solid var(--ink);text-decoration:none;font:700 21px/1 var(--display);letter-spacing:.04em;
+.callbar{position:fixed;z-index:20;left:0;right:0;bottom:0;display:flex;justify-content:center;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:rgba(11,11,12,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);
   transform:translateY(110%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .callbar.show{transform:none}
-.callbar .ic{width:22px;height:22px;fill:var(--ink)}
+.callbar a{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:440px;min-height:52px;
+  border-radius:14px;background:var(--yellow);color:var(--yellow-ink);text-decoration:none;font:800 16px/1 var(--ui)}
+.callbar .ic{width:20px;height:20px;fill:var(--yellow-ink)}
 .callbar span{font-variant-numeric:tabular-nums}
 .toast{position:fixed;z-index:30;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,40px);
-  width:max-content;max-width:calc(100vw - 32px);text-align:center;background:var(--paper);color:var(--ink);
-  border:3px solid var(--ink);box-shadow:5px 5px 0 var(--yellow);padding:12px 16px;border-radius:12px;font-weight:800;
-  transition:transform .25s,opacity .25s;opacity:0;pointer-events:none}
+  width:max-content;max-width:calc(100vw - 32px);text-align:center;background:var(--raise);color:var(--text);
+  border:1px solid var(--line2);border-left:4px solid var(--yellow);padding:12px 18px;border-radius:12px;font-weight:600;
+  box-shadow:0 14px 34px rgba(0,0,0,.6);transition:transform .25s,opacity .25s;opacity:0;pointer-events:none}
 .toast.show{transform:translate(-50%,0);opacity:1}
 /* ---- animasyonlar ---- */
-@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
-@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-@keyframes pop{0%{opacity:0;transform:translateY(16px) rotate(-2deg) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes up{from{transform:translateY(105%)}to{transform:none}}
+@keyframes dot{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:none}}
+@keyframes track{from{letter-spacing:1.1em;opacity:0}to{letter-spacing:.5em;opacity:1}}
+@keyframes line{from{transform:scaleX(0)}to{transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes stripes{from{background-position:-160px 0}to{background-position:0 0}}
-@keyframes ring{0%,84%,100%{transform:none}86%,90%,94%{transform:rotate(-15deg)}88%,92%,96%{transform:rotate(15deg)}}
-@keyframes print{from{clip-path:inset(0 0 100% 0);transform:translateY(-14px)}to{clip-path:inset(0 0 0 0);transform:none}}
-@keyframes flash{0%{background:var(--ink);color:var(--yellow)}100%{background:transparent;color:inherit}}
-@keyframes open{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
-.top{animation:fade .5s .1s both}
-.sub b{animation:wipe .65s .95s cubic-bezier(.6,0,.2,1) both}
-.sub::after{transform-origin:left;animation:grow .7s 1.1s cubic-bezier(.2,.8,.2,1) both}
-.hero+.stripe{animation:stripes 1.4s .2s cubic-bezier(.1,.6,.2,1) both}
-.contact .label{animation:rise .5s 1.1s both}
-.call{animation:rise .6s 1.18s cubic-bezier(.2,.8,.2,1) both}
-.call .ib .ic{animation:ring 6s 2.4s infinite}
-.tile{animation:pop .55s cubic-bezier(.2,1.2,.4,1) both}
-.tile:nth-child(1){animation-delay:1.3s}.tile:nth-child(2){animation-delay:1.38s}
-.tile:nth-child(3){animation-delay:1.46s}.tile:nth-child(4){animation-delay:1.54s}
-.ticket.go{animation:print .8s cubic-bezier(.3,.7,.2,1)}
-.iban.flash{animation:flash .9s ease-out;border-radius:4px}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes glow{from{opacity:0;transform:translateX(-45%)}to{opacity:1;transform:none}}
+@keyframes stripes{from{background-position:-120px 0}to{background-position:0 0}}
+@keyframes pulse{0%,78%,100%{box-shadow:0 18px 40px -22px rgba(255,200,20,.7),0 0 0 0 rgba(255,200,20,.45)}
+  90%{box-shadow:0 18px 40px -22px rgba(255,200,20,.7),0 0 0 10px rgba(255,200,20,0)}}
+@keyframes ring{0%,84%,100%{transform:none}86%,90%,94%{transform:rotate(-14deg)}88%,92%,96%{transform:rotate(14deg)}}
+@keyframes bar{from{transform:scaleY(0)}to{transform:none}}
+@keyframes flash{0%{color:var(--yellow)}100%{color:var(--text)}}
+@keyframes open{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.stripe.top{animation:stripes 1.6s cubic-bezier(.1,.6,.2,1) both}
+.hero::before{animation:glow 1.8s .1s cubic-bezier(.2,.7,.2,1) both}
+.mark .ch span{animation:up .9s cubic-bezier(.2,.8,.15,1) both}
+.mark .ch:nth-child(1) span{animation-delay:.25s}.mark .ch:nth-child(2) span{animation-delay:.31s}
+.mark .ch:nth-child(3) span{animation-delay:.37s}.mark .ch:nth-child(4) span{animation-delay:.43s}
+.mark .ch:nth-child(5) span{animation-delay:.49s}
+.mark .dot{animation:dot .5s 1s cubic-bezier(.3,1.4,.5,1) both}
+.kind{animation:track 1s .7s cubic-bezier(.2,.8,.2,1) both}
+.kind::after{transform-origin:left;animation:line .9s 1s cubic-bezier(.2,.8,.2,1) both}
+.lead{animation:fade .7s 1.05s both}
+.call{animation:rise .6s 1.15s cubic-bezier(.2,.8,.2,1) both,pulse 5s 2.6s infinite}
+.call .ib .ic{animation:ring 5s 2.6s infinite}
+.tile{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.tile:nth-child(1){animation-delay:1.25s}.tile:nth-child(2){animation-delay:1.32s}
+.tile:nth-child(3){animation-delay:1.39s}.tile:nth-child(4){animation-delay:1.46s}
+.pay.in .ibanbox::before{animation:bar .7s .1s cubic-bezier(.2,.8,.2,1) both}
+.pay.in .iban{animation:flash 1.4s .3s ease-out}
+.iban.flash{animation:flash .9s ease-out}
 .kk:not([hidden]){animation:open .35s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 """
 
 JS = S.JS + """
 (()=>{const R=document.documentElement,still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-/* pano: kapak üst yarısı düşer, yeni harfin alt yarısı iner */
-const SET='ABCDEFGHIJKLMNOPRSTUVYZÇĞİÖŞÜ0123456789';
-const rnd=()=>SET[Math.floor(Math.random()*SET.length)];
-function flip(el,ch,ms){const old=el.dataset.cur||el.dataset.ch;if(old===ch)return Promise.resolve();
-  const tb=el.querySelector('.half.top:not(.leaf) b'),bb=el.querySelector('.half.bot:not(.leaf) b');
-  tb.textContent=ch;
-  const lt=document.createElement('span'),lb=document.createElement('span');
-  lt.className='half top leaf';lb.className='half bot leaf';lt.innerHTML='<b></b>';lb.innerHTML='<b></b>';
-  lt.firstChild.textContent=old;lb.firstChild.textContent=ch;lb.style.transform='rotateX(90deg)';el.append(lt,lb);
-  return lt.animate([{transform:'rotateX(0)',filter:'brightness(1)'},{transform:'rotateX(-90deg)',filter:'brightness(.55)'}],
-      {duration:ms/2,easing:'ease-in',fill:'forwards'}).finished
-    .then(()=>lb.animate([{transform:'rotateX(90deg)',filter:'brightness(1.5)'},{transform:'rotateX(0)',filter:'brightness(1)'}],
-      {duration:ms/2,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'forwards'}).finished)
-    .then(()=>{bb.textContent=ch;lt.remove();lb.remove();el.dataset.cur=ch})}
-async function spin(el,n,ms,wait){await new Promise(r=>setTimeout(r,wait));
-  for(let k=0;k<n;k++)await flip(el,rnd(),ms);await flip(el,el.dataset.ch,ms*1.4)}
-const flaps=[...document.querySelectorAll('.flap')];let busy=false;
-function shuffle(start){if(still||busy)return;busy=true;
-  Promise.all(flaps.map((f,i)=>spin(f,4+i*2,96,start+i*70))).then(()=>busy=false)}
-const go=()=>shuffle(220);
-if(document.hidden)addEventListener('visibilitychange',go,{once:true});else go();
-document.querySelector('.board').addEventListener('click',()=>shuffle(0));
-if(!still)setInterval(()=>{if(busy||document.hidden)return;const f=flaps[Math.floor(Math.random()*flaps.length)];
-  busy=true;flip(f,rnd(),180).then(()=>flip(f,f.dataset.ch,240)).then(()=>busy=false)},7000);
+if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
+  addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
 if(!still){let q=0;addEventListener('scroll',()=>{if(!q)q=requestAnimationFrame(()=>{
-  R.style.setProperty('--roll',(scrollY*.7).toFixed(1)+'px');q=0})},{passive:true})}
+  R.style.setProperty('--roll',(scrollY*.6).toFixed(1)+'px');q=0})},{passive:true})}
 if('IntersectionObserver' in window){
-  const t=document.querySelector('.ticket');
-  const io=new IntersectionObserver(([e])=>{if(e.isIntersecting){t.classList.add('go');io.disconnect()}},{threshold:.2});
-  io.observe(t);
+  const p=document.querySelector('.pay');
+  const io=new IntersectionObserver(([e])=>{if(e.isIntersecting){p.classList.add('in');io.disconnect()}},{threshold:.4});
+  io.observe(p);
   const bar=document.querySelector('.callbar'),call=document.querySelector('.call');
   new IntersectionObserver(([e])=>bar.classList.toggle('show',!e.isIntersecting&&e.boundingClientRect.top<0)).observe(call)}
 const kb=document.getElementById('kk-btn'),kk=document.getElementById('kk');
 kb.addEventListener('click',()=>{const o=kk.hidden;kk.hidden=!o;kb.setAttribute('aria-expanded',o);
   if(o)kk.scrollIntoView({behavior:still?'auto':'smooth',block:'nearest'})})})();
 """
+
+ARROW = "M7 17L17 7M9 7h8v8"
 
 
 def page(info, standalone=False, artifact=False):
@@ -328,67 +297,57 @@ def page(info, standalone=False, artifact=False):
     desc = "Çalık Oto Lastik: hemen arayın, WhatsApp'tan yazın, Instagram, Google yorumları ve ödeme bilgileri."
     css, kk = (embed_fonts(CSS), data_uri("karekod.png", "image/png")) if standalone else (CSS, "karekod.png")
     tel = f' data-tel="{e(info.phone)}"' if artifact else ""
+    go = f'<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="{ARROW}"/></svg>'
     # aynı sekmede açılır: yeni sekme QR okuyucuların iç tarayıcılarında çoğu zaman açılmaz
-    tile = lambda href, icon, t, s, cls="", extra="": (  # noqa: E731
-        f'<a class="tile box{cls}" href="{e(href)}"{extra}><span class="ib">{icon}</span>'
+    tile = lambda href, icon, t, s, extra="": (  # noqa: E731
+        f'<a class="tile" href="{e(href)}"{extra}><span class="ib">{icon}</span>{go}'
         f'<span><b>{e(t)}</b><small>{e(s)}</small></span></a>')
-    save_tile = "" if artifact else tile("calik.vcf", S.svg(S.ICON["person"]), "Rehber", "Numarayı kaydedin",
-                                         " save", ' download="Çalık Oto Lastik.vcf"')
+    save_tile = "" if artifact else tile("calik.vcf", S.svg(S.ICON["person"]), "Rehbere kaydet", "Numarayı ekleyin",
+                                         ' download="Çalık Oto Lastik.vcf"')
     save = "Karekoda basılı tutup kaydedin," if artifact else "Karekodu kaydedin,"
     save_link = "" if artifact else f'\n      <a href="{kk}" download="calik-karekod.png">Karekodu kaydet</a>'
     og = (f'<meta property="og:url" content="{e(info.page)}">\n<meta property="og:image" content="{e(info.page)}og.png">'
           if info.page else "")
     favicon = ("data:image/svg+xml," + "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
-               "<rect width='64' height='64' rx='14' fill='%23ffc814'/><rect x='14' y='12' width='36' height='40' rx='6' "
-               "fill='%230d0d0d'/><rect x='14' y='31' width='36' height='2' fill='%23ffc814'/></svg>")
-    body = f"""<header class="hero band">
-  <div class="in">
-    <p class="top"><span>OTO LASTİK</span><span>{e(info.phone)}</span></p>
-    <div class="board" role="img" aria-label="Çalık">{board()}</div>
-    <p class="sub"><b>OTO LASTİK</b></p>
-  </div>
+               "<rect width='64' height='64' rx='14' fill='%230b0b0c'/><rect x='38' y='38' width='12' height='12' "
+               "fill='%23ffc814'/><path d='M14 32a16 16 0 0 1 27-11.6' stroke='%23f4f4f1' stroke-width='8' "
+               "fill='none'/><path d='M41 43.6A16 16 0 0 1 14 32' stroke='%23f4f4f1' stroke-width='8' fill='none'/></svg>")
+    body = f"""<div class="stripe top" aria-hidden="true"></div>
+<div class="wrap">
+<header class="hero">
+  <h1 class="mark" aria-label="Çalık">{wordmark()}</h1>
+  <p class="kind">OTO LASTİK</p>
+  <p class="lead">Lastikle ilgili her konuda bize tek dokunuşla ulaşın.</p>
 </header>
-<div class="stripe" aria-hidden="true"></div>
 <main>
-<section class="contact band" aria-label="İletişim">
-  <div class="in">
-    <p class="label">BİZE ULAŞIN</p>
-    <a class="call box" href="tel:+{info.tel}"{tel}><span class="t"><small>HEMEN ARA</small><b>{e(info.phone)}</b></span>
-      <span class="ib">{S.svg(S.ICON["phone"])}</span></a>
-    <nav class="grid" aria-label="Bağlantılar">
-      {tile(wa, S.svg(S.logo_path("whatsapp")), "WhatsApp", "Mesaj gönderin")}
-      {tile(insta, S.svg(S.logo_path("instagram")), "Instagram", "@" + info.instagram)}
-      {tile(info.google, S.svg(S.ICON["star"]), "Google", "Yorum yapın")}
-      {save_tile}
-    </nav>
+<a class="call" href="tel:+{info.tel}"{tel}><span class="t"><small>HEMEN ARA</small><b>{e(info.phone)}</b></span>
+  <span class="ib">{S.svg(S.ICON["phone"])}</span></a>
+<nav class="grid" aria-label="Bağlantılar">
+  {tile(wa, S.svg(S.logo_path("whatsapp")), "WhatsApp", "Mesaj gönderin")}
+  {tile(insta, S.svg(S.logo_path("instagram")), "Instagram", "@" + info.instagram)}
+  {tile(info.google, S.svg(S.ICON["star"]), "Google", "Yorum yapın")}
+  {save_tile}
+</nav>
+<h2 class="sec">ÖDEME BİLGİLERİ</h2>
+<section class="pay" aria-label="Ödeme bilgileri">
+  <dl class="rows"><dt>Banka</dt><dd>{e(info.bank)}</dd><dt>Alıcı</dt><dd>{e(info.holder)}</dd></dl>
+  <div class="ibanbox"><span>IBAN</span><output class="iban">{e(Q.iban_display(info.iban))}</output></div>
+  <div class="acts">
+    <button class="btn copy" type="button" data-copy="{e(info.iban)}">{S.svg(S.ICON["copy"])}<span>Kopyala</span></button>
+    <button class="btn ghost" type="button" id="kk-btn" aria-expanded="false" aria-controls="kk">{S.svg(S.ICON["qr"])}Karekod</button>
   </div>
-</section>
-<section class="pay band" aria-labelledby="odeme">
-  <div class="in">
-    <p class="label" id="odeme">ÖDEME</p>
-    <div class="ticket">
-      <div class="head"><b>ÖDEME BİLGİLERİ</b><span>{e(info.bank.upper())}</span></div>
-      <p class="iban-l">IBAN</p>
-      <div class="iban">{e(Q.iban_display(info.iban))}</div>
-      <div class="perf"></div>
-      <div class="who"><small>ALICI</small><b>{e(info.holder)}</b></div>
-    </div>
-    <div class="acts">
-      <button class="btn copy" type="button" data-copy="{e(info.iban)}">{S.svg(S.ICON["copy"])}<span>Kopyala</span></button>
-      <button class="btn ghost" type="button" id="kk-btn" aria-expanded="false" aria-controls="kk">{S.svg(S.ICON["qr"])}Karekod</button>
-    </div>
-    <div class="kk" id="kk" hidden>
-      <img src="{kk}" width="828" height="828" alt="{e(info.bank)} karekodu – {e(info.holder)}">
-      <p>{save} banka uygulamanızda <b>Karekod ile Öde</b>, ardından <b>Galeriden seç</b>.</p>{save_link}
-    </div>
+  <div class="kk" id="kk" hidden>
+    <span class="qr"><img src="{kk}" width="828" height="828" alt="{e(info.bank)} karekodu – {e(info.holder)}"></span>
+    <p>{save} banka uygulamanızda <b>Karekod ile Öde</b>, ardından <b>Galeriden seç</b>.</p>{save_link}
   </div>
 </section>
 </main>
-<footer class="band">
-  <div class="stripe" aria-hidden="true" style="margin-inline:calc(max(16px,env(safe-area-inset-left,0px)) * -1)"></div>
-  <div class="in row"><b>ÇALIK <span>OTO LASTİK</span></b><span>@{e(info.instagram)}</span></div>
+<footer>
+  <div class="stripe" aria-hidden="true"></div>
+  <div class="row"><b>ÇALIK<i></i></b><span>@{e(info.instagram)}</span></div>
 </footer>
-<a class="callbar" href="tel:+{info.tel}"{tel} aria-label="Hemen ara">{S.svg(S.ICON["phone"])}HEMEN ARA · <span>{e(info.phone)}</span></a>
+</div>
+<div class="callbar"><a href="tel:+{info.tel}"{tel} aria-label="Hemen ara">{S.svg(S.ICON["phone"])}Hemen ara · <span>{e(info.phone)}</span></a></div>
 <div class="toast" role="status" aria-live="polite"></div>
 <script>{JS}</script>
 """
@@ -404,7 +363,7 @@ def page(info, standalone=False, artifact=False):
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
-<meta name="theme-color" content="#ffc814">
+<meta name="theme-color" content="#0b0b0c">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc)}">
@@ -421,14 +380,13 @@ def page(info, standalone=False, artifact=False):
 # ---------------------------------------------------------------- görseller
 
 def og_image():
-    """Bağlantı paylaşılınca görünen kapak (1200 × 630): sarı tabela, pano."""
+    """Bağlantı paylaşılınca görünen kapak (1200 × 630): başlığın aynısı, büyük."""
     from playwright.sync_api import sync_playwright
     doc = f"""<!doctype html><meta charset="utf-8"><style>{embed_fonts(CSS)}
-body{{margin:0;background:#ffc814}} .hero{{width:1200px;height:600px;padding:70px 120px 0}} .in{{max-width:none}}
-.top{{font-size:26px}} .board{{gap:18px;margin-top:40px}} .flap{{height:300px}} .half b{{font-size:230px}}
-.sub{{margin-top:44px}} .sub b{{font-size:84px}} .sub::after{{height:12px}} .stripe{{height:30px}}</style>
-<header class="hero"><div class="in"><p class="top"><span>OTO LASTİK</span><span></span></p>
-<div class="board">{board()}</div><p class="sub"><b>OTO LASTİK</b></p></div></header><div class="stripe"></div>"""
+body{{margin:0}} .wrap{{max-width:none;padding:0 100px}} .hero{{padding-block:110px 0}} .stripe{{height:14px}}
+.mark{{font-size:250px;margin-top:0}} .kind{{font-size:34px;margin-top:34px}}</style>
+<div class="stripe"></div><div class="wrap"><header class="hero"><h1 class="mark">{wordmark()}</h1>
+<p class="kind">OTO LASTİK</p></header></div>"""
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path=CHROMIUM)
         pg = b.new_page(viewport={"width": 1200, "height": 630}, reduced_motion="reduce")
@@ -447,9 +405,9 @@ def screenshot(path=PREVIEW):
         pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, reduced_motion="reduce")
         pg.goto("file://" + os.path.join(OUT, "index.html"))
         pg.wait_for_timeout(400)
-        assert pg.evaluate("document.fonts.check('700 20px \"Oswald\"')"), "yazı tipi yüklenmedi"
+        assert pg.evaluate("document.fonts.check('800 20px \"Manrope\"')"), "yazı tipi yüklenmedi"
         assert pg.evaluate("document.documentElement.scrollWidth") <= 390, "yatay taşma"
-        assert pg.evaluate("[...document.querySelectorAll('.iban,.call b,.tile b,.tile small,.who b')]"
+        assert pg.evaluate("[...document.querySelectorAll('.iban,.call b,.tile b,.tile small,.rows dd')]"
                            ".every(e=>e.scrollWidth<=e.clientWidth+1)"), "yazı sığmadı"
         pg.screenshot(path=top)
         pg.click("#kk-btn")
@@ -470,7 +428,7 @@ def screenshot(path=PREVIEW):
 
 
 def tour_gif(path=TOUR):
-    """Tam tur (390 × 844, gerçek zamanlı): pano dönüşü, aşağı kaydırma, bilet, IBAN'ı kopyala, karekod."""
+    """Tam tur (390 × 844): açılış, aşağı kaydırma, IBAN'ı kopyala, karekod; dokunulan yer halkayla gösterilir."""
     from playwright.sync_api import sync_playwright
     frames, durs = [], []
 
@@ -493,9 +451,11 @@ def tour_gif(path=TOUR):
                             permissions=["clipboard-read", "clipboard-write"])
         pg = ctx.new_page()
         pg.goto("file://" + os.path.join(OUT, "index.html"))
-        for _ in range(34):                                  # açılış (gerçek zaman, ~2,6 sn)
-            pg.wait_for_timeout(30)
-            shot(pg, 75)
+        _seek(pg, 0)
+        pg.wait_for_timeout(300)
+        for k in range(0, 2300, 80):                         # açılış: animasyonlar zamanda adım adım
+            _seek(pg, k)
+            shot(pg, 80)
         _finish(pg)
         shot(pg, 900)
         h = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
