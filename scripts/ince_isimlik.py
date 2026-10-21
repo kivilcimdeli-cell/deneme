@@ -8,8 +8,8 @@ yazılar ve şekiller 2 mm kabartma, QR yüzeyle aynı hizada (beyaz zeminde siy
 15° eğik sehpa. Süsler kalın ve sade (en ince yeri ≥ 1,2 mm); küçük satırlar Outfit ExtraBold; her yazı satırının
 en dar harf içi boşluğu ölçülür.
 
-QR: işletmenin sitesi henüz yok. Örneklerde QR telefonu arar (TEL:+905458533070); `ince_isimlik/bilgiler.json`
-→ `sayfa_url` yazılınca site adresine döner. Yoğunluğu son hâline benzesin diye en az sürüm 4.
+QR: işletme sayfası (`ince_isimlik/bilgiler.json` → `sayfa_url`, scripts/ince_sayfa.py); adres boşsa telefonu
+arar (TEL:+905458533070). En az sürüm 4.
 
 Çıktı : ince_isimlik/<tasarım>.png, ince_isimlik/musteri_1.png, musteri_2.png, musteri_katalog.pdf
 
@@ -385,7 +385,7 @@ def catalog(ds):
         dr.text((70, 186), "Tek QR'lı tezgâh isimliği · tasarım önerileri", font=f(30), fill=muted)
         dr.text((W - 70 - dr.textlength(f"{p + 1}/2", font=f(28)), 196), f"{p + 1}/2", font=f(28), fill=muted)
         y = 285
-        for line in ("TARA: telefonla okutunca işletme sayfası açılır (site hazırlanınca). Örneklerde şimdilik arar.",
+        for line in ("TARA: telefonla okutunca işletme sayfası açılır: ara, WhatsApp, Instagram, Google yorum, ödeme.",
                      "1–7 beyaz zemin (siyah, kırmızı yazı) · 8–10 siyah zemin (beyaz, kırmızı yazı)"):
             dr.text((70, y), line, font=f(27), fill=ink)
             y += 40

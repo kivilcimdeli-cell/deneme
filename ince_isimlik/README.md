@@ -11,9 +11,8 @@ Müşteriye gönderilecek katalog: **`musteri_1.png`** (1–6), **`musteri_2.png
   kabartma, QR yüzeyle aynı hizada (beyaz zeminde siyah kareler, siyah zeminde beyaz karo), 15° eğik sehpa.
 - Küçük satırlar Outfit ExtraBold: harf içi boşluklar kabartmada dolmasın diye her satır ölçülür (en dar ≥ 0,6 mm).
 
-**QR:** işletmenin sitesi henüz yok; örneklerde QR telefonu arar (`TEL:+905458533070`). Site hazır olunca adresi
-`bilgiler.json` → `sayfa_url`a yazılır, QR site adresine döner (seçilen tasarım o zaman X2D dosyasına çevrilir;
-`scripts/uzar_isimlik_baski.py` örnek alınır).
+**QR:** işletme sayfasını açar: **https://inceotolastik.qrsistem.workers.dev/** (`bilgiler.json` → `sayfa_url`).
+Seçilen tasarım X2D dosyasına çevrilirken `scripts/uzar_isimlik_baski.py` örnek alınır.
 
 ```bash
 python3 scripts/ince_isimlik.py           # 10 öneri ve katalog
@@ -62,7 +61,8 @@ hesabında** durur; her işletme o hesapta ayrı bir Worker'dır, adres `<işlet
 
 - Ortak hesabın alt alanı (Workers & Pages → Account details → Subdomain) bir kez seçilir ve bir daha
   değiştirilmez. Değişirse oradaki bütün basılı QR'lar çalışmaz.
-- İnce'nin Worker'ı `ince` adıyla açılır ve `ince_site.zip` yüklenir. Sonra:
+- Ortak hesabın alt alanı `qrsistem`. İnce'nin Worker'ı `inceotolastik`: adres **https://inceotolastik.qrsistem.workers.dev/**.
+- Site değişince `ince_site.zip` aynı Worker'a **New deployment** ile yüklenir. Adres değişirse:
 
 1. Adresi (`…workers.dev`) `bilgiler.json` → `sayfa_url` alanına yaz.
 2. `python3 scripts/ince_sayfa.py` çalıştır; paylaşım kartı adresi kullanır.
