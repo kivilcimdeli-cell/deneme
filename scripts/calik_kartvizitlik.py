@@ -201,21 +201,30 @@ def tire(cy, cz, R, notch=2.4, pitch=12.0):
     return disc - A.union(*cuts)
 
 
-def k6_lastik():
+def lip_text(lip_h, max_w, cap):
+    """Ön dudaktaki ÇALIK OTO LASTİK (Saira Condensed Black: harf içleri ve aralar ≥ 0,8 mm), dudağın ortasında."""
+    cs = t("saira", "ÇALIK OTO LASTİK", cap, 0, 0, "c", 0.8, max_w)
+    b = cs.bounds()
+    return cs.translate((0, lip_h / 2 - (b[1] + b[3]) / 2))
+
+
+def k6_lastik(w_in=W_IN, k=1.0, cheek=CHEEK):
+    """w_in: kart cebi genişliği; k: diğer ölçülerin büyütme katı (baskı dosyası: w_in 100, k 1,1)."""
     m = Model("6_lastik", "Lastik yanaklı", "İki yanı diş izli lastik, yan yüzünde sarı jant; önde ÇALIK OTO LASTİK.")
-    depth, base, lip_h = 46.0, 4.0, 14.0
-    cy, cz, R = 24.0, 26.0, 28.0
-    body = prism([(0, 0), (depth, 0), (depth, base), (0, base)], W_IN + 0.02)
-    body += prism([(0, 0), (6, 0), (6, lip_h), (0, lip_h)], W_IN + 0.02)
-    body += prism(back_rest(28, 0, 44), W_IN + 0.02)
-    side = tire(cy, cz, R) + A.rect(0, 0, depth, 8.0)              # altı dolu: lastiğin alt yayı desteksiz basılır
-    body += slab(side, CHEEK, W_IN / 2) + slab(side, CHEEK, -W / 2)
-    rim = C.wheel(cy, cz, 15.0 / 0.56)[1][0]                       # sarı jant (5 bijon deliği ve göbek)
-    right = slab(rim, RELIEF + SINK, W / 2 - SINK)
+    depth, base, lip_h, rest_y = 46.0 * k, 4.0, 14.0 * k, 28.0 * k
+    cy, cz, R = 24.0 * k, 26.0 * k, 28.0 * k
+    w = w_in + 2 * cheek
+    body = prism([(0, 0), (depth, 0), (depth, base), (0, base)], w_in + 0.02)
+    body += prism([(0, 0), (6, 0), (6, lip_h), (0, lip_h)], w_in + 0.02)
+    body += prism(back_rest(rest_y, 0, 44.0 * k), w_in + 0.02)
+    side = tire(cy, cz, R) + A.rect(0, 0, depth, 8.0 * k)          # altı dolu: lastiğin alt yayı desteksiz basılır
+    body += slab(side, cheek, w_in / 2) + slab(side, cheek, -w / 2)
+    rim = C.wheel(cy, cz, 15.0 * k / 0.56)[1][0]                   # sarı jant (5 bijon deliği ve göbek)
+    right = slab(rim, RELIEF + SINK, w / 2 - SINK)
     m.body = body
-    m.yellow = [right, right.mirror((1, 0, 0)),
-                on_front(t("barlow", "ÇALIK OTO LASTİK", 7.4, 0, 7.8, "c", 0.8, W_IN - 8), 0)]
-    m.stack = cards(28, base)
+    m.text = lip_text(lip_h, w_in - 8, 8.0 * k)
+    m.yellow = [right, right.mirror((1, 0, 0)), on_front(m.text, 0)]
+    m.stack = cards(rest_y, base)
     return m
 
 

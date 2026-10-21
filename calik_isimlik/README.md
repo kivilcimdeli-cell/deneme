@@ -111,3 +111,23 @@ Müşteriye gönderilecek katalog: **`kartvizitlik/musteri_kartvizitlik.png`** (
 python3 scripts/calik_kartvizitlik.py          # 6 model ve katalog
 python3 scripts/calik_kartvizitlik.py 6_       # yalnız eşleşen modeller
 ```
+
+## Kartvizitlik baskı dosyası: seçilen 6 · Lastik yanaklı (X2D)
+
+![Baskı](kartvizitlik/baski/onizleme.png)
+
+**`kartvizitlik/baski/calik_kartvizitlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Tek parça,
+tabana oturarak dik basılır, destek gerekmez.
+
+| | |
+| --- | --- |
+| Kart cebi | **100 mm** (müşteri isteği: en geniş yaygın kart 90 mm + 1 cm; 85 × 55 ve 90 × 50 kartlar rahat girer), tabanda ~25 mm derin (~60 kart), arka sırt 48 mm, 15° yaslı |
+| Ölçü | 114 × 62 × 59 mm (jantlarla 116); öneriden %10 büyük, yanaklar 7 mm, diş izli lastik biçiminde |
+| Sarı | iki yanda jant, önde ÇALIK OTO LASTİK (Saira Condensed Black; harf içi ve aralar ≥ 0,85 mm), 1 mm kabartma |
+| AMS | 1 siyah (ana nozul) · 2 sarı (yardımcı nozul); yazılı katmanlarda yalnız nozul değişir |
+| Ayarlar | Bambu standart 0,20 mm; ütüleme kapalı; destek yok; Textured PEI; Generic PLA |
+| Filament | ~54 g (siyah 51, sarı 2,2) + kule; PrusaSlicer ~1 sa 40 dk (Bambu Studio kendi süresini gösterir) |
+
+```bash
+python3 scripts/calik_kartvizitlik_baski.py    # kartvizitlik/baski/calik_kartvizitlik_x2d.3mf, onizleme.png
+```
