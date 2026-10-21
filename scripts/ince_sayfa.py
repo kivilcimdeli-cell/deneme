@@ -272,7 +272,8 @@ footer{display:flex;align-items:center;justify-content:center;gap:10px;margin-to
 footer .mt{width:26px;height:26px}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,140%);
   background:var(--ink);color:#fff;border-left:6px solid var(--red);padding:12px 18px;border-radius:12px;
-  font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .25s,opacity .25s;white-space:nowrap;
+  font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .25s,opacity .25s;width:max-content;
+  max-width:calc(100vw - 28px);text-align:center;
   opacity:0;pointer-events:none}
 .toast.show{transform:translate(-50%,0);opacity:1}
 /* ---- animasyonlar: lastik yola yuvarlanarak gelir ve döner, yol akar, iz çizilir, düğmeler sırayla gelir ---- */
