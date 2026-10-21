@@ -48,7 +48,7 @@ J = m3.JoinType.Round
 TOWER, TOWER_BRIM = tower_size(n_fil=3, prime=45.0, change_len=10.0, height=T + RELIEF)
 COPIES = [(74.0, 99.0, 0), (182.0, 99.0, 0)]        # iki takım (panel + sehpa), tabla koordinatı (nesne merkezi)
 TOWER_XY = (40.0, 195.0)                            # kule: takımların arkasında, solda
-SHOW = {A.BLACK: (40, 40, 43), A.WHITE: (246, 246, 242), A.RED: (206, 28, 38)}
+SHOW = {A.BLACK: (40, 40, 43), A.WHITE: (246, 246, 242), A.RED: (206, 28, 38), A.YELLOW: (250, 198, 24)}
 
 
 # ---------------------------------------------------------------- yüz (2B)

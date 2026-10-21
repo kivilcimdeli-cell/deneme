@@ -52,15 +52,20 @@ SC = {"body": BLACK, "fg": WHITE, "dark": True}
 
 
 def make_qr():
-    """Google yorum QR'ı (sürüm ≥ 4; hata düzeltmesi sığdığı kadar yükseltilir)."""
+    """İşletme sayfası yayındaysa onun, değilse Google yorumlarının QR'ı (sürüm ≥ 4; hata düzeltmesi sığdığı kadar
+    yükseltilir)."""
     import segno
-    content = Q.google_url(DATA["google"])
+    if DATA.get("sayfa_url"):
+        content, key, label = Q.https_url(DATA["sayfa_url"]), "sayfa", "TARA"
+    else:
+        content, key, label = Q.google_url(DATA["google"]), "google", "GOOGLE YORUM"
     natural = segno.make(content, error="m", micro=False).version
     q = segno.make(content, error="m", version=max(4, natural), micro=False, boost_error=True)
-    return Q.Entry("google", "GOOGLE YORUM", content, "GOOGLE YORUM", qr=q)
+    return Q.Entry(key, label, content, label, qr=q)
 
 
 QR = make_qr()
+SITE = QR.key == "sayfa"
 SAMPLE_LINK = "/search?" in QR.content          # işletmenin yorum bağlantısı gelene kadar Google araması
 
 
@@ -83,13 +88,16 @@ def stars(cx, cy, r=3.0, n=5, gap=1.0):
 
 
 def review(d, cx, cy, s, top=True):
-    """Google yorum QR'ı: üstünde beş sarı yıldız (top), altında GOOGLE / YORUM YAP."""
+    """QR ve altında iki satır. Site QR'ı: TARA / BİZE ULAŞIN. Google yorum QR'ı: üstünde beş sarı yıldız (top),
+    altında GOOGLE / YORUM YAP."""
     d.inlay += qr_block(cx, cy, s)
-    if top:
+    if top and not SITE:
         d.add(None, stars(cx, cy + s / 2 + 4.6), YELLOW)
     y = cy - s / 2 - 4.6
-    d.add("GOOGLE", t("outfit", "GOOGLE", 4.2, cx, y, "c", 0.8), WHITE)
-    d.add("YORUM YAP", t("outfit", "YORUM YAP", 4.2, cx, y - 6.5, "c", 0.3), YELLOW)
+    (a, ta), (b, tb) = ((("TARA", 1.2), ("BİZE ULAŞIN", 0.3)) if SITE else (("GOOGLE", 0.8), ("YORUM YAP", 0.3)))
+    cap = 4.4 if SITE else 4.2                      # BİZE ULAŞIN'ın Ş / Ğ'si 4,2'de ince kalıyor
+    d.add(a, t("outfit", a, cap, cx, y, "c", ta), WHITE)
+    d.add(b, t("outfit", b, cap, cx, y - 6.5, "c", tb), YELLOW)
 
 
 # ---------------------------------------------------------------- simgeler (kalın, sade)
@@ -242,12 +250,16 @@ def c6_araba():
 
 def c7_lastik_izi():
     d = Design("7_lastik_izi", "Lastik izi", "Üstte boydan kalın sarı lastik izi okları; altında ÇALIK OTO LASTİK.", SC)
-    d.add(None, U.chevrons(X0, 80.5, 8.0, 12, 8.9, 2.6).offset(-0.5, J).offset(0.5, J), YELLOW)   # uçlar yuvarlak
+    # hiza: okların ucu QR'ın sağ kenarında (X1); QR'ın üstü ÇALIK'ın üstüyle, alt satırı telefonla aynı hizada
+    s = 44.0
+    n, w, h = 12, 2.6, 8.0
+    pitch = (X1 - X0 - w - h / 2) / (n - 1)
+    d.add(None, U.chevrons(X0, 80.5, h, n, pitch, w).offset(-0.5, J).offset(0.5, J), YELLOW)   # uçlar yuvarlak
     d.add("ÇALIK", t("barlow", "ÇALIK", 18.0, X0, 64.0, "l", 0.8, 60.0), WHITE)
     d.add("OTO LASTİK", t("barlow", "OTO LASTİK", 8.6, X0, 40.6, "l", 0.7, 61.0), YELLOW)
     d.add("HEMEN ARA", t("outfit", "HEMEN ARA", 4.6, X0, 27.0, "l", 0.9), YELLOW)
     d.add("telefon", t("outfit", PHONE, 5.2, X0, 17.0, "l", 0.4, 60.0), WHITE)
-    review(d, 34.0, 46.0, 40.0)
+    review(d, X1 - s / 2, 17.0 + 6.5 + 4.6 + s / 2, s)
     return d
 
 

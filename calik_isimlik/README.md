@@ -64,3 +64,25 @@ Sayfadaki karekod bankanınkiyle aynı baytlarla ve aynı hata düzeltmeyle (H) 
 **Yayın:** ortak Cloudflare hesabında (`qrsistem`) yeni bir Worker açılır, adı `calikotolastik`, ve
 `calik_site.zip` yüklenir. Adres `https://calikotolastik.qrsistem.workers.dev/` olur. Bu adres
 `bilgiler.json` → `sayfa_url` alanına yazılır ve `python3 scripts/calik_sayfa.py` yeniden çalıştırılır.
+
+## Baskı dosyası: seçilen 7 · Lastik izi (X2D)
+
+![Baskı](baski/onizleme.png)
+
+**`baski/calik_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Tablada **iki takım**
+(panel + sehpa) var; biri silinirse tek takım basılır. Ölçüler ve ayarlar Uzar ve İnce'nin isimlikleriyle aynı.
+
+| | |
+| --- | --- |
+| Panel | 120 × 90 mm, siyah gövde **1 cm**, köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
+| Kabartma | **2 mm** (10 katman): ÇALIK, telefon, TARA beyaz; lastik izi okları, OTO LASTİK, HEMEN ARA, BİZE ULAŞIN sarı |
+| QR | siteyi açar (**https://calikotolastik.qrsistem.workers.dev/**); yüzeyle aynı hizada beyaz dolgu (0,8 mm), 44 mm, kare 1,18 mm; görüntüden ve baskı hatası benzetiminden okundu. Katalogdaki yıldızlar ve GOOGLE / YORUM YAP yerine TARA / BİZE ULAŞIN yazar; Google yorumu sitedeki düğmeden yapılır |
+| Hiza | okların ucu QR'ın sağ kenarında; QR'ın üstü ÇALIK'ın üstüyle, alt satır telefonla aynı hizada |
+| AMS | 1 siyah (Elas, ana nozul) · 2 sarı (ana nozul) · 3 beyaz (Elas, yardımcı nozul) |
+| Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Generic PLA |
+| Filament | iki takım ~120 g (siyah 110, beyaz 5,9, sarı 3,6) + kule; PrusaSlicer ~3 sa 45 dk (Bambu Studio kendi süresini gösterir) |
+| Sehpa | 100 × 40 × 10 mm, aynı tablada; panel yuvaya (10,3 mm) 15° eğik takılır, tutkal gerekmez |
+
+```bash
+python3 scripts/calik_isimlik_baski.py    # baski/calik_isimlik_x2d.3mf, baski/onizleme.png
+```
