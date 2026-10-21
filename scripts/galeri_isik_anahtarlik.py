@@ -699,10 +699,10 @@ def customer_pages(concepts, per_page=10, start_page=1, total=20):
                     fill=ORANGE if getattr(c, "qr", False) else (110, 112, 120))
             parts = K.mesh_parts(c)
             for j, (R, label) in enumerate(((rotation(0, 0), "ÖN"), (rotation(180, 180), "ARKA"))):
-                img = A.fit_into(render(parts, 900, R, margin=0.02), cw // 2 - 60, ch - 120)
+                img = A.fit_into(render(parts, 900, R, margin=0.02), cw // 2 - 60, ch - 136)
                 bx = x0 + 30 + j * (cw // 2 - 15)
-                K.paste_center(im, img, (bx, y0 + 96, bx + cw // 2 - 45, y0 + ch - 16))
-                dr.text((bx, y0 + 90), label, font=K.fnt(18), fill=(150, 152, 160))
+                K.paste_center(im, img, (bx, y0 + 116, bx + cw // 2 - 45, y0 + ch - 16))
+                dr.text((bx, y0 + 84), label, font=K.fnt(18), fill=(150, 152, 160))
             dr.line((x0 + cw // 2, y0 + 110, x0 + cw // 2, y0 + ch - 24), fill=(232, 232, 236), width=2)
         foot = "Beğendiğiniz modelin numarasını yazmanız yeterli."
         dr.rounded_rectangle((50, H - 130, W - 50, H - 50), 22, fill=(10, 10, 11))
