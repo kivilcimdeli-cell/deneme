@@ -24,16 +24,23 @@ python3 scripts/ince_isimlik.py klasik    # yalnız eşleşen tasarımlar
 
 ![Sayfa](sayfa_onizleme.png)
 
-Uzar'ın sayfasıyla aynı işleri yapar; tasarımı farklıdır: siyah zemin, geniş ve kalın Archivo yazısı, tek vurgu rengi
-olarak kırmızı. Çizim kullanılmaz.
+Uzar'ın sayfasıyla aynı işleri yapar; tasarımı farklıdır. Siyah gece yolu teması: geniş ve kalın Archivo yazısı,
+tek vurgu rengi olarak kırmızı. Lastik çizimi yok; tema yalnız asfalttaki izlerle ve yolla verilir:
+
+- **Başlık:** yoldan çıkıp İNCE yazısının arkasından savrulan iki teker izi. Altta koyu lastik sürtmesi, üstünde diş
+  baskısı var; iz baştan sona soluklaşır.
+- **Yol şeritleri:** başlığın altında ve bölümler arasında yol var (kenar çizgileri, kesik şerit). Kesik şerit
+  sayfa kaydırıldıkça akar.
+- **Hemen Ara düğmesi ve ödeme kartı:** hafif lastik baskısı.
 
 **Animasyon** yalnız açılışta, bir kez oynar (`sayfa_animasyon.gif`, tam tur: `sayfa_tur.gif`):
 
-- İNCE yazısı maskeden yükselir.
-- Altından ince kırmızı bir ışık çizgisi soldan geçip yerinde kalır.
+- İz eğri boyunca çizilir.
+- Stop lambası ışığı yazının altından geçer.
+- İNCE yazısı yükselir ve yol şeridi kayıp durur.
 - Düğmeler sırayla gelir.
 
-Sonra sayfa durur.
+Kendiliğinden sürekli dönen ya da akan bir şey yok.
 
 **İçerik:**
 
