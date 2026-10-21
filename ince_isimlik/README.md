@@ -24,23 +24,24 @@ python3 scripts/ince_isimlik.py klasik    # yalnız eşleşen tasarımlar
 
 ![Sayfa](sayfa_onizleme.png)
 
-Uzar'ın sayfasıyla aynı işleri yapar; tasarımı farklıdır. Siyah gece yolu teması: geniş ve kalın Archivo yazısı,
-tek vurgu rengi olarak kırmızı. Lastik çizimi yok; tema yalnız asfalttaki izlerle ve yolla verilir:
+Uzar'ın sayfasıyla aynı işleri yapar; tasarımı farklıdır. Siyah zemin, yarış havası: eğik, dar ve kalın Saira
+Condensed Black Italic, tek vurgu rengi kırmızı. Lastik çizimi yok; tasarımın dili lastik izi, yani gidiş yönüne bakan
+ok biçimli diş baskısı (Hemen Ara düğmesindeki desen):
 
-- **Başlık:** yoldan çıkıp İNCE yazısının arkasından savrulan iki teker izi. Altta koyu lastik sürtmesi, üstünde diş
-  baskısı var; iz baştan sona soluklaşır.
-- **Yol şeritleri:** başlığın altında ve bölümler arasında yol var (kenar çizgileri, kesik şerit). Kesik şerit
-  sayfa kaydırıldıkça akar.
-- **Hemen Ara düğmesi ve ödeme kartı:** hafif lastik baskısı.
+- **Başlık:** logonun arkasından çapraz geçen büyük diş bandı.
+- **Desen tekrarı:** kutucukların ve IBAN kartının köşesinde, altbilgide aynı baskı.
+- **Ödeme:** banka kartı gibi tasarlanmış IBAN kartı (banka, IBAN, alıcı); altında Kopyala ve Karekod düğmeleri.
 
-**Animasyon** yalnız açılışta, bir kez oynar (`sayfa_animasyon.gif`, tam tur: `sayfa_tur.gif`):
+**Animasyon** (`sayfa_animasyon.gif`, tam tur: `sayfa_tur.gif`):
 
-- İz eğri boyunca çizilir.
-- Stop lambası ışığı yazının altından geçer.
-- İNCE yazısı yükselir ve yol şeridi kayıp durur.
-- Düğmeler sırayla gelir.
+- **Açılış:** diş bandı yuvarlanarak gelip durur, İNCE harf harf yükselir, OTO LASTİK soldan açılır, düğmeler
+  sırayla gelir. Hemen Ara'nın diş baskısı akıp durur, telefon bir kez çalar.
+- **Kaydırma:** desenler kaydırdıkça akar. IBAN kartı göründüğünde üzerinden ışık geçer. Hemen Ara ekrandan
+  çıkınca sağ altta kırmızı ara düğmesi belirir.
+- **Sürekli:** yalnız küçük işaretler oynar. 7/24 noktası atar; Hemen Ara birkaç saniyede bir parlar ve telefon
+  çalar.
 
-Kendiliğinden sürekli dönen ya da akan bir şey yok.
+Dönen bir şey yok. Telefonda "hareketi azalt" açıksa animasyonlar oynamaz.
 
 **İçerik:**
 
