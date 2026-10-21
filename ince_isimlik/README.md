@@ -54,3 +54,6 @@ Sonra:
 3. `python3 scripts/ince_isimlik.py` çalıştır; isimlikteki QR siteye döner.
 
 `sayfa_onizleme.html` tek dosyalık önizlemedir (yazı tipleri ve karekod gömülü).
+
+**Claude önizlemesi:** `sayfa_artifact.html` yalnız kontrol içindir; sitenin kendisi değildir.
+Orada üstte Claude yazar, Hemen Ara numarayı kopyalar, karekod ve rehber indirme bağlantıları yoktur.

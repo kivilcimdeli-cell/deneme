@@ -45,6 +45,7 @@ ZIP = os.path.join(BASE, "ince_site.zip")
 PREVIEW = os.path.join(BASE, "sayfa_onizleme.png")
 GIF = os.path.join(BASE, "sayfa_animasyon.gif")
 STANDALONE = os.path.join(BASE, "sayfa_onizleme.html")
+ARTIFACT = os.path.join(BASE, "sayfa_artifact.html")
 RED, INK = "#d0202a", "#121316"
 FONTS = {"russo": "RussoOne-Regular.ttf", "outfit": "Outfit-SemiBold.ttf", "outfit-xb": "Outfit-ExtraBold.ttf"}
 CHROMIUM = "/opt/pw-browsers/chromium"
@@ -182,7 +183,7 @@ html{background:var(--paper);-webkit-text-size-adjust:100%}
 body{background:var(--paper);color:var(--ink);font:600 16px/1.35 var(--ui);min-height:100vh;overflow-x:hidden;
   padding-bottom:env(safe-area-inset-bottom)}
 .wrap{--gl:max(16px,env(safe-area-inset-left,0px));--gr:max(16px,env(safe-area-inset-right,0px));
-  max-width:460px;margin:0 auto;padding:0 var(--gr) 26px var(--gl)}
+  max-width:460px;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr);padding-block:0 26px}
 a{color:inherit;-webkit-tap-highlight-color:transparent}
 /* ---- başlık: asfalt, lastik, yol ---- */
 .hero{position:relative;overflow:hidden;min-height:380px;margin:0 calc(var(--gr) * -1) 0 calc(var(--gl) * -1);
@@ -320,9 +321,6 @@ footer .mt{width:26px;height:26px}
 .iban.flash{animation:flash .9s ease-out}
 details.kk[open] .kk-body{animation:open .35s cubic-bezier(.2,.8,.2,1)}
 footer .mt-spin{animation-duration:3s}
-@media (prefers-reduced-motion:no-preference){
-  .js .reveal{transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.2,1)}
-  .js .reveal:not(.seen){opacity:0;transform:translateY(26px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
   .wind{display:none}}
 """
@@ -337,14 +335,25 @@ document.querySelectorAll('.mt').forEach(m=>m.addEventListener('animationend',()
 """
 
 
-def page(info, standalone=False):
-    """Site (`ince_isimlik/site`) ya da tek dosya önizleme (standalone=True: yazı tipleri ve karekod gömülü)."""
+# aşağıdaki bölümler görünür olunca gelir (yalnız sitede; Claude önizlemesinde kaydırmayı beklemeden görünür)
+REVEAL = """@media (prefers-reduced-motion:no-preference){
+  .js .reveal{transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.2,1)}
+  .js .reveal:not(.seen){opacity:0;transform:translateY(26px)}}
+"""
+
+
+def page(info, standalone=False, artifact=False):
+    """Site (`ince_isimlik/site`), tek dosya önizleme (standalone: yazı tipleri ve karekod gömülü) ya da Claude
+    önizleme sayfası (artifact: belge iskeleti yayında eklenir; oradaki çerçeve indirmeyi engellediği için
+    karekod ve rehber indirme bağlantısı yok; telefon bağlantısı her izleyicide çalışmayabildiği için Hemen Ara
+    numarayı da kopyalar; aşağıdaki bölümler kaydırmayı beklemeden görünür)."""
+    standalone = standalone or artifact
     e = html.escape
     wa = Q.whatsapp_link(info)
     insta = f"https://www.instagram.com/{info.instagram}/"
     title = "İnce Oto Lastik – 7/24 Hizmet"
     desc = "İnce Oto Lastik: hemen arayın, WhatsApp'tan yazın, Instagram, Google yorumları ve ödeme bilgileri."
-    css, kk = CSS, "karekod.png"
+    css, kk = (CSS if artifact else CSS + REVEAL), "karekod.png"
     if standalone:
         for key in FONTS:
             css = css.replace(f"url(fonts/{key}.woff)", f"url({data_uri('fonts/' + key + '.woff', 'font/woff')})")
@@ -357,6 +366,11 @@ def page(info, standalone=False):
     favicon = ("data:image/svg+xml," + "<svg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'>"
                "<circle r='48' fill='%23121316'/><circle r='30' fill='%23d4d6da'/><circle r='9' fill='%23d0202a'/>"
                "</svg>")
+    tel_extra = f' data-tel="{e(info.phone)}"' if artifact else ""
+    save = "Karekoda basılı tutup kaydedin;" if artifact else "Karekodu kaydedin;"
+    save_link = "" if artifact else f'\n      <a href="{kk}" download="ince-karekod.png">Karekodu kaydet</a>'
+    vcf = "" if artifact else (f'<a class="ghost reveal" href="ince.vcf" download="İnce Oto Lastik.vcf">'
+                               f'{S.svg(S.ICON["person"])}REHBERE KAYDET</a>\n')
     body = f"""<div class="wrap">
 <header class="hero">
   <h1 class="logo" aria-label="İnce">İNCE</h1>
@@ -368,7 +382,7 @@ def page(info, standalone=False):
 </header>
 {tread_strip()}
 <p class="label">BİZE ULAŞIN</p>
-<a class="call" href="tel:+{info.tel}">{mini_tire(S.svg(S.ICON["phone"]))}<span class="t"><b>HEMEN ARA</b>
+<a class="call" href="tel:+{info.tel}"{tel_extra}>{mini_tire(S.svg(S.ICON["phone"]))}<span class="t"><b>HEMEN ARA</b>
   <small>{e(info.phone)}</small></span><span class="go"></span></a>
 <nav class="tiles">
   {tile(wa, S.svg(S.logo_path("whatsapp")), "WhatsApp", "Mesaj yazın")}
@@ -386,18 +400,22 @@ def page(info, standalone=False):
     <summary class="kk-open">{S.svg(S.ICON["qr"])}KAREKOD İLE ÖDE</summary>
     <div class="kk-body">
       <img src="{kk}" width="732" height="732" alt="{e(info.bank)} karekodu – {e(info.holder)}">
-      <p>Karekodu kaydedin; banka uygulamanızda <b>Karekod ile Öde</b> → <b>Galeriden seç</b>.</p>
-      <a href="{kk}" download="ince-karekod.png">Karekodu kaydet</a>
+      <p>{save} banka uygulamanızda <b>Karekod ile Öde</b> → <b>Galeriden seç</b>.</p>{save_link}
     </div>
   </details>
   </div>
 </section>
-<a class="ghost reveal" href="ince.vcf" download="İnce Oto Lastik.vcf">{S.svg(S.ICON["person"])}REHBERE KAYDET</a>
-<footer class="reveal">{mini_tire('<i class="hub"></i>')}İNCE OTO LASTİK · 7/24 HİZMET</footer>
+{vcf}<footer class="reveal">{mini_tire('<i class="hub"></i>')}İNCE OTO LASTİK · 7/24 HİZMET</footer>
 </div>
 <div class="toast" role="status" aria-live="polite"></div>
 <script>{JS}</script>
 """
+    if artifact:
+        return f"""<title>İnce Oto Lastik</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script>document.documentElement.classList.add("js")</script>
+<style>{css}</style>
+{body}"""
     return f"""<!doctype html>
 <html lang="tr">
 <head>
@@ -515,6 +533,8 @@ def main():
     og_image()
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(page(info))
+    with open(ARTIFACT, "w", encoding="utf-8") as f:
+        f.write(page(info, artifact=True))
     with open(STANDALONE, "w", encoding="utf-8") as f:
         f.write(page(info, standalone=True))
     pack()
