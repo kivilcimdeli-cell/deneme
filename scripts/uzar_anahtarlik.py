@@ -162,10 +162,10 @@ def chevrons(x0, cy, h, n, pitch, w):
     return A.union(*out)
 
 
-def qr(cx, cy, module=1.1, quiet=2):
+def qr(cx, cy, module=1.1, quiet=2, data=QR_TEXT):
     """Telefon QR'ı: beyaz zemin (sessiz bölge dahil) eksi siyah kareler; siyah kareler gövdenin rengi."""
     import segno
-    m = np.array(segno.make(QR_TEXT, error="m", micro=False).matrix, dtype=bool)
+    m = np.array(segno.make(data, error="m", micro=False).matrix, dtype=bool)
     n = m.shape[0]
     size = (n + 2 * quiet) * module
     x0, y1 = cx - size / 2 + quiet * module, cy + size / 2 - quiet * module
