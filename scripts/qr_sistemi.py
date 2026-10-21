@@ -209,7 +209,8 @@ def load(path=DATA):
     holder = d.get("iban_alici", "").strip().upper()
     if karekod:
         k = karekod_check(karekod, iban)
-        if k["alici"] and holder and k["alici"].upper() != holder:
+        fold = lambda x: x.upper().translate(str.maketrans("ÇĞİÖŞÜ", "CGIOSU"))  # noqa: E731  bankalar Ç yerine C yazabilir
+        if k["alici"] and holder and fold(k["alici"]) != fold(holder):
             raise QRError(f"karekoddaki alıcı ({k['alici']}) ile iban_alici ({holder}) farklı")
     info = Info(d.get("isletme", ""), d.get("sehir", ""), tel, wa, d.get("whatsapp_mesaj", ""), handle,
                 google_url(d["google"]), iban, holder, d.get("banka", ""), karekod,
