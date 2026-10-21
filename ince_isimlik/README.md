@@ -24,22 +24,25 @@ python3 scripts/ince_isimlik.py klasik    # yalnız eşleşen tasarımlar
 
 ![Sayfa](sayfa_onizleme.png)
 
-Uzar'ın sayfasıyla aynı işleri yapar ama tasarımı ayrıdır: açık zemin, asfalt başlık, lastik teması.
+Uzar'ın sayfasıyla aynı işleri yapar; tasarımı farklıdır: siyah zemin, geniş ve kalın Archivo yazısı, tek vurgu rengi
+olarak kırmızı. Çizim kullanılmaz.
 
-**Animasyonlar** (`sayfa_animasyon.gif`):
+**Animasyon** yalnız açılışta, bir kez oynar (`sayfa_animasyon.gif`, tam tur: `sayfa_tur.gif`):
 
-- Lastik yola yuvarlanarak gelir, sonra yolda döner. Yanağında İNCE OTO LASTİK yazısı var; kırmızı kaliper dönmez.
-- Yol çizgileri akar, lastiğin ardında iz çizilir.
-- Düğme simgeleri küçük lastiklerin içindedir ve dokununca döner.
+- İNCE yazısı maskeden yükselir.
+- Altından ince kırmızı bir ışık çizgisi soldan geçip yerinde kalır.
+- Düğmeler sırayla gelir.
+
+Sonra sayfa durur.
 
 **İçerik:**
 
 - Hemen Ara: 0545 853 30 70
 - WhatsApp: aynı numara, hazır mesajla açılır.
 - Instagram: @enesssahin.7
-- Google yorum: işletmenin `share.google` bağlantısı.
-- Ödeme bilgileri: HAFİSE İNCE, DenizBank. IBAN tek dokunuşla kopyalanır; karekod kaydedilip banka uygulamasında
-  galeriden okutulur.
+- Google yorumları: işletmenin `share.google` bağlantısı.
+- Ödeme: HAFİSE İNCE, DenizBank. IBAN tek dokunuşla kopyalanır; karekod kaydedilip banka uygulamasında galeriden
+  okutulur.
 - Rehbere Kaydet.
 
 **Karekod:** fotoğraftaki DenizBank karekodundan okundu. CRC tutuyor, içindeki IBAN ve alıcı `bilgiler.json` ile
