@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Soylu Oto Lastik</title>
+<meta name="description" content="Soylu Oto Lastik, Antalya: mobil lastik tamir ve servis. Hemen arayın, WhatsApp&#x27;tan yazın; ödeme bilgileri.">
+<meta name="theme-color" content="#0a0a0b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Soylu Oto Lastik">
+<meta property="og:description" content="Soylu Oto Lastik, Antalya: mobil lastik tamir ve servis. Hemen arayın, WhatsApp&#x27;tan yazın; ödeme bilgileri.">
+<meta property="og:url" content="https://soyluotolastik.qrsistem.workers.dev/">
+<meta property="og:image" content="https://soyluotolastik.qrsistem.workers.dev/og.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230a0a0b'/><path d='M44 0h20v64H22z' fill='%23e0202e'/><rect x='12' y='44' width='18' height='5' fill='%23f5f5f2'/><rect x='12' y='15' width='18' height='5' fill='%23f5f5f2'/><rect x='12' y='29.5' width='18' height='5' fill='%23f5f5f2'/></svg>">
+<style>
+@font-face{font-family:"Sora";font-weight:400;font-display:swap;src:url(fonts/text.woff) format("woff")}
+@font-face{font-family:"Sora";font-weight:600;font-display:swap;src:url(fonts/text-sb.woff) format("woff")}
+@font-face{font-family:"Sora";font-weight:800;font-display:swap;src:url(fonts/text-xb.woff) format("woff")}
+/* siyah, tek sütun; kırmızı yalnız vurgu. Ölçek: 11 · 13 · 15 · 16 · 30 · büyük */
+:root{color-scheme:dark;--bg:#0a0a0b;--surface:#131315;--raise:#1a1a1d;--line:#242428;--line2:#35353b;
+  --text:#f5f5f2;--muted:#a1a1a8;--dim:#6b6b73;--red:#e0202e;--red-ink:#fff;--ok:#1f9d55;--white:#fff;
+  --ui:"Sora",system-ui,-apple-system,"Segoe UI",sans-serif;--sy:0px}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:400 16px/1.55 var(--ui);min-height:100vh;overflow-x:hidden}
+a{color:inherit;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.topline{height:4px;background:var(--red);transform-origin:left}
+.wrap{max-width:480px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:0 calc(110px + env(safe-area-inset-bottom,0px))}
+/* ---- başlık ---- */
+/* başlık kenardan kenara (şerit ekran kenarında kesilir, yatay taşma olmaz) */
+.hero{position:relative;isolation:isolate;overflow:hidden;padding-block:34px 30px;
+  margin-left:calc(-1 * max(20px,env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(20px,env(safe-area-inset-right,0px)));
+  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.hero::before{content:"";position:absolute;z-index:-2;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:30px 30px;background-position:-1px -1px;opacity:.55;
+  -webkit-mask-image:radial-gradient(80% 70% at 70% 30%,#000,transparent 75%);mask-image:radial-gradient(80% 70% at 70% 30%,#000,transparent 75%)}
+.slash{position:absolute;z-index:-1;top:-30px;right:-112px;width:150px;height:340px;background:var(--red);
+  transform:skewX(20deg);translate:0 calc(var(--sy) * -1);pointer-events:none}
+.slash::before{content:"";position:absolute;top:0;bottom:0;left:-30px;width:12px;background:var(--red);opacity:.5}
+.eyebrow{display:flex;align-items:center;gap:10px;font:600 12px/1 var(--ui);letter-spacing:.26em;color:var(--muted)}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--red)}
+.mark{position:relative;display:inline-block;margin-top:24px;font:800 clamp(70px,22vw,104px)/.9 var(--ui);
+  letter-spacing:-.035em}
+.mark .w{display:block}
+.mark .wipe{position:absolute;inset:-.02em -.06em -.06em;background:var(--red);transform:scaleX(0);transform-origin:left}
+.rule{width:96px;height:4px;margin-top:22px;background:var(--red);transform-origin:left}
+.kind{display:flex;margin-top:18px;font:600 15px/1 var(--ui);letter-spacing:.5em}
+.kind span{display:inline-block}
+.lead{margin-top:18px;max-width:30ch;color:var(--muted);font-size:15px}
+/* ---- Hemen Ara ---- */
+.call{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;margin-top:6px;
+  padding:18px 18px 18px 22px;border-radius:14px;background:var(--red);color:var(--red-ink);text-decoration:none;
+  box-shadow:0 20px 40px -24px rgba(224,32,46,.85);transition:transform .15s,filter .15s}
+.call::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-45%;width:30%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent);transform:skewX(-20deg)}
+.call:active{transform:scale(.985);filter:brightness(.95)}
+.call .t{flex:1;min-width:0}
+.call small{display:block;font:600 12px/1 var(--ui);letter-spacing:.24em;opacity:.85}
+.call b{display:block;margin-top:9px;font:800 clamp(24px,7.4vw,30px)/1 var(--ui);letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.call .ib{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.2)}
+.call .ic{width:22px;height:22px;fill:var(--red-ink)}
+/* ---- bağlantılar: numaralı liste ---- */
+.list{margin-top:18px;border-top:1px solid var(--line)}
+.row{position:relative;display:grid;grid-template-columns:26px 40px minmax(0,1fr) 18px;align-items:center;gap:12px;
+  padding:15px 2px;border-bottom:1px solid var(--line);text-decoration:none}
+.row::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--red);transform:scaleX(0);
+  transform-origin:left;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.row:active::after,.row:hover::after{transform:none}
+.row .n{font:600 12px/1 var(--ui);letter-spacing:.06em;color:var(--red);font-variant-numeric:tabular-nums}
+.row .ib{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--surface);
+  border:1px solid var(--line2)}
+.row .ic{width:20px;height:20px;fill:var(--text)}
+.row b{display:block;font:600 16px/1.2 var(--ui)}
+.row small{display:block;margin-top:4px;font-size:13px;line-height:1.3;color:var(--muted);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.row .go{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  transition:stroke .2s,transform .2s}
+.row:active .go,.row:hover .go{stroke:var(--red);transform:translateX(3px)}
+/* ---- ödeme ---- */
+.sec{display:flex;align-items:center;gap:12px;margin:42px 0 14px;font:600 12px/1 var(--ui);letter-spacing:.3em;
+  color:var(--muted)}
+.sec::before{content:"";width:8px;height:8px;background:var(--red)}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.pay{position:relative;overflow:hidden;padding:22px 20px 20px;border-radius:16px;background:var(--surface);
+  border:1px solid var(--line);container-type:inline-size}
+.pay::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--red);transform-origin:left}
+.rows{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;font-size:15px}
+.rows dt{color:var(--muted)}
+.rows dd{font-weight:600;text-align:right}
+.ibanbox{margin-top:18px;padding:14px 16px 15px;border-radius:12px;background:var(--bg);border:1px solid var(--line2)}
+.ibanbox span{display:block;font:600 11px/1 var(--ui);letter-spacing:.3em;color:var(--dim)}
+.iban{display:block;margin-top:9px;font:800 17px/1.2 var(--ui);font-size:min(17px,4.45cqi);letter-spacing:-.01em;
+  word-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;user-select:all;-webkit-user-select:all}
+.iban i{font-style:normal;display:inline-block}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.acts.one{grid-template-columns:1fr}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;border-radius:12px;cursor:pointer;
+  font:600 15px/1 var(--ui);text-decoration:none;transition:transform .15s,background .2s,border-color .2s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:19px;height:19px}
+.copy{border:0;background:var(--red);color:var(--red-ink)}
+.copy .ic{fill:var(--red-ink)}
+.copy.ok{background:var(--ok)}
+.ghost{border:1px solid var(--line2);background:transparent;color:var(--text)}
+.ghost .ic{fill:var(--text)}
+.ghost[aria-expanded="true"]{border-color:var(--red)}
+.kk{margin-top:12px;padding:18px 16px 14px;border-radius:14px;background:var(--raise);border:1px solid var(--line);
+  text-align:center}
+.kk .qr{display:inline-block;padding:12px;border-radius:12px;background:var(--white)}
+.kk img{display:block;width:min(220px,58vw);height:auto;image-rendering:pixelated}
+.kk p{margin:12px 4px 8px;font-size:14px;color:var(--muted)}
+.kk p b{color:var(--text);font-weight:600}
+.kk a{color:var(--text);font-weight:600;text-decoration-color:var(--red);text-underline-offset:4px}
+/* ---- altbilgi ---- */
+footer{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:48px;padding-top:22px;
+  border-top:1px solid var(--line);color:var(--dim);font-size:13px}
+footer b{display:block;font:800 22px/1 var(--ui);letter-spacing:-.03em;color:var(--text)}
+footer b i{display:block;width:34px;height:3px;margin-top:9px;background:var(--red)}
+/* ---- alttaki arama şeridi, bildirim ---- */
+.callbar{position:fixed;z-index:20;left:0;right:0;bottom:0;display:flex;justify-content:center;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:rgba(10,10,11,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  transform:translateY(110%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.callbar.show{transform:none}
+.callbar a{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:440px;min-height:52px;
+  border-radius:12px;background:var(--red);color:var(--red-ink);text-decoration:none;font:600 16px/1 var(--ui)}
+.callbar .ic{width:20px;height:20px;fill:var(--red-ink)}
+.callbar span{font-variant-numeric:tabular-nums}
+.toast{position:fixed;z-index:30;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,40px);
+  width:max-content;max-width:calc(100vw - 32px);text-align:center;background:var(--raise);color:var(--text);
+  border:1px solid var(--line2);border-left:4px solid var(--red);padding:12px 18px;border-radius:12px;font-weight:600;
+  box-shadow:0 14px 34px rgba(0,0,0,.6);transition:transform .25s,opacity .25s;opacity:0;pointer-events:none}
+.toast.show{transform:translate(-50%,0);opacity:1}
+/* ---- animasyonlar ---- */
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+@keyframes slash{from{transform:translateX(160%) skewX(20deg)}to{transform:skewX(20deg)}}
+@keyframes wipe{0%{transform:scaleX(0);transform-origin:left}45%,55%{transform:scaleX(1);transform-origin:left}
+  56%{transform:scaleX(1);transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
+@keyframes show{0%,49%{opacity:0}50%,100%{opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes grp{from{opacity:.15;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes left{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes shine{0%,82%{left:-45%}100%{left:125%}}
+@keyframes ring{0%,84%,100%{transform:none}86%,90%,94%{transform:rotate(-14deg)}88%,92%,96%{transform:rotate(14deg)}}
+@keyframes flash{0%{color:var(--red)}100%{color:var(--text)}}
+@keyframes open{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.topline{animation:grow .8s cubic-bezier(.6,0,.2,1) both}
+.slash{animation:slash 1.1s .15s cubic-bezier(.2,.8,.2,1) both}
+.eyebrow{animation:fade .6s .35s both}
+.mark .wipe{animation:wipe 1.15s .45s cubic-bezier(.7,0,.2,1) both}
+.mark .w{animation:show 1.15s .45s both}
+.rule{animation:grow .7s 1.35s cubic-bezier(.2,.8,.2,1) both}
+.kind span{animation:up .5s cubic-bezier(.2,.8,.2,1) both}
+.lead{animation:fade .7s 2s both}
+.call{animation:up .6s 2.05s cubic-bezier(.2,.8,.2,1) both}
+.call::after{animation:shine 5s 3s infinite}
+.call .ic{animation:ring 5s 3s infinite}
+.row{animation:left .55s cubic-bezier(.2,.8,.2,1) both}
+.row:nth-child(1){animation-delay:2.15s}.row:nth-child(2){animation-delay:2.23s}
+.row:nth-child(3){animation-delay:2.31s}.row:nth-child(4){animation-delay:2.39s}
+.pay::before{transform:scaleX(0)}
+.pay.in::before{animation:grow .8s .1s cubic-bezier(.2,.8,.2,1) both}
+.pay.in .iban i{animation:grp .45s cubic-bezier(.2,.8,.2,1) both}
+.iban.flash{animation:flash .9s ease-out}
+.kk:not([hidden]){animation:open .35s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
+  .pay::before{transform:none}}
+.kind span:nth-child(1){animation-delay:1.55s}.kind span:nth-child(2){animation-delay:1.59s}.kind span:nth-child(3){animation-delay:1.63s}.kind span:nth-child(4){animation-delay:1.67s}.kind span:nth-child(5){animation-delay:1.71s}.kind span:nth-child(6){animation-delay:1.75s}.kind span:nth-child(7){animation-delay:1.79s}.kind span:nth-child(8){animation-delay:1.83s}.kind span:nth-child(9){animation-delay:1.87s}.kind span:nth-child(10){animation-delay:1.91s}.kind span:nth-child(11){animation-delay:1.95s}.kind span:nth-child(12){animation-delay:1.99s}.pay.in .iban i:nth-child(1){animation-delay:0.20s}.pay.in .iban i:nth-child(2){animation-delay:0.27s}.pay.in .iban i:nth-child(3){animation-delay:0.34s}.pay.in .iban i:nth-child(4){animation-delay:0.41s}.pay.in .iban i:nth-child(5){animation-delay:0.48s}.pay.in .iban i:nth-child(6){animation-delay:0.55s}.pay.in .iban i:nth-child(7){animation-delay:0.62s}.pay.in .iban i:nth-child(8){animation-delay:0.69s}
+</style>
+</head>
+<body>
+<div class="topline" aria-hidden="true"></div>
+<div class="wrap">
+<header class="hero">
+  <div class="slash" aria-hidden="true"></div>
+  <p class="eyebrow">ANTALYA · LASTİK SERVİSİ</p>
+  <h1 class="mark" aria-label="Soylu"><span class="w">SOYLU</span><span class="wipe" aria-hidden="true"></span></h1>
+  <div class="rule" aria-hidden="true"></div>
+  <p class="kind" aria-label="Oto Lastik"><span>O</span><span>T</span><span>O</span><span>&nbsp;</span><span>L</span><span>A</span><span>S</span><span>T</span><span>İ</span><span>K</span></p>
+  <p class="lead">Mobil lastik tamir ve servis. Tek dokunuşla arayın, yazın.</p>
+</header>
+<main>
+<a class="call" href="tel:+905414873003"><span class="t"><small>HEMEN ARA</small><b>0541 487 30 03</b></span>
+  <span class="ib"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></span></a>
+<nav class="list" aria-label="Bağlantılar">
+  <a class="row" href="https://wa.me/905414873003?text=Merhaba%2C%20bilgi%20almak%20istiyorum."><span class="n">01</span><span class="ib"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></span><span><b>WhatsApp</b><small>Mesaj gönderin</small></span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <a class="row" href="https://www.instagram.com/soyluotolastikantalya/"><span class="n">02</span><span class="ib"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg></span><span><b>Instagram</b><small>@soyluotolastikantalya</small></span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <a class="row" href="https://www.google.com/search?client=safari&amp;sca_esv=b098a7969f7dea84&amp;hl=tr-us&amp;sxsrf=APpeQnuGG33is7AN1yyIjmHBq78QpSR_bw:1792756657966&amp;q=soylu+oto+lastik+-+antalya+merkez+mobil+tamir+servis+hizmetleri+aksu+yorumlar%C4%B1&amp;si=APenkKm7iecQ4G6P-TsbSMFKIQtv3EFIqRAFw-i8uEbk55Z-_0OrY74aL6u6pdxoBKBP__jVWAJFepjFxSsxbFJ3t1HF4FUAYcvmtAU-1JkeweLEBfny85_dskPs2j0EjRuCzCVcgf-FV5A2PO0mjycBw5FxZs_1qQLKqTDPQxqj-30BHUpHzPtqFKNztD7YPv7Q1BR730ygCAd6ALAly-DmpU8ZMBdFPg%3D%3D&amp;sa=X&amp;ved=2ahUKEwjUqpD-itCXAxUDQf4FHQhbLIgQ9qsLegQIGhAI&amp;biw=384&amp;bih=726&amp;dpr=2.81#sv=CAESzQEKuQEStgEKd0FKaVQ0dEpaaHJRbnFKMkliUzBFMmRvN3U3QTIydE8tbFBZaTBFLXRxZm1ZT2JETTE5Ni1Eb0tSbnVvdVJzNkE5clp0WUZ1MERkelhwdTc3d201QVVRckxfOGx6cEVHQXlyWHAxOWNBRjZUV3Y2Qk1TOVdlVmpjEhd6RXZiYW9xaEN0RzFpLWdQaXE2UC1RURoiQURzcjlmUkM5YThYbV84UmZRdGtzSGJPVU4xZHV0WHRmURIEODA1MRoBMyoAMAA4AUAAGAAg4Ia2mQxKAhAB"><span class="n">03</span><span class="ib"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></span><span><b>Google</b><small>Yorumları görün, yorum yapın</small></span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <a class="row" href="soylu.vcf" download="Soylu Oto Lastik.vcf"><span class="n">04</span><span class="ib"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><span><b>Rehbere kaydet</b><small>Numarayı ekleyin</small></span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+</nav>
+<h2 class="sec">ÖDEME BİLGİLERİ</h2>
+<section class="pay" aria-label="Ödeme bilgileri">
+  <dl class="rows"><dt>Banka</dt><dd>İş Bankası</dd><dt>Alıcı</dt><dd>CAVİT SOYLU</dd></dl>
+  <div class="ibanbox"><span>IBAN</span><output class="iban"><i>TR34</i> <i>0006</i> <i>4000</i> <i>0016</i> <i>2310</i> <i>1145</i> <i>83</i></output></div>
+  <div class="acts one">
+    <button class="btn copy" type="button" data-copy="TR340006400000162310114583"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>IBAN'ı kopyala</span></button>
+  </div>
+</section>
+</main>
+<footer>
+  <b>SOYLU<i></i></b><span>@soyluotolastikantalya</span>
+</footer>
+</div>
+<div class="callbar"><a href="tel:+905414873003" aria-label="Hemen ara"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Hemen ara · <span>0541 487 30 03</span></a></div>
+<div class="toast" role="status" aria-live="polite"></div>
+<script>
+const toast=document.querySelector('.toast');let tt;
+function say(m){toast.textContent=m;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),2200)}
+async function copy(t){
+  try{await navigator.clipboard.writeText(t);return true}catch(e){}
+  const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.position='fixed';a.style.opacity='0';
+  document.body.appendChild(a);a.select();a.setSelectionRange(0,99);let ok=false;try{ok=document.execCommand('copy')}catch(e){}
+  a.remove();return ok}
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{
+  const ok=await copy(b.dataset.copy);const l=b.querySelector('span');const o=l.textContent;
+  if(ok){b.classList.add('ok');l.textContent='KOPYALANDI';say('IBAN kopyalandı – banka uygulamanıza yapıştırın');
+    const ib=document.querySelector('.iban');ib.classList.remove('flash');void ib.offsetWidth;ib.classList.add('flash')}
+  else say('Kopyalanamadı: IBAN yazısına basılı tutun');
+  setTimeout(()=>{b.classList.remove('ok');l.textContent=o},2000)}));
+document.querySelectorAll('[data-tel]').forEach(a=>a.addEventListener('click',()=>{
+  copy(a.dataset.tel).then(ok=>{if(ok)say('Numara kopyalandı: '+a.dataset.tel)})}));
+
+(()=>{const R=document.documentElement,still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
+  addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
+if(!still){let q=0;addEventListener('scroll',()=>{if(!q)q=requestAnimationFrame(()=>{
+  R.style.setProperty('--sy',(Math.min(scrollY,400)*.25).toFixed(1)+'px');q=0})},{passive:true})}
+const p=document.querySelector('.pay');
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(([e])=>{if(e.isIntersecting){p.classList.add('in');io.disconnect()}},{threshold:.35});
+  io.observe(p);
+  const bar=document.querySelector('.callbar'),call=document.querySelector('.call');
+  new IntersectionObserver(([e])=>bar.classList.toggle('show',!e.isIntersecting&&e.boundingClientRect.top<0)).observe(call)}
+else p.classList.add('in');
+const kb=document.getElementById('kk-btn'),kk=document.getElementById('kk');
+if(kb)kb.addEventListener('click',()=>{const o=kk.hidden;kk.hidden=!o;kb.setAttribute('aria-expanded',o);
+  if(o)kk.scrollIntoView({behavior:still?'auto':'smooth',block:'nearest'})})})();
+</script>
+</body>
+</html>

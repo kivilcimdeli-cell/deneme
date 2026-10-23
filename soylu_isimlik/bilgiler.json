@@ -3,11 +3,11 @@
   "telefon": "0541 487 30 03",
   "whatsapp": "0541 487 30 03",
   "whatsapp_mesaj": "Merhaba, bilgi almak istiyorum.",
-  "instagram": "",
-  "google": "",
-  "iban": "",
-  "iban_alici": "",
-  "banka": "",
+  "instagram": "https://www.instagram.com/soyluotolastikantalya/",
+  "google": "https://www.google.com/search?client=safari&sca_esv=b098a7969f7dea84&hl=tr-us&sxsrf=APpeQnuGG33is7AN1yyIjmHBq78QpSR_bw:1792756657966&q=soylu+oto+lastik+-+antalya+merkez+mobil+tamir+servis+hizmetleri+aksu+yorumlar%C4%B1&si=APenkKm7iecQ4G6P-TsbSMFKIQtv3EFIqRAFw-i8uEbk55Z-_0OrY74aL6u6pdxoBKBP__jVWAJFepjFxSsxbFJ3t1HF4FUAYcvmtAU-1JkeweLEBfny85_dskPs2j0EjRuCzCVcgf-FV5A2PO0mjycBw5FxZs_1qQLKqTDPQxqj-30BHUpHzPtqFKNztD7YPv7Q1BR730ygCAd6ALAly-DmpU8ZMBdFPg%3D%3D&sa=X&ved=2ahUKEwjUqpD-itCXAxUDQf4FHQhbLIgQ9qsLegQIGhAI&biw=384&bih=726&dpr=2.81#sv=CAESzQEKuQEStgEKd0FKaVQ0dEpaaHJRbnFKMkliUzBFMmRvN3U3QTIydE8tbFBZaTBFLXRxZm1ZT2JETTE5Ni1Eb0tSbnVvdVJzNkE5clp0WUZ1MERkelhwdTc3d201QVVRckxfOGx6cEVHQXlyWHAxOWNBRjZUV3Y2Qk1TOVdlVmpjEhd6RXZiYW9xaEN0RzFpLWdQaXE2UC1RURoiQURzcjlmUkM5YThYbV84UmZRdGtzSGJPVU4xZHV0WHRmURIEODA1MRoBMyoAMAA4AUAAGAAg4Ia2mQxKAhAB",
+  "iban": "TR34 0006 4000 0016 2310 1145 83",
+  "iban_alici": "CAVİT SOYLU",
+  "banka": "İş Bankası",
   "iban_karekod": "",
   "sayfa_url": "https://soyluotolastik.qrsistem.workers.dev/"
 }
