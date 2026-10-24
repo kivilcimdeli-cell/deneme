@@ -69,7 +69,7 @@ def scan(d, cx, cy, s, labels=True):
     if labels:
         y = cy - s / 2 - 4.6
         d.add("TARA", t("outfit", "TARA", 4.4, cx, y, "c", 1.2), WHITE)
-        d.add("BİZE ULAŞIN", t("outfit", "BİZE ULAŞIN", 4.4, cx, y - 6.5, "c", 0.3), RED)
+        d.add("BİZE ULAŞIN", t("outfit", "BİZE ULAŞIN", 4.4, cx, y - 6.5, "c", 0.55), RED)   # harfler ≥ 0,6 mm ayrık
 
 
 def phone_line(d, x, y, cap=5.2, align="l", icon=True, col=WHITE, max_w=62.0):

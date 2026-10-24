@@ -51,3 +51,25 @@ bağlantısı, IBAN TR34 0006 4000 0016 2310 1145 83, CAVİT SOYLU, İş Bankas�
 ```bash
 python3 scripts/soylu_sayfa.py
 ```
+
+## Baskı dosyası: seçilen 3 · S monogramı (X2D)
+
+![Baskı](baski/onizleme.png)
+
+**`baski/soylu_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Tablada **iki takım**
+(panel + sehpa) var; biri silinirse tek takım basılır. Ölçüler ve ayarlar Uzar, İNCE ve Çalık'ın isimlikleriyle aynı.
+
+| | |
+| --- | --- |
+| Panel | 120 × 90 mm, siyah gövde **1 cm**, köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
+| Kabartma | **2 mm** (10 katman): SOYLU, HEMEN ARA, telefon, TARA beyaz; S monogramı (içinde oyma S), OTO LASTİK, telefon simgesi, BİZE ULAŞIN kırmızı |
+| QR | siteyi açar (**https://soyluotolastik.qrsistem.workers.dev/**); yüzeyle aynı hizada beyaz dolgu (0,8 mm), 38 mm, kare 1,02 mm; görüntüden ve baskı hatası benzetiminden okundu |
+| Yazılar | harf içi en dar 0,70 mm, harfler arası ve noktalar ≥ 0,5 mm; satırlar arası ≥ 2 mm |
+| AMS | 1 siyah (ana nozul) · 2 beyaz (yardımcı nozul) · 3 kırmızı (ana nozul) |
+| Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Generic PLA |
+| Filament | iki takım ~117 g (siyah 111, beyaz 3,4, kırmızı 2,0) + kule; PrusaSlicer ~3 sa 24 dk (Bambu Studio kendi süresini gösterir) |
+| Sehpa | 100 × 40 × 10 mm, aynı tablada; panel yuvaya (10,3 mm) 15° eğik takılır, tutkal gerekmez |
+
+```bash
+python3 scripts/soylu_isimlik_baski.py    # baski/soylu_isimlik_x2d.3mf, baski/onizleme.png
+```
