@@ -147,8 +147,10 @@ def karekod_check(s, iban=None):
     f = tlv(s)
     if "63" not in f or not s.endswith("6304" + f["63"]) or crc16(s[:-4]) != f["63"].upper():
         raise QRError("banka karekodu değil ya da bozuk (CRC tutmuyor)")
-    if s.startswith("000201") and "54" in f:
-        raise QRError(f"karekodda sabit tutar var ({f['54']} TL): uygulamadan tutarsız kod alınmalı")
+    if "54" in f and f["54"].isdigit() and int(f["54"]) > 0:      # EMVCo ve TCMB (75…) karekodu: işlem tutarı
+        tl = (f"{int(f['54']) / 100:,.2f}".translate(str.maketrans(",.", ".,")) if not s.startswith("000201")
+              else f["54"])
+        raise QRError(f"karekodda sabit tutar var ({tl} TL): uygulamadan tutarsız kod alınmalı")
     found = re.search(r"TR\d{24}", s)
     inner = {}
     for v in f.values():
