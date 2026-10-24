@@ -1894,7 +1894,10 @@ def overview(rows, p, n):
             cell = Image.new("RGB", (cw, chh), (250, 248, 244))
             cell.paste(photo_box(r["on"], cw, chh - 46), (0, 0))
         cd = ImageDraw.Draw(cell)
-        cd.text((14, 10), f"{r['i']:02d}", font=font_ui(28, "serif_k"), fill=(250, 248, 244))
+        fn_ = font_ui(24, "serif_k")
+        cd.rounded_rectangle((10, 10, 22 + cd.textlength(f"{r['i']:02d}", font=fn_) + 12, 46), 18,
+                             fill=(250, 248, 244))
+        cd.text((22, 13), f"{r['i']:02d}", font=fn_, fill=GOLD)
         nm = r["name"]
         f = font_ui(21, "bold")
         cd.text((cw / 2 - cd.textlength(nm, font=f) / 2, chh - 37), nm, font=f, fill=INK)
@@ -1993,7 +1996,8 @@ def unpack(r):
     out = dict(r)
     for k in ("on", "arka"):
         if isinstance(r[k], bytes):
-            out[k] = Image.open(io.BytesIO(r[k])).convert("RGBA")
+            out[k] = Image.open(io.BytesIO(r[k]))
+            out[k].load()
     return out
 
 

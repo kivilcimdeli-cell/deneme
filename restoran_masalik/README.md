@@ -1,18 +1,22 @@
-# Restoran masalıkları (30 tasarım, iki yüzlü)
+# Restoran masalıkları (30 tasarım, iki yüzlü, kabartmalı)
 
-Müşteriye gönderilecek katalog: **`musteri_katalog.pdf`** (12 sayfa) ya da tek tek **`musteri_01.jpg` … `musteri_12.jpg`**
-(1: kapak ve anlatım, 2–11: her sayfada 3 tasarım önden ve arkadan, 12: 30 tasarım tek sayfada). Ayrıntılı sayfalar:
-`<numara>_<ad>.png` (ön yüz, arka yüz, önden ve arkadan görünüş; ölçü, QR kontrolü, renkler).
+Müşteriye gönderilecek katalog: **`musteri_katalog.pdf`** (15 sayfa) ya da tek tek **`musteri_01.jpg` … `musteri_15.jpg`**:
+- 1: kapak (masada fotoğraf, türler, örnek site)
+- 2–11: her sayfada 3 tasarım, önden ve arkadan fotoğraf
+- 12: 30 tasarım tek sayfada
+- 13–15: 10 örnek menü sitesi telefonda (`siteler/`)
+
+Ayrıntılı sayfalar `<numara>_<ad>.png`: iki yüzün düz görünüşü ve iki fotoğraf; ölçü, QR kontrolü ve renkler.
+Fotoğraflar `foto/` klasöründe.
 
 Restoran isimleri uydurma, katalog için. Seçilen tasarım işletmenin adı, logosu, renkleri ve masa numaralarıyla
 yeniden hazırlanır.
 
 **Üç tür:**
 - **İKİ QR:** ön yüzde menü, arka yüzde Google yorumu.
-- **TEK QR:** iki yüzde aynı QR → işletmenin tek sayfası (menü, yorum, Wi-Fi, Instagram, rezervasyon). Lastikçi
-  sayfaları gibi.
-- **NFC + QR:** Ø25 mm NTAG215 etiket panelin içinde; telefonu dokundurmak yeter, iki yüzden de okunur. 6 numarada
-  arka yüz misafir Wi-Fi QR'ı.
+- **TEK QR:** iki yüzde aynı QR → işletmenin tek sayfası (menü, yorum, Wi-Fi, Instagram, rezervasyon).
+- **NFC + QR:** Ø25 mm NTAG215 etiket iki plakanın arasında; telefonu dokundurmak yeter, iki yüzden de okunur.
+- 6 numarada arka yüz misafir Wi-Fi QR'ıdır.
 
 QR'lar doğrudan Google'a ya da menü dosyasına değil, ortak hesaptaki sayfaya gider
 (`<ad>.qrsistem.workers.dev/menu`, `/yorum`). Menü ya da bağlantı değişse de masalık değişmez. Örneklerdeki adresler
@@ -52,35 +56,40 @@ henüz yayında değil.
 | 30 | Mahalle Köftecisi | ızgara köfte | İKİ QR | 20,0 × 14,6 cm | tuzluk-biberlik, kürdan ve şeker yuvalı düzenleyici 200 × 64 mm | MASA 07 |
 
 **Yapı (baskıya göre):**
-- Panel 4 mm, düz basılır: arka yüz tablada, ön yüz üstte.
-- İki yüzdeki renkler 0,8 mm gömülü dolgu, yüzeyle aynı hizada. Sticker değildir, silinmez. Renk değişimi yalnız ilk
-  ve son 4 katmanda olur.
-- 14 numarada (kesme tahtası) ön yüzde ek 1 mm kabartma vardır (yanık damga gibi).
-- Panelin 8 mm'lik dili ayaktaki yuvaya oturur; ayak ayrı basılır.
-- 14 numara çapraz ayaklıdır, 20 numara A tipi iki panellidir. 29 peçetelik, 30 tuzluk-biberlik ve kürdanlık
-  düzenleyicidir.
-- NFC: panelin ortasında Ø26 × 0,8 mm cep (z 1,6–2,4). 12. katmandan sonra baskı duraklatılır, etiket konur, devam
-  edilir.
+- **İki plaka sırt sırta:** her biri 3 mm, her yüz kendi plakası. Yüzü yukarı basılır; ikisi birlikte ayaktaki
+  yuvaya oturur (yuva 6,3 mm, 8 mm derin).
+- **Kabartma:**
+  - geniş renk alanları (etiket, şerit, dilim) 0,8 mm kabarık zemin;
+  - yazı, çerçeve, simge, yıldız 1 mm kabartma, zeminin de üstünde;
+  - QR 0,8 mm kabarık karoda, koyu kareler karonun üstüne 0,6 mm gömülü. Yüzeyi düz kalır, okunur.
+- **NFC:** etiket, ön plakanın arkasındaki Ø26 × 0,6 mm cebe konur ve iki plaka arasında kalır. Baskıyı duraklatmak
+  gerekmez.
+- **Özel ayaklar:**
+  - 14: takılır çapraz ayak;
+  - 20: A tipi, iki tek plaka ve ahşap tepe bağlantısı;
+  - 29: peçetelik, iki plaka iki yuvada;
+  - 30: tuzluk-biberlik, kürdan ve şeker yuvalı düzenleyici.
 
 **Kontroller:**
-- Her yüzün QR'ı ayrı okutulur, baskı hatası benzetiminde (taşma, bulanıklık, eğik bakış, uzaklık, gölge) de denenir.
-  60 QR'ın hepsi okundu; en küçük kare 0,96 mm.
-- Yazıların her harfinin yazı tipinde olduğu denetlenir; eksik harf (ör. ok işareti) varsa betik durur.
-- 0,6 mm'den ince dolgu alanı ölçülür. Küçük yazılar Jost Bold, en az 3,4 mm; serif başlıkların ince çizgileri
-  0,05–0,14 mm kalınlaştırılır.
+- 60 QR'ın hepsi düz görünüşte ve baskı hatası benzetiminde okundu; en küçük QR karesi 0,96 mm.
+- Yazıların her harfinin yazı tipinde olduğu denetlenir.
+- 0,6 mm'den ince yerler ölçülür.
+
+**Görseller:**
+- `scripts/restoran_masalik_foto.py`: Blender 4.2 Cycles ile ahşap masada stüdyo fotoğrafı. Mat PLA, ipek altın ve
+  bakır, ahşap PLA; ayaklarda 0,2 mm katman izleri; alan derinliği.
+- `scripts/menu_siteleri.py`: masalıklarla aynı stilde 10 telefon sitesi.
 
 **Yazı tipleri (OFL):**
-- Başlıklar: Fraunces, Playfair Display, Cinzel, Bodoni Moda, Anton, Big Shoulders, Archivo, Bricolage Grotesque,
-  Syne, Unbounded, Barlow Condensed, Righteous, Norican, Caveat.
+- Başlıklar: Fraunces, Playfair Display, Cinzel, Bodoni Moda, Anton, Big Shoulders, Archivo, Bricolage, Syne,
+  Unbounded, Barlow, Righteous, Norican, Caveat.
 - Küçük yazılar: Jost.
 
-**Renkler:**
-- Mat filament tonları: fildişi, antrasit, bordo, koyu yeşil, lacivert, terrakota, kum beji ve diğerleri.
-- İpek altın ve bakır.
-- Ahşap katkılı PLA.
-
 ```bash
-python3 scripts/restoran_masalik.py              # 30 tasarım ve katalog (4 süreçte, ~4 dk)
-python3 scripts/restoran_masalik.py kurek liman  # yalnız eşleşenler (katalog önbellekten yenilenir)
-python3 scripts/restoran_masalik.py katalog      # yalnız katalog (önbellekten)
+pip install bpy==4.2.0                                # bir kez
+python3 scripts/restoran_masalik_foto.py --kapak      # kapak fotoğrafı
+python3 scripts/restoran_masalik_foto.py [ad ...]     # tasarım fotoğrafları (~1,5 dk / tasarım)
+python3 scripts/menu_siteleri.py                      # 10 site ve ekran görüntüleri
+python3 scripts/restoran_masalik.py                   # kontroller, ayrıntı sayfaları ve katalog
+python3 scripts/restoran_masalik.py katalog           # yalnız katalog (önbellekten)
 ```
