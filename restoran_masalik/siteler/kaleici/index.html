@@ -1,0 +1,81 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kaleiçi Sofrası</title><style>
+@font-face{font-family:Jost;src:url(../fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
+:root{--bg:#F6EFE3;--fg:#2B1A17;--muted:#8A7468;--line:#E6D8C3;--card:#FFFBF4;--card-fg:#2B1A17;--accent:#701E28;--accent-fg:#F3E6CC;--chip:#F2E3C9;--chip-fg:#701E28;--hero:#701E28;--hero-fg:#E9CF94;--display:Cinzel;--dw:800;--ds:normal;--bls:.06em;--price:#8C6A2E;--r:14px;--star:#C9A35C}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{font-family:Jost,'Noto Sans',sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased;font-size:16px}
+a{color:inherit;text-decoration:none}
+.hero{background:var(--hero);color:var(--hero-fg);padding:60px 26px 34px;position:relative;overflow:hidden;
+  text-align:center}
+.hero svg.motif{position:absolute;left:0;top:0;width:100%;height:100%}
+.hero>*{position:relative}
+.mark{width:64px;height:64px;margin:0 auto 14px;display:block}
+.brand{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:var(--bs,46px);line-height:1.02;
+  letter-spacing:var(--bls,0)}
+.tag{font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.86;margin-top:12px}
+.table{display:inline-flex;gap:10px;align-items:center;margin-top:22px;padding:8px 18px;border-radius:999px;
+  border:1px solid var(--table-line,currentColor);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase}
+.table b{font-family:var(--display);font-size:17px;letter-spacing:.04em;font-weight:var(--dw)}
+.hi{padding:20px 22px 0;font-size:14.5px;color:var(--muted);text-align:center}
+main.btns{padding:16px 18px 10px;display:grid;gap:11px}
+.btn{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--r,18px);background:var(--card);
+  color:var(--card-fg);border:1px solid var(--line);box-shadow:var(--shadow,0 8px 22px rgba(0,0,0,.05))}
+.btn .ic{width:42px;height:42px;border-radius:calc(var(--r,18px) - 6px);display:grid;place-items:center;
+  background:var(--chip);color:var(--chip-fg);flex:none}
+.btn .ic svg{width:22px;height:22px}
+.btn b{display:block;font-weight:600;font-size:16.5px}
+.btn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.btn .chev{margin-left:auto;opacity:.4;width:18px;height:18px}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.btn.primary small{color:inherit;opacity:.78}
+.btn.primary .ic{background:rgba(255,255,255,.16);color:inherit}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.row .btn{flex-direction:column;align-items:flex-start;gap:10px}
+.row .btn .chev{display:none}
+.stars{color:var(--star,#E2A93B);letter-spacing:2px;font-size:13px}
+.rate{margin:6px 18px 4px;padding:16px 18px;border-radius:var(--r,18px);border:1px solid var(--line);
+  display:flex;align-items:center;gap:16px;background:var(--card);color:var(--card-fg)}
+.rate .n{font-family:var(--display);font-weight:var(--dw);font-size:40px;line-height:1}
+.rate small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+.rate .bar{margin-left:auto;display:grid;gap:4px;width:92px}
+.rate .bar i{display:block;height:5px;border-radius:3px;background:var(--line)}
+.rate .bar i b{display:block;height:100%;border-radius:3px;background:var(--star,#E2A93B)}
+.foot{padding:8px 22px 30px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
+.top{position:sticky;top:0;z-index:2;background:var(--hero);color:var(--hero-fg);padding:16px 18px;display:flex;
+  align-items:center;justify-content:space-between}
+.top .b{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:23px;letter-spacing:var(--bls,0)}
+.top .t{font-size:11.5px;letter-spacing:.2em;border:1px solid var(--table-line,currentColor);border-radius:999px;
+  padding:6px 12px;text-transform:uppercase}
+.title{padding:22px 20px 4px;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:34px}
+.lead{padding:0 20px;color:var(--muted);font-size:13.5px}
+.tabs{display:flex;gap:8px;padding:14px 20px 8px;overflow:hidden;white-space:nowrap}
+.tabs span{padding:9px 15px;border-radius:999px;background:var(--card);font-size:14px;border:1px solid var(--line)}
+.tabs span.on{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.feature{margin:12px 20px 4px;padding:16px 18px;border-radius:var(--r,18px);background:var(--feat,var(--accent));
+  color:var(--feat-fg,var(--accent-fg));display:flex;justify-content:space-between;gap:12px;align-items:center}
+.feature small{display:block;font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
+.feature b{display:block;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin-top:3px}
+.feature .price{color:inherit;font-size:18px}
+section{padding:4px 20px 6px}
+h2{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin:16px 0 4px;display:flex;
+  align-items:center;gap:12px;letter-spacing:var(--h2ls,0)}
+h2:after{content:"";flex:1;height:1px;background:var(--line)}
+.item{padding:13px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:3px 14px}
+.item b{font-size:16.5px;font-weight:600}
+.item p{grid-column:1;color:var(--muted);font-size:13.2px;line-height:1.45}
+.price{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;font-size:15.5px;color:var(--price,var(--accent));
+  white-space:nowrap;grid-row:1;grid-column:2}
+.pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
+  background:var(--chip);color:var(--chip-fg);margin-left:6px;vertical-align:2px;font-weight:600}
+.hero{padding-top:70px}.tag{color:#F3E6CC}.brand{font-size:44px}</style></head><body><header class="hero"><svg class="motif" viewBox="0 0 390 330" preserveAspectRatio="none" fill="none" stroke="#C9A35C" stroke-width="1.2" opacity=".55"><path d="M24 330V150C24 70 110 22 195 10 280 22 366 70 366 150V330"/><path d="M34 330V152C34 78 116 34 195 22 274 34 356 78 356 152V330"/></svg><svg class="mark" viewBox="0 0 64 64" fill="#C9A35C"><path d="M32 6c5 7 6 15 0 26-6-11-5-19 0-26z"/><path d="M30 34C24 32 17 25 16 14c7 4 12 10 14 20zM34 34c6-2 13-9 14-20-7 4-12 10-14 20z"/><rect x="31" y="32" width="2" height="22"/><path d="M32 52c-6-1-10-4-12-8 5 0 9 3 12 8zm0 0c6-1 10-4 12-8-5 0-9 3-12 8z"/></svg><div class="brand">KALEİÇİ</div><div class="tag">Sofrası · Osmanlı mutfağı</div><span class="table">Masa <b>07</b></span></header><p class="hi">Hoş geldiniz. Afiyet olsun.</p><main class="btns"><a class="btn primary" href="menu.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C6.5 4 9.5 4 12 5.8 14.5 4 17.5 4 20 5.5V19c-2.5-1.4-5.5-1.4-8 .4-2.5-1.8-5.5-1.8-8-.4z"/><path d="M12 5.8v13.6"/></svg></span><span><b>Menü</b><small>Kahvaltı, kebaplar, tatlılar</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg></span><span><b>Google&#x27;da değerlendirin</b><small class="stars">★★★★★</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><div class="row"><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg></span><span><b>Garson çağır</b><small>Masa 07</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.6a7.7 7.7 0 0 1 11 0M9.4 15.6a3.6 3.6 0 0 1 5.2 0"/><circle cx="12" cy="18.6" r="1.1" fill="currentColor"/></svg></span><span><b>Wi-Fi</b><small>Kaleici_Misafir</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a></div><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg></span><span><b>Rezervasyon</b><small>0242 000 00 00</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a></main><div class="rate"><span class="n">4,8</span><span><span class="stars">★★★★★</span><small>Google · 2.316 yorum</small></span><span class="bar"><i><b style="width:86%"></b></i><i><b style="width:9%"></b></i><i><b style="width:3%"></b></i><i><b style="width:1%"></b></i><i><b style="width:1%"></b></i></span></div><p class="foot">Kaleiçi, Muratpaşa / Antalya · Her gün 08:00–24:00</p></body></html>

@@ -9,19 +9,24 @@ QR'lar doğrudan Google'a / menü dosyasına değil, ortak hesaptaki sayfaya gid
 `/yorum`): menü ya da Google bağlantısı değişse de masalık değişmez. Örneklerdeki adresler henüz yayında değil.
 
 Yapı (baskıya göre):
-  * panel 4 mm (20 katman), düz basılır: arka yüz tablada, ön yüz üstte. İki yüzdeki renkler 0,8 mm (4 katman) gömülü
-    dolgu: yüzeyle aynı hizada, sticker değil; silinir, solmaz. Renk değişimi yalnız ilk ve son 4 katmanda.
-  * kesme tahtasında ön yüze ek 1 mm kabartma (yanık damga gibi)
+  * iki plaka sırt sırta (her biri 3 mm, 15 katman): her yüz kendi plakası, yüzü yukarı basılır; ikisi birlikte
+    ayaktaki yuvaya oturur (yuva 6,3 mm). Böylece iki yüz de kabartmalı olur.
+  * kabartma: geniş renk alanları (etiket, şerit, dilim) 0,8 mm kabarık zemin; yazı, çerçeve, simge, yıldız 1 mm
+    kabartma (zeminin de üstünde); QR kabarık karo (0,8 mm), koyu kareler karonun üstüne 0,6 mm gömülü: yüzeyi düz,
+    okunur
   * panelin alt dili (8 mm) ayaktaki yuvaya oturur; ayak ayrı basılır. Bazıları çapraz ayaklı, çadır (A) ya da
-    peçetelik / tuzluk-biberlik düzenli
-  * NFC: Ø25 mm NTAG215 etiket, panelin ortasında Ø26 × 0,8 mm cep (z 1,6–2,4); 12. katmandan sonra duraklat, etiketi
-    koy, devam. Telefon iki yüzden de okur.
-  * QR karesi ≥ 0,9 mm; koyu kareler koyu renk, zemin açık renk. İki yüzün QR'ı ayrı ayrı okutulup baskı hatası
-    benzetiminde de denenir. Yazıların her harfi yazı tipinde olmalı (yoksa hata). Dolguların en ince yeri ölçülür.
-Yazı tipleri: başlıklarda Fraunces, Playfair Display, Cinzel, Bodoni Moda, DM Serif, Anton, Big Shoulders, Archivo,
-Syne, Unbounded, Norican, Caveat; küçük yazılarda Jost Bold (≥ 3,6 mm). Renkler mat filament tonları + ipek altın / bakır.
+    peçetelik / tuzluk-biberlik düzenleyici
+  * NFC: Ø25 mm NTAG215 etiket, ön plakanın arkasında Ø26 × 0,6 mm cepte; iki plaka arasında kalır (baskıyı duraklatmak
+    gerekmez). Telefon iki yüzden de okur.
+  * QR karesi ≥ 0,9 mm; koyu kareler koyu renk, zemin açık renk. Her yüzün QR'ı ayrı ayrı okutulup baskı hatası
+    benzetiminde de denenir. Yazıların her harfi yazı tipinde olmalı (yoksa hata). İnce yerler ölçülür.
+Yazı tipleri: başlıklarda Fraunces, Playfair Display, Cinzel, Bodoni Moda, Anton, Big Shoulders, Archivo, Bricolage,
+Syne, Unbounded, Barlow, Righteous, Norican, Caveat; küçük yazılarda Jost Bold. Renkler mat filament tonları + ipek
+altın / bakır + ahşap PLA.
+Görseller: restoran_masalik_foto.py (Blender Cycles, ahşap masada stüdyo fotoğrafı) varsa onlar kullanılır; menü
+siteleri menu_siteleri.py.
 
-Çıktı : restoran_masalik/<n>_<ad>.png (ön yüz, arka yüz, 3B), musteri_01..12.png / .jpg, musteri_katalog.pdf
+Çıktı : restoran_masalik/<n>_<ad>.png (iki yüz, iki fotoğraf), musteri_01..15.png / .jpg, musteri_katalog.pdf
 
 Kullanım:
   python3 scripts/restoran_masalik.py [anahtar ...]
@@ -41,13 +46,16 @@ from cift_tarafli_isimlik import rotation  # noqa: E402
 
 OUT_DIR = os.path.join(A.ROOT, "restoran_masalik")
 J = m3.JoinType.Round
-T = 4.0                    # panel kalınlığı (20 katman)
-INL = 0.8                  # yüzlerdeki renkli dolgu (4 katman)
-RELIEF = 1.0               # ön yüzde kabartma (5 katman)
-EDGE = 0.8                 # dolgunun panel kenarına en yakın mesafesi
+T = 3.0                    # bir plaka (15 katman); masalık iki plaka sırt sırta
+INL = 0.8                  # ayak üstündeki gömülü renk (4 katman)
+PLAQUE = 0.8               # geniş renk alanları (etiket, şerit, dilim): kabarık zemin (4 katman)
+RELIEF = 1.0               # yazı, çizgi, simge: kabartma (5 katman), kabarık zeminin de üstünde
+QR_H, QR_INL = 0.8, 0.6    # QR karosu kabarık; koyu kareler karonun üstüne gömülü (düz, okunur)
+EDGE = 0.8                 # renkli öğelerin plaka kenarına en yakın mesafesi
 D = 8.0                    # panelin yuvaya giren dili
 CLR = 0.3                  # yuva boşluğu
-NFC_R, NFC_H, NFC_Z = 13.0, 0.8, 1.6
+FT = 4.0                   # çapraz ayak kalınlığı
+NFC_R, NFC_H = 13.0, 0.6   # NFC cebi: ön plakanın arka yüzünde, iki plaka arasında kalır
 DOMAIN = "qrsistem.workers.dev"
 MIN_FEAT = 0.6             # kontrol: en ince dolgu (mm)
 
@@ -267,29 +275,35 @@ def make_qr(content):
 
 class Side:
     """Bir yüzün içeriği (o yüze bakan kişinin gördüğü koordinatlarla). Sonra eklenen öncekinin üstüne yazar;
-    renk None → panel gövdesinin rengi."""
+    renk None → plakanın rengi. Geniş alanlar kabarık zemin, yazı / çizgi / simge kabartma, QR kabarık karo."""
 
     def __init__(self):
-        self.items, self.raised, self.qrs = [], [], []
+        self.items, self.qrs = [], []
 
     def add(self, cs, col, raised=False):
-        (self.raised if raised else self.items).append((cs, col))
+        self.items.append((cs, col, "relief" if raised else "auto"))
         return cs
 
     def qr(self, content, cx, cy, s, light="fildisi", dark=None, r=1.6, pad=0.0):
         e = make_qr(content)
         module = Q.module_for(e, s)
         _, dark_cs, _ = Q.shapes(e, module, cx, cy)
-        self.add(RR(s + 2 * pad, s + 2 * pad, r, cx, cy), light)
-        self.add(dark_cs, dark)
+        self.items.append((RR(s + 2 * pad, s + 2 * pad, r, cx, cy), light, "qr_tile"))
+        self.items.append((dark_cs, dark, "qr_dark"))
         self.qrs.append((e, module, dark))
         return e
 
 
+def kind_of(cs, kind):
+    if kind != "auto":
+        return kind
+    return "plaque" if cs.area() > 380 and not cs.offset(-3.2, J).is_empty() else "relief"
+
+
 def regions(items, body, clip):
-    """{renk: bölge}: üstteki öğe alttakini örter; gövde rengindeki bölgeler dolgu değildir."""
+    """Üstten görünen renkler {renk: bölge}: üstteki öğe alttakini örter; plaka rengi dışarıda."""
     taken, out = A.empty(), {}
-    for cs, col in reversed(items):
+    for cs, col, _ in reversed(items):
         part = (cs ^ clip) - taken
         taken = taken + part
         col = col or body
@@ -298,8 +312,25 @@ def regions(items, body, clip):
     return {c: cs for c, cs in out.items() if cs.area() > 0.01}
 
 
+def layers(items, body, clip):
+    """Katmanlar: {tür: {renk: bölge}}. Kabarık zemini yalnız sonraki zeminler örter (yazı onun üstüne oturur);
+    kabartma ve QR'ı sonraki her öğe örter."""
+    out = {k: {} for k in ("plaque", "relief", "qr_tile", "qr_dark")}
+    taken_all, taken_pl = A.empty(), A.empty()
+    for cs, col, kind in reversed(items):
+        k = kind_of(cs, kind)
+        cs = cs ^ clip
+        part = cs - (taken_pl if k == "plaque" else taken_all)
+        if k == "plaque":
+            taken_pl = taken_pl + part
+        taken_all = taken_all + part
+        c = col or body
+        out[k][c] = out[k].get(c, A.empty()) + part
+    return {k: {c: cs for c, cs in v.items() if cs.area() > 0.01} for k, v in out.items()}
+
+
 def chamfered(out, t, depth=0.4):
-    """Panelin iki yüz kenarını iki basamakla yumuşatır."""
+    """Plakanın iki yüz kenarını iki basamakla yumuşatır."""
     cuts = []
     for k in range(2):
         ring_ = out - out.offset(-depth * (2 - k) / 2, J)
@@ -309,6 +340,8 @@ def chamfered(out, t, depth=0.4):
 
 
 class Panel:
+    """Bir plaka: yüzü yukarı basılır, içeriği `front`. İki yüzlü masalıkta `back` ikinci plakaya geçer."""
+
     def __init__(self, outline, body, nfc=None, vis_y=D):
         self.outline, self.body, self.nfc = outline, body, nfc        # nfc: ön yüz koordinatında etiket merkezi
         self.vis_y = vis_y                                            # bunun altı ayağın içinde
@@ -320,37 +353,41 @@ class Panel:
 
     def faces(self):
         if not hasattr(self, "_faces"):
-            self._faces = (regions(self.front.items, self.body, self.outline.offset(-EDGE, J)),
-                           regions(self.back.items, self.body, self.outline_back.offset(-EDGE, J)))
+            self._faces = (regions(self.front.items, self.body, self.outline.offset(-EDGE, J)), {})
         return self._faces
 
     def solids(self):
-        """Baskı yönünde: arka yüz z = 0 (tablada), ön yüz z = T. [(ad, Manifold, renk)]"""
-        front, back = self.faces()
-        parts, pockets = [], []
-        for col, cs in front.items():
-            parts.append((f"Ön yüz ({COL_NAME[col]})", cs.extrude(INL).translate((0, 0, T - INL)), col))
-            pockets.append(cs.extrude(INL + 0.01).translate((0, 0, T - INL)))
-        for col, cs in back.items():
-            cs = cs.mirror((1, 0))
-            parts.append((f"Arka yüz ({COL_NAME[col]})", cs.extrude(INL), col))
-            pockets.append(cs.extrude(INL + 0.01).translate((0, 0, -0.01)))
-        if self.nfc:
-            pockets.append(C(NFC_R, *self.nfc).extrude(NFC_H).translate((0, 0, NFC_Z)))
+        """Baskı yönünde: plakanın arkası z = 0 (tablada), yüzü z = T, kabartmalar üstünde. [(ad, Manifold, renk)]"""
+        L = layers(self.front.items, self.body, self.outline.offset(-EDGE, J))
         body = chamfered(self.outline, T)
-        if pockets:
-            body = body - m3.Manifold.batch_boolean(pockets, m3.OpType.Add)
-        by_col = {}
-        clip = self.outline.offset(-EDGE, J)
-        for cs, col in self.front.raised:
-            by_col[col or self.body] = by_col.get(col or self.body, A.empty()) + (cs ^ clip)
-        for col, cs in by_col.items():
-            parts.append((f"Kabartma ({COL_NAME[col]})", cs.extrude(RELIEF).translate((0, 0, T)), col))
-        return [(f"Panel ({COL_NAME[self.body]})", body, self.body)] + parts
+        if self.nfc:
+            body = body - C(NFC_R, *self.nfc).extrude(NFC_H + 0.01).translate((0, 0, -0.01))
+        parts = [(f"Plaka ({COL_NAME[self.body]})", body, self.body)]
+        pl = A.union(*L["plaque"].values())
+        for col, cs in L["plaque"].items():
+            parts.append((f"Kabarık zemin ({COL_NAME[col]})", cs.extrude(PLAQUE).translate((0, 0, T)), col))
+
+        def split(cs):
+            return [(r, z) for r, z in ((cs - pl, T), (cs ^ pl, T + PLAQUE)) if r.area() > 0.01]
+
+        for col, cs in L["relief"].items():
+            for r, z in split(cs):
+                parts.append((f"Kabartma ({COL_NAME[col]})", r.extrude(RELIEF).translate((0, 0, z)), col))
+        if L["qr_tile"] or L["qr_dark"]:
+            light = next(iter(L["qr_tile"]), self.body)
+            for col, cs in L["qr_tile"].items():
+                for r, z in split(cs):
+                    parts.append((f"QR karosu ({COL_NAME[col]})", r.extrude(QR_H).translate((0, 0, z)), col))
+            for col, cs in L["qr_dark"].items():
+                for r, z in split(cs):
+                    parts.append((f"QR karosu ({COL_NAME[light]})", r.extrude(QR_H - QR_INL).translate((0, 0, z)),
+                                  light))
+                    parts.append((f"QR kareleri ({COL_NAME[col]})",
+                                  r.extrude(QR_INL).translate((0, 0, z + QR_H - QR_INL)), col))
+        return parts
 
     def colours(self):
-        front, back = self.faces()
-        return {self.body} | set(front) | set(back) | {c or self.body for _, c in self.front.raised}
+        return {c for _, _, c in self.solids()}
 
 
 def upright(z0, x0=0.0, y0=0.0, turn=False, tilt=0.0):
@@ -388,6 +425,14 @@ class Design:
         return cs | {c for _, _, c in self.stand}
 
 
+def double(d, p, z0, x0=0.0, y=0.0):
+    """Ön plaka (p.front) ve arka plaka (p.back) sırt sırta; ortaları y'de. Arka plaka arkadan bakana göre çizilir."""
+    back = Panel(p.outline_back, p.body, vis_y=p.vis_y)
+    back.front = p.back
+    d.put(p, upright(z0, x0, y - T / 2))
+    d.put(back, upright(z0, x0, y + T / 2, turn=True))
+
+
 KIND = {"2qr": "İKİ QR · menü + yorum", "1qr": "TEK QR · sayfa", "nfc": "NFC + QR", "wifi": "QR + Wi-Fi"}
 
 
@@ -397,8 +442,8 @@ def box(x0, y0, z0, x1, y1, z1):
     return R(x0, y0, x1, y1).extrude(z1 - z0).translate((0, 0, z0))
 
 
-def slot(tw, hb, x=0.0, y=0.0, depth=D):
-    return box(x - tw / 2 - CLR, y - (T + CLR) / 2, hb - depth, x + tw / 2 + CLR, y + (T + CLR) / 2, hb + 1)
+def slot(tw, hb, x=0.0, y=0.0, depth=D, thick=2 * T):
+    return box(x - tw / 2 - CLR, y - (thick + CLR) / 2, hb - depth, x + tw / 2 + CLR, y + (thick + CLR) / 2, hb + 1)
 
 
 def solid(cs, h, z0=0.0):
@@ -444,7 +489,7 @@ def foot_wave(w, d, h, amp, waves, tw, col, top=None):
 def saucer(r, slot_w, col, rim_col=None, rim_w=6.0):
     plate = solid(C(r), 3) + solid(ring(r, rim_w), 3.2, 3)
     hb = 3.8 + D
-    f = plate + solid(C(r * 0.38), hb - 3, 3) - slot(slot_w, hb)
+    f = plate + solid(C(max(r * 0.38, slot_w / 2 + 5)), hb - 3, 3) - slot(slot_w, hb)
     if rim_col:
         top = f ^ solid(ring(r - 1.0, rim_w - 2.0), INL, 6.2 - INL)
         return [(f"Tabak ({COL_NAME[col]})", f - top, col), (f"Tabak kenarı ({COL_NAME[rim_col]})", top, rim_col)], hb
@@ -455,13 +500,13 @@ def cross_foot(length, height, col, profile=None):
     """Panele dik takılan ayak (panelde alttan, ayakta üstten yarım yuva). Döner: (ayak, panel kesiği)."""
     prof = profile or P([(-length / 2, 0), (length / 2, 0), (length / 2 - 4, height), (-length / 2 + 4, height)])
     prof = soft(prof, 2)
-    f = along_y(prof, T) - box(-T, -(T + CLR) / 2, height / 2, T, (T + CLR) / 2, height + 1)
-    cut = R(-(T + CLR) / 2, -1, (T + CLR) / 2, height / 2 + 0.2)
+    f = along_y(prof, FT) - box(-FT, -(2 * T + CLR) / 2, height / 2, FT, (2 * T + CLR) / 2, height + 1)
+    cut = R(-(FT + CLR) / 2, -1, (FT + CLR) / 2, height / 2 + 0.2)
     return [(f"Ayak ({COL_NAME[col]})", f, col)], cut
 
 
 def standard(d, p, foot_parts, hb, desc):
-    d.put(p, upright(hb - D))
+    double(d, p, hb - D)
     d.stand += foot_parts
     d.stand_desc = desc
     return d
@@ -730,7 +775,7 @@ def t09_limon():
     cy = D + 61.0
     disc = C(60, 0, cy)
     lf = leaf(3, cy + 56, 36, 17, 58)
-    p = Panel(tab(U(disc, lf), 40, cy - 50), "sari")
+    p = Panel(tab(U(disc, lf), 40, D + 3), "sari")
     for side, sg in both(p):
         mir = mirror_fn(sg)
         side.add(ring(55.5, 2.6, 0, cy), "fildisi")
@@ -910,7 +955,7 @@ def t14_kasap():
     b.add(label("DEĞERLENDİRİN", 0, 27.0, 3.8, tr=0.8), "siyah")
     b.add(label("MASA", 0, 130.0, 3.2, tr=0.6), "siyah")
     b.add(tx("bodoni", "07", 7.0, 0, 121.0), "siyah")
-    d.put(p, upright(0.0))
+    double(d, p, 0.0)
     d.stand += foot
     d.stand_desc = "takılır çapraz ahşap ayak"
     return d
@@ -1228,7 +1273,7 @@ def t26_liman():
                masa=3)
     cy = D + 64.0
     disc = C(64, 0, cy)
-    p = Panel(tab(disc, 50, cy - 60), "fildisi")
+    p = Panel(tab(disc, 50, D + 2), "fildisi")
     for side, sg in both(p):
         for a0, a1 in ((55, 125), (235, 305), (-20, 20), (160, 200)):
             side.add(sector(37.5, 63.5, a0, a1, 0, cy), "kirmizi")
@@ -1317,7 +1362,7 @@ def t29_pecetelik():
     hb = 12.0
     d.put(p1, upright(hb - D, y0=-gap))
     d.put(p2, upright(hb - D, y0=gap, turn=True))
-    base = solid(RR(124, 58, 8), hb) - slot(112, hb, y=-gap) - slot(112, hb, y=gap)
+    base = solid(RR(124, 58, 8), hb) - slot(112, hb, y=-gap, thick=T) - slot(112, hb, y=gap, thick=T)
     d.stand.append(("Ayak (kırmızı)", base, "kirmizi"))
     d.props = [("Peçete", box(-50, -gap + 3, hb, 50, gap - 3, hb + 74), "beyaz")]
     d.stand_desc = "kırmızı peçetelik ayağı 124 × 58 mm, iki yuva"
@@ -1344,7 +1389,7 @@ def t30_kofte():
         org = org - m3.Manifold.cylinder(19, 16.5, 16.5, 96).translate((-74, y, hb - 18))
     org = org - m3.Manifold.cylinder(19, 11, 11, 64).translate((72, 14, hb - 18))
     org = org - solid(RR(40, 20, 4, 72, -14), 13, hb - 12)
-    d.put(p, upright(hb - D))
+    double(d, p, hb - D)
     d.stand.append(("Düzenleyici (siyah)", org, "siyah"))
 
     def shaker(x, y, col):
@@ -1483,30 +1528,22 @@ def raster_face(outline, regs, body, ppm=10.0, pad=6.0, bg=(150, 152, 158)):
 
 
 def face_checks(p):
-    """Her yüz: ([(düz okundu, benzetimde okundu, sürüm, kare)], ince dolgu alanı mm², görüntü)."""
-    front, back = p.faces()
-    out = []
-    for side, regs, outline in ((p.front, front, p.outline), (p.back, back, p.outline_back)):
-        regs = dict(regs)
-        if side is p.front:
-            for cs, col in p.front.raised:
-                c = col or p.body
-                regs[c] = regs.get(c, A.empty()) + (cs ^ outline.offset(-EDGE, J))
-        vis = outline ^ R(-999, p.vis_y, 999, 999)
-        im = raster_face(vis, {c: cs ^ vis for c, cs in regs.items()}, p.body, ppm=12.0)
-        g = im.convert("L")
-        got = Q.decode(g)
-        ok = []
-        for e, module, _ in side.qrs:
-            sim = Q.simulate(g, 12.0, module, **dict(Q.SIM_CASES)["hepsi birden"])
-            ok.append((e.content in got, e.content in Q.decode(sim), e.qr.version, module))
-        thin = 0.0
-        layers = list(regs.values()) + [outline - A.union(*regs.values())] if regs else []
-        for cs in layers:
-            th = cs - cs.offset(-MIN_FEAT / 2, J).offset(MIN_FEAT / 2, J)
-            thin += sum(q.area() for q in th.decompose() if q.area() > 0.4)
-        out.append((ok, thin, im))
-    return out
+    """Plakanın yüzü: [([(düz okundu, benzetimde okundu, sürüm, kare)], ince alan mm², üstten görüntü)]."""
+    regs, outline = p.faces()[0], p.outline
+    vis = outline ^ R(-999, p.vis_y, 999, 999)
+    im = raster_face(vis, {c: cs ^ vis for c, cs in regs.items()}, p.body, ppm=12.0)
+    g = im.convert("L")
+    got = Q.decode(g)
+    ok = []
+    for e, module, _ in p.front.qrs:
+        sim = Q.simulate(g, 12.0, module, **dict(Q.SIM_CASES)["hepsi birden"])
+        ok.append((e.content in got, e.content in Q.decode(sim), e.qr.version, module))
+    thin = 0.0
+    parts = list(regs.values()) + [outline - A.union(*regs.values())] if regs else []
+    for cs in parts:
+        th = cs - cs.offset(-MIN_FEAT / 2, J).offset(MIN_FEAT / 2, J)
+        thin += sum(q.area() for q in th.decompose() if q.area() > 0.4)
+    return [(ok, thin, im)]
 
 
 def size_mm(d):
@@ -1525,6 +1562,10 @@ VIEWS = {"on": rotation(-26, -79), "arka": rotation(154, -79)}
 
 
 def views(d, size=1000):
+    """Blender fotoğrafları (restoran_masalik_foto.py) varsa onlar, yoksa hızlı çizim."""
+    f = os.path.join(OUT_DIR, "foto", d.key + "_{}.png")
+    if all(os.path.exists(f.format(v)) for v in VIEWS):
+        return {v: Image.open(f.format(v)).convert("RGB") for v in VIEWS}
     parts = mesh(d.scene())
     return {k: render_pro(parts, size, R_) for k, R_ in VIEWS.items()}
 
@@ -1561,7 +1602,7 @@ def work(i):
     qr_ok = all(a and b for a, b, _, _ in rows)
     thin = max(t for pc in checks for _, t, _ in pc)
     w, dep, h = size_mm(d)
-    faces = [checks[0][0][2], checks[0][1][2]] if len(d.panels) == 1 else [checks[0][0][2], checks[1][0][2]]
+    faces = [pc[0][2] for pc in checks][:2]
     imgs = views(d)
     cols = sorted(d.colours(), key=list(COL).index)
     info = (f"{w / 10:.1f} × {h / 10:.1f} cm (en × boy, ayakla) · {KIND[d.kind]} · {len(rows)} QR "
@@ -1615,8 +1656,8 @@ def rounded(im, r):
     return mask
 
 
-def header(im, dr, p, n):
-    dr.text((80, 64), "Masalık Koleksiyonu", font=font_ui(30, "serif_i"), fill=INK)
+def header(im, dr, p, n, title="Masalık Koleksiyonu"):
+    dr.text((80, 64), title, font=font_ui(30, "serif_i"), fill=INK)
     s = f"{p} / {n}"
     dr.text((PAGE[0] - 80 - dr.textlength(s, font=font_ui(26)), 70), s, font=font_ui(26), fill=MUTED)
     dr.rectangle((80, 118, PAGE[0] - 80, 120), fill=(214, 206, 192))
@@ -1628,30 +1669,79 @@ def footer(dr, text="Beğendiğiniz tasarımın numarasını yazmanız yeterli; 
     dr.text((PAGE[0] / 2 - dr.textlength(text, font=f) / 2, PAGE[1] - 104), text, font=f, fill=MUTED)
 
 
-def phone_mock(w, h):
-    """Tek bağlantının açtığı sayfa: telefon ekranı taslağı."""
+def shadowed(canvas, im, xy, mask=None, blur=22, off=(0, 18), alpha=0.32):
+    """Görseli yumuşak gölgeyle yapıştırır."""
+    a = (mask if mask is not None else im.split()[-1]).point(lambda v: int(v * alpha))
+    pad = blur * 3
+    sh = Image.new("L", (im.width + 2 * pad, im.height + 2 * pad), 0)
+    sh.paste(a, (pad, pad))
+    sh = sh.filter(ImageFilter.GaussianBlur(blur))
+    dark = Image.new("RGB", sh.size, (40, 30, 22))
+    canvas.paste(dark, (xy[0] - pad + off[0], xy[1] - pad + off[1]), sh)
+    canvas.paste(im, xy, mask if mask is not None else im)
+
+
+def photo_box(im, w, h, focus=0.52):
+    """Fotoğrafı w × h kutuyu dolduracak biçimde kırpar (nesne ortada)."""
+    k = max(w / im.width, h / im.height)
+    r = im.resize((int(im.width * k + 0.5), int(im.height * k + 0.5)), Image.LANCZOS)
+    x = (r.width - w) // 2
+    y = int((r.height - h) * focus)
+    return r.crop((x, y, x + w, y + h))
+
+
+def phone(screen, w=360):
+    """Ekran görüntüsünü telefon çerçevesine koyar (RGBA)."""
+    bez = max(8, int(w * 0.034))
+    screen = screen.convert("RGB")
+    bar = int(screen.width * 0.13)                                   # durum çubuğu (saat, pil)
+    top = screen.getpixel((screen.width // 2, 4))
+    tall = Image.new("RGB", (screen.width, screen.height + bar), top)
+    tall.paste(screen, (0, bar))
+    tdr = ImageDraw.Draw(tall)
+    ink = (20, 20, 22) if sum(top) > 380 else (245, 245, 245)
+    fb = font_ui(int(bar * 0.36), "bold")
+    tdr.text((screen.width * 0.12, bar * 0.36), "9:41", font=fb, fill=ink)
+    bx, by, bw, bh = screen.width * 0.80, bar * 0.42, screen.width * 0.075, bar * 0.24
+    tdr.rounded_rectangle((bx, by, bx + bw, by + bh), bh * 0.3, outline=ink, width=3)
+    tdr.rounded_rectangle((bx + 4, by + 4, bx + bw * 0.7, by + bh - 4), bh * 0.2, fill=ink)
+    for k in range(4):
+        hh = bh * (0.35 + 0.22 * k)
+        tdr.rectangle((bx - 70 + k * 13, by + bh - hh, bx - 62 + k * 13, by + bh), fill=ink)
+    screen = tall
+    inner_w = w - 2 * bez
+    inner_h = int(inner_w * screen.height / screen.width)
+    h = inner_h + 2 * bez
+    r = int(w * 0.15)
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     dr = ImageDraw.Draw(im)
-    dr.rounded_rectangle((0, 0, w - 1, h - 1), 54, fill=(30, 30, 32))
-    dr.rounded_rectangle((14, 14, w - 15, h - 15), 44, fill=(250, 248, 244))
-    dr.rounded_rectangle((w / 2 - 60, 26, w / 2 + 60, 46), 10, fill=(30, 30, 32))
-    dr.rounded_rectangle((14, 14, w - 15, 250), 44, fill=(112, 30, 40))
-    dr.rectangle((14, 200, w - 15, 250), fill=(112, 30, 40))
-    f1 = ImageFont.truetype(os.path.join(A.FONT_DIR, FONT_FILES["cinzel"]), 40)
-    dr.text((w / 2 - dr.textlength("KALEİÇİ", font=f1) / 2, 96), "KALEİÇİ", font=f1, fill=(204, 168, 96))
-    f2 = font_ui(22)
-    dr.text((w / 2 - dr.textlength("Sofrası · Masa 07", font=f2) / 2, 156), "Sofrası · Masa 07", font=f2,
-            fill=(238, 232, 216))
-    y = 290
-    for lab, col in (("Menü", (112, 30, 40)), ("Google'da yorum yap", (40, 40, 42)),
-                     ("Wi-Fi şifresi", (40, 40, 42)), ("Instagram", (40, 40, 42)), ("Rezervasyon · Ara", (40, 40, 42))):
-        fill = col if lab == "Menü" else (255, 255, 255)
-        dr.rounded_rectangle((44, y, w - 45, y + 74), 22, fill=fill, outline=(222, 216, 204), width=2)
-        ff = font_ui(27, "bold")
-        dr.text((w / 2 - dr.textlength(lab, font=ff) / 2, y + 20), lab, font=ff,
-                fill=(255, 255, 255) if lab == "Menü" else (40, 40, 42))
-        y += 92
+    dr.rounded_rectangle((0, 0, w - 1, h - 1), r, fill=(22, 22, 24, 255), outline=(70, 70, 76, 255), width=2)
+    scr = screen.convert("RGB").resize((inner_w, inner_h), Image.LANCZOS)
+    m = Image.new("L", scr.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle((0, 0, inner_w - 1, inner_h - 1), r - bez, fill=255)
+    im.paste(scr, (bez, bez), m)
+    iw, ih = int(w * 0.28), int(w * 0.075)
+    dr.rounded_rectangle((w / 2 - iw / 2, bez + int(w * 0.03), w / 2 + iw / 2, bez + int(w * 0.03) + ih), ih // 2,
+                         fill=(12, 12, 14, 255))
     return im
+
+
+def site_shots():
+    """menu_siteleri.py'nin ekran görüntüleri (varsa)."""
+    import menu_siteleri as MS
+    out = []
+    for s in MS.SITES:
+        d = os.path.join(MS.OUT, s["slug"])
+        a, b = os.path.join(d, "ekran_ana.png"), os.path.join(d, "ekran_menu.png")
+        if os.path.exists(a) and os.path.exists(b):
+            out.append((s, Image.open(a), Image.open(b)))
+    return out
+
+
+SITE_FONT = {"kaleici": "Cinzel-Black.ttf", "lagun": "Fraunces-SemiBoldItalic.ttf", "forno": "PlayfairDisplay-Black.ttf",
+             "garaj": "Anton-Regular.ttf", "kopuk": "Fraunces-BlackItalic.ttf", "koi": "Syne-ExtraBold.ttf",
+             "asma": "PlayfairDisplay-Black.ttf", "kasap": "BodoniModa-ExtraBold.ttf", "palmiye": "Norican-Regular.ttf",
+             "r360": "Unbounded-ExtraBold.ttf"}
 
 
 def icon_box(kind, s=110):
@@ -1672,37 +1762,31 @@ def icon_box(kind, s=110):
             dr.text((s * 0.66, s * 0.6), "2", font=font_ui(int(s * 0.3), "bold"), fill=c)
     else:
         dr.rounded_rectangle((s * 0.3, s * 0.24, s * 0.52, s * 0.76), 6, outline=c, width=5)
-        for k, r in enumerate((0.14, 0.22, 0.30)):
+        for r in (0.14, 0.22, 0.30):
             bb = (s * 0.5 - s * r, s * 0.5 - s * r, s * 0.5 + s * r, s * 0.5 + s * r)
             dr.arc((bb[0] + s * 0.14, bb[1], bb[2] + s * 0.14, bb[3]), -40, 40, fill=c, width=5)
     return im
 
 
-def cover(rows, n_pages):
+def cover(rows, n_pages, shots):
     im = Image.new("RGB", PAGE, PAPER)
     dr = ImageDraw.Draw(im)
-    dr.text((80, 120), "Masalık", font=font_ui(170, "serif_k"), fill=INK)
-    dr.text((86, 318), "Koleksiyonu", font=font_ui(96, "serif_i"), fill=GOLD)
-    sub = "QR menü · Google yorumu · NFC   —   30 tasarım, iki yüzlü"
-    dr.text((90, 452), sub, font=font_ui(34), fill=MUTED)
-    hero = [1, 7, 27, 22, 13]
-    byi = {r["i"]: r for r in rows}
-    imgs = [A.fit_into(byi[k]["on"], 420, 720) for k in hero if k in byi]
+    dr.text((80, 110), "Masalık", font=font_ui(170, "serif_k"), fill=INK)
+    dr.text((86, 308), "Koleksiyonu", font=font_ui(96, "serif_i"), fill=GOLD)
+    dr.text((90, 440), "QR menü · Google yorumu · NFC   —   30 tasarım, iki yüzlü, kabartmalı", font=font_ui(34),
+            fill=MUTED)
+    kapak = os.path.join(OUT_DIR, "foto", "kapak.png")
     W_ = PAGE[0] - 160
-    total = sum(x.width for x in imgs) - 60 * (len(imgs) - 1)
-    k_ = min(1.0, (W_ - 40) / total)
-    imgs = [x.resize((int(x.width * k_), int(x.height * k_)), Image.LANCZOS) for x in imgs]
-    total = sum(x.width for x in imgs) - 60 * (len(imgs) - 1)
-    band = studio(W_, max(x.height for x in imgs) + 110)
-    x = (band.width - total) // 2
-    for x_im in imgs:
-        band.paste(x_im, (x, band.height - 40 - x_im.height), x_im)
-        x += x_im.width - 60
-    im.paste(band, (80, 540), rounded(band, 36))
-    y = 540 + band.height + 70
+    if os.path.exists(kapak):
+        ph = photo_box(Image.open(kapak).convert("RGB"), W_, 720, 0.6)
+    else:
+        ph = studio(W_, 720)
+    m = rounded(ph, 36)
+    shadowed(im, ph, (80, 520), m, blur=26, off=(0, 20), alpha=0.25)
+    y = 520 + 720 + 80
     cols = [("2qr", "İki QR", "Ön yüzde menü, arka yüzde Google yorumu. Masanın iki tarafından da okunur."),
             ("1qr", "Tek QR", "Tek bağlantı, sizin sayfanız: menü, yorum, Wi-Fi, Instagram, rezervasyon."),
-            ("nfc", "NFC + QR", "Telefonu dokundurmak yeter. Etiket panelin içinde, iki yüzden de okunur.")]
+            ("nfc", "NFC + QR", "Telefonu dokundurmak yeter. Etiket iki plakanın arasında, iki yüzden okunur.")]
     cw = 330
     for k, (kind, title, desc) in enumerate(cols):
         x = 80 + k * (cw + 30)
@@ -1713,22 +1797,23 @@ def cover(rows, n_pages):
         for line in wrap(dr, desc, font_ui(25), cw - 10):
             dr.text((x, ty), line, font=font_ui(25), fill=MUTED)
             ty += 36
-    ph = phone_mock(400, 820)
-    im.paste(ph, (PAGE[0] - 80 - 400, y - 10), ph)
-    y += 360
+    if shots:
+        ph_im = phone(shots[0][1], 330)
+        shadowed(im, ph_im, (PAGE[0] - 80 - 330, y - 40), blur=24, off=(0, 22), alpha=0.35)
+    y += 400
     dr.text((80, y), "Neden bu masalıklar?", font=font_ui(40, "serif_k"), fill=INK)
-    y += 70
-    for line in ("Renkler baskının içinde: sticker değil, silinmez, solmaz, yıkanır.",
-                 "İki yüzlü: masanın her iki tarafına da hitap eder.",
+    y += 66
+    for line in ("Kabartmalı: yazılar, çerçeveler ve QR karosu yüzeyden yükselir; ışıkta derinlik kazanır.",
+                 "İki yüzlü: iki plaka sırt sırta, masanın her iki tarafına da hitap eder.",
+                 "Renkler baskının içinde: sticker değil; silinmez, solmaz, yıkanır.",
                  "QR adresi bizim sistemimizde: menü ya da bağlantı değişse de masalık değişmez.",
-                 "Masa numarası her masalığa ayrı basılır; ayak dahil.",
-                 "İsim, logo, renkler ve biçim işletmenize göre uyarlanır."):
+                 "Masa numarası her masalığa ayrı basılır; işletmeye özel menü sitesi dahil."):
         dr.ellipse((84, y + 12, 98, y + 26), fill=GOLD)
         ty = y
-        for k, ln in enumerate(wrap(dr, line, font_ui(26), 1000)):
+        for ln in wrap(dr, line, font_ui(26), 1030):
             dr.text((118, ty), ln, font=font_ui(26), fill=INK)
             ty += 36
-        y = ty + 14
+        y = ty + 12
     footer(dr)
     return im
 
@@ -1738,55 +1823,57 @@ def design_page(group, p, n):
     dr = ImageDraw.Draw(im)
     header(im, dr, p, n)
     top, ch, gap = 160, 660, 36
+    pw, ph = 490, 600
     for k, r in enumerate(group):
         y0 = top + k * (ch + gap)
         x0, x1 = 80, PAGE[0] - 80
-        band = studio(1000, ch)
-        bd = ImageDraw.Draw(band)
         for j, (img, lab) in enumerate(((r["on"], "ÖN"), (r["arka"], "ARKA"))):
-            fit = A.fit_into(img, 470, ch - 80)
-            cx = 250 + j * 500
-            band.paste(fit, (int(cx - fit.width / 2), ch - 40 - fit.height), fit)
-            bd.text((cx - bd.textlength(lab, font=font_ui(22, "bold")) / 2, 20), lab, font=font_ui(22, "bold"),
-                    fill=(150, 142, 130))
-        im.paste(band, (x0, y0), rounded(band, 30))
-        tx0 = x0 + 1040
-        dr.text((tx0, y0 + 6), f"{r['i']:02d}", font=font_ui(64, "serif_k"), fill=GOLD)
-        try:
-            nf = ImageFont.truetype(os.path.join(A.FONT_DIR, FONT_FILES[r["font"]]), 60)
-        except OSError:
-            nf = font_ui(60, "serif_k")
+            px, py = x0 + j * (pw + 18), y0 + 20
+            if img.mode == "RGBA":
+                box_ = studio(pw, ph)
+                fit = A.fit_into(img, pw - 30, ph - 40)
+                box_.paste(fit, ((pw - fit.width) // 2, ph - 20 - fit.height), fit)
+            else:
+                box_ = photo_box(img, pw, ph)
+            m = rounded(box_, 26)
+            shadowed(im, box_, (px, py), m, blur=16, off=(0, 12), alpha=0.22)
+            f = font_ui(20, "bold")
+            tw = dr.textlength(lab, font=f)
+            dr.rounded_rectangle((px + 18, py + 18, px + 18 + tw + 28, py + 52), 17, fill=(250, 248, 244))
+            dr.text((px + 32, py + 22), lab, font=f, fill=(90, 82, 72))
+        tx0 = x0 + 2 * pw + 18 + 46
+        dr.text((tx0, y0 + 12), f"{r['i']:02d}", font=font_ui(64, "serif_k"), fill=GOLD)
         name = tr_upper(r["name"]) if r["font"] == "cinzel" else r["name"]
-        size = 60
-        while dr.textlength(name, font=nf) > x1 - tx0 and size > 30:
+        size = 58
+        nf = ImageFont.truetype(os.path.join(A.FONT_DIR, FONT_FILES[r["font"]]), size)
+        while dr.textlength(name, font=nf) > x1 - tx0 and size > 28:
             size -= 2
             nf = ImageFont.truetype(os.path.join(A.FONT_DIR, FONT_FILES[r["font"]]), size)
-        dr.text((tx0, y0 + 96), name, font=nf, fill=INK)
-        dr.text((tx0, y0 + 176), r["sub"], font=font_ui(28), fill=MUTED)
+        dr.text((tx0, y0 + 100), name, font=nf, fill=INK)
+        dr.text((tx0, y0 + 178), r["sub"], font=font_ui(27), fill=MUTED)
         chip = KIND[r["kind"]].split(" · ")[0]
-        f = font_ui(22, "bold")
-        cw_ = dr.textlength(chip, font=f) + 36
-        dr.rounded_rectangle((tx0, y0 + 228, tx0 + cw_, y0 + 266), 19, fill=CHIP[r["kind"]])
-        dr.text((tx0 + 18, y0 + 234), chip, font=f, fill=(247, 244, 238))
-        ty = y0 + 290
-        desc = r["desc"]
-        for line in wrap(dr, desc, font_ui(24), x1 - tx0)[:4]:
-            dr.text((tx0, ty), line, font=font_ui(24), fill=INK)
-            ty += 34
-        ty += 12
+        f = font_ui(21, "bold")
+        cw_ = dr.textlength(chip, font=f) + 34
+        dr.rounded_rectangle((tx0, y0 + 228, tx0 + cw_, y0 + 264), 18, fill=CHIP[r["kind"]])
+        dr.text((tx0 + 17, y0 + 233), chip, font=f, fill=(247, 244, 238))
+        ty = y0 + 288
+        for line in wrap(dr, r["desc"], font_ui(23), x1 - tx0)[:5]:
+            dr.text((tx0, ty), line, font=font_ui(23), fill=INK)
+            ty += 32
+        ty += 10
         w, _, h = r["size"]
         specs = [f"Ölçü: {w / 10:.1f} × {h / 10:.1f} cm".replace(".", ","), r["stand"][0].upper() + r["stand"][1:]]
         if r["masa"]:
             specs.append(f"Masa numaralı (örnek: {r['masa']:02d})")
         for line in specs:
-            for ln in wrap(dr, line, font_ui(23), x1 - tx0):
-                dr.text((tx0, ty), ln, font=font_ui(23), fill=MUTED)
-                ty += 32
-        ty += 14
+            for ln in wrap(dr, line, font_ui(22), x1 - tx0):
+                dr.text((tx0, ty), ln, font=font_ui(22), fill=MUTED)
+                ty += 30
+        ty += 12
         x = tx0
         for c in r["cols"]:
-            dr.ellipse((x, ty, x + 30, ty + 30), fill=COL[c], outline=(200, 194, 184), width=2)
-            x += 40
+            dr.ellipse((x, ty, x + 28, ty + 28), fill=COL[c], outline=(200, 194, 184), width=2)
+            x += 38
     footer(dr)
     return im
 
@@ -1799,23 +1886,91 @@ def overview(rows, p, n):
     cols, cw, chh = 5, 282, 302
     for k, r in enumerate(rows):
         x0, y0 = 80 + (k % cols) * (cw + 15), 250 + (k // cols) * (chh + 14)
-        cell = studio(cw, chh)
-        fit = A.fit_into(r["on"], cw - 20, chh - 70)
-        cell.paste(fit, ((cw - fit.width) // 2, chh - 50 - fit.height), fit)
+        if r["on"].mode == "RGBA":
+            cell = studio(cw, chh)
+            fit = A.fit_into(r["on"], cw - 20, chh - 70)
+            cell.paste(fit, ((cw - fit.width) // 2, chh - 50 - fit.height), fit)
+        else:
+            cell = Image.new("RGB", (cw, chh), (250, 248, 244))
+            cell.paste(photo_box(r["on"], cw, chh - 46), (0, 0))
         cd = ImageDraw.Draw(cell)
-        cd.text((14, 10), f"{r['i']:02d}", font=font_ui(28, "serif_k"), fill=GOLD)
+        cd.text((14, 10), f"{r['i']:02d}", font=font_ui(28, "serif_k"), fill=(250, 248, 244))
         nm = r["name"]
         f = font_ui(21, "bold")
-        cd.text((cw / 2 - cd.textlength(nm, font=f) / 2, chh - 38), nm, font=f, fill=INK)
+        cd.text((cw / 2 - cd.textlength(nm, font=f) / 2, chh - 37), nm, font=f, fill=INK)
         im.paste(cell, (x0, y0), rounded(cell, 18))
     footer(dr)
     return im
 
 
+def sites_page(group, p, n, last=False):
+    im = Image.new("RGB", PAGE, PAPER)
+    dr = ImageDraw.Draw(im)
+    header(im, dr, p, n)
+    dr.text((80, 150), "Masalıktan açılan sayfa", font=font_ui(56, "serif_k"), fill=INK)
+    dr.text((82, 228), "Her işletmeye özel menü sitesi: masa numarası, menü, Google yorumu, Wi-Fi, sipariş, garson çağır.",
+            font=font_ui(25), fill=MUTED)
+    cw, chh = (PAGE[0] - 160 - 40) // 2, 960
+    for k, (s, home, menu) in enumerate(group):
+        x0, y0 = 80 + (k % 2) * (cw + 40), 300 + (k // 2) * (chh + 20)
+        back = phone(menu, 300)
+        front = phone(home, 330)
+        shadowed(im, back, (x0 + cw - 300 - 40, y0 + 10), blur=20, off=(0, 16), alpha=0.28)
+        shadowed(im, front, (x0 + 40, y0 + 70), blur=22, off=(0, 20), alpha=0.34)
+        cy = y0 + 70 + front.height + 26
+        try:
+            nf = ImageFont.truetype(os.path.join(A.FONT_DIR, SITE_FONT[s["slug"]]), 40)
+        except OSError:
+            nf = font_ui(40, "serif_k")
+        dr.text((x0 + 40, cy), tr_upper(s["name"]) if s["slug"] == "kaleici" else s["name"], font=nf, fill=INK)
+        dr.text((x0 + 40, cy + 54), f"Masalık {s['no']:02d} · {s['slug']}.{DOMAIN}", font=font_ui(21), fill=MUTED)
+    if last:
+        y0 = 300 + chh + 20
+        box_ = (80, y0, PAGE[0] - 80, y0 + 330)
+        dr.rounded_rectangle(box_, 30, fill=(255, 253, 249), outline=(226, 218, 204))
+        dr.text((120, y0 + 40), "Sayfada neler var?", font=font_ui(40, "serif_k"), fill=INK)
+        items = ["Masa numaralı karşılama, menü ve fiyatlar", "Google yorumlarına tek dokunuşla yönlendirme",
+                 "Wi-Fi'ye bağlanma, Instagram, rezervasyon, yol tarifi", "Masadan sipariş ve garson çağırma (isteğe bağlı)",
+                 "Türkçe, İngilizce, Rusça, Almanca (isteğe bağlı)", "Menü ve fiyat güncellemeleri bizden; masalık değişmez"]
+        ty = y0 + 110
+        for k, line in enumerate(items):
+            x = 120 + (k % 2) * 700
+            yy = ty + (k // 2) * 56
+            dr.ellipse((x, yy + 10, x + 14, yy + 24), fill=GOLD)
+            dr.text((x + 30, yy), line, font=font_ui(24), fill=INK)
+        y1 = y0 + 390
+        dr.text((80, y1), "Nasıl çalışır?", font=font_ui(40, "serif_k"), fill=INK)
+        steps = [("1", "Okut ya da dokun", "Müşteri masalıktaki QR'ı okutur ya da telefonunu NFC'ye dokundurur."),
+                 ("2", "Sayfa açılır", "Masa numarasıyla işletmenin sayfası açılır; uygulama gerekmez."),
+                 ("3", "Menü, yorum, sipariş", "Menüye bakar, Google'da yorum bırakır, garsonu çağırır.")]
+        sw = (PAGE[0] - 160 - 2 * 30) // 3
+        for k, (num, t, dsc) in enumerate(steps):
+            x = 80 + k * (sw + 30)
+            dr.rounded_rectangle((x, y1 + 70, x + sw, y1 + 330), 26, fill=(255, 253, 249), outline=(226, 218, 204))
+            dr.ellipse((x + 28, y1 + 98, x + 92, y1 + 162), fill=GOLD)
+            fnum = font_ui(36, "serif_k")
+            dr.text((x + 60 - dr.textlength(num, font=fnum) / 2, y1 + 104), num, font=fnum, fill=(255, 253, 249))
+            dr.text((x + 110, y1 + 108), t, font=font_ui(28, "bold"), fill=INK)
+            ty = y1 + 186
+            for ln in wrap(dr, dsc, font_ui(23), sw - 56):
+                dr.text((x + 28, ty), ln, font=font_ui(23), fill=MUTED)
+                ty += 32
+    footer(dr, "Örnek sitelerdeki işletmeler, ürünler ve fiyatlar örnektir; siteniz kendi menünüzle hazırlanır.")
+    return im
+
+
 def catalog(rows):
+    shots = site_shots()
     groups = [rows[k:k + 3] for k in range(0, len(rows), 3)]
-    n = 2 + len(groups)
-    pages = [cover(rows, n)] + [design_page(g, k + 2, n) for k, g in enumerate(groups)] + [overview(rows, n, n)]
+    sgroups = [shots[k:k + 4] for k in range(0, len(shots), 4)]
+    n = 1 + len(groups) + 1 + len(sgroups)
+    pages = [cover(rows, n, shots)] + [design_page(g, k + 2, n) for k, g in enumerate(groups)]
+    pages.append(overview(rows, len(pages) + 1, n))
+    for k, g in enumerate(sgroups):
+        pages.append(sites_page(g, len(pages) + 1, n, last=k == len(sgroups) - 1 and len(g) <= 2))
+    for f in os.listdir(OUT_DIR):
+        if f.startswith("musteri_") and f[8:10].isdigit():
+            os.remove(os.path.join(OUT_DIR, f))
     for k, pg in enumerate(pages, 1):
         pg.save(os.path.join(OUT_DIR, f"musteri_{k:02d}.png"), optimize=True)
         pg.save(os.path.join(OUT_DIR, f"musteri_{k:02d}.jpg"), "JPEG", quality=88, optimize=True)
