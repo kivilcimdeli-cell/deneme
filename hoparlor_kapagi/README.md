@@ -17,8 +17,8 @@ Müşteriye gönderilecek katalog: **`musteri_1.jpg`** (1–6), **`musteri_2.jpg
 
 **Agresif / modern seri:** 11 Pençe · 12 Şimşek · 13 Hücre (Voronoi) · 14 Şevron · 15 Bıçak · 16 Üçgen ·
 17 Spor jant · 18 Op-art · 19 Hız çizgileri · 20 Karbon örgü. Agresiflerde (11, 12, 14, 15, 17, 19) yazı eğik
-Saira Condensed Black Italic, Ø100 kapakta altıgen rozet / Ø70'te eğik şerit; modernlerde (13, 16, 18, 20) Sora ya da
-Michroma.
+Saira Condensed Black Italic; 11, 12, 15 ve 17'de Ø100 kapakta altıgen rozet, Ø70'te eğik şerit. Modernlerde
+(13, 16, 18, 20) Sora ya da Michroma.
 
 **Kontroller** (her desen, iki boy için):
 - Delik / yarık genişliği en az 2,2 mm: kenarda ya da rozette kesilip daralan uçlar atılır.
