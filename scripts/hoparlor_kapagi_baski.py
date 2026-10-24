@@ -1,18 +1,23 @@
 """Hoparlör kapağı – müşterinin seçtiği 5 numara (Türbin), Ø100 hoparlöre iki kapak: baskıya hazır Bambu Lab X2D 3MF.
 
 Müşteri isteği: Ø70 kapaklar iptal; Ø100 hoparlöre 2 kapak; kırmızı yalnız dış çeperde; ortada NECDET EFE ÇALIK ve
-CEMAL ÇALIK, yazı alanı biraz büyük.
-  * Kapak Ø102,5 mm (hoparlörden 2,5 mm büyük, kenarından yapıştırılır); ızgara 2 mm, dış çerçeve 3 mm geniş ve
-    3,4 mm yüksek, alt yüzü tablada düz.
-  * Ortadaki rozet Ø36 → Ø47 mm; yazı iki satır: üstte ad (NECDET EFE / CEMAL), altta büyük ÇALIK (Saira Condensed
-    Bold Italic, beyaz, 0,8 mm kabartma; harf içleri ≥ 0,85 mm).
-  * Kırmızı: yalnız dış çeper; 3 mm'lik çerçevenin üst yüzü kırmızı (son 3 katmana gömülü, kenardan 0,6 mm içeride).
+CEMAL ÇALIK, yazı alanı biraz büyük. Hoparlöre yapıştırılacak: dış çeper arkaya doğru çıkıntılı, ucunda ona dik
+yapıştırma flanşı.
+  * Kapak Ø102,5 mm; ön plaka (ızgara) 2 mm.
+  * Arka çıkıntı: dış çeper arkaya 8 mm uzar (duvar 2,4 mm); ucunda içe doğru 4,8 mm, 2 mm kalın flanş. Flanşın düz
+    yüzü hoparlörün metal çerçevesine yapıştırılır (duvarla birlikte ~7 mm geniş halka, Ø88–102,5 mm); ızgara
+    koniden 8 mm uzakta kalır.
+  * Baskı: yüzü tablaya gelecek biçimde ters basılır. Duvar yukarı büyür; flanşın altı 45° pahlı, destek gerekmez;
+    yapıştırma yüzü son katman (düz).
+  * Ön yüz düz: kırmızı dış çeper ve beyaz isimler ilk 4 katmana gömülü (0,8 mm, Textured PEI dokusunda, keskin).
+  * Ortadaki rozet Ø47 mm; yazı iki satır: üstte ad (NECDET EFE / CEMAL), altta büyük ÇALIK (Saira Condensed Bold
+    Italic; harf içleri ≥ 0,7 mm).
   * Türbin 28 kıvrık yarık (rozet büyüyünce yarıklar dikleşir; köprüler ≥ 1,2 mm kalsın diye öneriden seyrek).
     Delikler ≥ 2,2 mm, köprüler ≥ 1,2 mm; ızgara tek parça (kontrol edilir).
-  * Nozullar: siyah ana nozulda; kırmızı ve beyaz yardımcı nozulda. AMS 1 siyah, 2 beyaz, 3 kırmızı. Kırmızı
-    3,4 mm'nin altında, beyaz yazı üstünde: yardımcı nozulda tek filament değişimi (kırmızı → beyaz).
-  * İki kapak tek nesne, yan yana; ikisi de yardımcı nozulun ulaştığı alanda (x ≥ 20,5 mm). Yüzü yukarı, düz basılır,
-    destek gerekmez. Bambu standart 0,20 mm, ütüleme kapalı, Textured PEI.
+  * Nozullar: siyah ana nozulda; kırmızı ve beyaz yardımcı nozulda. AMS 1 siyah, 2 beyaz, 3 kırmızı. Renk değişimi
+    yalnız ilk 4 katmanda.
+  * İki kapak tek nesne, yan yana; ikisi de yardımcı nozulun ulaştığı alanda (x ≥ 20,5 mm). Bambu standart 0,20 mm,
+    ütüleme kapalı, Textured PEI.
 
 Çıktı : hoparlor_kapagi/baski/hoparlor_kapagi_x2d.3mf, onizleme.png
 
@@ -43,7 +48,10 @@ NAMES = [("NECDET EFE", "ÇALIK"), ("CEMAL", "ÇALIK")]
 D = 100.0                                          # hoparlör çapı
 RC = 23.5                                          # rozet yarıçapı (öneride 18)
 SLOTS, TWIST = 28, 0.9                             # türbin yarığı sayısı ve kıvrımı (rad)
-INL = 0.6                                          # kırmızı gömülü dolgu (3 katman)
+INL = 0.8                                          # ön yüzde gömülü renk (4 katman)
+PLATE = 2.0                                        # ön plaka (ızgara)
+LIP, WALL = 8.0, 2.4                               # arka çıkıntı (plakanın arkasından) ve duvar kalınlığı
+FLANGE, FLANGE_T = 4.8, 2.0                        # içe doğru yapıştırma flanşı: genişlik, kalınlık
 CENTER = (128.0, 100.0)                            # nesne merkezi (tabla)
 PITCH = 110.0                                      # iki kapağın merkezleri arası
 GAP = 8.0                                          # kapaklar ile kule arası
@@ -62,8 +70,19 @@ def turbine(R, rc):
     return A.union(*[A.stroke(spiral(2 * math.pi * k / SLOTS, r0, r1), 2.4) for k in range(SLOTS)])
 
 
+def lip_profile(Rc):
+    """Arka çıkıntı ve flanşın (r, z) kesiti; flanşın altı 45° pahlı (ters baskıda destek gerekmez)."""
+    r_wi = Rc - WALL
+    r_fi = r_wi - FLANGE
+    z_top = PLATE + LIP
+    z_f = z_top - FLANGE_T
+    z_c = z_f - (r_wi - r_fi)
+    return A.polygon([(r_wi, 0.0), (Rc, 0.0), (Rc, z_top), (r_fi, z_top), (r_fi, z_f), (r_wi, z_c)])
+
+
 def cover(line1, line2):
-    """Bir kapak, merkezi (0, 0), tabanı z = 0: {renk: Manifold} ve ölçümler."""
+    """Bir kapak baskı yönünde: ön yüz z = 0'da (tablada), arka çıkıntı yukarı. {renk: Manifold} ve ölçümler.
+    Ön görünüşte çizilen her şey x'te aynalanır (alttan bakınca düz okunsun)."""
     Rc = (D + HK.EXTRA) / 2
     Ri = Rc - HK.RIM
     badge = A.circle(RC, 0, 0, 200)
@@ -72,16 +91,16 @@ def cover(line1, line2):
     holes = (holes ^ keep).offset(-HK.MIN_HOLE / 2, J).offset(HK.MIN_HOLE / 2, J)
     holes = A.union(*[p for p in holes.decompose() if p.area() > 2.0])
     grille = A.circle(Rc, 0, 0, 240) - holes
-    rim = A.circle(Rc, 0, 0, 240) - A.circle(Ri, 0, 0, 240)
-    # kırmızı yalnız dış çeper: çerçevenin üst yüzü (z 2,8–3,4)
-    top_red = A.circle(Rc - 0.6, 0, 0, 240) - A.circle(Ri + 0.3, 0, 0, 240)
+    red2d = A.circle(Rc - 0.6, 0, 0, 240) - A.circle(Ri + 0.3, 0, 0, 240)        # dış çeper
     t1 = N.t("saira_bi", line1, 6.0, 0, 7.0, "c", 0.7, 35.5)
     t2 = N.t("saira_bi", line2, 9.6, 0, -7.0, "c", 0.7, 31.0)
     text = t1 + t2
-    red = top_red.extrude(INL).translate((0, 0, HK.H - INL))
-    body = grille.extrude(HK.T) + (rim + badge).extrude(HK.H)
-    body = body - top_red.extrude(INL + 0.01).translate((0, 0, HK.H - INL))
-    white = text.extrude(HK.RAISE).translate((0, 0, HK.H))
+    mir = lambda cs: cs.mirror((1, 0))  # noqa: E731
+    lip = m3.Manifold.revolve(lip_profile(Rc), 240)
+    body = mir(grille).extrude(PLATE) + lip
+    red = mir(red2d).extrude(INL)
+    white = mir(text).extrude(INL)
+    body = body - (mir(red2d) + mir(text)).extrude(INL + 0.01).translate((0, 0, -0.01))
     m = dict(D=2 * Rc, open=100 * holes.area() / (A.circle(Ri, 0, 0, 240) - badge).area(),
              thin=sum(p.area() for p in (grille - grille.offset(-HK.MIN_BAR / 2, J).offset(HK.MIN_BAR / 2, J))
                       .decompose() if p.area() > 0.3),
@@ -91,6 +110,11 @@ def cover(line1, line2):
     return {A.BLACK: body, A.RED: red, A.WHITE: white}, m
 
 
+def front_up(man, height):
+    """Baskı yönündeki parçayı ön yüzü yukarı bakacak biçimde çevirir (görseller için)."""
+    return man.rotate((0, 180, 0)).translate((0, 0, height))
+
+
 class Plate:
     key = "hoparlor_kapagi_x2d"
     title = "HOPARLOR_KAPAGI_5_Turbin_x2"
@@ -98,7 +122,7 @@ class Plate:
     def __init__(self):
         self.covers = [cover(a, b) for a, b in NAMES]
         self.offsets = [(-PITCH / 2, 0.0), (PITCH / 2, 0.0)]
-        self.height = HK.H + HK.RAISE
+        self.height = PLATE + LIP
         self.tower, self.brim = tower_size(n_fil=3, prime=45.0, change_len=10.0, height=self.height)
         r = (D + HK.EXTRA) / 2
         self.tower_xy = (CENTER[0] - self.tower / 2, CENTER[1] + r + GAP + self.brim)
@@ -135,6 +159,43 @@ def checks(plate, parts):
                 f"kule {plate.tower:.1f} mm ({tx:.1f}, {ty:.1f}), Bambu sınırında: {allowed}, nesneye {clear:.1f} mm")
 
 
+def section(w, h):
+    """Kesit çizimi: ön plaka, arka çıkıntı, flanş, 45° pah; hoparlör çerçevesi kesikli."""
+    Rc = (D + HK.EXTRA) / 2
+    im = Image.new("RGB", (w, h), (250, 250, 248))
+    dr = ImageDraw.Draw(im)
+    fs = ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), 20)
+    k = 30.0                                          # piksel / mm
+    ox, oy = 150, h - 60                              # r = 38 mm, z = 0 (ön yüz) noktası
+    r0 = 38.0
+
+    def P(r, z):                                     # ön yüz aşağıda (tabladaki gibi), arka yukarıda
+        return ox + (r - r0) * k, oy - z * k
+
+    prof = lip_profile(Rc).to_polygons()[0]
+    dr.polygon([P(r, z) for r, z in prof], fill=(52, 52, 56))
+    holes_r = [(Rc - HK.RIM - 0.9 - 4.2 * j, Rc - HK.RIM - 0.9 - 4.2 * j - 2.4) for j in range(3)]
+    dr.rectangle([P(r0, PLATE), P(Rc - WALL + 0.01, 0)], fill=(52, 52, 56))
+    for a_, b_ in holes_r:                            # ızgara yarıkları (temsili)
+        dr.rectangle([P(b_, PLATE), P(a_, 0)], fill=(250, 250, 248))
+    dr.rectangle([P(Rc - HK.RIM + 0.3, INL), P(Rc - 0.6, 0)], fill=(210, 30, 38))
+    z_top = PLATE + LIP
+    sp = [P(r, z_top + 0.6) for r in np.linspace(r0 + 6, Rc - 1.25, 2)]
+    for x in np.arange(sp[0][0], sp[1][0], 14):
+        dr.line([(x, sp[0][1]), (x + 8, sp[0][1])], fill=(40, 110, 200), width=3)
+    dr.text((sp[0][0], sp[0][1] - 32), "hoparlörün çerçevesi (Ø100) — buraya yapıştırılır", font=fs,
+            fill=(40, 110, 200))
+    dr.line([P(Rc - WALL - FLANGE, z_top + 0.25), P(Rc, z_top + 0.25)], fill=(230, 160, 40), width=4)
+    lab = [((Rc + 1.0, z_top - 1.0), f"yapıştırma yüzü ~{WALL + FLANGE:.1f} mm"),
+           ((Rc + 1.0, PLATE + LIP / 2), f"arka çıkıntı {LIP:.0f} mm"),
+           ((Rc - WALL - FLANGE - 6.2, PLATE + LIP - 4.0), "45° pah: destek yok"),
+           ((Rc + 1.0, 0.6), "ön yüz tablada · kırmızı ve yazı ilk 4 katmanda")]
+    for (r, z), t in lab:
+        dr.text(P(r, z), t, font=fs, fill=(40, 40, 46))
+    dr.text((14, 10), "Kesit (baskı yönünde, ölçekli)", font=fs, fill=(90, 90, 96))
+    return im
+
+
 def preview(plate, parts, path, info, title):
     bed = m3.Manifold.cube((256, 256, 0.2)).translate((0, 0, -0.4))
     tx, ty = plate.tower_xy
@@ -142,19 +203,25 @@ def preview(plate, parts, path, info, title):
     x, y, _ = plate.instances[0]
     on_bed = [(*A.mesh_arrays(bed), (205, 208, 214)), (*A.mesh_arrays(tower), (150, 156, 168))]
     on_bed += [(*A.mesh_arrays(m.translate((x, y, 0))), SHOW[c]) for _, m, c in parts]
-    bed_im = A.fit_into(render(on_bed, 1000, A.R_TOP, flat=0.75, margin=0.02), 440, 440)
-    shown = [(*A.mesh_arrays(m), SHOW[c]) for _, m, c in parts]
-    iso = A.fit_into(render(shown, 1400, rotation(-12, -38), margin=0.02, **HK.LIGHT), 960, 440)
-    W, H = 1500, 760
+    bed_im = A.fit_into(render(on_bed, 1000, A.R_TOP, flat=0.75, margin=0.02), 420, 400)
+    front = [(*A.mesh_arrays(front_up(m, plate.height)), SHOW[c]) for _, m, c in parts]
+    front_im = A.fit_into(render(front, 1300, rotation(-12, -40), margin=0.02, **HK.LIGHT), 560, 400)
+    one = [(n, m ^ m3.Manifold.cube((115, 120, 30)).translate((-115, -60, -1)), c) for n, m, c in parts]
+    back_im = A.fit_into(render([(*A.mesh_arrays(m), SHOW[c]) for _, m, c in one if not m.is_empty()], 1100,
+                                rotation(-20, -50), margin=0.03, **HK.LIGHT), 400, 400)
+    W, H = 1500, 1160
     canvas = Image.new("RGB", (W, H), (236, 239, 244))
     dr = ImageDraw.Draw(canvas)
     f = ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), 32)
     fs = ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), 18)
-    for im, label, (x0, y0, x1, y1) in ((bed_im, "Tabla (üstten, gri: prime kulesi)", (30, 230, 500, 740)),
-                                        (iso, "İki kapak (Ø102,5 mm)", (520, 230, 1470, 740))):
+    for im, label, (x0, y0, x1, y1) in ((bed_im, "Tabla (üstten; ters basılır, gri: kule)", (30, 210, 470, 660)),
+                                        (front_im, "Ön yüz (taktıktan sonra)", (490, 210, 1070, 660)),
+                                        (back_im, "Arka: çıkıntı ve flanş", (1090, 210, 1470, 660))):
         dr.rounded_rectangle((x0, y0, x1, y1), 22, fill=(146, 153, 166))
         canvas.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0 + 30 + (y1 - y0 - 30 - im.height) // 2), im)
         dr.text((x0 + 16, y0 + 10), label, fill=(236, 239, 244), font=fs)
+    sec = section(1440, 460)
+    canvas.paste(sec, (30, 680))
     dr.text((30, 18), title, fill=(24, 26, 30), font=f)
     for k, line in enumerate(info):
         dr.text((30, 66 + k * 28), line, fill=(22, 120, 60) if k == len(info) - 1 else (70, 74, 84), font=fs)
@@ -199,11 +266,11 @@ def main():
     else:
         print(f"  dolu hacimden filament: {g}")
     o = plate.covers[0][1]["open"]
-    info = ["5 · Türbin · Ø100 hoparlöre iki kapak Ø102,5 mm (kenardan yapıştırılır) · rozet Ø47 mm, iki satır yazı "
-            "(NECDET EFE / CEMAL + ÇALIK), 0,8 mm beyaz kabartma",
-            "Kırmızı yalnız dış çeperde (çerçevenin üst yüzü, son 3 katmana gömülü) · AMS: 1 siyah (ana nozul), "
-            "2 beyaz ve 3 kırmızı (yardımcı nozul)",
-            "Yüzü yukarı, düz basılır, destek yok · Bambu standart 0,20 mm · ütüleme kapalı · Textured PEI · Generic PLA",
+    info = [f"5 · Türbin · Ø100 hoparlöre iki kapak Ø102,5 mm · arka çıkıntı {LIP:.0f} mm, ucunda içe {FLANGE:g} mm "
+            f"flanş (yapıştırma yüzü) · rozet Ø47, iki satır yazı",
+            "Ters basılır (ön yüz tablada): kırmızı dış çeper ve beyaz isimler ilk 4 katmana gömülü · flanşın altı 45°, "
+            "destek yok · AMS: 1 siyah (ana), 2 beyaz ve 3 kırmızı (yardımcı)",
+            "Bambu standart 0,20 mm · ütüleme kapalı · Textured PEI · Generic PLA",
             f"Filament ~{sum(g.values()):.0f} g ({', '.join(f'{k} {v:g}' for k, v in g.items())}){when} · açıklık "
             f"%{o:.0f} · delikler en az 2,2 mm, köprüler en az 1,2 mm · yerleşim {'tamam' if ok_all else 'SORUN'}"]
     preview(plate, parts, os.path.join(OUT_DIR, "onizleme.png"), info,
