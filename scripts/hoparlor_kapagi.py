@@ -1,4 +1,4 @@
-"""Hoparlör kapağı önerileri (10): araç içi hoparlör yuvalarına yapıştırılan, ortası yazılı ızgara kapaklar.
+"""Hoparlör kapağı önerileri (20; 11–20 agresif / modern seri): araç içi hoparlör yuvalarına yapıştırılan, ortası yazılı ızgara kapaklar.
 
 İki boy, ikisi de tam yuvarlak: ölçülen Ø100 mm (orta ses) ve Ø70 mm (tiz, REISS) hoparlör; kapak ölçüden 2,5 mm
 büyük (Ø102,5 ve Ø72,5 mm) ki kenarı hoparlör halkasının üstüne otursun, kenarından yapıştırılsın.
@@ -12,7 +12,7 @@ Yapı (yüzü yukarı, düz basılır; destek gerekmez):
 Renk: siyah gövde, beyaz yazı; bazılarında kırmızı halka. Yazı şimdilik örnek ("YAZINIZ"): `YAZI` değiştirilip
 yeniden çalıştırılır.
 
-Çıktı : hoparlor_kapagi/<n>_<ad>.png, musteri_1.png / .jpg (1–6), musteri_2.png / .jpg (7–10), musteri_katalog.pdf
+Çıktı : hoparlor_kapagi/<n>_<ad>.png, musteri_1..4.png / .jpg (1–6, 7–10, 11–16, 17–20), musteri_katalog.pdf
 
 Kullanım:
   python3 scripts/hoparlor_kapagi.py [anahtar ...]
@@ -39,7 +39,8 @@ RIM = 3.0
 MIN_HOLE, MIN_BAR = 2.2, 1.2
 BLACK, WHITE, RED = (34, 34, 36), (240, 240, 236), (210, 30, 38)
 J = m3.JoinType.Round
-N.FONT_FILES.update({"michroma": "Michroma-Regular.ttf", "sora": "Sora-ExtraBold.ttf"})
+N.FONT_FILES.update({"michroma": "Michroma-Regular.ttf", "sora": "Sora-ExtraBold.ttf",
+                     "sairai": "Saira-CondensedBlackItalic.ttf"})
 
 
 # ---------------------------------------------------------------- desenler (2B: delikler)
@@ -176,12 +177,175 @@ def p_gradient(R, rc):
     return A.union(*out)
 
 
+# ---------------------------------------------------------------- seri 2: agresif ve modern desenler
+
+def taper(pts, w0, w1, wmid=None):
+    """Orta çizgiden kalınlığı değişen dolu şekil (uçlarda w0 → w1, ortada wmid)."""
+    pts = np.asarray(pts, float)
+    n = len(pts)
+    t = np.diff(pts, axis=0)
+    t = np.vstack([t, t[-1:]])
+    t /= np.linalg.norm(t, axis=1, keepdims=True)
+    nrm = np.c_[-t[:, 1], t[:, 0]]
+    u = np.linspace(0, 1, n)
+    w = w0 + (w1 - w0) * u if wmid is None else np.where(u < .5, w0 + (wmid - w0) * u * 2, wmid + (w1 - wmid) * (u - .5) * 2)
+    left, right = pts + nrm * (w / 2)[:, None], pts - nrm * (w / 2)[:, None]
+    return A.polygon(np.vstack([left, right[::-1]]))
+
+
+def p_claw(R, rc):
+    """Pençe izi: dört kalın, kıvrık çapraz yarık; arası küçük deliklerle dolu."""
+    claws = []
+    for k in range(4):
+        off = (k - 1.5) * 9.5
+        pts = [(-R * 0.75 + off + 6 * math.sin(math.pi * u), R * 0.9 - 1.8 * R * u + off * 0.4) for u in np.linspace(0, 1, 40)]
+        pts = [(x + y * 0.35, y) for x, y in pts]
+        claws.append(taper(pts, 1.0, 1.0, 6.0))
+    claws = A.union(*claws)
+    dots = A.union(*[A.circle(1.2, x, y, 18) for x, y in hex_grid(R, 3.9)]) - claws.offset(1.6, J)
+    return claws + dots
+
+
+def p_bolt(R, rc):
+    """Şimşek: merkezden dışa zikzak yarıklar."""
+    r0 = max(rc + 2.6, 0.34 * R)
+    n = int(2 * math.pi * r0 / 6.2)
+    out = []
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        da = 2 * math.pi / n * 0.32
+        rs = [r0, r0 + (R - r0) * 0.42, r0 + (R - r0) * 0.48, R + 1]
+        angs = [a, a + da, a - da * 0.4, a + da * 0.6]
+        out.append(A.stroke([(r * math.cos(t), r * math.sin(t)) for r, t in zip(rs, angs)], 2.5))
+    return A.union(*out)
+
+
+def p_voronoi(R, rc):
+    """Voronoi hücreleri: düzensiz, doğal kafes (sabit tohum: her seferinde aynı)."""
+    from scipy.spatial import Voronoi
+    rng = np.random.default_rng(7)
+    pts, gap = [], 7.0                                   # tohumlar arası en az 7 mm (Poisson disk, sınırlı deneme)
+    for _ in range(5000):
+        x, y = rng.uniform(-R - 9, R + 9, 2)
+        if all((x - a) ** 2 + (y - b) ** 2 > gap * gap for a, b in pts):
+            pts.append((x, y))
+    vor = Voronoi(np.array(pts))
+    cells = []
+    for i, reg in enumerate(vor.point_region):
+        verts = vor.regions[reg]
+        if -1 in verts or len(verts) < 3:
+            continue
+        poly = vor.vertices[verts]
+        if np.hypot(*poly.mean(0)) > R + 6:
+            continue
+        cells.append(A.polygon(poly).offset(-0.75 - 0.8, J).offset(0.8, J))
+    return A.union(*cells)
+
+
+def p_chevron(R, rc):
+    """Şevron: yukarı bakan V yarıklar, sütun sütun üst üste (yarış çizgisi); V'ler birbirine değmez."""
+    out = []
+    w, h = 12.0, 5.0
+    for y in np.arange(-R - 6, R + 6, 5.2):                 # kollar arası dik ölçüde ~1,6 mm
+        for x in np.arange(-R - 16, R + 16, w + 4.0):        # V uçları arası ~1,6 mm
+            out.append(A.stroke([(x - w / 2, y - h / 2), (x, y + h / 2), (x + w / 2, y - h / 2)], 2.4))
+    return A.union(*out)
+
+
+def p_blades(R, rc):
+    """Bıçak: az sayıda büyük, sivri, kıvrık kanat (jet türbini)."""
+    r0 = max(rc + 2.6, 0.3 * R)
+    n = 9
+    out = []
+    for k in range(n):
+        a0 = 2 * math.pi * k / n
+        pts = [((r0 + (R + 2 - r0) * u) * math.cos(a0 + 1.15 * u ** 1.3), (r0 + (R + 2 - r0) * u) * math.sin(a0 + 1.15 * u ** 1.3))
+               for u in np.linspace(0, 1, 50)]
+        out.append(taper(pts, 2.6, 2.4, 9.0))
+    return A.union(*out)
+
+
+def p_triangles(R, rc):
+    """Üçgen kafes: sırayla yukarı ve aşağı bakan üçgen delikler."""
+    side, bar = 7.4, 1.4
+    hgt = side * math.sqrt(3) / 2
+    out = []
+    for j, y in enumerate(np.arange(-R - hgt, R + hgt, hgt)):
+        for i, x in enumerate(np.arange(-R - side, R + side, side / 2)):
+            up = (i + j) % 2 == 0
+            c = (x, y + (hgt / 3 if up else 2 * hgt / 3))
+            tri = [(x - side / 2, y), (x + side / 2, y), (x, y + hgt)] if up else \
+                  [(x - side / 2, y + hgt), (x + side / 2, y + hgt), (x, y)]
+            out.append(A.polygon(tri).offset(-bar / 2 * 1.0, J).translate((0, 0)))
+            del c
+    return A.union(*out)
+
+
+def p_sport(R, rc):
+    """Spor jant: beş Y kol; aralar açık."""
+    disc = A.circle(R + 1, 0, 0, 160) - A.circle(rc + 2.4, 0, 0, 120)
+    rm = rc + (R - rc) * 0.42
+    spokes = []
+    for k in range(5):
+        a = 2 * math.pi * k / 5 + math.pi / 2
+        p0 = (rc * math.cos(a), rc * math.sin(a))
+        pm = (rm * math.cos(a), rm * math.sin(a))
+        spokes.append(A.stroke([p0, pm], 5.6))
+        for s in (-1, 1):
+            b = a + s * math.radians(13)
+            spokes.append(A.stroke([pm, ((R + 2) * math.cos(b), (R + 2) * math.sin(b))], 3.6))
+    return (disc - A.union(*spokes)).offset(-0.8, J).offset(0.8, J)
+
+
+def p_opart(R, rc):
+    """Op-art: halka halka delikler; boyları açıya göre dalgalanır, dönen bir desen çıkar."""
+    r0 = max(rc + 3.0, 0.3 * R)
+    out, r = [], r0
+    while r + 2.1 < R:
+        n = int(2 * math.pi * r / 5.2)
+        for k in range(n):
+            t = 2 * math.pi * k / n
+            d = 2.3 + 1.6 * (0.5 + 0.5 * math.sin(4 * t + r * 0.32))
+            out.append(A.circle(d / 2, r * math.cos(t), r * math.sin(t), 20))
+        r += 4.9
+    return A.union(*out)
+
+
+def p_speed(R, rc):
+    """Hız çizgileri: sağdan sola uzayan, boyları değişen yatay yarıklar."""
+    rng = np.random.default_rng(3)
+    out = []
+    for y in np.arange(-R, R + 4.0, 4.0):
+        x = R + 2.0
+        while x > -R:
+            L = rng.uniform(9, 26)
+            out.append(A.rrect(L, 2.4, 1.19, x - L / 2, y))
+            x -= L + rng.uniform(2.6, 5.0)
+    return A.union(*out)
+
+
+def p_weave(R, rc):
+    """Karbon örgü: hücre hücre ikişer yarık, yatay ve dikey sırayla (sepet örgüsü)."""
+    c = 8.0
+    out = []
+    for i, x in enumerate(np.arange(-R - c, R + c, c)):
+        for j, y in enumerate(np.arange(-R - c, R + c, c)):
+            for o in (-1.95, 1.95):
+                if (i + j) % 2 == 0:
+                    out.append(A.rrect(6.2, 2.4, 1.19, x, y + o))
+                else:
+                    out.append(A.rrect(2.4, 6.2, 1.19, x + o, y))
+    return A.union(*out)
+
+
 # ---------------------------------------------------------------- tasarımlar
 
 class Design:
-    def __init__(self, key, title, desc, pattern, font="outfit", ring=False, bar=False):
+    def __init__(self, key, title, desc, pattern, font="outfit", ring=False, bar=False, hexa=False, accent=False):
+        """hexa: ortada altıgen rozet (Ø70'te eğik şerit); accent: rozetin çevresinde kırmızı çizgi."""
         self.key, self.title, self.desc = key, title, desc
         self.pattern, self.font, self.ring, self.bar = pattern, font, ring, bar
+        self.hexa, self.accent = hexa, accent
 
 
 DESIGNS = [
@@ -195,6 +359,20 @@ DESIGNS = [
     Design("8_jant", "Jant", "Jant gibi altı kol, aralar açık; ortası jant göbeği.", p_spokes, ring=True),
     Design("9_dalga", "Dalga", "Dalgalı yatay yarıklar; iki ince köprü taşır.", p_waves, "outfit"),
     Design("10_degrade", "Degrade", "Delikler içeriden dışa büyür; kırmızı halka.", p_gradient, "saira", ring=True),
+    # seri 2: daha agresif ve daha modern
+    Design("11_pence", "Pençe", "Dört kıvrık pençe yarığı, arası küçük delikli; altıgen rozet.", p_claw, "sairai",
+           hexa=True, accent=True),
+    Design("12_simsek", "Şimşek", "Merkezden dışa zikzak şimşek yarıklar.", p_bolt, "sairai", hexa=True, accent=True),
+    Design("13_voronoi", "Hücre", "Düzensiz Voronoi hücreleri: doğal, modern kafes.", p_voronoi, "sora"),
+    Design("14_sevron", "Şevron", "Sıra sıra V yarıklar; yarış şeridi görüntüsü.", p_chevron, "sairai", ring=True),
+    Design("15_bicak", "Bıçak", "Dokuz büyük sivri kanat; jet türbini.", p_blades, "sairai", hexa=True, ring=True),
+    Design("16_ucgen", "Üçgen", "Yukarı ve aşağı bakan üçgen delikler; geometrik.", p_triangles, "michroma"),
+    Design("17_spor_jant", "Spor jant", "Beş Y kollu spor jant; aralar açık, kırmızı halka.", p_sport, "sairai",
+           hexa=True, ring=True, accent=True),
+    Design("18_opart", "Op-art", "Delik boyları açıya göre dalgalanır; dönen desen.", p_opart, "michroma", accent=True),
+    Design("19_hiz", "Hız çizgileri", "Boyları değişen yatay yarıklar; hız izi.", p_speed, "sairai", bar=True,
+           accent=True),
+    Design("20_karbon", "Karbon örgü", "Yatay ve dikey yarık çiftleri sırayla; karbon örgü görüntüsü.", p_weave, "sora"),
 ]
 
 
@@ -204,11 +382,21 @@ def center(design, D):
     big = D >= 90
     if big and not design.bar:
         rc = 18.0
-        badge = A.circle(rc, 0, 0, 160)
-        txt = text(design.font, 6.0, 2 * rc - 7.0, 0.8)
+        if design.hexa:                                   # köşeli altıgen rozet (yatay kenarlı)
+            badge = A.polygon([(rc * 1.08 * math.cos(math.radians(60 * k)), rc * 1.08 * math.sin(math.radians(60 * k)))
+                               for k in range(6)]).offset(-1.2, J).offset(1.2, J)
+        else:
+            badge = A.circle(rc, 0, 0, 160)
+        txt = text(design.font, 6.4 if design.hexa else 6.0, 2 * rc - 7.0, 0.8)
         return badge, txt, rc
     w = (34.0 if not big else 2 * (D / 2 + EXTRA / 2 - RIM) - 10.0)
     h = 9.0 if not big else 12.0
+    if design.hexa:                                       # eğik şerit (paralelkenar)
+        sk = h * 0.45
+        badge = A.polygon([(-w / 2, -h / 2), (w / 2 - sk, -h / 2), (w / 2, h / 2), (-w / 2 + sk, h / 2)]
+                          ).offset(-1.0, J).offset(1.0, J)
+        txt = text(design.font, 5.0, w - h - 2, 0.6)
+        return badge, txt, h / 2
     badge = A.rrect(w, h, h / 2 - 0.01)
     txt = text(design.font, 4.6 if not big else 6.4, w - h, 0.6)
     return badge, txt, h / 2 + 0.0
@@ -237,11 +425,15 @@ def build(design, D):
     if design.ring:
         ring = A.circle(Rc - 0.8, 0, 0, 240) - A.circle(Rc - 2.2, 0, 0, 240)
         parts.append((ring.extrude(0.6).translate((0, 0, H)), RED))
+    if design.accent:                                     # rozetin kenarında kırmızı çizgi
+        line = badge.offset(-0.7, J) - badge.offset(-1.9, J)
+        parts.append((line.extrude(0.6).translate((0, 0, H)), RED))
     open_pct = 100 * holes.area() / (A.circle(Ri, 0, 0, 240) - badge).area()
     thin = grille - grille.offset(-MIN_BAR / 2, J).offset(MIN_BAR / 2, J)
     small = [p for p in holes.decompose() if p.offset(-MIN_HOLE / 2 + 0.1, J).is_empty()]
+    islands = len([p for p in grille.decompose() if p.area() > 0.05]) - 1      # çerçeveye bağlı olmayan parça
     m = dict(D=2 * Rc, open=open_pct, thin=sum(p.area() for p in thin.decompose() if p.area() > 0.3),
-             small=len(small), grams=sum(Y_grams(s) for s, _ in parts))
+             small=len(small) + 100 * islands, islands=islands, grams=sum(Y_grams(s) for s, _ in parts))
     return parts, m
 
 
@@ -308,7 +500,8 @@ def catalog(images, infos):
     ink, muted, paper, red = (20, 20, 22), (96, 98, 106), (245, 245, 243), RED
     big = ImageFont.truetype(os.path.join(A.FONT_DIR, "Sora-ExtraBold.ttf"), 80)
     pages = []
-    for p, group in enumerate([list(range(0, 6)), list(range(6, 10))]):
+    groups = [list(range(0, 6)), list(range(6, 10)), list(range(10, 16)), list(range(16, len(DESIGNS)))]
+    for p, group in enumerate(groups):
         im = Image.new("RGB", (W, Hh), paper)
         dr = ImageDraw.Draw(im)
         dr.rectangle((0, 0, W, 250), fill=(14, 14, 16))
@@ -317,9 +510,11 @@ def catalog(images, infos):
                 cx, cy = W - 330 + k * 44 + (22 if j % 2 else 0), 50 + j * 44
                 dr.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), fill=(40, 40, 44))
         dr.text((70, 46), "HOPARLÖR KAPAĞI", font=big, fill=(244, 244, 242))
-        dr.text((72, 172), "Tasarım önerileri · Ø100 ve Ø70 mm hoparlör · ortada yazı", font=f(30), fill=(200, 200, 206))
+        sub = "Tasarım önerileri" if p < 2 else "Agresif & modern seri"
+        dr.text((72, 172), f"{sub} · Ø100 ve Ø70 mm hoparlör · ortada yazı", font=f(30), fill=(200, 200, 206))
         dr.rectangle((0, 246, W, 254), fill=red)
-        dr.text((W - 70 - dr.textlength(f"{p + 1}/2", font=f(28)), 196), f"{p + 1}/2", font=f(28), fill=(170, 170, 176))
+        pg = f"{p + 1}/{len(groups)}"
+        dr.text((W - 70 - dr.textlength(pg, font=f(28)), 196), pg, font=f(28), fill=(170, 170, 176))
         y = 285
         for line in ("Kapaklar hoparlörden 2,5 mm büyük (Ø102,5 ve Ø72,5 mm): kenarı halkaya oturur, kenardan yapıştırılır.",
                      f"Yazı örnek (\"{YAZI}\"); istediğiniz yazı ve renkle hazırlanır. Delikler sesi geçirir."):
@@ -340,7 +535,7 @@ def catalog(images, infos):
             img = A.fit_into(images[idx], cw - 50, ch - 160)
             im.paste(img, (x0 + (cw - img.width) // 2, y0 + 96 + (ch - 160 - img.height) // 2), img)
             dr.text((x0 + 30, y0 + ch - 50), d.desc, font=f(23), fill=muted)
-        if p == 1:
+        if len(group) <= 4:
             y0, y1 = top + 2 * (ch + gap), Hh - 190
             dr.rounded_rectangle((60, y0, W - 60, y1), 28, fill=(255, 255, 255), outline=(226, 226, 230))
             dr.text((100, y0 + 40), "Ürün", font=f(38), fill=ink)
@@ -354,7 +549,8 @@ def catalog(images, infos):
                 ty += 54
             pair = []
             for key in ("buyuk", "kucuk"):
-                pair.append(render(mesh(build(DESIGNS[0], SIZES[key])[0]), 900, rotation(0, 0), flat=0.9, margin=0.01))
+                pair.append(render(mesh(build(DESIGNS[group[0]], SIZES[key])[0]), 900, rotation(0, 0), flat=0.9,
+                                   margin=0.01))
             hb = y1 - y0 - 330
             big_im = A.fit_into(pair[0], hb, hb)
             small_im = A.fit_into(pair[1], int(hb * 72.5 / 102.5), int(hb * 72.5 / 102.5))
