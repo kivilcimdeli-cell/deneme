@@ -30,3 +30,33 @@ Saira Condensed Black Italic; 11, 12, 15 ve 17'de Ø100 kapakta altıgen rozet, 
 python3 scripts/hoparlor_kapagi.py            # 20 öneri ve katalog (4 süreçte)
 python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 ```
+
+## Seçilen: 5 · Türbin, Ø100 hoparlöre 2 kapak — baskı dosyası `baski/`
+
+![Kapaklar](baski/foto.png)
+
+**`baski/hoparlor_kapagi_x2d.3mf`**: Bambu Lab X2D. İki kapak tek tablada; Bambu Studio'da açılıp doğrudan dilimlenir.
+
+| | |
+| --- | --- |
+| Kapak | Ø102,5 mm, Ø100 hoparlöre; kenarından yapıştırılır |
+| Yazı | NECDET EFE / ÇALIK ve CEMAL / ÇALIK |
+| Rozet | Ø47 mm (öneride Ø36) |
+| Yazı tipi | Saira Condensed Bold Italic, beyaz, 0,8 mm kabartma; harf içleri en az 0,7 mm |
+| Kırmızı | yalnız dış çeper: çerçevenin üst yüzü, son 3 katmana gömülü |
+| Izgara | 28 kıvrık yarık, açıklık %44; delikler en az 2,2 mm, köprüler en az 1,2 mm, tek parça |
+| AMS / nozul | 1 siyah: ana nozul<br>2 beyaz, 3 kırmızı: yardımcı nozul (yalnız bir kez kırmızı → beyaz değişimi) |
+| Filament (yaklaşık) | ~31,5 g (siyah 30, kırmızı 1, beyaz 0,4) + kule |
+| Süre | PrusaSlicer ~1 sa 17 dk (kule ve nozul değişimi hariç) |
+
+Ø70 kapaklar iptal edildi.
+
+**Baskı:**
+- Yüzü yukarı, düz basılır; destek gerekmez.
+- Bambu standart 0,20 mm, ütüleme kapalı, Textured PEI.
+
+Önizleme: `baski/onizleme.png`. Yeniden üretmek için:
+
+```bash
+python3 scripts/hoparlor_kapagi_baski.py
+```
