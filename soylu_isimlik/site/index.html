@@ -103,6 +103,7 @@ button{font:inherit;color:inherit}
   font:600 15px/1 var(--ui);text-decoration:none;transition:transform .15s,background .2s,border-color .2s}
 .btn:active{transform:scale(.97)}
 .btn .ic{width:19px;height:19px}
+.btn span{white-space:nowrap}
 .copy{border:0;background:var(--red);color:var(--red-ink)}
 .copy .ic{fill:var(--red-ink)}
 .copy.ok{background:var(--ok)}
@@ -198,8 +199,14 @@ footer b i{display:block;width:34px;height:3px;margin-top:9px;background:var(--r
 <section class="pay" aria-label="Ödeme bilgileri">
   <dl class="rows"><dt>Banka</dt><dd>İş Bankası</dd><dt>Alıcı</dt><dd>CAVİT SOYLU</dd></dl>
   <div class="ibanbox"><span>IBAN</span><output class="iban"><i>TR34</i> <i>0006</i> <i>4000</i> <i>0016</i> <i>2310</i> <i>1145</i> <i>83</i></output></div>
-  <div class="acts one">
-    <button class="btn copy" type="button" data-copy="TR340006400000162310114583"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>IBAN'ı kopyala</span></button>
+  <div class="acts">
+    <button class="btn copy" type="button" data-copy="TR340006400000162310114583"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>Kopyala</span></button>
+    <button class="btn ghost" type="button" id="kk-btn" aria-expanded="false" aria-controls="kk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 19h2v2h-2zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>Karekod</button>
+  </div>
+  <div class="kk" id="kk" hidden>
+    <span class="qr"><img src="karekod.png" width="828" height="828" alt="İş Bankası karekodu – CAVİT SOYLU"></span>
+    <p>Karekodu kaydedin, banka uygulamanızda <b>Karekod ile Öde</b>, ardından <b>Galeriden seç</b>.</p>
+      <a href="karekod.png" download="soylu-karekod.png">Karekodu kaydet</a>
   </div>
 </section>
 </main>

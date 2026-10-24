@@ -42,8 +42,11 @@ Uzar, İnce ve Çalık'ın sayfalarıyla aynı işleri yapar, tasarımı farklı
 - **Sürekli:** Hemen Ara'nın üstünden birkaç saniyede bir ışık geçer, telefon simgesi çalar.
 
 **Bilgiler** (`bilgiler.json`): telefon ve WhatsApp 0541 487 30 03, Instagram @soyluotolastikantalya, Google yorum
-bağlantısı, IBAN TR34 0006 4000 0016 2310 1145 83, CAVİT SOYLU, İş Bankası. **Banka karekodu** henüz yok; gelince
-`iban_karekod` alanına yazılır ve ödeme kartına Karekod düğmesi eklenir.
+bağlantısı, IBAN TR34 0006 4000 0016 2310 1145 83, CAVİT SOYLU, İş Bankası.
+
+**Karekod:** İşCep'in tutarsız "Karekod ile Para İste" kodu. CRC tutuyor, içindeki IBAN ve alıcı aynı. Sayfadaki karekod
+bankanınkiyle aynı baytlarla ve aynı hata düzeltmeyle (H) çizilir. İlk gönderilen kodda 1.500,00 TL sabit tutar vardı;
+o kullanılmadı (scripts/qr_sistemi.py tutarlı kodu reddeder).
 
 **Yayın:** ortak Cloudflare hesabında (`qrsistem`) yeni bir Worker açılır, adı tam olarak `soyluotolastik`, ve
 `soylu_site.zip` yüklenir. Adres `https://soyluotolastik.qrsistem.workers.dev/` olur; isimliklerdeki QR bu adresi açar.

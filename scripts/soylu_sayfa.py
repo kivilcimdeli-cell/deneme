@@ -79,8 +79,8 @@ def subset_fonts():
             dst.write(src.read())
 
 
-def karekod_png(info, error="m"):
-    """Banka karekodu (varsa): bankanınkiyle aynı baytlar (ECI yok) ve aynı hata düzeltme."""
+def karekod_png(info, error="h"):
+    """Banka karekodu (varsa): bankanınkiyle aynı baytlar (ECI yok) ve aynı hata düzeltme (İş Bankası: H)."""
     import segno
     import zxingcpp
     path = os.path.join(OUT, "karekod.png")
@@ -217,6 +217,7 @@ button{font:inherit;color:inherit}
   font:600 15px/1 var(--ui);text-decoration:none;transition:transform .15s,background .2s,border-color .2s}
 .btn:active{transform:scale(.97)}
 .btn .ic{width:19px;height:19px}
+.btn span{white-space:nowrap}
 .copy{border:0;background:var(--red);color:var(--red-ink)}
 .copy .ic{fill:var(--red-ink)}
 .copy.ok{background:var(--ok)}
@@ -374,7 +375,7 @@ def page(info, standalone=False, artifact=False):
   <dl class="rows"><dt>Banka</dt><dd>{e(info.bank)}</dd><dt>Alıcı</dt><dd>{e(info.holder)}</dd></dl>
   <div class="ibanbox"><span>IBAN</span><output class="iban">{iban_groups(info.iban)}</output></div>
   <div class="acts{'' if info.karekod else ' one'}">
-    <button class="btn copy" type="button" data-copy="{e(info.iban)}">{S.svg(S.ICON["copy"])}<span>IBAN'ı kopyala</span></button>{kk_btn}
+    <button class="btn copy" type="button" data-copy="{e(info.iban)}">{S.svg(S.ICON["copy"])}<span>{"Kopyala" if info.karekod else "IBAN'ı kopyala"}</span></button>{kk_btn}
   </div>{kk_box}
 </section>
 </main>
