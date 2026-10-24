@@ -10,72 +10,50 @@
 @font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
 @font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
 @font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
 @font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
-:root{--bg:#F3F3EE;--fg:#2E1B1D;--muted:#7D7271;--line:#E1DDD4;--card:#FFFFFF;--card-fg:#2E1B1D;--accent:#6E1E2B;--accent-fg:#F7EBDD;--chip:#F1E7E2;--chip-fg:#6E1E2B;--hero:#6E1E2B;--hero-fg:#F7EBDD;--display:Playfair;--dw:900;--ds:normal;--bls:.05em;--price:#6E1E2B;--star:#CBA25E}
+
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg)}
-body{font-family:Jost,'Noto Sans',sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased;font-size:16px}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-.hero{background:var(--hero);color:var(--hero-fg);padding:60px 26px 34px;position:relative;overflow:hidden;
-  text-align:center}
-.hero svg.motif{position:absolute;left:0;top:0;width:100%;height:100%}
-.hero>*{position:relative}
-.mark{width:64px;height:64px;margin:0 auto 14px;display:block}
-.brand{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:var(--bs,46px);line-height:1.02;
-  letter-spacing:var(--bls,0)}
-.tag{font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.86;margin-top:12px}
-.table{display:inline-flex;gap:10px;align-items:center;margin-top:22px;padding:8px 18px;border-radius:999px;
-  border:1px solid var(--table-line,currentColor);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase}
-.table b{font-family:var(--display);font-size:17px;letter-spacing:.04em;font-weight:var(--dw)}
-.hi{padding:20px 22px 0;font-size:14.5px;color:var(--muted);text-align:center}
-main.btns{padding:16px 18px 10px;display:grid;gap:11px}
-.btn{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--r,18px);background:var(--card);
-  color:var(--card-fg);border:1px solid var(--line);box-shadow:var(--shadow,0 8px 22px rgba(0,0,0,.05))}
-.btn .ic{width:42px;height:42px;border-radius:calc(var(--r,18px) - 6px);display:grid;place-items:center;
-  background:var(--chip);color:var(--chip-fg);flex:none}
-.btn .ic svg{width:22px;height:22px}
-.btn b{display:block;font-weight:600;font-size:16.5px}
-.btn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
-.btn .chev{margin-left:auto;opacity:.4;width:18px;height:18px}
-.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.btn.primary small{color:inherit;opacity:.78}
-.btn.primary .ic{background:rgba(255,255,255,.16);color:inherit}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.row .btn{flex-direction:column;align-items:flex-start;gap:10px}
-.row .btn .chev{display:none}
-.stars{color:var(--star,#E2A93B);letter-spacing:2px;font-size:13px}
-.rate{margin:6px 18px 4px;padding:16px 18px;border-radius:var(--r,18px);border:1px solid var(--line);
-  display:flex;align-items:center;gap:16px;background:var(--card);color:var(--card-fg)}
-.rate .n{font-family:var(--display);font-weight:var(--dw);font-size:40px;line-height:1}
-.rate small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
-.rate .bar{margin-left:auto;display:grid;gap:4px;width:92px}
-.rate .bar i{display:block;height:5px;border-radius:3px;background:var(--line)}
-.rate .bar i b{display:block;height:100%;border-radius:3px;background:var(--star,#E2A93B)}
-.foot{padding:8px 22px 30px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
-.top{position:sticky;top:0;z-index:2;background:var(--hero);color:var(--hero-fg);padding:16px 18px;display:flex;
-  align-items:center;justify-content:space-between}
-.top .b{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:23px;letter-spacing:var(--bls,0)}
-.top .t{font-size:11.5px;letter-spacing:.2em;border:1px solid var(--table-line,currentColor);border-radius:999px;
-  padding:6px 12px;text-transform:uppercase}
-.title{padding:22px 20px 4px;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:34px}
-.lead{padding:0 20px;color:var(--muted);font-size:13.5px}
-.tabs{display:flex;gap:8px;padding:14px 20px 8px;overflow:hidden;white-space:nowrap}
-.tabs span{padding:9px 15px;border-radius:999px;background:var(--card);font-size:14px;border:1px solid var(--line)}
-.tabs span.on{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.feature{margin:12px 20px 4px;padding:16px 18px;border-radius:var(--r,18px);background:var(--feat,var(--accent));
-  color:var(--feat-fg,var(--accent-fg));display:flex;justify-content:space-between;gap:12px;align-items:center}
-.feature small{display:block;font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
-.feature b{display:block;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin-top:3px}
-.feature .price{color:inherit;font-size:18px}
-section{padding:4px 20px 6px}
-h2{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin:16px 0 4px;display:flex;
-  align-items:center;gap:12px;letter-spacing:var(--h2ls,0)}
-h2:after{content:"";flex:1;height:1px;background:var(--line)}
-.item{padding:13px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:3px 14px}
-.item b{font-size:16.5px;font-weight:600}
-.item p{grid-column:1;color:var(--muted);font-size:13.2px;line-height:1.45}
-.price{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;font-size:15.5px;color:var(--price,var(--accent));
-  white-space:nowrap;grid-row:1;grid-column:2}
-.pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
-  background:var(--chip);color:var(--chip-fg);margin-left:6px;vertical-align:2px;font-weight:600}
-.brand{font-size:44px}.tag{color:#CBA25E}</style></head><body><div class="top"><span class="b">ASMAALTI</span><span class="t">Masa 11</span></div><h1 class="title">Menü</h1><p class="lead">Fiyatlara KDV dahildir.</p><div class="tabs"><span class="on">Sıcak</span><span class="">Soğuk</span><span class="">Atıştırmalık</span><span class="">Tatlı</span></div><div class="feature"><span><small>Semaver</small><b>4 kişilik semaver çay</b></span><span class="price">260 ₺</span></div><section><h2>Sıcak</h2><div class="item"><b>Çay</b><span class="price">25 ₺</span><p>İnce belli bardakta</p></div><div class="item"><b>Bitki çayı</b><span class="price">60 ₺</span><p>Ihlamur, adaçayı, kuşburnu</p></div><div class="item"><b>Sahlep</b><span class="price">90 ₺</span><p>Tarçınlı</p></div></section><section><h2>Atıştırmalık</h2><div class="item"><b>Gözleme</b><span class="price">160 ₺</span><p>Peynirli, patatesli ya da kıymalı</p></div><div class="item"><b>Kaşarlı tost</b><span class="price">120 ₺</span><p>Köy ekmeğiyle</p></div></section></body></html>
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#5B3A22;color:#F4F1E6}
+.bd{margin:10px;min-height:824px;border-radius:6px;padding:24px 22px 22px;position:relative;
+  background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.08),transparent 50%),
+  radial-gradient(ellipse at 80% 70%,rgba(255,255,255,.05),transparent 45%),#26362B;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.55),0 0 0 6px #7A5532,0 0 0 8px #4A2F1B}
+.hand{font-family:Caveat;font-weight:700}
+h1.hand{font-size:68px;line-height:.9;text-align:center}
+.sub{text-align:center;font-family:Caveat;font-size:25px;color:#F2D27A;margin-top:4px}
+.ms{display:block;width:max-content;margin:8px auto 0;font-family:Caveat;font-size:25px;border:2px dashed
+  rgba(244,241,230,.7);border-radius:12px;padding:0 16px}
+.cup{width:196px;height:196px;margin:16px auto 0;border-radius:50%;padding:6px;border:2px dashed rgba(244,241,230,.6)}
+.cup img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.lf{position:absolute;width:84px;height:84px;opacity:.55}
+.bx{display:grid;gap:12px;margin-top:20px}
+.bx a{display:flex;justify-content:space-between;align-items:center;font-family:Caveat;font-size:29px;padding:4px 16px;
+  border:2px solid rgba(244,241,230,.85);border-radius:14px 10px 16px 9px}
+.bx a small{font-family:Caveat;font-size:21px;color:#C9D3C0}
+.bx a.y{border-color:#F2D27A;color:#F2D27A}
+.bx .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bx .two a{font-size:25px;justify-content:center}
+.ft{text-align:center;font-family:Caveat;font-size:22px;color:#C9D3C0;margin-top:16px}
+.mh{display:flex;justify-content:space-between;align-items:baseline}
+.mh h1{font-size:56px}
+.mh span{font-family:Caveat;font-size:24px;color:#F2D27A}
+.pol{display:flex;gap:16px;justify-content:center;margin:12px 0 4px}
+.pol div{background:#F7F3E8;padding:7px 7px 28px;width:150px;box-shadow:0 8px 18px rgba(0,0,0,.4);position:relative}
+.pol div:first-child{transform:rotate(-4deg)}.pol div:last-child{transform:rotate(3deg);margin-top:8px}
+.pol img{width:100%;height:122px;object-fit:cover}
+.pol span{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-family:Caveat;font-size:21px;color:#3A2A20}
+.pol div:before{content:"";position:absolute;left:50%;top:-10px;width:56px;height:18px;margin-left:-28px;z-index:2;
+  background:rgba(240,226,180,.75);transform:rotate(-3deg)}
+.sc h2{font-family:Caveat;font-size:35px;color:#F2D27A;margin:10px 0 0;text-decoration:underline;
+  text-decoration-thickness:2px;text-underline-offset:6px}
+.ci{display:flex;align-items:baseline;gap:8px;font-family:Caveat;font-size:28px;line-height:1.2}
+.ci i{flex:1;border-bottom:2px dotted rgba(244,241,230,.5);transform:translateY(-6px)}
+.cd{font-family:Caveat;font-size:20px;color:#C9D3C0;margin:-2px 0 4px}
+</style></head><body><div class="bd"><div class="mh"><h1 class="hand">Menü</h1><span>Masa 11</span></div><div class="pol"><div><img src="../img/gozleme.jpg" alt=""><span>Gözleme</span></div><div><img src="../img/tost.jpg" alt=""><span>Kaşarlı tost</span></div></div><section class="sc"><h2>Sıcak</h2><div class="ci"><span>Çay</span><i></i><span>25 ₺</span></div><div class="cd">ince belli bardakta</div><div class="ci"><span>Bitki çayı</span><i></i><span>60 ₺</span></div><div class="cd">ıhlamur, adaçayı, kuşburnu</div><div class="ci"><span>Sahlep</span><i></i><span>90 ₺</span></div><div class="cd">tarçınlı</div></section><section class="sc"><h2>Atıştırmalık</h2><div class="ci"><span>Gözleme</span><i></i><span>160 ₺</span></div><div class="cd">peynirli, ıspanaklı ya da kıymalı</div><div class="ci"><span>Kaşarlı tost</span><i></i><span>120 ₺</span></div><div class="cd">köy ekmeğiyle</div></section></div></body></html>

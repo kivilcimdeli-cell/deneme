@@ -1,4 +1,6 @@
-"""RESTORAN MASALIKLARI – 30 çift yüzlü (arkalı önlü) QR'lı / NFC'li masalık önerisi; restoran isimleri uydurma.
+"""RESTORAN MASALIKLARI – 45 çift yüzlü (arkalı önlü) QR'lı / NFC'li masalık önerisi; restoran isimleri uydurma.
+
+1–30 tasarım serisi; 31–45 standart seri (yuvarlak, dikey, yatay; sade ve şık).
 
 Masanın ortasında durur, iki yüzden de okunur. Üç tür:
   * İKİ QR   : ön yüzde MENÜ, arka yüzde GOOGLE YORUM QR'ı
@@ -9,11 +11,11 @@ QR'lar doğrudan Google'a / menü dosyasına değil, ortak hesaptaki sayfaya gid
 `/yorum`): menü ya da Google bağlantısı değişse de masalık değişmez. Örneklerdeki adresler henüz yayında değil.
 
 Yapı (baskıya göre):
-  * iki plaka sırt sırta (her biri 3 mm, 15 katman): her yüz kendi plakası, yüzü yukarı basılır; ikisi birlikte
-    ayaktaki yuvaya oturur (yuva 6,3 mm). Böylece iki yüz de kabartmalı olur.
-  * kabartma: geniş renk alanları (etiket, şerit, dilim) 0,8 mm kabarık zemin; yazı, çerçeve, simge, yıldız 1 mm
-    kabartma (zeminin de üstünde); QR kabarık karo (0,8 mm), koyu kareler karonun üstüne 0,6 mm gömülü: yüzeyi düz,
-    okunur
+  * iki plaka sırt sırta (her biri 4 mm, 20 katman): her yüz kendi plakası, yüzü yukarı basılır; ikisi birlikte
+    ayaktaki yuvaya oturur (yuva 8,3 mm). Böylece iki yüz de kabartmalı olur.
+  * kabartma: geniş renk alanları (etiket, şerit, dilim) 1,2 mm kabarık zemin; yazı, çerçeve, simge, yıldız 1,6 mm
+    kabartma (zeminin de üstünde), üst kenarı 0,4 mm pahlı; QR kabarık karo (1,2 mm), koyu kareler karonun üstüne
+    0,6 mm gömülü: yüzeyi düz, okunur
   * panelin alt dili (8 mm) ayaktaki yuvaya oturur; ayak ayrı basılır. Bazıları çapraz ayaklı, çadır (A) ya da
     peçetelik / tuzluk-biberlik düzenleyici
   * NFC: Ø25 mm NTAG215 etiket, ön plakanın arkasında Ø26 × 0,6 mm cepte; iki plaka arasında kalır (baskıyı duraklatmak
@@ -26,7 +28,7 @@ altın / bakır + ahşap PLA.
 Görseller: restoran_masalik_foto.py (Blender Cycles, ahşap masada stüdyo fotoğrafı) varsa onlar kullanılır; menü
 siteleri menu_siteleri.py.
 
-Çıktı : restoran_masalik/<n>_<ad>.png (iki yüz, iki fotoğraf), musteri_01..15.png / .jpg, musteri_katalog.pdf
+Çıktı : restoran_masalik/<n>_<ad>.png (iki yüz, iki fotoğraf), musteri_NN.png / .jpg, musteri_katalog.pdf
 
 Kullanım:
   python3 scripts/restoran_masalik.py [anahtar ...]
@@ -46,11 +48,12 @@ from cift_tarafli_isimlik import rotation  # noqa: E402
 
 OUT_DIR = os.path.join(A.ROOT, "restoran_masalik")
 J = m3.JoinType.Round
-T = 3.0                    # bir plaka (15 katman); masalık iki plaka sırt sırta
+T = 4.0                    # bir plaka (20 katman); masalık iki plaka sırt sırta (8 mm)
 INL = 0.8                  # ayak üstündeki gömülü renk (4 katman)
-PLAQUE = 0.8               # geniş renk alanları (etiket, şerit, dilim): kabarık zemin (4 katman)
-RELIEF = 1.0               # yazı, çizgi, simge: kabartma (5 katman), kabarık zeminin de üstünde
-QR_H, QR_INL = 0.8, 0.6    # QR karosu kabarık; koyu kareler karonun üstüne gömülü (düz, okunur)
+PLAQUE = 1.2               # geniş renk alanları (etiket, şerit, dilim): kabarık zemin (6 katman)
+RELIEF = 1.6               # yazı, çizgi, simge: kabartma (8 katman), kabarık zeminin de üstünde
+QR_H, QR_INL = 1.2, 0.6    # QR karosu kabarık; koyu kareler karonun üstüne gömülü (düz, okunur)
+BEVEL = 0.4                # kabartmaların üst kenarı iki basamakla yuvarlatılır (ışık yakalar)
 EDGE = 0.8                 # renkli öğelerin plaka kenarına en yakın mesafesi
 D = 8.0                    # panelin yuvaya giren dili
 CLR = 0.3                  # yuva boşluğu
@@ -66,13 +69,15 @@ COL = {"siyah": (40, 40, 42), "fildisi": (238, 232, 216), "beyaz": (246, 245, 24
        "koyu_yesil": (42, 72, 54), "yesil": (88, 136, 82), "pembe": (232, 172, 180), "lila": (174, 154, 200),
        "mor": (72, 44, 100), "kahve": (80, 54, 42), "latte": (198, 164, 128), "karamel": (190, 128, 72),
        "terrakota": (176, 92, 66), "kum": (214, 192, 152), "ahsap": (170, 124, 84), "gri": (142, 144, 146),
-       "mercan": (228, 120, 102)}
+       "mercan": (228, 120, 102), "adacayi": (150, 166, 140), "pudra": (228, 190, 182), "kobalt": (34, 68, 146),
+       "zeytin": (98, 102, 64), "mermer": (236, 234, 228)}
 COL_NAME = {"siyah": "siyah", "fildisi": "fildişi", "beyaz": "beyaz", "bordo": "bordo", "kirmizi": "kırmızı",
             "altin": "ipek altın", "bakir": "ipek bakır", "sari": "limon sarısı", "hardal": "hardal",
             "turuncu": "turuncu", "lacivert": "lacivert", "turkuaz": "turkuaz", "koyu_yesil": "koyu yeşil",
             "yesil": "yeşil", "pembe": "pembe", "lila": "lila", "mor": "mor", "kahve": "kahverengi",
             "latte": "latte", "karamel": "karamel", "terrakota": "terrakota", "kum": "kum beji",
-            "ahsap": "ahşap (PLA Wood)", "gri": "gri", "mercan": "mercan"}
+            "ahsap": "ahşap (PLA Wood)", "gri": "beton gri", "mercan": "mercan", "adacayi": "adaçayı yeşili",
+            "pudra": "pudra pembe", "kobalt": "kobalt mavi", "zeytin": "zeytin yeşili", "mermer": "mermer (PLA Marble)"}
 METAL = {"altin", "bakir"}
 
 FONT_FILES = {"cinzel": "Cinzel-Black.ttf", "fraunces": "Fraunces-SemiBold.ttf", "fraunces_k": "Fraunces-Black.ttf",
@@ -329,6 +334,17 @@ def layers(items, body, clip):
     return {k: {c: cs for c, cs in v.items() if cs.area() > 0.01} for k, v in out.items()}
 
 
+def bevelled(cs, h, z0, b=BEVEL):
+    """Üst kenarı iki basamakla pahlanmış kabartma (ince yerlerde basamak kalmaz, tam yükseklik korunur)."""
+    lo = cs.extrude(h - b).translate((0, 0, z0))
+    s1 = cs.offset(-b * 0.35, J)
+    s2 = cs.offset(-b * 0.75, J)
+    thin = cs - s2.offset(b * 0.75 + 0.05, J)                 # basamak sığmayan ince kısımlar tam boy
+    tops = [s1.extrude(b / 2).translate((0, 0, z0 + h - b)), s2.extrude(b / 2).translate((0, 0, z0 + h - b / 2)),
+            thin.extrude(b).translate((0, 0, z0 + h - b))]
+    return m3.Manifold.batch_boolean([lo] + [t for t in tops if not t.is_empty()], m3.OpType.Add)
+
+
 def chamfered(out, t, depth=0.4):
     """Plakanın iki yüz kenarını iki basamakla yumuşatır."""
     cuts = []
@@ -365,14 +381,14 @@ class Panel:
         parts = [(f"Plaka ({COL_NAME[self.body]})", body, self.body)]
         pl = A.union(*L["plaque"].values())
         for col, cs in L["plaque"].items():
-            parts.append((f"Kabarık zemin ({COL_NAME[col]})", cs.extrude(PLAQUE).translate((0, 0, T)), col))
+            parts.append((f"Kabarık zemin ({COL_NAME[col]})", bevelled(cs, PLAQUE, T), col))
 
         def split(cs):
             return [(r, z) for r, z in ((cs - pl, T), (cs ^ pl, T + PLAQUE)) if r.area() > 0.01]
 
         for col, cs in L["relief"].items():
             for r, z in split(cs):
-                parts.append((f"Kabartma ({COL_NAME[col]})", r.extrude(RELIEF).translate((0, 0, z)), col))
+                parts.append((f"Kabartma ({COL_NAME[col]})", bevelled(r, RELIEF, z), col))
         if L["qr_tile"] or L["qr_dark"]:
             light = next(iter(L["qr_tile"]), self.body)
             for col, cs in L["qr_tile"].items():
@@ -1405,6 +1421,365 @@ def t30_kofte():
     return d
 
 
+# ---------------------------------------------------------------- standart seri (31–45): yuvarlak, dikey, yatay, kare
+
+def corners(x0, y0, x1, y1, L=10.0, w=1.2):
+    """Dört köşede L biçimli süs."""
+    return U(*[ST([(x + sx * L, y), (x, y), (x, y + sy * L)], w)
+               for x, y, sx, sy in ((x0, y0, 1, 1), (x1, y0, -1, 1), (x0, y1, 1, -1), (x1, y1, -1, -1))])
+
+
+def frame2(vis, a=3.6, w1=1.2, b=5.8, w2=0.9):
+    return (vis.offset(-a, J) - vis.offset(-a - w1, J)) + (vis.offset(-b, J) - vis.offset(-b - w2, J))
+
+
+def frame1(vis, a=3.8, w=1.1):
+    return vis.offset(-a, J) - vis.offset(-a - w, J)
+
+
+def olive_branch(cx, cy, s=1.0):
+    stem = ST((A.smooth([(-14, -4), (-4, 1), (6, 2), (15, -1)], n=40) * s + (cx, cy)), 1.2)
+    lv = [leaf(cx + x * s, cy + y * s, 8.5 * s, 3.8 * s, a) for x, y, a in ((-9, -1.5, 135), (-3, 1.0, 65),
+                                                                            (3, 1.6, 110), (9, 1.2, 50),
+                                                                            (-6, -0.5, -140), (6, 1.0, -40))]
+    return U(stem, *lv, ellipse(1.8 * s, 2.5 * s, cx + 15.5 * s, cy - 2.5 * s), ellipse(1.8 * s, 2.5 * s, cx - 1 * s,
+                                                                                    cy - 2.8 * s))
+
+
+def pomegranate(cx, cy, r):
+    crown = P([(cx - r * 0.42, cy + r * 0.8), (cx - r * 0.36, cy + r * 1.25), (cx - r * 0.14, cy + r * 1.05),
+               (cx, cy + r * 1.32), (cx + r * 0.14, cy + r * 1.05), (cx + r * 0.36, cy + r * 1.25),
+               (cx + r * 0.42, cy + r * 0.8)])
+    return U(C(r, cx, cy), crown)
+
+
+def crescent(cx, cy, r):
+    return C(r, cx, cy) - C(r * 0.8, cx + r * 0.42, cy + r * 0.18)
+
+
+def thyme(cx, cy, s=1.0):
+    stem = ST([(cx, cy - 13 * s), (cx, cy + 13 * s)], 1.2)
+    lv = []
+    for k, y in enumerate(np.linspace(-9, 11, 6)):
+        L = (6.5 - abs(y) * 0.18) * s
+        lv.append(leaf(cx, cy + y * s, L, 3.0 * s, 35 + 4 * k))
+        lv.append(leaf(cx, cy + y * s, L, 3.0 * s, 145 - 4 * k))
+    return U(stem, *lv)
+
+
+def waves(x0, x1, y, n=3, amp=1.6, wl=11.0, gap=5.0, w=1.2):
+    xs = np.linspace(x0, x1, 80)
+    return U(*[ST(np.c_[xs, y - k * gap + amp * np.sin(2 * np.pi * (xs - x0) / wl)], w) for k in range(n)])
+
+
+def sun_horizon(cx, cy, r):
+    sun = (C(r, cx, cy) ^ R(cx - r, cy + 1.6, cx + r, cy + r))
+    return U(sun, rule(cx - r * 1.6, cx + r * 1.6, cy, 1.4), rule(cx - r * 1.1, cx + r * 1.1, cy - 3.2, 1.2),
+             rule(cx - r * 0.6, cx + r * 0.6, cy - 6.2, 1.2))
+
+
+def wine_glass(cx, cy, s=1.0):
+    bowl = ellipse(6.5 * s, 7.5 * s, cx, cy + 6 * s) ^ R(cx - 9 * s, cy - 2 * s, cx + 9 * s, cy + 9 * s)
+    bowl = bowl - (ellipse(5.2 * s, 6.2 * s, cx, cy + 6 * s) ^ R(cx - 9 * s, cy + 1.5 * s, cx + 9 * s, cy + 9 * s))
+    return U(bowl, R(cx - 0.7 * s, cy - 9 * s, cx + 0.7 * s, cy - 1 * s), RR(10 * s, 1.4 * s, 0.6 * s, cx, cy - 9.4 * s))
+
+
+def salt_pepper(cx, cy, r=6.0):
+    a = C(r, cx - r - 1.5, cy) - U(*[C(0.9, cx - r - 1.5 + dx, cy + dy) for dx, dy in ((-2, 1), (2, 1), (0, -2))])
+    b = ring(r, 1.3, cx + r + 1.5, cy) + U(*[C(0.9, cx + r + 1.5 + dx, cy + dy) for dx, dy in ((-2, 1), (2, 1),
+                                                                                           (0, -2))])
+    return a + b
+
+
+def macaron(cx, cy, s=1.0):
+    return U(RR(18 * s, 5 * s, 2.5 * s, cx, cy + 4 * s), RR(16 * s, 2.0 * s, 1.0 * s, cx, cy),
+             RR(18 * s, 5 * s, 2.5 * s, cx, cy - 4 * s))
+
+
+def round_panel(r):
+    cy = D + r - 1.0
+    return C(r, 0, cy), cy
+
+
+def t31_mira():
+    d = Design("31_mira", "Mira", "modern bistro", "2qr",
+               "Yuvarlak, antrasit zemin, ipek altın çift halka ve monogram; Bodoni harf aralıklı isim. Ön menü, arka "
+               "yorum.", masa=4)
+    disc, cy = round_panel(56)
+    p = Panel(tab(disc, 50, D + 2), "siyah")
+    for side, sg in both(p):
+        side.add(ring(53, 1.2, 0, cy) + ring(50.6, 0.8, 0, cy), "altin")
+        side.add(ring(8.6, 1.1, 0, cy + 37) + tx("bodoni", "M", 8.0, 0, cy + 37), "altin")
+        side.add(tx("bodoni", "MİRA", 7.4, 0, cy + 22, tr=3.4), "fildisi")
+        side.qr(url("mira", "menu" if sg > 0 else "yorum"), 0, cy - 6, 32, dark="siyah")
+    p.front.add(label("MENÜ", 0, cy - 28.5, 3.8, tr=2.4), "altin")
+    p.front.add(label("MASA 04", 0, cy - 37.5, 3.4, tr=1.4), "fildisi")
+    p.back.add(stars(0, cy - 28.5, 2.2, gap=1.2), "altin")
+    p.back.add(label("DEĞERLENDİRİN", 0, cy - 37.5, 3.4, tr=0.8), "fildisi")
+    foot, hb = foot_plain(RR(84, 26, 6), 10, 50, "altin")
+    return standard(d, p, foot, hb, "ipek altın ince kaide 84 × 26 mm")
+
+
+def t32_saffron():
+    d = Design("32_saffron", "Saffron", "fine dining", "2qr",
+               "Dikey menü kartı: fildişi zemin, siyah Bodoni, ipek altın köşe süsleri ve çizgi. Ön menü, arka yorum.",
+               masa=2)
+    pan = RR(96, 146, 5, 0, D + 71)
+    p = Panel(tab(pan, 96), "fildisi")
+    for side, sg in both(p):
+        side.add(corners(-41.5, D + 5.5, 41.5, D + 135.5, 11, 1.2), "altin")
+        side.add(tx("bodoni", "SAFFRON", 9.4, 0, D + 117, tr=2.4, max_w=78), "siyah")
+        side.add(rule(-14, 14, D + 106.5, 1.0), "altin")
+        side.add(label("RESTORAN · ANTALYA", 0, D + 98.5, 3.4, tr=1.0), "siyah")
+        side.qr(url("saffron", "menu" if sg > 0 else "yorum"), 0, D + 66, 40, dark="siyah")
+    p.front.add(label("MENÜ", 0, D + 35, 4.0, tr=2.6), "altin")
+    p.front.add(label("MASA 02", 0, D + 25, 3.4, tr=1.4), "siyah")
+    p.back.add(stars(0, D + 35, 2.3, gap=1.3), "altin")
+    p.back.add(label("BİZİ DEĞERLENDİRİN", 0, D + 25, 3.4, tr=0.6), "siyah")
+    p.back.add(label("MASA 02", 0, D + 16, 3.4, tr=1.4), "siyah")
+    foot, hb = foot_plain(RR(108, 30, 5), 10, 96, "siyah")
+    return standard(d, p, foot, hb, "siyah ince kaide 108 × 30 mm")
+
+
+def t33_olea():
+    d = Design("33_olea", "Olea", "Akdeniz mutfağı", "1qr",
+               "Yatay kart: adaçayı yeşili zemin, fildişi çerçeve, zeytin dalı ve Fraunces; sağda QR. İki yüz aynı sayfa.",
+               masa=6)
+    pan = RR(152, 100, 6, 0, D + 48)
+    p = Panel(tab(pan, 140), "adacayi")
+    vis = pan ^ R(-99, D, 99, 999)
+    for side, sg in both(p):
+        x_ = sg * -32
+        side.add(frame1(vis, 4.0, 1.1), "fildisi")
+        side.add(olive_branch(x_, D + 80, 1.05), "fildisi")
+        side.add(tx("fraunces_k", "Olea", 15.0, x_, D + 58), "fildisi")
+        side.add(label("AKDENİZ MUTFAĞI", x_, D + 41, 3.4, tr=1.0), "koyu_yesil")
+        side.add(label("MASA 06", x_, D + 20, 3.4, tr=1.4), "fildisi")
+        side.qr(url("olea"), sg * 40, D + 48, 44, dark="koyu_yesil")
+    foot, hb = foot_plain(RR(150, 36, 10), 10, 140, "ahsap")
+    return standard(d, p, foot, hb, "ahşap ayak 150 × 36 mm")
+
+
+def t34_nar():
+    d = Design("34_nar", "Nar", "Anadolu mutfağı", "2qr",
+               "Yuvarlak, bordo zemin, pudra pembe nar simgesi ve iri Fraunces; ipek altın halka; mermer ayak.", masa=9)
+    disc, cy = round_panel(55)
+    p = Panel(tab(disc, 50, D + 2), "bordo")
+    for side, sg in both(p):
+        side.add(ring(52, 1.3, 0, cy), "altin")
+        side.add(pomegranate(0, cy + 33, 7.5), "pudra")
+        side.add(tx("fraunces_k", "NAR", 13.0, 0, cy + 15, tr=3.0), "pudra")
+        side.qr(url("nar", "menu" if sg > 0 else "yorum"), 0, cy - 17, 30)
+        side.add(label("MASA 09", 0, cy - 40.5, 3.4, tr=1.4), "pudra")
+    p.front.add(label("MENÜ", 0, cy + 3.2, 3.6, tr=2.4), "altin")
+    p.back.add(stars(0, cy + 3.2, 2.0, gap=1.1), "altin")
+    foot, hb = foot_plain(C(34), 12, 50, "mermer")
+    return standard(d, p, foot, hb, "mermer yuvarlak ayak Ø68 mm")
+
+
+def t35_atolye():
+    d = Design("35_atolye", "Atölye 7", "et & ızgara", "nfc",
+               "Dikey, antrasit zemin, iri bakır 7, Anton yazı; NFC ve QR. Beton gri kaide.", masa=7)
+    pan = RR(92, 150, 4, 0, D + 73)
+    p = Panel(tab(pan, 92), "siyah", nfc=(0, D + 25))
+    vis = pan ^ R(-99, D, 99, 999)
+    for side, sg in both(p):
+        side.add(frame1(vis, 3.4, 1.0), "bakir")
+        side.add(tx("anton", "ATÖLYE", 12.0, 0, D + 131, tr=2.4), "fildisi")
+        side.add(tx("bigsh", "7", 26.0, 0, D + 106), "bakir")
+        side.add(label("ET · IZGARA · ŞARAP", 0, D + 87.5, 3.4, tr=0.8), "fildisi")
+        side.qr(url("atolye7"), 0, D + 60, 38)
+        side.add(ring(10.0, 1.2, 0, D + 25), "bakir")
+        side.add(phone_waves(0.5, D + 25, 11.0), "fildisi")
+        side.add(label("MASA 07" if sg > 0 else "DOKUN · OKUT", 0, D + 9.5, 3.4, tr=1.2 if sg > 0 else 0.6), "bakir")
+    foot, hb = foot_plain(RR(104, 40, 3), 14, 92, "gri")
+    return standard(d, p, foot, hb, "beton gri kaide 104 × 40 mm")
+
+
+def t36_beyaz():
+    d = Design("36_beyaz", "Beyaz Masa", "modern mutfak", "1qr",
+               "Yatay, yalın: beyaz zemin, siyah Syne küçük harf, ince çizgi ve iri masa numarası; sağda QR.", masa=12)
+    pan = RR(150, 96, 3, 0, D + 46)
+    p = Panel(tab(pan, 140), "beyaz")
+    for side, sg in both(p):
+        x0 = -66 if sg > 0 else 14
+        side.add(tx("syne", "beyaz masa", 8.0, x0, D + 76, align="l", max_w=58), "siyah")
+        side.add(rule(x0, x0 + 52, D + 64.5, 1.0), "siyah")
+        side.add(label("MODERN MUTFAK" if sg > 0 else "MENÜ · YORUM · SİPARİŞ", x0, D + 56, 3.4,
+                       tr=1.0 if sg > 0 else 0.4, align="l", max_w=56), "siyah")
+        side.add(label("MASA", x0, D + 36, 3.4, tr=1.4, align="l"), "siyah")
+        side.add(tx("syne", "12", 18.0, x0, D + 20, align="l"), "siyah")
+        side.qr(url("beyazmasa"), sg * 40, D + 46, 46, dark="siyah")
+    foot, hb = foot_plain(RR(150, 28, 4), 10, 140, "siyah")
+    return standard(d, p, foot, hb, "siyah ince kaide 150 × 28 mm")
+
+
+def t37_lune():
+    d = Design("37_lune", "Lune", "cafe · bistro", "nfc",
+               "Yuvarlak, lacivert zemin, ipek altın hilal ve yıldızlar, Playfair italik; QR ve NFC.", masa=5)
+    disc, cy = round_panel(55)
+    p = Panel(tab(disc, 50, D + 2), "lacivert", nfc=(24, cy - 17.5))
+    for side, sg in both(p):
+        side.add(ring(52, 1.2, 0, cy), "altin")
+        side.add(crescent(-2, cy + 33, 8.5) + star(9, cy + 40, 2.2) + star(13, cy + 30, 1.6) + star(-15, cy + 39, 1.4),
+                 "altin")
+        side.add(tx("playfair_ki", "Lune", 12.0, 0, cy + 15), "fildisi")
+        side.add(label("CAFE · BİSTRO", 0, cy + 3, 3.2, tr=1.4), "altin")
+        side.qr(url("lune"), sg * -8, cy - 17.5, 31)
+        side.add(ring(8.6, 1.1, sg * 24, cy - 17.5), "altin")
+        side.add(phone_waves(sg * 24 + 0.4, cy - 17.5, 9.5), "fildisi")
+        side.add(label("MASA 05", 0, cy - 40.5, 3.4, tr=1.4), "fildisi")
+    foot, hb = foot_plain(RR(80, 24, 6), 10, 50, "altin")
+    return standard(d, p, foot, hb, "ipek altın ince kaide 80 × 24 mm")
+
+
+def t38_kekik():
+    d = Design("38_kekik", "Kekik", "ev yemekleri", "2qr",
+               "Dikey, zeytin yeşili zemin, fildişi kekik dalı, çerçeve ve Fraunces; ahşap ayak. Ön menü, arka yorum.",
+               masa=3)
+    pan = RR(96, 140, 12, 0, D + 68)
+    p = Panel(tab(pan, 96), "zeytin")
+    vis = pan ^ R(-99, D, 99, 999)
+    for side, sg in both(p):
+        side.add(frame1(vis, 4.0, 1.1), "fildisi")
+        side.add(thyme(0, D + 117, 0.9), "fildisi")
+        side.add(tx("fraunces_k", "Kekik", 13.0, 0, D + 96), "fildisi")
+        side.add(label("EV YEMEKLERİ", 0, D + 84, 3.6, tr=1.6), "fildisi")
+        side.qr(url("kekik", "menu" if sg > 0 else "yorum"), 0, D + 58, 36)
+        side.add(label("MASA 03", 0, D + 19, 3.4, tr=1.4), "fildisi")
+    p.front.add(label("MENÜ", 0, D + 30, 4.0, tr=2.4), "fildisi")
+    p.back.add(stars(0, D + 30, 2.3, gap=1.2), "fildisi")
+    foot, hb = foot_plain(RR(104, 34, 8), 12, 96, "ahsap")
+    return standard(d, p, foot, hb, "ahşap ayak 104 × 34 mm")
+
+
+def t39_coral():
+    d = Design("39_coral", "Coral", "deniz ürünleri", "2qr",
+               "Yatay, mercan zemin, lacivert Archivo geniş yazı ve dalga çizgileri; sağda QR. Ön menü, arka yorum.",
+               masa=8)
+    pan = RR(150, 100, 6, 0, D + 48)
+    p = Panel(tab(pan, 140), "mercan")
+    for side, sg in both(p):
+        x_ = sg * -32
+        side.add(tx("archivo_x", "CORAL", 11.0, x_, D + 70, tr=1.6), "lacivert")
+        side.add(label("DENİZ ÜRÜNLERİ", x_, D + 57, 3.4, tr=1.0), "lacivert")
+        side.add(waves(x_ - 26, x_ + 26, D + 41, 3, 1.5, 13.0, 5.0, 1.2), "fildisi")
+        side.add(label("MASA 08", x_, D + 17, 3.4, tr=1.4), "lacivert")
+        side.qr(url("coral", "menu" if sg > 0 else "yorum"), sg * 42, D + 48, 42, dark="lacivert")
+    foot, hb = foot_plain(RR(150, 34, 6), 10, 140, "lacivert")
+    return standard(d, p, foot, hb, "lacivert ayak 150 × 34 mm")
+
+
+def t40_mavikapi():
+    d = Design("40_mavikapi", "Mavi Kapı", "Ege mutfağı", "1qr",
+               "Dikey, kobalt mavi zemin, beyaz kapı kemeri çizgisi ve Cinzel; mermer kaide. İki yüz aynı sayfa.",
+               masa=11)
+    pan = RR(96, 146, 5, 0, D + 71)
+    p = Panel(tab(pan, 96), "kobalt")
+    door = U(R(-36, D + 4, 36, D + 104), C(36, 0, D + 104))
+    door_line = door - door.offset(-1.4, J)
+    for side, sg in both(p):
+        side.add(door_line, "beyaz")
+        side.add(tx("cinzel", "MAVİ KAPI", 7.0, 0, D + 114, tr=1.4, max_w=58), "beyaz")
+        side.add(label("EGE MUTFAĞI", 0, D + 102.5, 3.4, tr=1.6), "beyaz")
+        side.qr(url("mavikapi"), 0, D + 70, 40, light="beyaz")
+        side.add(label("MENÜ · YORUM" if sg > 0 else "OKUTUN", 0, D + 36, 3.6, tr=1.0), "beyaz")
+        side.add(label("MASA 11", 0, D + 26, 3.4, tr=1.4), "beyaz")
+    foot, hb = foot_plain(RR(108, 36, 4), 12, 96, "mermer")
+    return standard(d, p, foot, hb, "mermer kaide 108 × 36 mm")
+
+
+def t41_tuzbiber():
+    d = Design("41_tuzbiber", "Tuz & Biber", "ızgara evi", "2qr",
+               "Kare, siyah zemin, beyaz tuz-biber simgesi ve Anton yazı; ahşap ayak. Ön menü, arka yorum.", masa=1)
+    pan = RR(112, 112, 8, 0, D + 54)
+    p = Panel(tab(pan, 112), "siyah")
+    vis = pan ^ R(-99, D, 99, 999)
+    for side, sg in both(p):
+        side.add(frame1(vis, 3.6, 1.0), "beyaz")
+        side.add(salt_pepper(0, D + 95, 5.6), "beyaz")
+        side.add(tx("anton", "TUZ & BİBER", 11.0, 0, D + 79, tr=1.2), "beyaz")
+        side.add(label("IZGARA EVİ", 0, D + 68.5, 3.4, tr=2.0), "beyaz")
+        side.qr(url("tuzbiber", "menu" if sg > 0 else "yorum"), 0, D + 42, 34)
+    p.front.add(label("MENÜ · MASA 01", 0, D + 13, 3.4, tr=1.0), "beyaz")
+    p.back.add(stars(0, D + 19.5, 2.0, gap=1.0), "beyaz")
+    p.back.add(label("DEĞERLENDİRİN", 0, D + 12, 3.4, tr=0.6), "beyaz")
+    foot, hb = foot_plain(RR(120, 34, 6), 12, 112, "ahsap")
+    return standard(d, p, foot, hb, "ahşap ayak 120 × 34 mm")
+
+
+def t42_ada():
+    d = Design("42_ada", "Ada", "bistro · plaj", "1qr",
+               "Yuvarlak, kum beji zemin, kahverengi güneş-ufuk simgesi ve harf aralıklı Fraunces; kahverengi ayak.",
+               masa=14)
+    disc, cy = round_panel(55)
+    p = Panel(tab(disc, 50, D + 2), "kum")
+    for side, sg in both(p):
+        side.add(ring(52, 1.2, 0, cy), "kahve")
+        side.add(sun_horizon(0, cy + 33, 8.0), "kahve")
+        side.add(tx("fraunces_k", "ADA", 12.0, 0, cy + 15, tr=4.0), "kahve")
+        side.add(label("BİSTRO · PLAJ", 0, cy + 3, 3.2, tr=1.6), "kahve")
+        side.qr(url("ada"), 0, cy - 17.5, 31, dark="kahve")
+        side.add(label("MASA 14", 0, cy - 39.5, 3.4, tr=1.4), "kahve")
+    foot, hb = foot_plain(C(32), 12, 50, "kahve")
+    return standard(d, p, foot, hb, "kahverengi yuvarlak ayak Ø64 mm")
+
+
+def t43_bakir():
+    d = Design("43_bakir", "Bakır", "şarap & meze", "2qr",
+               "Yatay, antrasit zemin, ipek bakır çift çerçeve ve kadeh, Bodoni; bakır ince kaide. Ön menü, arka yorum.",
+               masa=6)
+    pan = RR(150, 98, 4, 0, D + 47)
+    p = Panel(tab(pan, 140), "siyah")
+    vis = pan ^ R(-99, D, 99, 999)
+    for side, sg in both(p):
+        x_ = sg * -32
+        side.add(frame2(vis, 3.4, 1.1, 5.4, 0.8), "bakir")
+        side.add(wine_glass(x_, D + 77, 0.95), "bakir")
+        side.add(tx("bodoni", "BAKIR", 11.0, x_, D + 56, tr=3.0), "fildisi")
+        side.add(label("ŞARAP · MEZE", x_, D + 44, 3.4, tr=1.6), "bakir")
+        side.add(label("MASA 06", x_, D + 21, 3.4, tr=1.4), "fildisi")
+        side.qr(url("bakir", "menu" if sg > 0 else "yorum"), sg * 40, D + 47, 42)
+    foot, hb = foot_plain(RR(150, 24, 4), 9, 140, "bakir")
+    return standard(d, p, foot, hb, "ipek bakır ince kaide 150 × 24 mm")
+
+
+def t44_yesilev():
+    d = Design("44_yesilev", "Yeşil Ev", "bahçe cafe", "nfc",
+               "Dikey, koyu yeşil zemin, köşelerde açık yeşil yapraklar, Fraunces italik; NFC ve QR; terrakota ayak.",
+               masa=10)
+    pan = RR(94, 142, 14, 0, D + 69)
+    p = Panel(tab(pan, 94), "koyu_yesil", nfc=(0, D + 33))
+    leaves = U(leaf(40, D + 134, 16, 7, 205), leaf(40, D + 134, 13, 6, 240), leaf(40, D + 134, 11, 5, 180),
+               leaf(-40, D + 6, 16, 7, 25), leaf(-40, D + 6, 13, 6, 60), leaf(-40, D + 6, 11, 5, 0))
+    for side, sg in both(p):
+        side.add(mirror_fn(sg)(leaves) ^ pan.offset(-2.0, J), "yesil")
+        side.add(tx("fraunces_i", "Yeşil Ev", 11.0, 0, D + 110), "fildisi")
+        side.add(label("BAHÇE CAFE", 0, D + 98, 3.4, tr=2.0), "yesil")
+        side.qr(url("yesilev"), 0, D + 70, 36)
+        side.add(ring(10.0, 1.2, 0, D + 33), "yesil")
+        side.add(phone_waves(0.5, D + 33, 11.0), "fildisi")
+        side.add(label("MASA 10" if sg > 0 else "DOKUN · OKUT", 0, D + 15, 3.4, tr=1.2 if sg > 0 else 0.6), "fildisi")
+    foot, hb = foot_plain(RR(100, 36, 8), 12, 94, "terrakota")
+    return standard(d, p, foot, hb, "terrakota ayak 100 × 36 mm")
+
+
+def t45_seker():
+    d = Design("45_seker", "Şeker", "patiseri", "2qr",
+               "Yuvarlak, pudra pembe zemin, fildişi makaron simgesi, kahverengi Norican yazı; mermer ayak.", masa=2)
+    disc, cy = round_panel(55)
+    p = Panel(tab(disc, 50, D + 2), "pudra")
+    for side, sg in both(p):
+        side.add(ring(52, 1.3, 0, cy), "fildisi")
+        side.add(macaron(0, cy + 34, 0.9), "fildisi")
+        side.add(tx("norican", "Şeker", 12.0, 0, cy + 15), "kahve")
+        side.qr(url("seker", "menu" if sg > 0 else "yorum"), 0, cy - 18, 31, dark="kahve")
+        side.add(label("MASA 02", 0, cy - 39.5, 3.4, tr=1.4), "kahve")
+    p.front.add(label("PATİSERİ", 0, cy + 2.4, 3.2, tr=2.2), "kahve")
+    p.back.add(stars(0, cy + 2.4, 2.0, gap=1.0), "kahve")
+    foot, hb = foot_plain(C(32), 12, 50, "mermer")
+    return standard(d, p, foot, hb, "mermer yuvarlak ayak Ø64 mm")
+
 
 # ---------------------------------------------------------------- görüntü: stüdyo ışığı ve masa gölgesi
 
@@ -1617,14 +1992,18 @@ def work(i):
 DESIGNS = [t01_kemer, t02_balik, t03_kurek, t04_garaj, t05_zeytin, t06_kahve, t07_bistro, t08_ates, t09_limon,
            t10_sushi, t11_pide, t12_dondurma, t13_cay, t14_kasap, t15_gozleme, t16_sorf, t17_pasta, t18_tabak,
            t19_vegan, t20_tahta, t21_baklava, t22_kaktus, t23_wok, t24_tabela, t25_gunbatimi, t26_liman, t27_rooftop,
-           t28_bilet, t29_pecetelik, t30_kofte]
+           t28_bilet, t29_pecetelik, t30_kofte, t31_mira, t32_saffron, t33_olea, t34_nar, t35_atolye, t36_beyaz,
+           t37_lune, t38_kekik, t39_coral, t40_mavikapi, t41_tuzbiber, t42_ada, t43_bakir, t44_yesilev, t45_seker]
 NAME_FONT = {"kemer": "cinzel", "balik": "fraunces_i", "kurek": "playfair_k", "garaj": "anton", "zeytin": "fraunces",
              "kahve": "fraunces_ki", "bistro": "playfair_ki", "ates": "bigsh", "limon": "fraunces_k", "sushi": "syne",
              "pide": "fraunces_k", "dondurma": "fraunces_ki", "cay": "playfair_k", "kasap": "bodoni",
              "gozleme": "fraunces_k", "sorf": "norican", "pasta": "norican", "tabak": "bodoni", "vegan": "fraunces_k",
              "tahta": "caveat", "baklava": "playfair_k", "kaktus": "bricolage", "wok": "archivo_x", "tabela": "barlow",
              "gunbatimi": "fraunces_k", "liman": "fraunces_k", "rooftop": "unbounded", "bilet": "righteous",
-             "pecetelik": "norican", "kofte": "anton"}
+             "pecetelik": "norican", "kofte": "anton", "mira": "bodoni", "saffron": "bodoni", "olea": "fraunces_k",
+             "nar": "fraunces_k", "atolye": "anton", "beyaz": "syne", "lune": "playfair_ki", "kekik": "fraunces_k",
+             "coral": "archivo_x", "mavikapi": "cinzel", "tuzbiber": "anton", "ada": "fraunces_k", "bakir": "bodoni",
+             "yesilev": "fraunces_i", "seker": "norican"}
 
 
 # ---------------------------------------------------------------- müşteri kataloğu
@@ -1773,8 +2152,8 @@ def cover(rows, n_pages, shots):
     dr = ImageDraw.Draw(im)
     dr.text((80, 110), "Masalık", font=font_ui(170, "serif_k"), fill=INK)
     dr.text((86, 308), "Koleksiyonu", font=font_ui(96, "serif_i"), fill=GOLD)
-    dr.text((90, 440), "QR menü · Google yorumu · NFC   —   30 tasarım, iki yüzlü, kabartmalı", font=font_ui(34),
-            fill=MUTED)
+    dr.text((90, 440), f"QR menü · Google yorumu · NFC   —   {len(rows)} tasarım, iki yüzlü, kabartmalı",
+            font=font_ui(34), fill=MUTED)
     kapak = os.path.join(OUT_DIR, "foto", "kapak.png")
     W_ = PAGE[0] - 160
     if os.path.exists(kapak):
@@ -1798,13 +2177,15 @@ def cover(rows, n_pages, shots):
             dr.text((x, ty), line, font=font_ui(25), fill=MUTED)
             ty += 36
     if shots:
-        ph_im = phone(shots[0][1], 330)
+        home = next((h for s_, h, _ in shots if s_["slug"] == "forno"), shots[0][1])
+        ph_im = phone(home, 330)
         shadowed(im, ph_im, (PAGE[0] - 80 - 330, y - 40), blur=24, off=(0, 22), alpha=0.35)
     y += 400
     dr.text((80, y), "Neden bu masalıklar?", font=font_ui(40, "serif_k"), fill=INK)
     y += 66
     for line in ("Kabartmalı: yazılar, çerçeveler ve QR karosu yüzeyden yükselir; ışıkta derinlik kazanır.",
                  "İki yüzlü: iki plaka sırt sırta, masanın her iki tarafına da hitap eder.",
+                 "İki seri: 30 tasarım serisi ve yuvarlak, dikey, yatay 15 sade standart model.",
                  "Renkler baskının içinde: sticker değil; silinmez, solmaz, yıkanır.",
                  "QR adresi bizim sistemimizde: menü ya da bağlantı değişse de masalık değişmez.",
                  "Masa numarası her masalığa ayrı basılır; işletmeye özel menü sitesi dahil."):
@@ -1818,10 +2199,10 @@ def cover(rows, n_pages, shots):
     return im
 
 
-def design_page(group, p, n):
+def design_page(group, p, n, title="Masalık Koleksiyonu"):
     im = Image.new("RGB", PAGE, PAPER)
     dr = ImageDraw.Draw(im)
-    header(im, dr, p, n)
+    header(im, dr, p, n, title)
     top, ch, gap = 160, 660, 36
     pw, ph = 490, 600
     for k, r in enumerate(group):
@@ -1878,14 +2259,20 @@ def design_page(group, p, n):
     return im
 
 
-def overview(rows, p, n):
+def overview(rows, p, n, title="Tüm tasarımlar", sub=None, cols=5, head="Masalık Koleksiyonu"):
     im = Image.new("RGB", PAGE, PAPER)
     dr = ImageDraw.Draw(im)
-    header(im, dr, p, n)
-    dr.text((80, 150), "Tüm tasarımlar", font=font_ui(56, "serif_k"), fill=INK)
-    cols, cw, chh = 5, 282, 302
+    header(im, dr, p, n, head)
+    dr.text((80, 150), title, font=font_ui(56, "serif_k"), fill=INK)
+    top = 250
+    if sub:
+        dr.text((82, 228), sub, font=font_ui(25), fill=MUTED)
+        top = 300
+    nrows = -(-len(rows) // cols)
+    cw = (PAGE[0] - 160 - (cols - 1) * 15) // cols
+    chh = min((PAGE[1] - 150 - top) // nrows - 14, int(cw * 1.07))
     for k, r in enumerate(rows):
-        x0, y0 = 80 + (k % cols) * (cw + 15), 250 + (k // cols) * (chh + 14)
+        x0, y0 = 80 + (k % cols) * (cw + 15), top + (k // cols) * (chh + 14)
         if r["on"].mode == "RGBA":
             cell = studio(cw, chh)
             fit = A.fit_into(r["on"], cw - 20, chh - 70)
@@ -1911,14 +2298,14 @@ def sites_page(group, p, n, last=False):
     dr = ImageDraw.Draw(im)
     header(im, dr, p, n)
     dr.text((80, 150), "Masalıktan açılan sayfa", font=font_ui(56, "serif_k"), fill=INK)
-    dr.text((82, 228), "Her işletmeye özel menü sitesi: masa numarası, menü, Google yorumu, Wi-Fi, sipariş, garson çağır.",
+    dr.text((82, 228), "Her işletmeye kendi tarzında site: fotoğraflı menü, masa numarası, Google yorumu, Wi-Fi, sipariş.",
             font=font_ui(25), fill=MUTED)
     cw, chh = (PAGE[0] - 160 - 40) // 2, 960
     for k, (s, home, menu) in enumerate(group):
         x0, y0 = 80 + (k % 2) * (cw + 40), 300 + (k // 2) * (chh + 20)
-        back = phone(menu, 300)
-        front = phone(home, 330)
-        shadowed(im, back, (x0 + cw - 300 - 40, y0 + 10), blur=20, off=(0, 16), alpha=0.28)
+        back = phone(menu, 288)
+        front = phone(home, 312)
+        shadowed(im, back, (x0 + cw - 288 - 40, y0 + 10), blur=20, off=(0, 16), alpha=0.28)
         shadowed(im, front, (x0 + 40, y0 + 70), blur=22, off=(0, 20), alpha=0.34)
         cy = y0 + 70 + front.height + 26
         try:
@@ -1927,6 +2314,8 @@ def sites_page(group, p, n, last=False):
             nf = font_ui(40, "serif_k")
         dr.text((x0 + 40, cy), tr_upper(s["name"]) if s["slug"] == "kaleici" else s["name"], font=nf, fill=INK)
         dr.text((x0 + 40, cy + 54), f"Masalık {s['no']:02d} · {s['slug']}.{DOMAIN}", font=font_ui(21), fill=MUTED)
+        if s.get("stil"):
+            dr.text((x0 + 40, cy + 86), s["stil"][0].upper() + s["stil"][1:], font=font_ui(21, "bold"), fill=GOLD)
     if last:
         y0 = 300 + chh + 20
         box_ = (80, y0, PAGE[0] - 80, y0 + 330)
@@ -1964,11 +2353,19 @@ def sites_page(group, p, n, last=False):
 
 def catalog(rows):
     shots = site_shots()
-    groups = [rows[k:k + 3] for k in range(0, len(rows), 3)]
+    main_, std = [r for r in rows if r["i"] <= 30], [r for r in rows if r["i"] > 30]
+    groups = [main_[k:k + 3] for k in range(0, len(main_), 3)]
+    sgroup = [std[k:k + 3] for k in range(0, len(std), 3)]
     sgroups = [shots[k:k + 4] for k in range(0, len(shots), 4)]
-    n = 1 + len(groups) + 1 + len(sgroups)
+    n = 1 + len(groups) + 1 + (1 + len(sgroup) if std else 0) + len(sgroups)
     pages = [cover(rows, n, shots)] + [design_page(g, k + 2, n) for k, g in enumerate(groups)]
-    pages.append(overview(rows, len(pages) + 1, n))
+    pages.append(overview(main_, len(pages) + 1, n, "Tasarım serisi · 01–30"))
+    if std:
+        pages.append(overview(std, len(pages) + 1, n, f"Standart seri · 31–{30 + len(std)}",
+                              "Yuvarlak, dikey ve yatay; sade, modern ve şık. Her işletmeye uyan zamansız modeller.",
+                              cols=3, head="Masalık Koleksiyonu · Standart seri"))
+        for g in sgroup:
+            pages.append(design_page(g, len(pages) + 1, n, "Masalık Koleksiyonu · Standart seri"))
     for k, g in enumerate(sgroups):
         pages.append(sites_page(g, len(pages) + 1, n, last=k == len(sgroups) - 1 and len(g) <= 2))
     for f in os.listdir(OUT_DIR):

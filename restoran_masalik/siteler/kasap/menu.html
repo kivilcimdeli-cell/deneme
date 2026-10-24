@@ -10,72 +10,55 @@
 @font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
 @font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
 @font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
 @font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
-:root{--bg:#1C1714;--fg:#EFE6DA;--muted:#A49584;--line:#33291F;--card:#251E19;--card-fg:#EFE6DA;--accent:#B07C4F;--accent-fg:#1C1714;--chip:#33291F;--chip-fg:#D7A574;--hero:#1C1714;--hero-fg:#EFE6DA;--display:Bodoni;--dw:800;--ds:normal;--bls:.06em;--price:#D7A574;--r:6px;--shadow:none}
+
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg)}
-body{font-family:Jost,'Noto Sans',sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased;font-size:16px}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-.hero{background:var(--hero);color:var(--hero-fg);padding:60px 26px 34px;position:relative;overflow:hidden;
-  text-align:center}
-.hero svg.motif{position:absolute;left:0;top:0;width:100%;height:100%}
-.hero>*{position:relative}
-.mark{width:64px;height:64px;margin:0 auto 14px;display:block}
-.brand{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:var(--bs,46px);line-height:1.02;
-  letter-spacing:var(--bls,0)}
-.tag{font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.86;margin-top:12px}
-.table{display:inline-flex;gap:10px;align-items:center;margin-top:22px;padding:8px 18px;border-radius:999px;
-  border:1px solid var(--table-line,currentColor);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase}
-.table b{font-family:var(--display);font-size:17px;letter-spacing:.04em;font-weight:var(--dw)}
-.hi{padding:20px 22px 0;font-size:14.5px;color:var(--muted);text-align:center}
-main.btns{padding:16px 18px 10px;display:grid;gap:11px}
-.btn{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--r,18px);background:var(--card);
-  color:var(--card-fg);border:1px solid var(--line);box-shadow:var(--shadow,0 8px 22px rgba(0,0,0,.05))}
-.btn .ic{width:42px;height:42px;border-radius:calc(var(--r,18px) - 6px);display:grid;place-items:center;
-  background:var(--chip);color:var(--chip-fg);flex:none}
-.btn .ic svg{width:22px;height:22px}
-.btn b{display:block;font-weight:600;font-size:16.5px}
-.btn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
-.btn .chev{margin-left:auto;opacity:.4;width:18px;height:18px}
-.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.btn.primary small{color:inherit;opacity:.78}
-.btn.primary .ic{background:rgba(255,255,255,.16);color:inherit}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.row .btn{flex-direction:column;align-items:flex-start;gap:10px}
-.row .btn .chev{display:none}
-.stars{color:var(--star,#E2A93B);letter-spacing:2px;font-size:13px}
-.rate{margin:6px 18px 4px;padding:16px 18px;border-radius:var(--r,18px);border:1px solid var(--line);
-  display:flex;align-items:center;gap:16px;background:var(--card);color:var(--card-fg)}
-.rate .n{font-family:var(--display);font-weight:var(--dw);font-size:40px;line-height:1}
-.rate small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
-.rate .bar{margin-left:auto;display:grid;gap:4px;width:92px}
-.rate .bar i{display:block;height:5px;border-radius:3px;background:var(--line)}
-.rate .bar i b{display:block;height:100%;border-radius:3px;background:var(--star,#E2A93B)}
-.foot{padding:8px 22px 30px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
-.top{position:sticky;top:0;z-index:2;background:var(--hero);color:var(--hero-fg);padding:16px 18px;display:flex;
-  align-items:center;justify-content:space-between}
-.top .b{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:23px;letter-spacing:var(--bls,0)}
-.top .t{font-size:11.5px;letter-spacing:.2em;border:1px solid var(--table-line,currentColor);border-radius:999px;
-  padding:6px 12px;text-transform:uppercase}
-.title{padding:22px 20px 4px;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:34px}
-.lead{padding:0 20px;color:var(--muted);font-size:13.5px}
-.tabs{display:flex;gap:8px;padding:14px 20px 8px;overflow:hidden;white-space:nowrap}
-.tabs span{padding:9px 15px;border-radius:999px;background:var(--card);font-size:14px;border:1px solid var(--line)}
-.tabs span.on{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.feature{margin:12px 20px 4px;padding:16px 18px;border-radius:var(--r,18px);background:var(--feat,var(--accent));
-  color:var(--feat-fg,var(--accent-fg));display:flex;justify-content:space-between;gap:12px;align-items:center}
-.feature small{display:block;font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
-.feature b{display:block;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin-top:3px}
-.feature .price{color:inherit;font-size:18px}
-section{padding:4px 20px 6px}
-h2{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin:16px 0 4px;display:flex;
-  align-items:center;gap:12px;letter-spacing:var(--h2ls,0)}
-h2:after{content:"";flex:1;height:1px;background:var(--line)}
-.item{padding:13px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:3px 14px}
-.item b{font-size:16.5px;font-weight:600}
-.item p{grid-column:1;color:var(--muted);font-size:13.2px;line-height:1.45}
-.price{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;font-size:15.5px;color:var(--price,var(--accent));
-  white-space:nowrap;grid-row:1;grid-column:2}
-.pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
-  background:var(--chip);color:var(--chip-fg);margin-left:6px;vertical-align:2px;font-weight:600}
-.brand{font-size:46px}.tag{color:#D7A574}.hero{border-bottom:1px solid #33291F}</style></head><body><div class="top"><span class="b">KASAPHANE</span><span class="t">Masa 07</span></div><h1 class="title">Menü</h1><p class="lead">Fiyatlara KDV dahildir.</p><div class="tabs"><span class="on">Kesimler</span><span class="">Mezeler</span><span class="">Yanlar</span><span class="">Şarap</span></div><div class="feature"><span><small>Kasabın seçimi</small><b>Dry-aged antrikot</b></span><span class="price">100 g 520 ₺</span></div><section><h2>Kesimler</h2><div class="item"><b>Dana antrikot</b><span class="price">100 g 480 ₺</span><p>28 gün dinlendirilmiş</p></div><div class="item"><b>Kuzu pirzola</b><span class="price">100 g 420 ₺</span><p>Kekik, deniz tuzu</p></div><div class="item"><b>Kasap köfte<span class="pill">Usta</span></b><span class="price">540 ₺</span><p>Elde çekilmiş, közlenmiş biber</p></div><div class="item"><b>Zırh kıyma Adana<span class="pill">Acı</span></b><span class="price">560 ₺</span><p>Kuyruk yağı, isot</p></div></section></body></html>
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#1C1714;color:#EFE6DA}
+.fs{position:relative;height:844px;overflow:hidden}
+.fs>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.3) translateY(3%)}
+.fs:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,14,12,.92) 0%,
+  rgba(18,14,12,.35) 30%,rgba(18,14,12,.15) 46%,rgba(18,14,12,.88) 68%,#1C1714 100%)}
+.fs .t{position:absolute;top:40px;left:0;right:0;text-align:center;z-index:2}
+.fs .t svg{width:56px;height:56px;margin:0 auto 8px;display:block}
+.fs .t b{font-family:Bodoni;font-weight:800;font-size:44px;letter-spacing:.08em;display:block}
+.fs .t span{font-size:12px;letter-spacing:.32em;color:#D7A574;text-transform:uppercase}
+.fs .t em{display:inline-block;margin-top:14px;font-style:normal;font-size:11.5px;letter-spacing:.24em;
+  border:1px solid #D7A574;padding:6px 12px}
+.gl{position:absolute;left:16px;right:16px;bottom:24px;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gl a{padding:14px;background:rgba(40,32,26,.55);backdrop-filter:blur(14px);border:1px solid rgba(215,165,116,.35);
+  display:flex;flex-direction:column;gap:8px;font-size:15px}
+.gl a svg{width:22px;height:22px;color:#D7A574}
+.gl a small{color:#B9AA98;font-size:12px}
+.gl a.p{grid-column:1/3;flex-direction:row;justify-content:space-between;align-items:center;background:#B07C4F;
+  color:#1C1714;border-color:#B07C4F;font-family:Bodoni;font-weight:800;font-size:24px;letter-spacing:.06em}
+.gl a.p svg{color:#1C1714}
+.gl .rt{grid-column:1/3;text-align:center;font-size:12.5px;color:#B9AA98;margin-top:2px}
+.gl .rt b{font-family:Bodoni;color:#EFE6DA;font-size:19px}.gl .rt i{font-style:normal;color:#D7A574;letter-spacing:2px}
+.tp{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid #33291F}
+.tp b{font-family:Bodoni;font-weight:800;font-size:22px;letter-spacing:.1em}
+.tp span{font-size:11px;letter-spacing:.24em;color:#D7A574}
+.hero{position:relative;height:250px;overflow:hidden}
+.hero img{width:100%;height:100%;object-fit:cover;transform:scale(1.2)}
+.hero div{position:absolute;inset:auto 0 0 0;padding:40px 18px 14px;background:linear-gradient(transparent,#1C1714)}
+.hero small{font-size:10.5px;letter-spacing:.3em;color:#D7A574;text-transform:uppercase}
+.hero b{display:block;font-family:Bodoni;font-weight:800;font-size:28px;line-height:1.1}
+.hero .num{color:#D7A574}
+.cap{font-family:Bodoni;font-style:italic;font-size:14px;color:#B9AA98;padding:4px 18px 0}
+.tb{margin:14px 18px 0}
+.tb h2{font-family:Bodoni;font-weight:800;font-size:13px;letter-spacing:.34em;color:#D7A574;
+  border-bottom:1px solid #D7A574;padding-bottom:6px}
+.tb .r{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-bottom:1px solid #33291F}
+.tb .r b{font-family:Bodoni;font-weight:700;font-size:17px}
+.tb .r p{font-size:12.4px;color:#A49584;grid-column:1}
+.tb .r .num{color:#D7A574;grid-row:1;grid-column:2;font-size:14px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px 18px 26px}
+.three img{width:100%;aspect-ratio:3/4;object-fit:cover}
+.three span{display:block;font-family:Bodoni;font-size:13px;margin-top:5px}
+</style></head><body><div class="tp"><b>KASAPHANE</b><span>MASA 07</span></div><div class="hero"><img src="../img/et_antrikot.jpg" alt=""><div><small>Kasabın seçimi</small><b>Dry-aged antrikot</b><span class="num">100 g · 520 ₺</span></div></div><p class="cap">28 gün dinlendirildi, meşe kömüründe pişer.</p><div class="tb"><h2>KESİMLER · GRAMLA</h2><div class="r"><b>Dana antrikot</b><span class="num">100 g 480 ₺</span><p>28 gün dinlendirilmiş</p></div><div class="r"><b>Bonfile</b><span class="num">100 g 560 ₺</span><p>Tereyağı, kekik</p></div><div class="r"><b>Kuzu pirzola</b><span class="num">100 g 420 ₺</span><p>Kekik, deniz tuzu</p></div></div><div class="three"><div><img src="../img/et_pirzola.jpg" alt=""><span>Pirzola · 420 ₺</span></div><div><img src="../img/et_kofte.jpg" alt=""><span>Köfte · 540 ₺</span></div><div><img src="../img/et_adana.jpg" alt=""><span>Adana · 560 ₺</span></div></div></body></html>

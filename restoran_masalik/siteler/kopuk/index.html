@@ -10,72 +10,65 @@
 @font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
 @font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
 @font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
 @font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
-:root{--bg:#F5EEE4;--fg:#3B2A22;--muted:#8F7B6C;--line:#E7D9C7;--card:#FFFBF5;--card-fg:#3B2A22;--accent:#4E3428;--accent-fg:#F5E9D8;--chip:#EFE2CF;--chip-fg:#4E3428;--hero:#C6A57F;--hero-fg:#3B2A22;--display:Fraunces;--dw:900;--ds:italic;--price:#4E3428;--r:26px}
+
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg)}
-body{font-family:Jost,'Noto Sans',sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased;font-size:16px}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-.hero{background:var(--hero);color:var(--hero-fg);padding:60px 26px 34px;position:relative;overflow:hidden;
-  text-align:center}
-.hero svg.motif{position:absolute;left:0;top:0;width:100%;height:100%}
-.hero>*{position:relative}
-.mark{width:64px;height:64px;margin:0 auto 14px;display:block}
-.brand{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:var(--bs,46px);line-height:1.02;
-  letter-spacing:var(--bls,0)}
-.tag{font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.86;margin-top:12px}
-.table{display:inline-flex;gap:10px;align-items:center;margin-top:22px;padding:8px 18px;border-radius:999px;
-  border:1px solid var(--table-line,currentColor);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase}
-.table b{font-family:var(--display);font-size:17px;letter-spacing:.04em;font-weight:var(--dw)}
-.hi{padding:20px 22px 0;font-size:14.5px;color:var(--muted);text-align:center}
-main.btns{padding:16px 18px 10px;display:grid;gap:11px}
-.btn{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--r,18px);background:var(--card);
-  color:var(--card-fg);border:1px solid var(--line);box-shadow:var(--shadow,0 8px 22px rgba(0,0,0,.05))}
-.btn .ic{width:42px;height:42px;border-radius:calc(var(--r,18px) - 6px);display:grid;place-items:center;
-  background:var(--chip);color:var(--chip-fg);flex:none}
-.btn .ic svg{width:22px;height:22px}
-.btn b{display:block;font-weight:600;font-size:16.5px}
-.btn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
-.btn .chev{margin-left:auto;opacity:.4;width:18px;height:18px}
-.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.btn.primary small{color:inherit;opacity:.78}
-.btn.primary .ic{background:rgba(255,255,255,.16);color:inherit}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.row .btn{flex-direction:column;align-items:flex-start;gap:10px}
-.row .btn .chev{display:none}
-.stars{color:var(--star,#E2A93B);letter-spacing:2px;font-size:13px}
-.rate{margin:6px 18px 4px;padding:16px 18px;border-radius:var(--r,18px);border:1px solid var(--line);
-  display:flex;align-items:center;gap:16px;background:var(--card);color:var(--card-fg)}
-.rate .n{font-family:var(--display);font-weight:var(--dw);font-size:40px;line-height:1}
-.rate small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
-.rate .bar{margin-left:auto;display:grid;gap:4px;width:92px}
-.rate .bar i{display:block;height:5px;border-radius:3px;background:var(--line)}
-.rate .bar i b{display:block;height:100%;border-radius:3px;background:var(--star,#E2A93B)}
-.foot{padding:8px 22px 30px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
-.top{position:sticky;top:0;z-index:2;background:var(--hero);color:var(--hero-fg);padding:16px 18px;display:flex;
-  align-items:center;justify-content:space-between}
-.top .b{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:23px;letter-spacing:var(--bls,0)}
-.top .t{font-size:11.5px;letter-spacing:.2em;border:1px solid var(--table-line,currentColor);border-radius:999px;
-  padding:6px 12px;text-transform:uppercase}
-.title{padding:22px 20px 4px;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:34px}
-.lead{padding:0 20px;color:var(--muted);font-size:13.5px}
-.tabs{display:flex;gap:8px;padding:14px 20px 8px;overflow:hidden;white-space:nowrap}
-.tabs span{padding:9px 15px;border-radius:999px;background:var(--card);font-size:14px;border:1px solid var(--line)}
-.tabs span.on{background:var(--accent);color:var(--accent-fg);border-color:transparent}
-.feature{margin:12px 20px 4px;padding:16px 18px;border-radius:var(--r,18px);background:var(--feat,var(--accent));
-  color:var(--feat-fg,var(--accent-fg));display:flex;justify-content:space-between;gap:12px;align-items:center}
-.feature small{display:block;font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
-.feature b{display:block;font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin-top:3px}
-.feature .price{color:inherit;font-size:18px}
-section{padding:4px 20px 6px}
-h2{font-family:var(--display);font-weight:var(--dw);font-style:var(--ds);font-size:21px;margin:16px 0 4px;display:flex;
-  align-items:center;gap:12px;letter-spacing:var(--h2ls,0)}
-h2:after{content:"";flex:1;height:1px;background:var(--line)}
-.item{padding:13px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:3px 14px}
-.item b{font-size:16.5px;font-weight:600}
-.item p{grid-column:1;color:var(--muted);font-size:13.2px;line-height:1.45}
-.price{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;font-size:15.5px;color:var(--price,var(--accent));
-  white-space:nowrap;grid-row:1;grid-column:2}
-.pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
-  background:var(--chip);color:var(--chip-fg);margin-left:6px;vertical-align:2px;font-weight:600}
-.brand{font-size:72px}.hero{border-radius:0 0 40px 40px}</style></head><body><header class="hero"><svg class="motif" viewBox="0 0 390 320" fill="none" stroke="#F5E9D8" stroke-width="5" stroke-linecap="round" opacity=".55"><path d="M150 40c12 14-12 22 0 38s-12 24 0 38"/><path d="M195 30c12 14-12 22 0 38s-12 24 0 38"/><path d="M240 40c12 14-12 22 0 38s-12 24 0 38"/></svg><div class="brand">köpük</div><div class="tag">Kahve &amp; espresso</div><span class="table">Masa <b>03</b></span></header><p class="hi">Wi-Fi şifresi arka yüzdeki QR&#x27;da.</p><main class="btns"><a class="btn primary" href="menu.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C6.5 4 9.5 4 12 5.8 14.5 4 17.5 4 20 5.5V19c-2.5-1.4-5.5-1.4-8 .4-2.5-1.8-5.5-1.8-8-.4z"/><path d="M12 5.8v13.6"/></svg></span><span><b>Menü</b><small>Kahveler, tatlılar, kahvaltı</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.6a7.7 7.7 0 0 1 11 0M9.4 15.6a3.6 3.6 0 0 1 5.2 0"/><circle cx="12" cy="18.6" r="1.1" fill="currentColor"/></svg></span><span><b>Wi-Fi&#x27;ye bağlan</b><small>Tek dokunuş</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><div class="row"><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg></span><span><b>Yorum yap</b><small class="stars">★★★★★</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="btn" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="16.9" cy="7.1" r=".9" fill="currentColor"/></svg></span><span><b>Instagram</b><small>@kopukkahve</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a></div></main><div class="rate"><span class="n">4,9</span><span><span class="stars">★★★★★</span><small>Google · 640 yorum</small></span><span class="bar"><i><b style="width:86%"></b></i><i><b style="width:9%"></b></i><i><b style="width:3%"></b></i><i><b style="width:1%"></b></i><i><b style="width:1%"></b></i></span></div><p class="foot">Kaleiçi / Antalya · 08:00–23:00</p></body></html>
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#F5EEE4;color:#3B2A22;padding-bottom:90px}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0}
+.hd b{font-family:Fraunces;font-style:italic;font-weight:900;font-size:32px}
+.hd span{background:#4E3428;color:#F5E9D8;border-radius:999px;padding:7px 13px;font-size:12px;letter-spacing:.12em}
+.hi{padding:14px 20px 0}
+.hi small{font-size:13px;color:#8F7B6C}
+.hi h1{font-family:Fraunces;font-weight:800;font-size:31px;line-height:1.1;margin-top:2px}
+.sr{margin:14px 20px 0;display:flex;align-items:center;gap:10px;background:#FFFBF5;border:1px solid #E7D9C7;
+  border-radius:999px;padding:12px 16px;color:#8F7B6C;font-size:14px}
+.sr svg{width:20px;height:20px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;padding:18px 20px 10px}
+.sh b{font-family:Fraunces;font-weight:800;font-size:20px}.sh a{font-size:13px;color:#8F7B6C}
+.car{display:flex;gap:12px;padding-left:20px;overflow:hidden}
+.cc{flex:none;width:158px;background:#FFFBF5;border-radius:24px;overflow:hidden;border:1px solid #E7D9C7}
+.cc img{width:100%;height:150px;object-fit:cover}
+.cc div{padding:10px 12px 12px}
+.cc b{font-weight:600;font-size:15px;display:block}
+.cc .num{color:#4E3428;font-size:14px}
+.cc em{font-style:normal;font-size:10.5px;background:#4E3428;color:#F5E9D8;border-radius:999px;padding:2px 8px;
+  margin-left:6px}
+.cats{display:flex;justify-content:space-between;padding:18px 20px 0;text-align:center;font-size:12.5px}
+.cats a{width:76px}
+.cats img{width:60px;height:60px;border-radius:50%;object-fit:cover;margin:0 auto 6px;border:3px solid #FFFBF5;
+  box-shadow:0 6px 14px rgba(60,40,20,.15)}
+.wf{margin:16px 20px 0;display:flex;align-items:center;gap:12px;background:#4E3428;color:#F5E9D8;border-radius:22px;
+  padding:14px 16px}
+.wf svg{width:26px;height:26px}
+.wf small{display:block;font-size:12px;opacity:.8}
+.wf i{margin-left:auto;width:46px;height:26px;border-radius:999px;background:#C6A57F;position:relative;flex:none}
+.wf i:after{content:"";position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#FFFBF5;border-top:1px solid #E7D9C7;display:flex;
+  justify-content:space-around;padding:10px 0 24px;font-size:11px;color:#8F7B6C;z-index:5}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav svg{width:24px;height:24px}
+.nav a.on{color:#4E3428;font-weight:600}
+.tabs{display:flex;gap:8px;padding:14px 20px 6px;overflow:hidden;white-space:nowrap}
+.tabs span{padding:9px 15px;border-radius:999px;background:#FFFBF5;border:1px solid #E7D9C7;font-size:14px}
+.tabs span.on{background:#4E3428;color:#F5E9D8;border-color:#4E3428}
+.li{display:flex;align-items:center;gap:14px;margin:0 20px;padding:11px 0;border-bottom:1px solid #E7D9C7}
+.li img{width:66px;height:66px;border-radius:50%;object-fit:cover;flex:none}
+.li b{font-weight:600;font-size:16px;display:block}
+.li p{font-size:12.6px;color:#8F7B6C;line-height:1.35}
+.li .num{display:block;color:#4E3428;margin-top:3px;font-size:14.5px}
+.li .add{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid #4E3428;display:grid;
+  place-items:center;color:#4E3428}
+.li .add.on{background:#4E3428;color:#F5E9D8}
+.li .add svg{width:16px;height:16px}
+.ct{position:fixed;left:14px;right:14px;bottom:16px;background:#4E3428;color:#F5E9D8;border-radius:22px;display:flex;
+  justify-content:space-between;align-items:center;padding:16px 20px;z-index:5;box-shadow:0 12px 30px rgba(60,30,20,.35)}
+.ct b{font-weight:600}.ct span{background:#C6A57F;color:#3B2A22;border-radius:999px;padding:7px 14px;font-weight:600;
+  font-size:14px}
+</style></head><body><div class="hd"><b>köpük</b><span>MASA 03</span></div><div class="hi"><small>Günaydın ☀</small><h1>Bugün ne içelim?</h1></div><div class="sr"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Kahve, tatlı, kahvaltı ara</div><div class="sh"><b>Bu hafta</b><a href="menu.html">Tümü</a></div><div class="car"><div class="cc"><img src="../img/kahve_fistik.jpg" alt=""><div><b>Fıstıklı latte</b><span class="num">165 ₺</span><em>Yeni</em></div></div><div class="cc"><img src="../img/kahve_flatwhite.jpg" alt=""><div><b>Flat white</b><span class="num">140 ₺</span></div></div><div class="cc"><img src="../img/kahve_cheesecake.jpg" alt=""><div><b>San Sebastian</b><span class="num">210 ₺</span></div></div></div><div class="cats"><a href="menu.html"><img src="../img/kahve_espresso.jpg" alt="">Espresso</a><a href="menu.html"><img src="../img/kahve_turk.jpg" alt="">Türk kahvesi</a><a href="menu.html"><img src="../img/kahve_flatwhite.jpg" alt="">Sütlü</a><a href="menu.html"><img src="../img/kahve_cheesecake.jpg" alt="">Tatlı</a></div><div class="wf"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.6a7.7 7.7 0 0 1 11 0M9.4 15.6a3.6 3.6 0 0 1 5.2 0"/><circle cx="12" cy="18.6" r="1.1" fill="currentColor"/></svg><span><b>Wi-Fi'ye bağlan</b><small>Kopuk_Misafir · tek dokunuş</small></span><i></i></div><nav class="nav"><a class="on" href="#"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Ana sayfa</a><a class="" href="menu.html"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C6.5 4 9.5 4 12 5.8 14.5 4 17.5 4 20 5.5V19c-2.5-1.4-5.5-1.4-8 .4-2.5-1.8-5.5-1.8-8-.4z"/><path d="M12 5.8v13.6"/></svg>Menü</a><a class="" href="#"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l-1 12h-11z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Sipariş</a><a class="" href="#"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg>Yorum</a></nav></body></html>

@@ -26,7 +26,7 @@ OUT = os.path.join(M.OUT_DIR, "foto")
 MM = 0.001
 LAYER = 0.0002
 SIZE = (760, 930)
-LIGHT = (22.0, 6.0, 12.0)                                # ana, dolgu, arka ışık (W)
+LIGHT = (26.0, 4.5, 12.0)                                # ana, dolgu, arka ışık (W)
 VIEW = {"on": (28.0, 11.0), "arka": (208.0, 11.0)}       # kamera açısı (derece), yükseklik açısı (derece)
 
 
@@ -43,8 +43,8 @@ def node(nt, kind, loc=(0, 0), **inputs):
     return n
 
 
-def material(name, rgb, metal=False, wood=False, layers=True):
-    """PLA: hafif parlak plastik; ipek: metalik; ahşap: damarlı. Katman izi ve yuvarlatılmış kenar."""
+def material(name, rgb, metal=False, wood=False, marble=False, layers=True):
+    """PLA: hafif parlak plastik; ipek: metalik; ahşap: damarlı; mermer: gri damarlı. Katman izi ve yuvarlatılmış kenar."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -66,6 +66,19 @@ def material(name, rgb, metal=False, wood=False, layers=True):
         nt.links.new(noise.outputs["Fac"], ramp.inputs["Fac"])
         nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
         bsdf.inputs["Roughness"].default_value = 0.62
+    if marble:
+        tc = node(nt, "ShaderNodeTexCoord", (-900, 200))
+        noise = node(nt, "ShaderNodeTexNoise", (-650, 200), Scale=22.0, Detail=8.0, Distortion=6.0)
+        nt.links.new(tc.outputs["Object"], noise.inputs["Vector"])
+        ramp = node(nt, "ShaderNodeValToRGB", (-400, 200))     # beyaz zeminde ince gri damar
+        ramp.color_ramp.elements[0].position = 0.488
+        ramp.color_ramp.elements[0].color = srgb(rgb)
+        ramp.color_ramp.elements[1].position = 0.512
+        ramp.color_ramp.elements[1].color = srgb(rgb)
+        ramp.color_ramp.elements.new(0.5).color = (0.36, 0.36, 0.37, 1)
+        nt.links.new(noise.outputs["Fac"], ramp.inputs["Fac"])
+        nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
+        bsdf.inputs["Roughness"].default_value = 0.4
     bev = node(nt, "ShaderNodeBevel", (0, -300))
     bev.samples = 6
     bev.inputs["Radius"].default_value = 0.25 * MM
@@ -96,7 +109,7 @@ def mat_for(col, layers=True):
     key = (col, layers)
     if key not in _MATS:
         _MATS[key] = material(f"{col}_{int(layers)}", M.COL[col], metal=col in M.METAL, wood=col == "ahsap",
-                              layers=layers)
+                              marble=col == "mermer", layers=layers)
     return _MATS[key]
 
 
@@ -274,8 +287,8 @@ def render_design(fn, samples):
         right /= np.linalg.norm(right)
         flat = direction * [1, 1, 0]
         flat /= np.linalg.norm(flat)
-        key = centre + R * (0.75 * flat - 0.55 * right) + [0, 0, 0.75]
-        fill = centre + R * (0.8 * flat + 0.7 * right) + [0, 0, 0.35]
+        key = centre + R * (0.42 * flat - 0.92 * right) + [0, 0, 0.62]      # yandan: kabartma gölge atar
+        fill = centre + R * (0.85 * flat + 0.6 * right) + [0, 0, 0.3]
         rim = centre - R * flat + R * 0.5 * right + [0, 0, 0.7]
         light("ana", LIGHT[0], 0.7, key, centre, (1.0, 0.97, 0.92))
         light("dolgu", LIGHT[1], 0.9, fill, centre, (0.92, 0.95, 1.0))
@@ -361,7 +374,7 @@ def main():
     args = sys.argv[1:]
     samples = 32
     if "--kapak" in args:
-        hero(["kemer", "bistro", "rooftop", "cay", "kahve"], 48)
+        hero(["mira", "saffron", "kemer", "mavikapi", "nar"], 48)
         return
     if "--ornek" in args:
         k = args.index("--ornek")
