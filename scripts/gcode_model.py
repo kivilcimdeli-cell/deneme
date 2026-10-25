@@ -12,7 +12,6 @@ seçilir).
 Kullanım:
   python3 scripts/gcode_model.py <girdi.gcode.3mf> <çıktı.3mf>
 """
-import math
 import re
 import sys
 import zipfile
@@ -142,7 +141,7 @@ def to_cross_section(geom):
 
 def build(layers, heights):
     zs = sorted(layers)
-    slabs, cur, z0 = [], None, None
+    slabs, cur = [], None
     for k, z in enumerate(zs):
         reg = layer_region(layers[z], first=k == 0)
         bot = round(z - heights.get(z, 0.2), 3)
