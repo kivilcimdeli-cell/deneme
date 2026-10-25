@@ -3,9 +3,9 @@
 Müşteri isteği: Ø70 kapaklar iptal; Ø100 hoparlöre 2 kapak; kırmızı yalnız dış çeperde; ortada NECDET EFE ÇALIK ve
 CEMAL ÇALIK, yazı alanı biraz büyük. Hoparlöre yapıştırılacak: dış çeper arkaya doğru çıkıntılı, ucunda ona dik
 yapıştırma flanşı.
-  * Kapak Ø102,5 mm; ön plaka (ızgara) 2 mm.
+  * Kapak dış çapı Ø106,5 mm; arka çıkıntının iç çapı Ø102,5 mm (müşteri isteği); ön plaka (ızgara) 2 mm.
   * Arka çıkıntı: dış çeper arkaya 8 mm uzar (duvar 2 mm). Duvarın düz ucu hoparlörün metal çerçevesine
-    yapıştırılır (2 mm geniş halka, Ø98,5–102,5 mm); ızgara koniden 8 mm uzakta kalır. (FLANGE > 0 verilirse ucunda
+    yapıştırılır (2 mm geniş halka, Ø102,5–106,5 mm); ızgara koniden 8 mm uzakta kalır. (FLANGE > 0 verilirse ucunda
     içe doğru, altı 45° pahlı bir flanş da olur.)
   * Baskı: yüzü tablaya gelecek biçimde ters basılır. Duvar yukarı büyür, destek gerekmez; yapıştırma yüzü son
     katman (düz).
@@ -46,13 +46,14 @@ OUT_DIR = os.path.join(HK.OUT_DIR, "baski")
 J = m3.JoinType.Round
 NAMES = [("NECDET EFE", "ÇALIK"), ("CEMAL", "ÇALIK")]
 D = 100.0                                          # hoparlör çapı
+INNER = 102.5                                      # arka çıkıntının iç çapı (dış çap = INNER + 2·WALL)
 RC = 23.5                                          # rozet yarıçapı (öneride 18)
 SLOTS, TWIST = 28, 0.9                             # türbin yarığı sayısı ve kıvrımı (rad)
 INL = 0.8                                          # ön yüzde gömülü renk (4 katman)
 PLATE = 2.0                                        # ön plaka (ızgara)
 LIP, WALL = 8.0, 2.0                               # arka çıkıntı (plakanın arkasından) ve duvar kalınlığı
 FLANGE, FLANGE_T = 0.0, 1.4                        # içe doğru flanş: genişlik (0: yok, duvarın ucu yapışır), kalınlık
-CENTER = (128.0, 100.0)                            # nesne merkezi (tabla)
+CENTER = (136.0, 100.0)                            # nesne merkezi (tabla; yardımcı nozul x ≥ 20,5)
 PITCH = 110.0                                      # iki kapağın merkezleri arası
 GAP = 8.0                                          # kapaklar ile kule arası
 SHOW = {A.BLACK: HK.BLACK, A.WHITE: HK.WHITE, A.RED: HK.RED}
@@ -85,7 +86,7 @@ def lip_profile(Rc):
 def cover(line1, line2):
     """Bir kapak baskı yönünde: ön yüz z = 0'da (tablada), arka çıkıntı yukarı. {renk: Manifold} ve ölçümler.
     Ön görünüşte çizilen her şey x'te aynalanır (alttan bakınca düz okunsun)."""
-    Rc = (D + HK.EXTRA) / 2
+    Rc = INNER / 2 + WALL
     Ri = Rc - HK.RIM
     badge = A.circle(RC, 0, 0, 200)
     holes = turbine(Ri, RC)
@@ -126,7 +127,7 @@ class Plate:
         self.offsets = [(-PITCH / 2, 0.0), (PITCH / 2, 0.0)]
         self.height = PLATE + LIP
         self.tower, self.brim = tower_size(n_fil=3, prime=45.0, change_len=10.0, height=self.height)
-        r = (D + HK.EXTRA) / 2
+        r = INNER / 2 + WALL
         self.tower_xy = (CENTER[0] - self.tower / 2, CENTER[1] + r + GAP + self.brim)
         self.instances = [(*CENTER, 0)]
         self.nozzle_map = {A.BLACK: 1, A.RED: 2, A.WHITE: 2}
@@ -162,8 +163,8 @@ def checks(plate, parts):
 
 
 def section(w, h):
-    """Kesit çizimi: ön plaka, arka çıkıntı, flanş, 45° pah; hoparlör çerçevesi kesikli."""
-    Rc = (D + HK.EXTRA) / 2
+    """Kesit çizimi: ön plaka, arka çıkıntı (varsa flanş ve 45° pah); arka ölçüler kesikli çizginin üstünde."""
+    Rc = INNER / 2 + WALL
     im = Image.new("RGB", (w, h), (250, 250, 248))
     dr = ImageDraw.Draw(im)
     fs = ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), 20)
@@ -185,7 +186,7 @@ def section(w, h):
     sp = [P(r, z_top + 0.6) for r in np.linspace(r0 + 6, Rc - 1.25, 2)]
     for x in np.arange(sp[0][0], sp[1][0], 14):
         dr.line([(x, sp[0][1]), (x + 8, sp[0][1])], fill=(40, 110, 200), width=3)
-    dr.text((sp[0][0], sp[0][1] - 32), "hoparlörün çerçevesi (Ø100) — buraya yapıştırılır", font=fs,
+    dr.text((sp[0][0], sp[0][1] - 32), f"arka: iç Ø{INNER:g} · dış Ø{INNER + 2 * WALL:g} mm".replace(".", ","), font=fs,
             fill=(40, 110, 200))
     dr.line([P(Rc - WALL - FLANGE, z_top + 0.25), P(Rc, z_top + 0.25)], fill=(230, 160, 40), width=4)
     lab = [((Rc + 1.0, z_top - 1.0), f"yapıştırma yüzü {WALL + FLANGE:g} mm".replace(".", ",")),
@@ -272,7 +273,8 @@ def main():
     back = (f"ucunda içe {FLANGE:g} mm flanş, yapıştırma yüzü {WALL + FLANGE:g} mm" if FLANGE > 0 else
             f"ucu {WALL:g} mm yapıştırma yüzü".replace(".", ","))
     support = "flanşın altı 45°" if FLANGE > 0 else "düz duvar"
-    info = [f"5 · Türbin · Ø100 hoparlöre iki kapak Ø102,5 mm · arka çıkıntı {LIP:.0f} mm, {back} · rozet Ø47, "
+    info = [f"5 · Türbin · iki kapak, dış Ø{INNER + 2 * WALL:g}, iç Ø{INNER:g} mm".replace(".", ",") +
+            f" · arka çıkıntı {LIP:.0f} mm, {back} · rozet Ø47, "
             f"iki satır yazı",
             f"Ters basılır (ön yüz tablada): kırmızı dış çeper ve beyaz isimler ilk 4 katmana gömülü · {support}, "
             "destek yok · AMS: 1 siyah (ana), 2 beyaz ve 3 kırmızı (yardımcı)",

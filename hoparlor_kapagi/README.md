@@ -31,7 +31,7 @@ python3 scripts/hoparlor_kapagi.py            # 20 öneri ve katalog (4 süreçt
 python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 ```
 
-## Seçilen: 5 · Türbin, Ø100 hoparlöre 2 kapak — baskı dosyası `baski/`
+## Seçilen: 5 · Türbin, 2 kapak (iç Ø102,5, dış Ø106,5) — baskı dosyası `baski/`
 
 ![Önden](baski/foto.png)
 ![Arkadan: çıkıntı ve yapıştırma yüzü](baski/foto_arka.png)
@@ -40,17 +40,17 @@ python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 
 | | |
 | --- | --- |
-| Kapak | Ø102,5 mm, Ø100 hoparlöre |
+| Kapak | dış çap Ø106,5 mm; arka çıkıntının iç çapı Ø102,5 mm |
 | Yazı | NECDET EFE / ÇALIK ve CEMAL / ÇALIK |
 | Rozet | Ø47 mm (öneride Ø36) |
 | Yazı tipi | Saira Condensed Bold Italic, beyaz; harf içleri en az 0,7 mm |
 | Kırmızı | yalnız dış çeper |
 | Arka çıkıntı | dış çeper arkaya 8 mm uzar (duvar 2 mm); ızgarayı koniden uzak tutar |
-| Yapıştırma yüzü | çıkıntının düz ucu, 2 mm geniş halka (Ø98,5–102,5); hoparlörün çerçevesine yapıştırılır |
+| Yapıştırma yüzü | çıkıntının düz ucu, 2 mm geniş halka (Ø102,5–106,5) |
 | Izgara | 2 mm, 28 kıvrık yarık, açıklık %44; delikler en az 2,2 mm, köprüler en az 1,2 mm, tek parça |
 | AMS / nozul | 1 siyah: ana nozul<br>2 beyaz, 3 kırmızı: yardımcı nozul<br>renk değişimi yalnız ilk 4 katmanda |
-| Filament (yaklaşık) | ~40,4 g (siyah 38,6, kırmızı 1,3, beyaz 0,4) + kule |
-| Süre | PrusaSlicer ~1 sa 28 dk (kule ve nozul değişimi hariç) |
+| Filament (yaklaşık) | ~42,9 g (siyah 41,1, kırmızı 1,4, beyaz 0,4) + kule |
+| Süre | PrusaSlicer ~1 sa 33 dk (kule ve nozul değişimi hariç) |
 
 **Baskı (destek gerekmez):**
 - Ters basılır: ön yüz tablada, çıkıntı yukarı büyür.
@@ -61,8 +61,8 @@ python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 
 Ø70 kapaklar iptal edildi.
 
-Önizleme ve kesit çizimi: `baski/onizleme.png`. Çıkıntı boyu, duvar kalınlığı (= yapıştırma yüzü) ve isteğe bağlı
-iç flanş betiğin başında (`LIP`, `WALL`, `FLANGE`). Yeniden üretmek için:
+Önizleme ve kesit çizimi: `baski/onizleme.png`. Arka iç çap, çıkıntı boyu, duvar kalınlığı (= yapıştırma yüzü) ve
+isteğe bağlı iç flanş betiğin başında (`INNER`, `LIP`, `WALL`, `FLANGE`). Yeniden üretmek için:
 
 ```bash
 python3 scripts/hoparlor_kapagi_baski.py
