@@ -1,0 +1,13 @@
+{
+  "isim": "Süleyman Boylu",
+  "gorev": "Satın Alma Müdürü",
+  "otel": "Paloma Grida",
+  "grup": "Paloma Hotels",
+  "cep": "0536 458 79 25",
+  "sirket_tel": "0553 277 94 86",
+  "eposta": "suleymanboyluu@gmail.com",
+  "adres": ["İskele Mevkii", "Belek, Serik", "Antalya", "Türkiye"],
+  "harita": "https://www.google.com/maps/search/?api=1&query=Paloma+Grida+Belek+Serik+Antalya",
+  "whatsapp_mesaj": "Merhaba Süleyman Bey,",
+  "sayfa_url": "https://suleymanboylu.qrsistem.workers.dev/"
+}

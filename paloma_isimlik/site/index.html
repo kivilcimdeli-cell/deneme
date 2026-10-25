@@ -1,0 +1,65 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0E1A38"><title>Süleyman Boylu · Satın Alma Müdürü · Paloma Grida</title><meta name="description" content="Süleyman Boylu – Satın Alma Müdürü, Paloma Grida. Ara, WhatsApp, e-posta, rehbere kaydet."><meta property="og:title" content="Süleyman Boylu · Satın Alma Müdürü · Paloma Grida"><style>
+@font-face{font-family:Cinzel;src:url(fonts/display.woff) format("woff");font-weight:900;font-display:swap}
+@font-face{font-family:Fraunces;src:url(fonts/serif.woff) format("woff");font-weight:600;font-display:swap}
+@font-face{font-family:Jost;src:url(fonts/text.woff) format("woff");font-weight:600;font-display:swap}
+@font-face{font-family:Jost;src:url(fonts/text-b.woff) format("woff");font-weight:700;font-display:swap}
+:root{--navy:#0E1A38;--navy2:#162A5C;--blue:#2457D6;--sky:#8FB2FF;--sand:#F4F1EA;--ink:#141A2B;--muted:#6B7287;
+  --line:#E4E7EF}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--sand)}
+body{font-family:Jost,system-ui,sans-serif;font-weight:600;color:var(--ink);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:440px;margin:0 auto;min-height:100vh;background:var(--sand)}
+.hero{position:relative;overflow:hidden;color:#fff;text-align:center;padding:44px 24px 172px;
+  background:radial-gradient(120% 80% at 50% 0%,#24418A 0%,var(--navy2) 45%,var(--navy) 100%)}
+.hero .stars{position:absolute;inset:0;background:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),
+  radial-gradient(1px 1px at 70% 20%,#fff6,transparent),radial-gradient(1.5px 1.5px at 85% 45%,#fff5,transparent),
+  radial-gradient(1px 1px at 35% 55%,#fff4,transparent);opacity:.7}
+.logo{display:block;font-family:Cinzel;font-weight:900;font-size:40px;letter-spacing:.18em;padding-left:.18em;
+  position:relative}
+.logo-img{display:block;margin:0 auto;max-width:200px;max-height:70px;position:relative}
+.hotel{display:block;margin-top:8px;font-size:13px;letter-spacing:.5em;padding-left:.5em;color:var(--sky);position:relative}
+.waves{position:absolute;left:0;right:0;bottom:-1px;height:110px}
+.waves svg{position:absolute;bottom:0;width:200%;height:100%;left:0}
+.waves .w1{animation:drift 14s linear infinite;opacity:.35}
+.waves .w2{animation:drift 9s linear infinite reverse;opacity:.5}
+.waves .w3{animation:drift 18s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.card{position:relative;margin:-84px 18px 0;background:#fff;border-radius:26px;padding:62px 22px 22px;text-align:center;
+  box-shadow:0 18px 50px rgba(14,26,56,.18)}
+.av{position:absolute;left:50%;top:-46px;width:92px;height:92px;margin-left:-46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),#0A2989);display:grid;place-items:center;color:#fff;
+  font-family:Cinzel;font-weight:900;font-size:30px;letter-spacing:.06em;border:5px solid #fff;
+  box-shadow:0 10px 26px rgba(36,87,214,.35)}
+h1{font-family:Fraunces;font-weight:600;font-size:31px;line-height:1.1;letter-spacing:-.01em}
+.role{margin-top:8px;color:var(--blue);font-size:15px;letter-spacing:.16em;text-transform:uppercase}
+.org{margin-top:6px;color:var(--muted);font-size:14.5px}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
+.acts a{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;color:var(--ink)}
+.acts a span{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:#EEF2FC;
+  color:var(--blue);transition:transform .15s}
+.acts a:active span{transform:scale(.94)}
+.acts a span svg{width:25px;height:25px}
+.acts a.wa span{background:#E7F7EE;color:#1E9E5A}
+.list{margin:18px 18px 0;background:#fff;border-radius:22px;padding:6px 18px;box-shadow:0 8px 24px rgba(14,26,56,.06)}
+.row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .i{width:40px;height:40px;border-radius:12px;background:#F3F5FA;color:var(--navy2);display:grid;place-items:center;
+  flex:none}
+.row .i svg{width:20px;height:20px}
+.row small{display:block;color:var(--muted);font-size:12.5px;letter-spacing:.04em}
+.row b{display:block;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;word-break:break-word}
+.row .go{margin-left:auto;color:#B6BCCB;width:18px;height:18px;flex:none}
+.save{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 18px 0;padding:17px;border-radius:18px;
+  background:var(--navy);color:#fff;font-weight:700;font-size:16.5px;box-shadow:0 12px 26px rgba(14,26,56,.25)}
+.save svg{width:22px;height:22px}
+.share{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 18px 0;padding:14px;border-radius:16px;
+  border:1.5px solid var(--line);color:var(--navy2);font-weight:700;font-size:15px;background:#fff;width:calc(100% - 36px);
+  font-family:inherit;cursor:pointer}
+.share svg{width:19px;height:19px}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:24px 0 30px;letter-spacing:.06em}
+.foot b{font-family:Cinzel;font-weight:900;letter-spacing:.2em;color:var(--navy2)}
+.in{opacity:0;transform:translateY(14px);animation:up .6s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes up{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.waves svg{animation:none!important}.in{animation:none;opacity:1;transform:none}}
+</style></head><body><div class="wrap"><header class="hero"><div class="stars"></div><span class="logo">PALOMA</span><span class="hotel">GRIDA</span><div class="waves"><svg class="w1" viewBox="0 0 800 110" preserveAspectRatio="none"><path fill="#3A63C9" d="M0,110 L0,40.0 L20,45.9 L40,49.5 L60,49.5 L80,45.9 L100,40.0 L120,34.1 L140,30.5 L160,30.5 L180,34.1 L200,40.0 L220,45.9 L240,49.5 L260,49.5 L280,45.9 L300,40.0 L320,34.1 L340,30.5 L360,30.5 L380,34.1 L400,40.0 L420,45.9 L440,49.5 L460,49.5 L480,45.9 L500,40.0 L520,34.1 L540,30.5 L560,30.5 L580,34.1 L600,40.0 L620,45.9 L640,49.5 L660,49.5 L680,45.9 L700,40.0 L720,34.1 L740,30.5 L760,30.5 L780,34.1 L800,40.0 L800,110 Z"/></svg><svg class="w2" viewBox="0 0 800 110" preserveAspectRatio="none"><path fill="#2B4FA8" d="M0,110 L0,58.0 L20,62.7 L40,65.6 L60,65.6 L80,62.7 L100,58.0 L120,53.3 L140,50.4 L160,50.4 L180,53.3 L200,58.0 L220,62.7 L240,65.6 L260,65.6 L280,62.7 L300,58.0 L320,53.3 L340,50.4 L360,50.4 L380,53.3 L400,58.0 L420,62.7 L440,65.6 L460,65.6 L480,62.7 L500,58.0 L520,53.3 L540,50.4 L560,50.4 L580,53.3 L600,58.0 L620,62.7 L640,65.6 L660,65.6 L680,62.7 L700,58.0 L720,53.3 L740,50.4 L760,50.4 L780,53.3 L800,58.0 L800,110 Z"/></svg><svg class="w3" viewBox="0 0 800 110" preserveAspectRatio="none"><path fill="#F4F1EA" d="M0,110 L0,78.0 L20,82.1 L40,84.7 L60,84.7 L80,82.1 L100,78.0 L120,73.9 L140,71.3 L160,71.3 L180,73.9 L200,78.0 L220,82.1 L240,84.7 L260,84.7 L280,82.1 L300,78.0 L320,73.9 L340,71.3 L360,71.3 L380,73.9 L400,78.0 L420,82.1 L440,84.7 L460,84.7 L480,82.1 L500,78.0 L520,73.9 L540,71.3 L560,71.3 L580,73.9 L600,78.0 L620,82.1 L640,84.7 L660,84.7 L680,82.1 L700,78.0 L720,73.9 L740,71.3 L760,71.3 L780,73.9 L800,78.0 L800,110 Z"/></svg></div></header><section class="card in" style="animation-delay:0.08s"><div class="av">SB</div><h1>Süleyman Boylu</h1><p class="role">Satın Alma Müdürü</p><p class="org">Paloma Grida · Paloma Hotels</p><nav class="acts"><a class="" href="tel:+905364587925"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/></svg></span>Ara</a><a class="wa" href="https://wa.me/905364587925?text=Merhaba%20Süleyman%20Bey%2C" target=_blank rel=noopener><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.2-4A8 8 0 1 1 9 18.6z"/><path d="M9.2 8.6c.2-.5.6-.6.9-.6.4 0 .6.6.9 1.4.2.5-.4.9-.6 1.2.6 1.2 1.6 2.2 2.9 2.8.3-.3.7-.9 1.2-.7.8.3 1.4.6 1.4 1 0 .3-.1.7-.6.9-.7.4-1.7.4-3-.2a8 8 0 0 1-3.4-3.3c-.5-1.1-.5-1.9.3-2.5z" fill="currentColor" stroke="none"/></svg></span>WhatsApp</a><a class="" href="mailto:suleymanboyluu@gmail.com"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span>E-posta</a><a class="" href="https://www.google.com/maps/search/?api=1&amp;query=Paloma+Grida+Belek+Serik+Antalya" target=_blank rel=noopener><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span>Konum</a></nav></section><div class="list in" style="animation-delay:0.24s"><a class="row" href="tel:+905364587925"><span class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/></svg></span><span><small>Cep telefonu</small><b>0536 458 79 25</b></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="row" href="tel:+905532779486"><span class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V6.5L12 3l8 3.5V20"/><path d="M9 20v-5h6v5M8 9h1M11.5 9h1M15 9h1M8 12h1M11.5 12h1M15 12h1"/></svg></span><span><small>Şirket hattı</small><b>0553 277 94 86</b></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="row" href="mailto:suleymanboyluu@gmail.com"><span class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg></span><span><small>E-posta</small><b>suleymanboyluu@gmail.com</b></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a><a class="row" href="https://www.google.com/maps/search/?api=1&amp;query=Paloma+Grida+Belek+Serik+Antalya"><span class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span><span><small>Adres</small><b>İskele Mevkii, Belek, Serik / Antalya</b></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a></div><a class="save in" style="animation-delay:0.40s" href="suleyman-boylu.vcf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.5"/><path d="M3.5 19c.8-3.2 3-4.8 5.5-4.8 1.4 0 2.7.4 3.7 1.3M17.5 13v7M14 16.5h7"/></svg>Rehbere kaydet</a><button class="share in" style="animation-delay:0.48s" id="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="M8.7 10.8l6.6-4M8.7 13.2l6.6 4"/></svg>Kartviziti paylaş</button><p class="foot"><b>PALOMA</b> · Grida · Belek</p></div><script>document.getElementById('share').onclick=async()=>{const u=location.href,t=document.title;if(navigator.share){try{await navigator.share({title:t,url:u})}catch(e){}}else{try{await navigator.clipboard.writeText(u);event.target.closest('button').lastChild.textContent=' Bağlantı kopyalandı'}catch(e){}}}</script></body></html>
