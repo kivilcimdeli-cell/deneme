@@ -1,19 +1,23 @@
-"""PALOMA GRIDA – Süleyman Boylu (Satın Alma Müdürü) için QR'lı masa isimliği önerileri (10).
+"""PALOMA GRIDA – Süleyman Boylu (Satın Alma Müdürü) için QR'lı masa isimliği önerileri, 2. tur.
 
-1–5 beyaz tabla, siyah ve mavi yazı; 6–10 siyah tabla, beyaz ve mavi detay. İsimlikte yalnız otel (logo + GRIDA),
-ad soyad ve görev yazar; telefonlar, e-posta ve adres QR'ın açtığı kartvizit sayfasındadır (scripts/paloma_sayfa.py).
+Beş düzen, her biri iki renkte: beyaz tabla (siyah ve mavi yazı) ve siyah tabla (beyaz ve mavi detay); 10 öneri.
+İsimlikte otelin logosu (PALOMA HOTELS), ad soyad, görev ve otel (Paloma Grida) yazar; telefonlar, e-posta ve adres
+QR'ın açtığı kartvizit sayfasındadır (scripts/paloma_sayfa.py).
 
-Logo: `paloma_isimlik/logo.png` (ya da .jpg) varsa çizilip kabartmaya çevrilir (koyu ya da saydam olmayan yerler
-logo sayılır); yoksa yerine geçici "PALOMA" yazısı (Cinzel) konur.
+İlk turdan farklar:
+  * Gerçek logo: Instagram profilindeki logodan vektöre çevrildi (scripts/paloma_logo.py). Mavi, logonun mavisi.
+  * Yazılar ve logo kabartma değil, yüzeyle aynı hizada renkli dolgu (0,8 mm): baskı gibi düz ve net, gölge yok;
+    logodaki ince HOTELS harfleri de basılabiliyor.
+  * Ad soyad büyük-küçük harf (Montserrat SemiBold ya da Lora Bold), görev ve otel daha küçük ve sakin; az öğe.
+  * QR 3. sürüm (29 × 29): aynı alanda daha iri kareler.
 
-Yapı Uzar, İNCE, Çalık ve Soylu isimlikleriyle aynı: 120 × 90 mm, köşeler R8, gövde 1 cm, yazılar 2 mm kabartma,
-QR yüzeyle aynı hizada dolgu, 15° eğik sehpa. Her satırın en dar harf içi boşluğu ölçülür, öğeler arası ≥ 2 mm.
+Basılabilirlik (0,4 nozul, düz dolgu): çizgiler ≥ 0,5 mm, harf içleri ve aralar ≥ 0,4 mm, öğeler arası ≥ 2 mm.
 
-Çıktı : paloma_isimlik/<tasarım>.png, musteri_1.png (1–5), musteri_2.png (6–10), musteri_3.png (sayfa),
-        musteri_katalog.pdf
+Çıktı : paloma_isimlik/<tasarım>.png, musteri_1..3.png/.jpg (öneriler), musteri_4 (sayfa), musteri_katalog.pdf
 
 Kullanım:
-  python3 scripts/paloma_isimlik.py [anahtar ...]
+  python3 scripts/paloma_isimlik.py [anahtar ...]      # anahtar: tasarım adından bir parça (ör. bant)
+  python3 scripts/paloma_isimlik.py katalog            # yalnız katalog
 """
 import json
 import os
@@ -25,7 +29,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
-import calik_isimlik as C  # noqa: E402
 import ince_isimlik as N  # noqa: E402
 import qr_sistemi as Q  # noqa: E402
 import uzar_isimlik as I  # noqa: E402
@@ -34,325 +37,253 @@ from cift_tarafli_isimlik import render, rotation  # noqa: E402
 
 OUT_DIR = os.path.join(A.ROOT, "paloma_isimlik")
 DATA = json.load(open(os.path.join(OUT_DIR, "bilgiler.json"), encoding="utf-8"))
+LOGO = json.load(open(os.path.join(OUT_DIR, "logo", "paloma_hotels.json"), encoding="utf-8"))
 BLACK, WHITE, BLUE = A.BLACK, A.WHITE, A.BLUE
-SHOW = {BLACK: (36, 36, 40), WHITE: (246, 246, 242), BLUE: (30, 82, 196)}
+PALOMA_BLUE = (105, 161, 186)                                   # logonun mavisi (#69A1BA)
+SHOW = {BLACK: (34, 35, 39), WHITE: (246, 246, 243), BLUE: PALOMA_BLUE}
 NAMES = {BLACK: "siyah", WHITE: "beyaz", BLUE: "mavi"}
 J = m3.JoinType.Round
-X0, X1 = -54.0, 54.0
-N.FONT_FILES.update({"cinzel": "Cinzel-Black.ttf", "sora": "Sora-SemiBold.ttf", "jost": "Jost-Bold.ttf",
-                     "manrope": "Manrope-ExtraBold.ttf", "fraunces": "Fraunces-SemiBold.ttf",
-                     "playfair": "PlayfairDisplay-Black.ttf", "michroma": "Michroma-Regular.ttf"})
-t, Design = N.t, N.Design
-WHITE_SC = {"body": WHITE, "fg": BLACK, "dark": False}
-BLACK_SC = {"body": BLACK, "fg": WHITE, "dark": True}
-
+X0, X1 = -52.0, 52.0                                            # yan boşluklar 8 mm
+TOP, BOTTOM = 83.0, 12.0                                        # üst boşluk 7 mm; altta sehpa (~9,5 mm) örter
+MIN_LINE, MIN_GAP = 0.5, 0.4
+N.FONT_FILES.update({"ms6": "Montserrat_600SemiBold.ttf", "ms7": "Montserrat_700Bold.ttf",
+                     "lora": "Lora_700Bold.ttf"})
+WHITE_SC = {"key": "beyaz", "body": WHITE, "fg": BLACK, "logo": BLUE, "dark": False}
+BLACK_SC = {"key": "siyah", "body": BLACK, "fg": WHITE, "logo": WHITE, "dark": True}
 
 
 def tr_upper(s):
     return s.replace("i", "İ").replace("ı", "I").upper()
 
 
-FIRST, LAST = (tr_upper(w) for w in DATA["isim"].split())
-NAME = f"{FIRST} {LAST}"
-TITLE = tr_upper(DATA["gorev"])
-HOTEL = DATA["otel"].split()[-1].upper()                 # GRIDA (logo PALOMA'nın altında)
-LOGO_FILE = next((os.path.join(OUT_DIR, f) for f in ("logo.png", "logo.jpg", "logo.jpeg")
-                  if os.path.exists(os.path.join(OUT_DIR, f))), None)
+FIRST, LAST = DATA["isim"].split()
+NAME = DATA["isim"]
+TITLE = DATA["gorev"]                                           # Satın Alma Müdürü
+TITLE_CAPS = tr_upper(TITLE)
+HOTEL = DATA["otel"]                                            # Paloma Grida
+GRIDA = HOTEL.split()[-1].upper()                               # marka adı: GRIDA (noktasız I)
+HOTEL_CAPS = HOTEL.upper()                                      # PALOMA GRIDA
 
 
 def make_qr():
+    """Sondaki / olmadan adres 42 bayt: 3. sürüm M (29 × 29) sığar; tarayıcılar / ekler."""
     import segno
-    content = Q.https_url(DATA["sayfa_url"])
-    natural = segno.make(content, error="m", micro=False).version
-    q = segno.make(content, error="m", version=max(4, natural), micro=False, boost_error=True)
+    content = Q.https_url(DATA["sayfa_url"]).rstrip("/")
+    q = segno.make(content, error="m", micro=False, boost_error=True)
     return Q.Entry("sayfa", "KARTVİZİT", content, "KARTVİZİT", qr=q)
 
 
 QR = make_qr()
 
 
-# ---------------------------------------------------------------- logo
+# ---------------------------------------------------------------- tasarım ve öğeler
 
-def traced_logo():
-    """logo.png → çokgenler (saydam zeminde opak yerler, düz zeminde koyu yerler); 1 mm yüksekliğe ölçekli."""
-    import cv2
-    im = cv2.imread(LOGO_FILE, cv2.IMREAD_UNCHANGED)
-    if im.ndim == 3 and im.shape[2] == 4 and im[:, :, 3].min() < 200:
-        mask = im[:, :, 3] > 128
-    else:
-        g = cv2.cvtColor(im[:, :, :3], cv2.COLOR_BGR2GRAY) if im.ndim == 3 else im
-        _, th = cv2.threshold(g, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-        mask = th > 0
-    cnts, hier = cv2.findContours(mask.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    h = mask.shape[0]
-    rings = [[(float(x), float(h - y)) for x, y in c[:, 0]] for c in cnts if len(c) >= 3 and cv2.contourArea(c) > 4]
-    cs = m3.CrossSection(rings, m3.FillRule.EvenOdd)
+class Design:
+    """Bütün öğeler düz dolgu (yüzeyle aynı hizada). `lines`: ölçülen ve aralığı denetlenen adlı öğeler."""
+
+    def __init__(self, key, title, desc, sc):
+        self.key, self.title, self.desc, self.sc = key, title, desc, sc
+        self.inlay, self.lines = [], {}
+
+    def add(self, name, cs, colour):
+        if colour != self.sc["body"]:                           # gövde renginde öğe: dolgu yok, yalnız boşluk
+            self.inlay.append((cs, colour))
+        if name:
+            self.lines[name] = cs
+        return cs
+
+
+def t(font, s, cap, x, y, align="l", tr=0.0, max_w=None):
+    """Yazı; y büyük harflerin ortası. (B.loosen_dots küçük yazıda I'yı da nokta sanıp incelttiği için
+    kullanılmaz; noktalar küçültülmez, biraz yukarı alınır.)"""
+    cs = I.text(N.font(font), s, cap, x, y, align, tr, max_w)
+    out = []
+    for p in cs.decompose():                    # İ / Ü noktaları 0,15 mm yukarı: harfle arası ≥ 0,4 mm
+        b = p.bounds()
+        w, h = b[2] - b[0], b[3] - b[1]
+        dot = p.area() < 2.5 and w * h > 0 and p.area() / (w * h) > 0.6 and 0.6 < w / h < 1.7 and b[1] > y
+        out.append(p.translate((0.0, 0.15)) if dot else p)
+    return A.union(*out)
+
+
+def logo(x, y_top, w, align="l"):
+    """PALOMA HOTELS logosu, genişlik w mm, üst kenarı y_top. HOTELS'in ince çizgileri (dikeyler genişliğin ~%1,1'i,
+    yataylar ~%0,85'i) en az 0,56 mm'ye kalınlaştırılır. Döner: (çokgen, alt kenarın y'si)."""
+    rows = []
+    for k in ("paloma", "hotels"):
+        cs = m3.CrossSection(LOGO[k], m3.FillRule.EvenOdd).scale((w, w))
+        if k == "hotels":
+            off = max(0.0, (0.56 - 0.0085 * w) / 2)
+            cs = cs.offset(off, J) if off > 0.005 else cs
+        rows.append(cs)
+    cs = rows[0] + rows[1]
     b = cs.bounds()
-    return cs.translate((-(b[0] + b[2]) / 2, -(b[1] + b[3]) / 2)).scale((1 / (b[3] - b[1]),) * 2)
+    dx = {"l": x - b[0], "c": x - (b[0] + b[2]) / 2, "r": x - b[2]}[align]
+    cs = cs.translate((dx, y_top - b[3]))
+    return cs, cs.bounds()[1]
 
 
-_LOGO = {}
-
-
-def logo(cx, cy, w, align="c", max_h=None):
-    """Otel logosu, genişliği w mm (yükseklik max_h'yi aşmaz). Logo dosyası yoksa geçici PALOMA yazısı."""
-    if "cs" not in _LOGO:
-        _LOGO["cs"] = traced_logo() if LOGO_FILE else None
-    if _LOGO["cs"] is None:
-        cs = t("cinzel", "PALOMA", 10.0, 0, 0, "c", 2.2)
-    else:
-        cs = _LOGO["cs"]
-    b = cs.bounds()
-    k = w / (b[2] - b[0])
-    if max_h:
-        k = min(k, max_h / (b[3] - b[1]))
-    cs = cs.scale((k, k))
-    b = cs.bounds()
-    dx = {"l": cx - b[0], "c": cx - (b[0] + b[2]) / 2, "r": cx - b[2]}[align]
-    out = cs.translate((dx, cy - (b[1] + b[3]) / 2))
-    return out.offset(0.12, J) if LOGO_FILE else out          # çizilen logoda ince yerler biraz kalınlaşsın
-
-
-# ---------------------------------------------------------------- ortak öğeler
-
-def qr_block(cx, cy, s, sc):
-    """Beyaz tablada siyah kareler; siyah tablada beyaz karo (kareler gövde rengi)."""
+def qr(d, cx, cy, s):
+    """QR karo (sessiz bölge dahil) s mm. Beyaz tablada siyah kareler, siyah tablada beyaz karo (kareler gövde
+    rengi). Döner: karo (altındaki renkli alandan çıkarılsın)."""
     _, dark, _ = Q.shapes(QR, Q.module_for(QR, s), cx, cy)
-    square = A.rrect(s, s, 1.6, cx, cy)
-    return [(square - dark, WHITE)] if sc["dark"] else [(dark ^ square, BLACK)]
+    tile = A.rrect(s, s, 1.4, cx, cy)
+    if d.sc["dark"]:
+        d.inlay.append((tile - dark, WHITE))
+    else:
+        d.inlay.append((dark ^ tile, BLACK))
+    d.lines["QR"] = tile
+    return tile
 
 
-def small(text, cap, x, y, align="l", tr=0.6, max_w=None):
-    """Küçük satırlar Manrope ExtraBold (4,8 mm'den küçük değil: çizgiler ≥ 0,8 mm, harf içleri ≥ 0,6 mm)."""
-    return t("manrope", text, cap, x, y, align, tr, max_w)
+def caption(d, text, cap, x, y, align="c", col=None, tr=1.2, max_w=None):
+    return d.add(text, t("ms7", text, cap, x, y, align, tr, max_w), d.sc["fg"] if col is None else col)
 
 
-def scan(d, cx, cy, s, col=BLUE, label="KARTVİZİT"):
-    d.inlay += qr_block(cx, cy, s, d.sc)
-    if label:
-        d.add(label, small(label, 4.8, cx, cy - s / 2 - 7.2, "c", 0.5, s + 8), col)
-
-
-# ad soyad yazı tipleri ve ince yerleri kalınlaştırma (mm, dışa)
-NAME_FONT = {"cinzel": 0.1, "sora_xb": 0.0, "manrope": 0.0, "fraunces_b": 0.06, "jost": 0.0, "archivo": 0.0}
-N.FONT_FILES.update({"sora_xb": "Sora-ExtraBold.ttf", "fraunces_b": "Fraunces-Black.ttf"})
-
-
-def loosen(cs, shrink=0.15):
-    """Ü ve İ noktaları (Cinzel'de baklava biçimli) küçültülür: noktalar arası ve harfle arası ≥ 0,5 mm kalsın."""
-    return A.union(*[p.offset(-shrink, J) if p.area() < 2.5 else p for p in cs.decompose()])
-
-
-def name_block(d, x, y_top, font, cap, align="l", col=None, two_lines=True, max_w=62.0, gap=None, tr=0.6):
-    """Ad soyad (iki satır ya da tek satır). Döner: alt kenarın y'si."""
+def name_lines(d, font, cap, x, y_top, align="l", lead=1.62, col=None, max_w=None):
+    """Ad ve soyad alt alta (y_top: ilk satırın büyük harf üstü). Döner: soyadın taban çizgisi."""
     col = d.sc["fg"] if col is None else col
-    off = NAME_FONT.get(font, 0.0)
-    th = (lambda cs: loosen(cs.offset(off, J), 0.12 + off)) if off else loosen  # noqa: E731
-    if two_lines:
-        l1 = th(t(font, FIRST, cap, x, y_top - cap, align, tr, max_w))
-        g = gap if gap is not None else cap * 0.42
-        l2 = th(t(font, LAST, cap, x, l1.bounds()[1] - g - cap, align, tr, max_w))
-        d.add("ad", l1, col)
-        d.add("soyad", l2, col)
-        return l2.bounds()[1]
-    l1 = th(t(font, NAME, cap, x, y_top - cap, align, tr, max_w))
-    d.add("ad soyad", l1, col)
-    return l1.bounds()[1]
+    y1 = y_top - cap
+    d.add("ad", t(font, FIRST, cap, x, y1, align, 0.0, max_w), col)
+    y2 = y1 - cap * lead
+    d.add("soyad", t(font, LAST, cap, x, y2, align, 0.0, max_w), col)
+    return y2
 
 
-def title_block(d, x, y_top, col, align="l", cap=4.8, one_line=False, max_w=62.0):
-    """Görev: SATIN ALMA / MÜDÜRÜ (iki satır; tek satır yalnız genişlik yetiyorsa). Döner: alt kenarın y'si."""
-    words = TITLE.split()
-    lines = [TITLE] if one_line else [" ".join(words[:-1]), words[-1]]
-    y = y_top - cap
-    for k, ln in enumerate(lines):
-        cs = small(ln, cap, x, y, align, 0.5, max_w)
-        d.add("görev" if k == 0 else "görev 2", cs, col)
-        y = cs.bounds()[1] - 2.2 - cap
-    return cs.bounds()[1]
+def lockup(x, y_top, w, align="l", gap=4.2, cap=4.0, tr=2.4):
+    """Logo | GRIDA: logonun yanında ince dikey çizgi ve otelin adı (logonun ortasına hizalı).
+    Döner: (logo, çizgi, GRIDA)."""
+    lg, yb = logo(0.0, y_top, w)
+    mid, h = (y_top + yb) / 2, y_top - yb
+    bar = vrule(w + gap, mid - h * 0.42, mid + h * 0.42, 0.6)
+    gr = t("ms6", GRIDA, cap, w + 2 * gap + 0.3, mid - cap / 2, "l", tr)
+    total = gr.bounds()[2]
+    dx = {"l": x, "c": x - total / 2, "r": x - total}[align]
+    return lg.translate((dx, 0.0)), bar.translate((dx, 0.0)), gr.translate((dx, 0.0))
 
 
-def hotel_line(d, x, y, col, align="l", cap=4.8):
-    d.add("GRIDA", small(HOTEL, cap, x, y, align, 2.0), col)
+def rule(x0, x1, y, w=0.7):
+    return A.rect(x0, y - w / 2, x1, y + w / 2)
 
 
-def wave(x0, x1, y, amp, period, w, phase=0.0):
-    xs = np.linspace(x0, x1, 120)
-    pts = [(x, y + amp * np.sin(2 * np.pi * (x - x0) / period + phase)) for x in xs]
-    return A.stroke(pts, w)
+def vrule(x, y0, y1, w=0.7):
+    return A.rect(x - w / 2, y0, x + w / 2, y1)
 
 
-# ---------------------------------------------------------------- 1–5: beyaz tabla, siyah ve mavi
+# ---------------------------------------------------------------- beş düzen
 
-def p1_cizgi():
-    d = Design("1_mavi_cizgi", "Mavi çizgi", "Mavi PALOMA ve GRIDA; iki satır büyük ad soyad (Cinzel), altında mavi "
-               "çizgi ve görev; sağda QR.", WHITE_SC)
-    d.add(None, logo(X0, 81.0, 34.0, "l", 7.0), BLUE)
-    hotel_line(d, X0, 70.0, BLUE)
-    yb = name_block(d, X0, 63.0, "cinzel", 7.0, max_w=62.0, tr=1.6)
-    d.add(None, A.rect(X0, yb - 4.4, X0 + 24.0, yb - 2.8), BLUE)
-    title_block(d, X0, yb - 7.4, BLACK)
-    scan(d, X1 - 17.5, 46.0, 35.0)
+def m1_sutun(sc):
+    """Solda logo, iki satır ad soyad, görev ve otel; ince mavi dikey çizgi; sağda QR."""
+    d = Design(f"{sc['key']}_1_sutun", "Sütun", "Solda logo, iki satır ad soyad, görev ve otel; ince mavi dikey "
+               "çizgiyle ayrılmış sağ sütunda QR.", sc)
+    lg, _ = logo(X0, TOP, 42.0)
+    d.add("logo", lg, sc["logo"])
+    y = name_lines(d, "ms6", 7.4, X0, 56.0)
+    d.add("görev", t("ms6", TITLE, 4.2, X0, y - 11.0, "l", 0.1), BLUE)
+    d.add("otel", t("ms6", HOTEL, 4.2, X0, y - 18.6, "l", 0.1), sc["fg"])
+    d.add(None, vrule(13.0, 18.0, 78.0), BLUE)
+    tile = qr(d, 33.5, 47.5, 31.0)
+    caption(d, "KARTVİZİT", 3.0, 33.5, tile.bounds()[1] - 6.6)
     return d
 
 
-def p2_serit():
-    d = Design("2_sol_serit", "Sol şerit", "Sol kenarda boydan mavi şerit; yanında logo, ad soyad (Sora) ve mavi görev; "
-               "sağda QR.", WHITE_SC)
-    d.add(None, A.rrect(4.0, 70.0, 1.6, X0 + 2.0, 48.0), BLUE)
-    x0 = X0 + 9.0
-    d.add(None, logo(x0, 79.5, 30.0, "l", 6.0), BLUE)
-    hotel_line(d, x0, 69.5, BLACK)
-    yb = name_block(d, x0, 62.0, "sora_xb", 6.6, max_w=52.0)
-    title_block(d, x0, yb - 4.6, BLUE, max_w=52.0)
-    scan(d, X1 - 17.5, 46.0, 35.0)
+def m2_genis(sc):
+    """Üstte boydan tek satır ad soyad ve görev; ince mavi çizgi; altta logo ve QR."""
+    d = Design(f"{sc['key']}_2_genis", "Geniş isim", "Üstte boydan tek satır ad soyad ve görev; ince mavi çizgi; "
+               "altta solda logo | GRIDA, sağda QR.", sc)
+    d.add("ad soyad", t("ms6", NAME, 7.2, X0, TOP - 7.6, "l", 0.0, X1 - X0), sc["fg"])
+    d.add("görev", t("ms6", TITLE_CAPS, 3.6, X0, 63.4, "l", 1.1, X1 - X0), BLUE)
+    d.add(None, rule(X0, X1, 54.0), BLUE)
+    lg, bar, gr = lockup(X0, 37.4, 34.0, cap=3.8, tr=2.2)
+    d.add("logo", lg, sc["logo"])
+    d.add(None, bar, BLUE)
+    d.add("GRIDA", gr, sc["fg"])
+    qr(d, X1 - 15.0, 29.0, 30.0)
+    caption(d, "KARTVİZİT", 3.0, X1 - 15.0, 47.8)
     return d
 
 
-def p3_bant():
-    d = Design("3_mavi_bant", "Mavi üst bant", "Üstte boydan mavi bant, içinde oyma PALOMA · GRIDA; altında ad soyad ve "
-               "görev, sağda QR.", WHITE_SC)
-    band = A.rrect(108.0, 15.0, 3.0, 0, 76.0)
-    lg = logo(-8.0, 76.0, 36.0, "r", 7.5).offset(0.15, J)
-    gr = small(HOTEL, 4.4, 0.0, 76.0 - 2.2, "l", 2.2).offset(0.12, J)
-    d.add(None, band - lg - gr - A.rect(-4.8, 72.2, -3.2, 79.8), BLUE)       # logo, ayraç ve GRIDA oyma
-    d.lines["GRIDA (oyma)"] = gr
-    yb = name_block(d, X0, 62.5, "manrope", 6.8, max_w=60.0)
-    title_block(d, X0, yb - 4.6, BLUE)
-    scan(d, X1 - 17.5, 42.5, 35.0)
+def m3_mavi_kart(sc):
+    """Sağda içe çekik mavi kart, içinde QR ve KARTVİZİT; solda logo, ad soyad (Lora), görev ve otel."""
+    d = Design(f"{sc['key']}_3_mavi_kart", "Mavi kart", "Sağda içe çekik mavi kart, içinde beyaz QR; solda logo, "
+               "iki satır ad soyad (Lora), görev ve otel.", sc)
+    card = A.rrect(38.0, 73.0, 4.0, 37.0, 49.5)                 # x 18..56, y 13..86: sehpanın üstünde biter
+    tile = qr(d, 37.0, 54.5, 30.0)
+    cap = t("ms7", "KARTVİZİT", 3.0, 37.0, tile.bounds()[1] - 7.0, "c", 1.2)
+    d.lines["KARTVİZİT"] = cap
+    if sc["dark"]:
+        d.inlay.append((cap, WHITE))
+    d.add(None, card - tile.offset(0.0, J) - cap.offset(0.0, J), BLUE)
+    lg, _ = logo(X0, TOP, 40.0)
+    d.add("logo", lg, sc["logo"])
+    y = name_lines(d, "lora", 7.6, X0, 56.0, lead=1.58)
+    d.add("görev", t("ms6", TITLE, 4.2, X0, y - 10.8, "l", 0.1, 64.0), BLUE)
+    d.add("otel", t("ms6", HOTEL, 4.2, X0, y - 18.4, "l", 0.1, 64.0), sc["fg"])
     return d
 
 
-def p4_cerceve():
-    d = Design("4_ince_cerceve", "İnce çerçeve", "Panelin içinde ince mavi çerçeve; logo, ad soyad (Fraunces) ve görev "
-               "solda, QR sağda.", WHITE_SC)
-    fr = A.rrect(108.0, 74.0, 5.0, 0, 49.0) - A.rrect(104.8, 70.8, 3.4, 0, 49.0)
-    d.add(None, fr, BLUE)
-    x0 = X0 + 5.0
-    d.add(None, logo(x0, 78.0, 30.0, "l", 6.0), BLUE)
-    hotel_line(d, x0, 68.0, BLUE)
-    yb = name_block(d, x0, 61.5, "fraunces_b", 6.8, max_w=50.0)
-    title_block(d, x0, yb - 4.6, BLACK, max_w=50.0)
-    scan(d, X1 - 24.0, 46.0, 34.0)
+def m4_ust_bant(sc):
+    """Üstte boydan mavi bant: içinde beyaz logo ve GRIDA (Instagram'daki gibi); altta ad soyad, görev, QR."""
+    d = Design(f"{sc['key']}_4_ust_bant", "Üst bant", "Üstte boydan mavi bant, içinde beyaz logo ve GRIDA; altında iki "
+               "satır ad soyad ve görev, sağda QR.", sc)
+    band = A.rrect(112.0, 25.0, 4.0, 0.0, 73.5)                 # x −56..56, y 61..86
+    lg, _ = logo(-50.0, 73.5 + 7.05, 44.0)
+    gr = t("ms6", GRIDA, 4.2, 50.0, 73.5 - 2.1, "r", 2.4)
+    bar = vrule(9.0, 67.5, 79.5, 0.6)
+    white = lg + gr + bar
+    d.lines["logo"], d.lines["GRIDA"] = lg, gr
+    d.add(None, band - white.offset(0.0, J), BLUE)
+    if sc["dark"]:
+        d.inlay.append((white, WHITE))
+    y = name_lines(d, "ms6", 7.0, X0, 53.0)
+    d.add("görev", t("ms6", TITLE, 4.2, X0, y - 10.4, "l", 0.1), BLUE)
+    tile = qr(d, X1 - 15.0, 39.0, 30.0)
+    caption(d, "KARTVİZİT", 3.0, X1 - 15.0, tile.bounds()[1] - 6.4)
     return d
 
 
-def p5_minimal():
-    d = Design("5_minimal", "Minimal", "Bol boşluk: tek satır ad soyad (Jost), mavi görev; logo küçük, altta; sağda QR.",
-               WHITE_SC)
-    yb = name_block(d, X0, 74.0, "jost", 6.6, two_lines=False, max_w=64.0, tr=0.5)
-    d.add(None, A.rect(X0, yb - 4.6, X0 + 10.0, yb - 3.0), BLUE)
-    title_block(d, X0, yb - 7.6, BLUE, max_w=60.0)
-    d.add(None, logo(X0, 24.5, 26.0, "l", 5.4), BLACK)
-    hotel_line(d, X0, 13.0, BLUE)
-    scan(d, X1 - 17.5, 46.0, 35.0, col=BLACK)
+def m5_ortali(sc):
+    """Ortalı: logo | GRIDA, ad soyad (Lora), kısa mavi çizgi, görev; altta ortada QR, iki yanında DİJİTAL KARTVİZİT."""
+    d = Design(f"{sc['key']}_5_ortali", "Ortalı", "Her şey ortada: logo | GRIDA, tek satır ad soyad (Lora), kısa mavi "
+               "çizgi ve görev; altta QR, iki yanında DİJİTAL · KARTVİZİT.", sc)
+    lg, bar, gr = lockup(0.0, TOP + 0.5, 34.0, "c", cap=3.8, tr=2.2)
+    d.add("logo", lg, sc["logo"])
+    d.add(None, bar, BLUE)
+    d.add("GRIDA", gr, sc["fg"])
+    yb = lg.bounds()[1]
+    d.add("ad soyad", t("lora", NAME, 6.8, 0.0, yb - 11.0, "c", 0.1, X1 - X0), sc["fg"])
+    d.add("çizgi", rule(-6.0, 6.0, yb - 19.6), BLUE)
+    d.add("görev", t("ms6", TITLE_CAPS, 3.4, 0.0, yb - 24.8, "c", 1.0, X1 - X0), BLUE)
+    qr(d, 0.0, 26.5, 30.0)
+    caption(d, "DİJİTAL", 3.0, -20.0, 25.0, "r")
+    caption(d, "KARTVİZİT", 3.0, 20.0, 25.0, "l")
     return d
 
 
-# ---------------------------------------------------------------- 6–10: siyah tabla, beyaz ve mavi
-
-def p6_gece():
-    d = Design("6_gece", "Gece", "Siyah tablada beyaz PALOMA, mavi GRIDA; iki satır ad soyad (Cinzel), mavi çizgi ve "
-               "görev; sağda QR.", BLACK_SC)
-    d.add(None, logo(X0, 81.0, 34.0, "l", 7.0), WHITE)
-    hotel_line(d, X0, 70.0, BLUE)
-    yb = name_block(d, X0, 63.0, "cinzel", 7.0, max_w=62.0, tr=1.6)
-    d.add(None, A.rect(X0, yb - 4.4, X0 + 24.0, yb - 2.8), BLUE)
-    title_block(d, X0, yb - 7.4, BLUE)
-    scan(d, X1 - 17.5, 46.0, 35.0)
-    return d
-
-
-def p7_kose():
-    d = Design("7_mavi_kose", "Mavi köşe", "Sağ üst köşede mavi eğik şerit; solda QR, sağda logo, ad soyad (Sora) ve görev.",
-               BLACK_SC)
-    d.add(None, A.polygon([(30.0, 88.0), (44.0, 88.0), (60.0, 72.0), (60.0, 58.0)]) ^ I.outline().offset(-3.2, J), BLUE)
-    cx = 17.0
-    d.add(None, logo(cx, 75.0, 30.0, "c", 6.2), WHITE)
-    hotel_line(d, cx, 65.0, BLUE, "c")
-    yb = name_block(d, cx, 57.5, "sora_xb", 6.4, align="c", max_w=56.0)
-    title_block(d, cx, yb - 4.6, BLUE, align="c", max_w=56.0)
-    scan(d, X0 + 17.5, 46.0, 35.0, col=WHITE)
-    return d
-
-
-def p8_alt_bant():
-    d = Design("8_alt_bant", "Alt bant", "Altta boydan mavi bant, içinde oyma görev; üstte logo ve büyük ad soyad "
-               "(Manrope); sağda QR.", BLACK_SC)
-    band = A.rrect(108.0, 11.0, 2.6, 0, 16.5)
-    title = small(TITLE, 4.6, X0 + 6.0, 16.5 - 2.3, "l", 0.8, 96.0).offset(0.12, J)
-    d.add(None, band - title, BLUE)
-    d.lines["görev (oyma)"] = title
-    d.add(None, logo(X0, 81.0, 32.0, "l", 6.6), WHITE)
-    hotel_line(d, X0, 70.5, BLUE)
-    name_block(d, X0, 62.5, "manrope", 7.0, max_w=60.0)
-    scan(d, X1 - 17.0, 53.0, 34.0, label=None)
-    d.add("KARTVİZİT", small("KARTVİZİT", 4.8, X1 - 17.0, 53.0 - 17.0 - 7.2, "c", 0.5, 42.0), WHITE)
-    return d
-
-
-def badge(cx, cy, r):
-    """Mavi yuvarlak rozet, içinde oyma baş harfler."""
-    ini = t("cinzel", FIRST[0] + LAST[0], r * 0.62, 0, 0, "c", 0.6).offset(0.25, J)
-    b = ini.bounds()
-    ini = ini.translate((cx - (b[0] + b[2]) / 2, cy - (b[1] + b[3]) / 2))
-    ring = A.circle(r, cx, cy, 120) - A.circle(r - 1.6, cx, cy, 120)
-    inner = A.circle(r - 3.0, cx, cy, 120) - ini
-    return ring + inner
-
-
-def p9_rozet():
-    d = Design("9_rozet", "Rozet", "Solda mavi rozette oyma SB; yanında logo, ad soyad ve görev; sağda QR.", BLACK_SC)
-    d.add(None, badge(X0 + 12.0, 70.0, 12.0), BLUE)
-    x0 = X0 + 29.0
-    d.add(None, logo(x0, 74.5, 26.0, "l", 5.4), WHITE)
-    hotel_line(d, x0, 63.0, BLUE)
-    yb = name_block(d, X0, 52.0, "sora_xb", 6.0, two_lines=False, max_w=64.0, tr=0.4)
-    title_block(d, X0, yb - 4.6, BLUE, max_w=60.0)
-    scan(d, X1 - 17.5, 44.0, 35.0, col=WHITE)
-    return d
-
-
-def p10_dalga():
-    d = Design("10_dalga", "Dalga", "Belek'in denizi: altta boydan iki mavi dalga; üstte logo, ad soyad (Archivo) ve görev; "
-               "sağda QR.", BLACK_SC)
-    for k in range(2):                                                   # en altta, boydan iki dalga
-        d.add(None, wave(X0, X1, 11.8 + 3.6 * k, 0.9, 13.0, 1.4, phase=1.1 * k) ^ I.outline().offset(-3.2, J), BLUE)
-    d.add(None, logo(X0, 81.0, 32.0, "l", 6.6), WHITE)
-    hotel_line(d, X0, 70.5, BLUE)
-    yb = name_block(d, X0, 63.0, "archivo", 6.0, max_w=60.0, tr=0.6)
-    title_block(d, X0, yb - 4.0, WHITE)
-    scan(d, X1 - 17.5, 49.0, 35.0)
-    return d
-
-
-DESIGNS = [p1_cizgi, p2_serit, p3_bant, p4_cerceve, p5_minimal, p6_gece, p7_kose, p8_alt_bant, p9_rozet, p10_dalga]
+LAYOUTS = [m1_sutun, m2_genis, m3_mavi_kart, m4_ust_bant, m5_ortali]
+DESIGNS = [(fn, sc) for fn in LAYOUTS for sc in (WHITE_SC, BLACK_SC)]   # 1 beyaz, 2 siyah, 3 beyaz, ...
 
 
 # ---------------------------------------------------------------- katılar, kontroller, görseller
 
 def solids(d):
     out = I.outline()
-    body = B.flat_chamfer(out.extrude(B.T), out)
-    parts, pockets = [], []
+    clip = out.offset(-1.0, J)
+    by_col = {}
     for cs, col in d.inlay:
-        cs = cs ^ out.offset(-1.0, J)
-        parts.append((f"Dolgu ({NAMES[col]})", cs.extrude(B.INLAY).translate((0, 0, B.T - B.INLAY)), col))
-        pockets.append(cs)
-    if pockets:
-        body = body - A.union(*pockets).extrude(B.INLAY + 0.01).translate((0, 0, B.T - B.INLAY))
-    taken, by_col = A.empty(), {}
-    for cs, col in reversed(d.raised):
-        part = (cs ^ out.offset(-1.0, J)) - taken
-        taken = taken + cs
-        by_col[col] = by_col.get(col, A.empty()) + part
+        by_col[col] = by_col.get(col, A.empty()) + (cs ^ clip)
+    body = B.flat_chamfer(out.extrude(B.T), out)
+    if by_col:
+        body = body - A.union(*by_col.values()).extrude(B.INLAY + 0.01).translate((0, 0, B.T - B.INLAY))
+    parts = [(f"Panel ({NAMES[d.sc['body']]})", body, d.sc["body"])]
     for col, cs in by_col.items():
-        parts.append((f"Kabartma ({NAMES[col]})", cs.extrude(B.RELIEF).translate((0, 0, B.T)), col))
-    return [(f"Panel ({NAMES[d.sc['body']]})", body, d.sc["body"])] + parts
+        parts.append((f"Dolgu ({NAMES[col]})", cs.extrude(B.INLAY).translate((0, 0, B.T - B.INLAY)), col))
+    return parts
 
 
-def build(fn):
-    d = fn()
+def build(item):
+    fn, sc = item
+    d = fn(sc)
     d.parts = solids(d)
     d.stand, (z0, y0) = B.stand()
     d.shown = B.assembled(d.parts, z0, y0) + [("Sehpa", d.stand, d.sc["body"])]
@@ -361,6 +292,38 @@ def build(fn):
 
 def mesh(parts):
     return [(*A.mesh_arrays(m), SHOW[c]) for _, m, c in parts]
+
+
+def thin(cs, lim=MIN_LINE):
+    """`lim` mm'den ince alan (%). Sivri köşelerin ucu (her biri < 0,2 mm²) sayılmaz; ince şeritler sayılır."""
+    th = cs - cs.offset(-lim / 2, J).offset(lim / 2, J)
+    return round(100 * sum(p.area() for p in th.decompose() if p.area() > 0.2) / max(cs.area(), 1e-9), 1)
+
+
+def problems(d):
+    """Dolgular üst üste binmesin; adlı öğeler arası ≥ 2 mm, kenara ve sehpaya ≥ 3 mm; çizgi ve aralar basılabilsin."""
+    found = []
+    cols = [(cs, col) for cs, col in d.inlay]
+    for k, (a, ca) in enumerate(cols):
+        for b, cb in cols[k + 1:]:
+            if ca != cb and (a ^ b).area() > 0.01:
+                found.append(f"{NAMES[ca]}/{NAMES[cb]} dolgu çakışıyor")
+    safe = I.outline().offset(-3.0, J) ^ A.rect(-70, 10.0, 70, 100)
+    items = list(d.lines.items())
+    for k, (n, cs) in enumerate(items):
+        if (cs - safe).area() > 0.05:
+            found.append(f"{n} kenarda")
+        for n2, cs2 in items[k + 1:]:
+            if (cs.offset(2.0, J) ^ cs2).area() > 0.01:
+                found.append(f"{n} ~ {n2}")
+    for n, cs in items:
+        if n == "QR":
+            continue
+        inner, gap, _ = B.line_metrics(cs)
+        p = thin(cs)
+        if p > 3.0 or inner < MIN_GAP or gap < MIN_GAP:
+            found.append(f"{n}: ince %{p}, iç {inner:.2f}, ara {gap:.2f}")
+    return found
 
 
 def qr_check(d):
@@ -377,6 +340,10 @@ def font_ui(n, f="Outfit-SemiBold.ttf"):
     return ImageFont.truetype(os.path.join(A.FONT_DIR, f), n)
 
 
+def front(d, width):
+    return A.fit_into(render(mesh(d.shown), 1600, rotation(0, -90), flat=0.85, margin=0.02), width, 10 ** 4)
+
+
 def sheet(d, i):
     W, H = 1500, 700
     canvas = Image.new("RGB", (W, H), (236, 239, 244))
@@ -390,86 +357,121 @@ def sheet(d, i):
         im = A.fit_into(render(parts, 1200, R, flat=flat, margin=0.02), x1 - x0 - 40, y1 - y0 - 60)
         canvas.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0 + 40 + (y1 - y0 - 40 - im.height) // 2), im)
         dr.text((x0 + 16, y0 + 10), label, fill=(236, 239, 244), font=font_ui(18))
-    dr.text((30, 18), f"{i}. {d.title.upper()}", fill=(24, 26, 30), font=font_ui(32))
+    dr.text((30, 18), f"{i}. {d.title.upper()} · {d.sc['key'].upper()} TABLA", fill=(24, 26, 30), font=font_ui(32))
     dr.text((30, 62), d.desc, fill=(80, 86, 98), font=font_ui(19))
-    worst = min((v[0] for v in d.metrics.values()), default=9)
-    dr.text((30, 94), f"Gövde 1 cm, kabartma 2 mm · en dar harf içi boşluk {worst:.2f} mm · QR "
-                      f"{'okundu' if d.qr[0] else 'OKUNMADI'}{', benzetimde de' if d.qr[1] else ''}",
-            fill=(22, 120, 60) if d.qr[0] and worst >= 0.6 else (200, 30, 38), font=font_ui(19))
+    ok = d.qr[0] and not d.problems
+    dr.text((30, 94), f"Gövde 1 cm · yazılar ve logo yüzeyle aynı hizada 0,8 mm renkli dolgu · QR "
+                      f"{'okundu' if d.qr[0] else 'OKUNMADI'}{', benzetimde de' if d.qr[1] else ''}"
+                      f"{'' if not d.problems else ' · ' + '; '.join(d.problems)}",
+            fill=(22, 120, 60) if ok else (200, 30, 38), font=font_ui(19))
     canvas.save(os.path.join(OUT_DIR, d.key + ".png"))
 
 
-NAVY, BLUE_UI, PAPER, INK, MUTED = (14, 26, 56), SHOW[BLUE], (246, 247, 250), (18, 22, 32), (96, 102, 116)
+# ---------------------------------------------------------------- katalog
+
+NAVY, PAPER, INK, MUTED = (20, 44, 62), (246, 247, 249), (20, 26, 34), (98, 106, 118)
 
 
-def header(dr, W, page, n, sub):
-    dr.rectangle((0, 0, W, 250), fill=NAVY)
-    big = ImageFont.truetype(os.path.join(A.FONT_DIR, "Cinzel-Black.ttf"), 84)
-    dr.text((70, 40), "PALOMA", font=big, fill=(244, 244, 246))
-    x = 76 + dr.textlength("PALOMA", font=big) + 28
-    dr.text((x, 74), HOTEL, font=font_ui(40), fill=(120, 160, 240))
-    dr.text((70, 168), sub, font=font_ui(30), fill=(200, 208, 228))
+def logo_image(height, colour=(255, 255, 255)):
+    """Logoyu (çift-tek kuralıyla delikli) RGBA görsele çizer."""
+    ss = 4
+    w = int(round(height * LOGO["en_boy"]))
+    mask = Image.new("1", (w * ss, height * ss), 0)
+    k = w * ss
+    for key in ("paloma", "hotels"):
+        for ring in LOGO[key]:
+            m = Image.new("1", mask.size, 0)
+            ImageDraw.Draw(m).polygon([(x * k, height * ss - y * k) for x, y in ring], fill=1)
+            mask = Image.fromarray(np.asarray(mask) ^ np.asarray(m))
+    a = mask.convert("L").resize((w, height), Image.LANCZOS)
+    im = Image.new("RGBA", (w, height), colour + (0,))
+    im.putalpha(a)
+    return im
+
+
+def header(im, dr, W, page, n, sub):
+    dr.rectangle((0, 0, W, 230), fill=PALOMA_BLUE)
+    lg = logo_image(118)
+    im.paste(lg, (70, 56), lg)
+    dr.text((70 + lg.width + 46, 66), "GRIDA", font=font_ui(46), fill=(255, 255, 255))
+    dr.text((70 + lg.width + 46, 128), "Belek · Antalya", font=font_ui(28), fill=(232, 242, 247))
     s = f"{page}/{n}"
-    dr.text((W - 90 - dr.textlength(s, font=font_ui(40)), 96), s, font=font_ui(40), fill=(170, 180, 204))
-    dr.rectangle((0, 246, W, 254), fill=BLUE_UI)
+    dr.text((W - 80 - dr.textlength(s, font=font_ui(36)), 96), s, font=font_ui(36), fill=(232, 242, 247))
+    dr.text((70, 262), sub, font=font_ui(34), fill=INK)
 
 
 def footer(dr, W, H, text):
-    dr.rounded_rectangle((60, H - 150, W - 60, H - 70), 22, fill=NAVY)
-    dr.text((W / 2 - dr.textlength(text, font=font_ui(30)) / 2, H - 128), text, font=font_ui(30), fill=(244, 244, 246))
+    dr.rounded_rectangle((60, H - 140, W - 60, H - 64), 20, fill=NAVY)
+    dr.text((W / 2 - dr.textlength(text, font=font_ui(29)) / 2, H - 120), text, font=font_ui(29), fill=(244, 246, 248))
 
 
 def catalog(ds):
-    """musteri_1 (1–5, beyaz tabla), musteri_2 (6–10, siyah tabla), musteri_3 (QR'ın açtığı sayfa), PDF."""
+    """Her sayfada düzenler satır satır: solda beyaz tabla, sağda siyah tabla (numaralı). Sonra kartvizit sayfası."""
     W, H = 1654, 2339
     f = font_ui
+    rows = [ds[k:k + 2] for k in range(0, len(ds), 2)]
+    groups = [rows[:2], rows[2:4], rows[4:]]
+    n = len(groups) + 1
     pages = []
-    groups = [(ds[:5], "Beyaz tabla · siyah ve mavi yazı"), (ds[5:], "Siyah tabla · beyaz ve mavi detay")]
-    n = 3
-    for p, (group, sub) in enumerate(groups):
+    for p, group in enumerate(groups):
         im = Image.new("RGB", (W, H), PAPER)
         dr = ImageDraw.Draw(im)
-        header(dr, W, p + 1, n, f"{DATA['isim']} · {DATA['gorev']} · QR'lı masa isimliği · {sub}")
-        y = 285
-        for line in ("İsimlikte otel, ad soyad ve görev yazar; telefonlar, e-posta ve adres QR'ın açtığı kartvizit "
-                     "sayfasındadır.",):
-            for row in N.wrap(dr, line, f(27), W - 140):
-                dr.text((70, y), row, font=f(27), fill=INK)
-                y += 40
-        top, gap, cw = 395, 50, (W - 3 * 60) // 2
-        ch = (H - top - 190 - 2 * gap) // 3
-        for k, d in enumerate(group):
-            x0, y0 = 60 + (k % 2) * (cw + 60), top + (k // 2) * (ch + gap)
-            dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 28, fill=(255, 255, 255), outline=(222, 226, 234))
-            num = ds.index(d) + 1
-            dr.ellipse((x0 + 26, y0 + 24, x0 + 86, y0 + 84), fill=NAVY)
-            dr.text((x0 + 56 - dr.textlength(str(num), font=f(32)) / 2, y0 + 35), str(num), font=f(32),
-                    fill=(244, 244, 246))
-            dr.text((x0 + 104, y0 + 30), d.title, font=f(38), fill=INK)
-            img = A.fit_into(render(mesh(d.shown), 1300, rotation(0, -90), flat=0.85, margin=0.02), cw - 70, ch - 190)
-            im.paste(img, (x0 + (cw - img.width) // 2, y0 + 100 + (ch - 190 - img.height) // 2), img)
-            ty = y0 + ch - 78
-            for line in N.wrap(dr, d.desc, f(25), cw - 60)[:2]:
-                dr.text((x0 + 30, ty), line, font=f(25), fill=MUTED)
-                ty += 33
-        x0, y0 = 60 + cw + 60, top + 2 * (ch + gap)
-        dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 28, fill=(255, 255, 255), outline=(222, 226, 234))
-        img = A.fit_into(render(mesh(group[0].shown), 1200, rotation(-28, -68), margin=0.02), cw - 80, ch - 230)
-        im.paste(img, (x0 + (cw - img.width) // 2, y0 + 30), img)
-        ty = y0 + ch - 190
-        for line in ("12 × 9 cm, gövde 1 cm, köşeler yuvarlak", "Yazılar 2 mm kabartma, QR düz ve keskin",
-                     "Masa sehpası dahil, 15° eğik durur"):
-            dr.ellipse((x0 + 34, ty + 9, x0 + 48, ty + 23), fill=BLUE_UI)
-            dr.text((x0 + 64, ty), line, font=f(26), fill=MUTED)
-            ty += 50
-        footer(dr, W, H, "Beğendiğiniz tasarımın numarasını yazmanız yeterli." if p else
-               "Ölçü 12 × 9 cm · 1 cm kalın · kabartma yazı · masa sehpası dahil")
+        header(im, dr, W, p + 1, n, f"{DATA['isim']} · {DATA['gorev']} · QR'lı masa isimliği")
+        y = 330
+        if p == 0:
+            for line in ("Beyaz tablada siyah ve mavi yazı, siyah tablada beyaz ve mavi detay. Logo, yazılar ve QR "
+                         "yüzeyle aynı hizada renkli dolgu: baskı gibi düz ve net.",
+                         "İsimlikte otel, ad soyad ve görev yazar; telefonlar, e-posta ve adres QR'ın açtığı "
+                         "kartvizit sayfasındadır."):
+                for row in N.wrap(dr, line, f(27), W - 140):
+                    dr.text((70, y), row, font=f(27), fill=MUTED)
+                    y += 38
+                y += 6
+            y += 14
+        rh = (H - 170 - y) // len(group) if len(group) > 1 else 860
+        for row in group:
+            m = ds.index(row[0]) // 2 + 1
+            dr.text((70, y), f"Model {m} · {row[0].title}", font=f(40), fill=INK)
+            for line in N.wrap(dr, row[0].desc, f(25), W - 140)[:1]:
+                dr.text((70, y + 54), line, font=f(25), fill=MUTED)
+            cw = (W - 3 * 60) // 2
+            for k, d in enumerate(row):
+                x0, y0 = 60 + k * (cw + 60), y + 100
+                ch = rh - 130
+                dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 26, fill=(255, 255, 255), outline=(222, 226, 234))
+                img = front(d, cw - 60)
+                img = A.fit_into(img, cw - 60, ch - 80)
+                im.paste(img, (x0 + (cw - img.width) // 2, y0 + 20 + (ch - 80 - img.height) // 2), img)
+                num = ds.index(d) + 1
+                dr.ellipse((x0 + 24, y0 + ch - 66, x0 + 76, y0 + ch - 14), fill=NAVY)
+                dr.text((x0 + 50 - dr.textlength(str(num), font=f(28)) / 2, y0 + ch - 58), str(num), font=f(28),
+                        fill=(255, 255, 255))
+                dr.text((x0 + 92, y0 + ch - 56), "Beyaz tabla" if not d.sc["dark"] else "Siyah tabla", font=f(27),
+                        fill=MUTED)
+            y += rh
+        if p == len(groups) - 1:
+            x0, y0, cw = 60, y + 20, W - 120
+            ch = H - 170 - y0
+            if ch > 300:
+                dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 26, fill=(255, 255, 255), outline=(222, 226, 234))
+                for k, d in enumerate(ds[:2]):
+                    img = A.fit_into(render(mesh(d.shown), 1200, rotation(-28, -68), margin=0.02), 560, ch - 60)
+                    im.paste(img, (x0 + 30 + k * 520, y0 + (ch - img.height) // 2), img)
+                ty = y0 + 60
+                for line in ("12 × 9 cm, gövde 1 cm, köşeler yuvarlak", "Logo ve yazılar düz renkli dolgu",
+                             "QR telefonla okutulur, kartvizit açılır", "Masa sehpası dahil, 15° eğik durur"):
+                    dr.ellipse((x0 + 1110, ty + 10, x0 + 1124, ty + 24), fill=PALOMA_BLUE)
+                    for j, part in enumerate(N.wrap(dr, line, f(26), cw - 1160)):
+                        dr.text((x0 + 1140, ty + j * 34), part, font=f(26), fill=MUTED)
+                    ty += 34 * len(N.wrap(dr, line, f(26), cw - 1160)) + 22
+        footer(dr, W, H, "Beğendiğiniz tasarımın numarasını yazmanız yeterli." if p == len(groups) - 1 else
+               "Ölçü 12 × 9 cm · 1 cm kalın · masa sehpası dahil")
         pages.append(im)
     shot = os.path.join(OUT_DIR, "sayfa_onizleme.png")
     im = Image.new("RGB", (W, H), PAPER)
     dr = ImageDraw.Draw(im)
-    header(dr, W, 3, n, "QR'ı okutunca açılan kartvizit sayfası")
-    y = 300
+    header(im, dr, W, n, n, "QR'ı okutunca açılan kartvizit sayfası")
+    y = 330
     for line in ("Telefonla QR okutulunca Süleyman Bey'in kartviziti açılır: tek dokunuşla arama (cep ve şirket hattı), "
                  "WhatsApp, e-posta, otelin konumu ve rehbere kaydetme.",
                  "Bilgiler değişirse yalnız sayfa güncellenir; isimlik ve QR aynı kalır."):
@@ -479,8 +481,8 @@ def catalog(ds):
         y += 10
     if os.path.exists(shot):
         s = Image.open(shot).convert("RGB")
-        s = A.fit_into(s, W - 140, H - y - 260)
-        im.paste(s, ((W - s.width) // 2, y + 30))
+        s = A.fit_into(s, W - 140, H - y - 230)
+        im.paste(s, ((W - s.width) // 2, y + 20))
     footer(dr, W, H, f"Sayfa adresi: {DATA['sayfa_url'].replace('https://', '').rstrip('/')}")
     pages.append(im)
     for k, pg in enumerate(pages, 1):
@@ -491,28 +493,26 @@ def catalog(ds):
 
 def check(i):
     d = build(DESIGNS[i - 1])
-    d.metrics = {k: B.line_metrics(cs) for k, cs in d.lines.items()}
+    d.problems = problems(d)
     d.qr = qr_check(d)
     sheet(d, i)
-    bad = {k: v for k, v in d.metrics.items() if v[0] < 0.6 or v[2] > 6.0}
-    return (f"{d.key:18s} QR {d.qr}  simgelerde 1,2 mm'den ince %{C.thin_shapes(d)}  dar/ince satırlar: {bad or 'yok'}"
-            f"  sıkışık: {C.crowded(d) or 'yok'}")
+    return f"{i:2d} {d.key:22s} QR {d.qr}  sorun: {d.problems or 'yok'}"
 
 
 def main():
     from multiprocessing import Pool
     os.makedirs(OUT_DIR, exist_ok=True)
-    print("logo:", os.path.relpath(LOGO_FILE, A.ROOT) if LOGO_FILE else "yok (geçici PALOMA yazısı)")
+    print(f"QR: {Q.describe(QR, Q.module_for(QR, 30.0)) if hasattr(Q, 'describe') else QR.qr.version}")
     only = sys.argv[1:]
     if only == ["katalog"]:
-        catalog([build(fn) for fn in DESIGNS])
+        catalog([build(x) for x in DESIGNS])
         return
-    todo = [i for i, fn in enumerate(DESIGNS, 1) if not only or any(o in fn.__name__ for o in only)]
+    todo = [i for i, (fn, sc) in enumerate(DESIGNS, 1) if not only or any(o in fn.__name__ for o in only)]
     with Pool(4) as pool:
         for line in pool.map(check, todo):
             print(line)
     if not only:
-        catalog([build(fn) for fn in DESIGNS])
+        catalog([build(x) for x in DESIGNS])
 
 
 if __name__ == "__main__":

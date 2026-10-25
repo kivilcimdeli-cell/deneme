@@ -1,11 +1,12 @@
 """PALOMA GRIDA – Süleyman Boylu'nun dijital kartviziti (isimlikteki QR bu sayfayı açar).
 
-Lacivert ve mavi, otel zarafetinde tek sayfa: üstte PALOMA · GRIDA ve yavaşça dalgalanan deniz, ad soyad ve görev;
+Paloma mavisi ve beyaz, otelin kimliğinde tek sayfa: üstte Paloma Hotels logosu, GRIDA ve dalgalanan deniz;
 altında tek dokunuşla ara (cep ve şirket hattı), WhatsApp, e-posta, konum, rehbere kaydet (vCard) ve paylaş.
 Dış bağlantı yok: yazı tipleri sayfanın yanında (OFL), simgeler sayfanın içinde. "Hareketi azalt" açıksa dalga ve
 giriş hareketleri durur.
 
-Logo: paloma_isimlik/logo.png varsa üstte o görünür; yoksa PALOMA yazısı (Cinzel).
+Logo: paloma_isimlik/logo/paloma_hotels.svg (scripts/paloma_logo.py). Yazı tipleri isimliklerle aynı: Montserrat ve
+Lora (ad soyad).
 Bilgiler `paloma_isimlik/bilgiler.json`dan okunur.
 
 Yayın: ortak Cloudflare hesabında (`qrsistem`) `suleymanboylu` adlı Worker'a `paloma_site.zip` yüklenir; adres
@@ -18,6 +19,7 @@ Kullanım:
 """
 import html
 import json
+import math
 import os
 import shutil
 import sys
@@ -34,9 +36,9 @@ OUT = os.path.join(BASE, "site")
 ZIP = os.path.join(BASE, "paloma_site.zip")
 PREVIEW = os.path.join(BASE, "sayfa_onizleme.png")
 CHROMIUM = "/opt/pw-browsers/chromium"
-FONTS = {"display": "Cinzel-Black.ttf", "serif": "Fraunces-SemiBold.ttf", "text": "Jost-SemiBold.ttf",
-         "text-b": "Jost-Bold.ttf"}
-LICENSES = ("OFL-cinzel.txt", "OFL-fraunces.txt", "OFL-jost.txt")
+FONTS = {"sans": "Montserrat_600SemiBold.ttf", "sans-b": "Montserrat_700Bold.ttf", "serif": "Lora_700Bold.ttf"}
+LICENSES = ("OFL-montserrat.txt", "OFL-lora.txt")
+LOGO_SVG = os.path.join(BASE, "logo", "paloma_hotels.svg")
 VCF = "suleyman-boylu.vcf"
 
 ICON = {
@@ -107,74 +109,72 @@ def vcard(d):
 
 
 def logo_html():
-    path = os.path.join(BASE, "logo.png")
-    if os.path.exists(path):
-        shutil.copy(path, os.path.join(OUT, "logo.png"))
-        return '<img class="logo-img" src="logo.png" alt="Paloma">'
-    return '<span class="logo">PALOMA</span>'
+    """Paloma Hotels logosu (scripts/paloma_logo.py ile çizilen vektör), sayfanın içinde: rengi CSS'ten gelir."""
+    return f'<span class="logo">{open(LOGO_SVG, encoding="utf-8").read().strip()}</span>'
 
 
 CSS = """
-@font-face{font-family:Cinzel;src:url(fonts/display.woff) format("woff");font-weight:900;font-display:swap}
-@font-face{font-family:Fraunces;src:url(fonts/serif.woff) format("woff");font-weight:600;font-display:swap}
-@font-face{font-family:Jost;src:url(fonts/text.woff) format("woff");font-weight:600;font-display:swap}
-@font-face{font-family:Jost;src:url(fonts/text-b.woff) format("woff");font-weight:700;font-display:swap}
-:root{--navy:#0E1A38;--navy2:#162A5C;--blue:#2457D6;--sky:#8FB2FF;--sand:#F4F1EA;--ink:#141A2B;--muted:#6B7287;
-  --line:#E4E7EF}
+@font-face{font-family:Montserrat;src:url(fonts/sans.woff) format("woff");font-weight:600;font-display:swap}
+@font-face{font-family:Montserrat;src:url(fonts/sans-b.woff) format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:Lora;src:url(fonts/serif.woff) format("woff");font-weight:700;font-display:swap}
+:root{--pb:#69A1BA;--pb2:#5690AA;--pbd:#2F6F8C;--deep:#173543;--sand:#F2F5F6;--ink:#16222B;--muted:#66727B;
+  --line:#E3E9EC;--tint:#EAF3F7}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--sand)}
-body{font-family:Jost,system-ui,sans-serif;font-weight:600;color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:Montserrat,system-ui,sans-serif;font-weight:600;color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 .wrap{max-width:440px;margin:0 auto;min-height:100vh;background:var(--sand)}
-.hero{position:relative;overflow:hidden;color:#fff;text-align:center;padding:44px 24px 172px;
-  background:radial-gradient(120% 80% at 50% 0%,#24418A 0%,var(--navy2) 45%,var(--navy) 100%)}
-.hero .stars{position:absolute;inset:0;background:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),
-  radial-gradient(1px 1px at 70% 20%,#fff6,transparent),radial-gradient(1.5px 1.5px at 85% 45%,#fff5,transparent),
-  radial-gradient(1px 1px at 35% 55%,#fff4,transparent);opacity:.7}
-.logo{display:block;font-family:Cinzel;font-weight:900;font-size:40px;letter-spacing:.18em;padding-left:.18em;
-  position:relative}
-.logo-img{display:block;margin:0 auto;max-width:200px;max-height:70px;position:relative}
-.hotel{display:block;margin-top:8px;font-size:13px;letter-spacing:.5em;padding-left:.5em;color:var(--sky);position:relative}
+.hero{position:relative;overflow:hidden;color:#fff;text-align:center;padding:52px 24px 176px;
+  background:linear-gradient(165deg,#86B8CD 0%,var(--pb) 42%,var(--pb2) 100%)}
+.hero .glow{position:absolute;inset:-40% -20% auto;height:120%;background:radial-gradient(closest-side,#ffffff38,transparent);
+  pointer-events:none}
+.logo{display:block;width:212px;margin:0 auto;color:#fff;position:relative}
+.logo svg{display:block;width:100%;height:auto}
+.hotel{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;font-size:13px;font-weight:600;
+  letter-spacing:.42em;padding-left:.42em;color:#fff;position:relative}
+.hotel:before,.hotel:after{content:"";width:28px;height:1px;background:#ffffffaa}
 .waves{position:absolute;left:0;right:0;bottom:-1px;height:110px}
 .waves svg{position:absolute;bottom:0;width:200%;height:100%;left:0}
 .waves .w1{animation:drift 14s linear infinite;opacity:.35}
 .waves .w2{animation:drift 9s linear infinite reverse;opacity:.5}
 .waves .w3{animation:drift 18s linear infinite}
 @keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.card{position:relative;margin:-84px 18px 0;background:#fff;border-radius:26px;padding:62px 22px 22px;text-align:center;
-  box-shadow:0 18px 50px rgba(14,26,56,.18)}
+.card{position:relative;margin:-84px 18px 0;background:#fff;border-radius:24px;padding:62px 22px 22px;text-align:center;
+  box-shadow:0 18px 50px rgba(23,53,67,.16)}
 .av{position:absolute;left:50%;top:-46px;width:92px;height:92px;margin-left:-46px;border-radius:50%;
-  background:linear-gradient(135deg,var(--blue),#0A2989);display:grid;place-items:center;color:#fff;
-  font-family:Cinzel;font-weight:900;font-size:30px;letter-spacing:.06em;border:5px solid #fff;
-  box-shadow:0 10px 26px rgba(36,87,214,.35)}
-h1{font-family:Fraunces;font-weight:600;font-size:31px;line-height:1.1;letter-spacing:-.01em}
-.role{margin-top:8px;color:var(--blue);font-size:15px;letter-spacing:.16em;text-transform:uppercase}
-.org{margin-top:6px;color:var(--muted);font-size:14.5px}
+  background:linear-gradient(140deg,#7DB1C8,var(--pbd));display:grid;place-items:center;color:#fff;
+  font-family:Lora;font-weight:700;font-size:31px;letter-spacing:.04em;border:5px solid #fff;
+  box-shadow:0 10px 26px rgba(47,111,140,.32)}
+h1{font-family:Lora;font-weight:700;font-size:30px;line-height:1.15}
+.role{margin-top:9px;color:var(--pbd);font-size:13.5px;letter-spacing:.2em;text-transform:uppercase}
+.org{margin-top:7px;color:var(--muted);font-size:14.5px}
 .acts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
 .acts a{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;color:var(--ink)}
-.acts a span{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:#EEF2FC;
-  color:var(--blue);transition:transform .15s}
+.acts a span{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:var(--tint);
+  color:var(--pbd);transition:transform .15s}
 .acts a:active span{transform:scale(.94)}
 .acts a span svg{width:25px;height:25px}
 .acts a.wa span{background:#E7F7EE;color:#1E9E5A}
-.list{margin:18px 18px 0;background:#fff;border-radius:22px;padding:6px 18px;box-shadow:0 8px 24px rgba(14,26,56,.06)}
+.list{margin:18px 18px 0;background:#fff;border-radius:22px;padding:6px 18px;box-shadow:0 8px 24px rgba(23,53,67,.06)}
 .row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
-.row .i{width:40px;height:40px;border-radius:12px;background:#F3F5FA;color:var(--navy2);display:grid;place-items:center;
+.row .i{width:40px;height:40px;border-radius:12px;background:var(--tint);color:var(--pbd);display:grid;place-items:center;
   flex:none}
 .row .i svg{width:20px;height:20px}
-.row small{display:block;color:var(--muted);font-size:12.5px;letter-spacing:.04em}
-.row b{display:block;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;word-break:break-word}
-.row .go{margin-left:auto;color:#B6BCCB;width:18px;height:18px;flex:none}
+.row small{display:block;color:var(--muted);font-size:12px;letter-spacing:.04em}
+.row b{display:block;font-weight:700;font-size:15.5px;font-variant-numeric:tabular-nums;word-break:break-word}
+.row.em b{font-size:14px;letter-spacing:-.01em}
+.row .go{margin-left:auto;color:#B3C0C7;width:18px;height:18px;flex:none}
 .save{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 18px 0;padding:17px;border-radius:18px;
-  background:var(--navy);color:#fff;font-weight:700;font-size:16.5px;box-shadow:0 12px 26px rgba(14,26,56,.25)}
+  background:var(--deep);color:#fff;font-weight:700;font-size:16px;box-shadow:0 12px 26px rgba(23,53,67,.25)}
 .save svg{width:22px;height:22px}
 .share{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 18px 0;padding:14px;border-radius:16px;
-  border:1.5px solid var(--line);color:var(--navy2);font-weight:700;font-size:15px;background:#fff;width:calc(100% - 36px);
+  border:1.5px solid var(--line);color:var(--deep);font-weight:700;font-size:15px;background:#fff;width:calc(100% - 36px);
   font-family:inherit;cursor:pointer}
 .share svg{width:19px;height:19px}
-.foot{text-align:center;color:var(--muted);font-size:12.5px;padding:24px 0 30px;letter-spacing:.06em}
-.foot b{font-family:Cinzel;font-weight:900;letter-spacing:.2em;color:var(--navy2)}
+.foot{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:12px;padding:28px 0 32px;
+  letter-spacing:.12em}
+.foot .logo{width:96px;color:var(--pb)}
 .in{opacity:0;transform:translateY(14px);animation:up .6s cubic-bezier(.2,.7,.2,1) forwards}
 @keyframes up{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.waves svg{animation:none!important}.in{animation:none;opacity:1;transform:none}}
@@ -184,7 +184,6 @@ h1{font-family:Fraunces;font-weight:600;font-size:31px;line-height:1.1;letter-sp
 def wave_svg(cls, color, amp, y):
     pts = []
     for k in range(0, 801, 20):
-        import math
         pts.append(f"{k},{y + amp * math.sin(k / 400 * 2 * math.pi * 2):.1f}")
     return (f'<svg class="{cls}" viewBox="0 0 800 110" preserveAspectRatio="none"><path fill="{color}" '
             f'd="M0,110 L{" L".join(pts)} L800,110 Z"/></svg>')
@@ -203,13 +202,13 @@ def page(d):
             ("office", "Şirket hattı", d["sirket_txt"], f"tel:+{d['sirket_e164']}"),
             ("mail", "E-posta", d["eposta"], f"mailto:{d['eposta']}"),
             ("pin", "Adres", addr, d["harita"])]
-    r = "".join(f'<a class="row" href="{e(h)}"><span class="i">{icon(k)}</span><span><small>{e(lab)}</small>'
+    r = "".join(f'<a class="row{" em" if k == "mail" else ""}" href="{e(h)}"><span class="i">{icon(k)}</span><span><small>{e(lab)}</small>'
                 f'<b>{e(v)}</b></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
                 f'stroke-width="2" stroke-linecap="round">{ICON["arrow"]}</svg></a>' for k, lab, v, h in rows)
-    waves = (wave_svg("w1", "#3A63C9", 10, 40) + wave_svg("w2", "#2B4FA8", 8, 58) +
-             wave_svg("w3", "#F4F1EA", 7, 78))
+    waves = (wave_svg("w1", "#A9CEDD", 10, 40) + wave_svg("w2", "#4D86A0", 8, 58) +
+             wave_svg("w3", "#F2F5F6", 7, 78))
     delay = lambda k: f' style="animation-delay:{k * 0.08:.2f}s"'  # noqa: E731
-    body = (f'<div class="wrap"><header class="hero"><div class="stars"></div>{logo_html()}'
+    body = (f'<div class="wrap"><header class="hero"><div class="glow"></div>{logo_html()}'
             f'<span class="hotel">{e(d["otel"].split()[-1].upper())}</span><div class="waves">{waves}</div></header>'
             f'<section class="card in"{delay(1)}><div class="av">{e(ini)}</div><h1>{e(d["isim"])}</h1>'
             f'<p class="role">{e(d["gorev"])}</p><p class="org">{e(d["otel"])} · {e(d["grup"])}</p>'
@@ -217,14 +216,14 @@ def page(d):
             f'<div class="list in"{delay(3)}>{r}</div>'
             f'<a class="save in"{delay(5)} href="{VCF}" download>{icon("save")}Rehbere kaydet</a>'
             f'<button class="share in"{delay(6)} id="share">{icon("share")}Kartviziti paylaş</button>'
-            f'<p class="foot"><b>PALOMA</b> · {e(d["otel"].split()[-1])} · Belek</p></div>')
+            f'<footer class="foot">{logo_html()}<span>{e(d["otel"])} · Belek</span></footer></div>')
     js = ("document.getElementById('share').onclick=async()=>{const u=location.href,t=document.title;"
           "if(navigator.share){try{await navigator.share({title:t,url:u})}catch(e){}}else{"
           "try{await navigator.clipboard.writeText(u);event.target.closest('button').lastChild.textContent="
           "' Bağlantı kopyalandı'}catch(e){}}}")
     title = f"{d['isim']} · {d['gorev']} · {d['otel']}"
     return (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" '
-            f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0E1A38">'
+            f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#69A1BA">'
             f'<title>{e(title)}</title><meta name="description" content="{e(d["isim"])} – {e(d["gorev"])}, '
             f'{e(d["otel"])}. Ara, WhatsApp, e-posta, rehbere kaydet."><meta property="og:title" content="{e(title)}">'
             f'<style>{CSS}</style></head><body>{body}<script>{js}</script></body></html>')
@@ -238,7 +237,7 @@ def screenshot(path=PREVIEW):
         pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, reduced_motion="reduce")
         pg.goto("file://" + os.path.join(OUT, "index.html"))
         pg.wait_for_timeout(500)
-        assert pg.evaluate("document.fonts.check('600 20px \"Fraunces\"')"), "yazı tipi yüklenmedi"
+        assert pg.evaluate("document.fonts.check('700 20px \"Lora\"')"), "yazı tipi yüklenmedi"
         assert pg.evaluate("document.documentElement.scrollWidth") <= 390, "yatay taşma"
         pg.screenshot(path=top)
         pg.screenshot(path=full, full_page=True)
