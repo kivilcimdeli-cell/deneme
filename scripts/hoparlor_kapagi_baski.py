@@ -4,8 +4,8 @@ Müşteri isteği: Ø70 kapaklar iptal; Ø100 hoparlöre 2 kapak; kırmızı yal
 CEMAL ÇALIK, yazı alanı biraz büyük. Hoparlöre yapıştırılacak: dış çeper arkaya doğru çıkıntılı, ucunda ona dik
 yapıştırma flanşı.
   * Kapak Ø102,5 mm; ön plaka (ızgara) 2 mm.
-  * Arka çıkıntı: dış çeper arkaya 8 mm uzar (duvar 2,4 mm); ucunda içe doğru 4,8 mm, 2 mm kalın flanş. Flanşın düz
-    yüzü hoparlörün metal çerçevesine yapıştırılır (duvarla birlikte ~7 mm geniş halka, Ø88–102,5 mm); ızgara
+  * Arka çıkıntı: dış çeper arkaya 8 mm uzar (duvar 2 mm); ucunda içe doğru 3 mm, 1,4 mm kalın flanş. Flanşın düz
+    yüzü hoparlörün metal çerçevesine yapıştırılır (duvarla birlikte 5 mm geniş halka, Ø92,5–102,5 mm); ızgara
     koniden 8 mm uzakta kalır.
   * Baskı: yüzü tablaya gelecek biçimde ters basılır. Duvar yukarı büyür; flanşın altı 45° pahlı, destek gerekmez;
     yapıştırma yüzü son katman (düz).
@@ -50,8 +50,8 @@ RC = 23.5                                          # rozet yarıçapı (öneride
 SLOTS, TWIST = 28, 0.9                             # türbin yarığı sayısı ve kıvrımı (rad)
 INL = 0.8                                          # ön yüzde gömülü renk (4 katman)
 PLATE = 2.0                                        # ön plaka (ızgara)
-LIP, WALL = 8.0, 2.4                               # arka çıkıntı (plakanın arkasından) ve duvar kalınlığı
-FLANGE, FLANGE_T = 4.8, 2.0                        # içe doğru yapıştırma flanşı: genişlik, kalınlık
+LIP, WALL = 8.0, 2.0                               # arka çıkıntı (plakanın arkasından) ve duvar kalınlığı
+FLANGE, FLANGE_T = 3.0, 1.4                        # içe doğru yapıştırma flanşı: genişlik, kalınlık
 CENTER = (128.0, 100.0)                            # nesne merkezi (tabla)
 PITCH = 110.0                                      # iki kapağın merkezleri arası
 GAP = 8.0                                          # kapaklar ile kule arası

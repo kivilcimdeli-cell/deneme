@@ -45,8 +45,8 @@ python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 | Rozet | Ø47 mm (öneride Ø36) |
 | Yazı tipi | Saira Condensed Bold Italic, beyaz; harf içleri en az 0,7 mm |
 | Kırmızı | yalnız dış çeper |
-| Arka çıkıntı | dış çeper arkaya 8 mm uzar (duvar 2,4 mm); ızgarayı koniden uzak tutar |
-| Yapıştırma flanşı | çıkıntının ucunda, ona dik, içe doğru 4,8 mm, 2 mm kalın; duvarla birlikte ~7 mm geniş düz halka (Ø88–102,5) hoparlörün çerçevesine yapıştırılır |
+| Arka çıkıntı | dış çeper arkaya 8 mm uzar (duvar 2 mm); ızgarayı koniden uzak tutar |
+| Yapıştırma flanşı | çıkıntının ucunda, ona dik, içe doğru 3 mm, 1,4 mm kalın; duvarla birlikte 5 mm geniş düz halka (Ø92,5–102,5) hoparlörün çerçevesine yapıştırılır |
 | Izgara | 2 mm, 28 kıvrık yarık, açıklık %44; delikler en az 2,2 mm, köprüler en az 1,2 mm, tek parça |
 | AMS / nozul | 1 siyah: ana nozul<br>2 beyaz, 3 kırmızı: yardımcı nozul<br>renk değişimi yalnız ilk 4 katmanda |
 | Filament (yaklaşık) | ~47,5 g (siyah 45,7, kırmızı 1,3, beyaz 0,4) + kule |
