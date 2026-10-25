@@ -34,7 +34,7 @@ python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 ## Seçilen: 5 · Türbin, Ø100 hoparlöre 2 kapak — baskı dosyası `baski/`
 
 ![Önden](baski/foto.png)
-![Arkadan: çıkıntı ve flanş](baski/foto_arka.png)
+![Arkadan: çıkıntı ve yapıştırma yüzü](baski/foto_arka.png)
 
 **`baski/hoparlor_kapagi_x2d.3mf`**: Bambu Lab X2D. İki kapak tek tablada; Bambu Studio'da açılıp doğrudan dilimlenir.
 
@@ -46,23 +46,23 @@ python3 scripts/hoparlor_kapagi.py jant       # yalnız eşleşen
 | Yazı tipi | Saira Condensed Bold Italic, beyaz; harf içleri en az 0,7 mm |
 | Kırmızı | yalnız dış çeper |
 | Arka çıkıntı | dış çeper arkaya 8 mm uzar (duvar 2 mm); ızgarayı koniden uzak tutar |
-| Yapıştırma flanşı | çıkıntının ucunda, ona dik, içe doğru 3 mm, 1,4 mm kalın; duvarla birlikte 5 mm geniş düz halka (Ø92,5–102,5) hoparlörün çerçevesine yapıştırılır |
+| Yapıştırma yüzü | çıkıntının düz ucu, 2 mm geniş halka (Ø98,5–102,5); hoparlörün çerçevesine yapıştırılır |
 | Izgara | 2 mm, 28 kıvrık yarık, açıklık %44; delikler en az 2,2 mm, köprüler en az 1,2 mm, tek parça |
 | AMS / nozul | 1 siyah: ana nozul<br>2 beyaz, 3 kırmızı: yardımcı nozul<br>renk değişimi yalnız ilk 4 katmanda |
-| Filament (yaklaşık) | ~47,5 g (siyah 45,7, kırmızı 1,3, beyaz 0,4) + kule |
-| Süre | PrusaSlicer ~1 sa 46 dk (kule ve nozul değişimi hariç) |
+| Filament (yaklaşık) | ~40,4 g (siyah 38,6, kırmızı 1,3, beyaz 0,4) + kule |
+| Süre | PrusaSlicer ~1 sa 28 dk (kule ve nozul değişimi hariç) |
 
 **Baskı (destek gerekmez):**
 - Ters basılır: ön yüz tablada, çıkıntı yukarı büyür.
-- Flanşın altı 45° pahlıdır; yapıştırma yüzü son katmandır ve düzdür.
+- Duvar düz yukarı büyür, destek gerekmez; yapıştırma yüzü son katmandır ve düzdür.
 - Kırmızı çeper ve beyaz isimler ilk 4 katmana (0,8 mm) gömülüdür, ön yüzle aynı hizadadır. Textured PEI dokusunda
   keskin çıkar.
 - Bambu standart 0,20 mm, ütüleme kapalı, Textured PEI.
 
 Ø70 kapaklar iptal edildi.
 
-Önizleme ve kesit çizimi: `baski/onizleme.png`. Çıkıntı boyu, flanş genişliği ve duvar kalınlığı betiğin başında
-(`LIP`, `FLANGE`, `WALL`). Yeniden üretmek için:
+Önizleme ve kesit çizimi: `baski/onizleme.png`. Çıkıntı boyu, duvar kalınlığı (= yapıştırma yüzü) ve isteğe bağlı
+iç flanş betiğin başında (`LIP`, `WALL`, `FLANGE`). Yeniden üretmek için:
 
 ```bash
 python3 scripts/hoparlor_kapagi_baski.py

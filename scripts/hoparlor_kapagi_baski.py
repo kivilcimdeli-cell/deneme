@@ -4,11 +4,11 @@ Müşteri isteği: Ø70 kapaklar iptal; Ø100 hoparlöre 2 kapak; kırmızı yal
 CEMAL ÇALIK, yazı alanı biraz büyük. Hoparlöre yapıştırılacak: dış çeper arkaya doğru çıkıntılı, ucunda ona dik
 yapıştırma flanşı.
   * Kapak Ø102,5 mm; ön plaka (ızgara) 2 mm.
-  * Arka çıkıntı: dış çeper arkaya 8 mm uzar (duvar 2 mm); ucunda içe doğru 3 mm, 1,4 mm kalın flanş. Flanşın düz
-    yüzü hoparlörün metal çerçevesine yapıştırılır (duvarla birlikte 5 mm geniş halka, Ø92,5–102,5 mm); ızgara
-    koniden 8 mm uzakta kalır.
-  * Baskı: yüzü tablaya gelecek biçimde ters basılır. Duvar yukarı büyür; flanşın altı 45° pahlı, destek gerekmez;
-    yapıştırma yüzü son katman (düz).
+  * Arka çıkıntı: dış çeper arkaya 8 mm uzar (duvar 2 mm). Duvarın düz ucu hoparlörün metal çerçevesine
+    yapıştırılır (2 mm geniş halka, Ø98,5–102,5 mm); ızgara koniden 8 mm uzakta kalır. (FLANGE > 0 verilirse ucunda
+    içe doğru, altı 45° pahlı bir flanş da olur.)
+  * Baskı: yüzü tablaya gelecek biçimde ters basılır. Duvar yukarı büyür, destek gerekmez; yapıştırma yüzü son
+    katman (düz).
   * Ön yüz düz: kırmızı dış çeper ve beyaz isimler ilk 4 katmana gömülü (0,8 mm, Textured PEI dokusunda, keskin).
   * Ortadaki rozet Ø47 mm; yazı iki satır: üstte ad (NECDET EFE / CEMAL), altta büyük ÇALIK (Saira Condensed Bold
     Italic; harf içleri ≥ 0,7 mm).
@@ -51,7 +51,7 @@ SLOTS, TWIST = 28, 0.9                             # türbin yarığı sayısı 
 INL = 0.8                                          # ön yüzde gömülü renk (4 katman)
 PLATE = 2.0                                        # ön plaka (ızgara)
 LIP, WALL = 8.0, 2.0                               # arka çıkıntı (plakanın arkasından) ve duvar kalınlığı
-FLANGE, FLANGE_T = 3.0, 1.4                        # içe doğru yapıştırma flanşı: genişlik, kalınlık
+FLANGE, FLANGE_T = 0.0, 1.4                        # içe doğru flanş: genişlik (0: yok, duvarın ucu yapışır), kalınlık
 CENTER = (128.0, 100.0)                            # nesne merkezi (tabla)
 PITCH = 110.0                                      # iki kapağın merkezleri arası
 GAP = 8.0                                          # kapaklar ile kule arası
@@ -73,6 +73,8 @@ def turbine(R, rc):
 def lip_profile(Rc):
     """Arka çıkıntı ve flanşın (r, z) kesiti; flanşın altı 45° pahlı (ters baskıda destek gerekmez)."""
     r_wi = Rc - WALL
+    if FLANGE <= 0:                                  # flanşsız: düz duvar, yapıştırma yüzü duvarın ucu
+        return A.polygon([(r_wi, 0.0), (Rc, 0.0), (Rc, PLATE + LIP), (r_wi, PLATE + LIP)])
     r_fi = r_wi - FLANGE
     z_top = PLATE + LIP
     z_f = z_top - FLANGE_T
@@ -186,10 +188,11 @@ def section(w, h):
     dr.text((sp[0][0], sp[0][1] - 32), "hoparlörün çerçevesi (Ø100) — buraya yapıştırılır", font=fs,
             fill=(40, 110, 200))
     dr.line([P(Rc - WALL - FLANGE, z_top + 0.25), P(Rc, z_top + 0.25)], fill=(230, 160, 40), width=4)
-    lab = [((Rc + 1.0, z_top - 1.0), f"yapıştırma yüzü ~{WALL + FLANGE:.1f} mm"),
+    lab = [((Rc + 1.0, z_top - 1.0), f"yapıştırma yüzü {WALL + FLANGE:g} mm".replace(".", ",")),
            ((Rc + 1.0, PLATE + LIP / 2), f"arka çıkıntı {LIP:.0f} mm"),
-           ((Rc - WALL - FLANGE - 6.2, PLATE + LIP - 4.0), "45° pah: destek yok"),
            ((Rc + 1.0, 0.6), "ön yüz tablada · kırmızı ve yazı ilk 4 katmanda")]
+    if FLANGE > 0:
+        lab.append(((Rc - WALL - FLANGE - 6.2, PLATE + LIP - 4.0), "45° pah: destek yok"))
     for (r, z), t in lab:
         dr.text(P(r, z), t, font=fs, fill=(40, 40, 46))
     dr.text((14, 10), "Kesit (baskı yönünde, ölçekli)", font=fs, fill=(90, 90, 96))
@@ -216,7 +219,7 @@ def preview(plate, parts, path, info, title):
     fs = ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), 18)
     for im, label, (x0, y0, x1, y1) in ((bed_im, "Tabla (üstten; ters basılır, gri: kule)", (30, 210, 470, 660)),
                                         (front_im, "Ön yüz (taktıktan sonra)", (490, 210, 1070, 660)),
-                                        (back_im, "Arka: çıkıntı ve flanş", (1090, 210, 1470, 660))):
+                                        (back_im, "Arka: çıkıntı ve yapıştırma yüzü", (1090, 210, 1470, 660))):
         dr.rounded_rectangle((x0, y0, x1, y1), 22, fill=(146, 153, 166))
         canvas.paste(im, (x0 + (x1 - x0 - im.width) // 2, y0 + 30 + (y1 - y0 - 30 - im.height) // 2), im)
         dr.text((x0 + 16, y0 + 10), label, fill=(236, 239, 244), font=fs)
@@ -266,9 +269,12 @@ def main():
     else:
         print(f"  dolu hacimden filament: {g}")
     o = plate.covers[0][1]["open"]
-    info = [f"5 · Türbin · Ø100 hoparlöre iki kapak Ø102,5 mm · arka çıkıntı {LIP:.0f} mm, ucunda içe {FLANGE:g} mm "
-            f"flanş (yapıştırma yüzü) · rozet Ø47, iki satır yazı",
-            "Ters basılır (ön yüz tablada): kırmızı dış çeper ve beyaz isimler ilk 4 katmana gömülü · flanşın altı 45°, "
+    back = (f"ucunda içe {FLANGE:g} mm flanş, yapıştırma yüzü {WALL + FLANGE:g} mm" if FLANGE > 0 else
+            f"ucu {WALL:g} mm yapıştırma yüzü".replace(".", ","))
+    support = "flanşın altı 45°" if FLANGE > 0 else "düz duvar"
+    info = [f"5 · Türbin · Ø100 hoparlöre iki kapak Ø102,5 mm · arka çıkıntı {LIP:.0f} mm, {back} · rozet Ø47, "
+            f"iki satır yazı",
+            f"Ters basılır (ön yüz tablada): kırmızı dış çeper ve beyaz isimler ilk 4 katmana gömülü · {support}, "
             "destek yok · AMS: 1 siyah (ana), 2 beyaz ve 3 kırmızı (yardımcı)",
             "Bambu standart 0,20 mm · ütüleme kapalı · Textured PEI · Generic PLA",
             f"Filament ~{sum(g.values()):.0f} g ({', '.join(f'{k} {v:g}' for k, v in g.items())}){when} · açıklık "
