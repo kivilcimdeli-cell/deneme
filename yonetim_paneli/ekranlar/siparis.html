@@ -1,0 +1,122 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Siparişler</title><style>
+@font-face{font-family:Jost;src:url(../../restoran_masalik/siteler/fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../../restoran_masalik/siteler/fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../../restoran_masalik/siteler/fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../../restoran_masalik/siteler/fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../../restoran_masalik/siteler/fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../../restoran_masalik/siteler/fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../../restoran_masalik/siteler/fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../../restoran_masalik/siteler/fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../../restoran_masalik/siteler/fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+:root{--ink:#17191F;--bg:#F4F1EA;--line:#E6E0D4;--muted:#7D776C;--acc:#C8963E;--navy:#1D2742;--ok:#2E8B57;
+  --bad:#C4473B;--soft:#FBF8F2}
+body{background:var(--bg);color:var(--ink);font-size:15px}
+.app{display:grid;grid-template-columns:250px 1fr;height:900px;overflow:hidden}
+.side{background:#15171C;color:#D9D3C7;padding:22px 16px;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-family:Fraunces;font-weight:700;font-size:21px;color:#fff;padding:0 6px}
+.logo i{width:36px;height:36px;border-radius:11px;background:var(--acc);display:grid;place-items:center;color:#15171C}
+.logo i svg{width:22px;height:22px}
+.biz{margin:22px 0 14px;padding:11px 12px;border-radius:14px;background:#1F2229;display:flex;align-items:center;gap:11px}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(#2B3A6B,#C9667A 60%,#F2A86C);display:grid;
+  place-items:center;font-family:Norican;font-size:21px;color:#fff;flex:none}
+.biz b{display:block;color:#fff;font-weight:600;font-size:14.5px}
+.biz small{font-size:12px;color:#9C968A}
+.biz svg{margin-left:auto;width:16px;height:16px;color:#9C968A}
+.nav{display:grid;gap:3px}
+.nav h6{font-size:10.5px;letter-spacing:.2em;color:#6E695F;margin:14px 12px 6px;font-weight:600}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:15px;color:#B5AFA3}
+.nav a svg{width:20px;height:20px}
+.nav a.on{background:#2A2E37;color:#fff}
+.nav a em{margin-left:auto;font-style:normal;background:var(--bad);color:#fff;border-radius:999px;font-size:11.5px;
+  font-weight:600;padding:1px 8px}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 8px 0;border-top:1px solid #262930;font-size:13.5px}
+.me .a2{width:34px;height:34px;border-radius:50%;background:var(--acc);color:#15171C;display:grid;place-items:center;
+  font-weight:700}
+.me small{display:block;color:#8C8679;font-size:12px}
+.main{padding:22px 30px;overflow:hidden}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.top h1{font-family:Fraunces;font-weight:700;font-size:30px;letter-spacing:-.01em;line-height:1.1}
+.top .sub{color:var(--muted);font-size:14px;margin-top:3px}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;font-weight:500;font-size:14.5px;white-space:nowrap}
+.btn svg{width:18px;height:18px}
+.btn.p{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.a{background:var(--acc);color:#fff;border-color:var(--acc)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+.card h3{font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card h3 small{margin-left:auto;font-weight:400;color:var(--muted);font-size:13px}
+.card h3 svg{width:19px;height:19px;color:var(--acc);flex:none}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;background:#F2ECE0;
+  color:#7A5A22;margin-right:4px}
+.chip.g{background:#E5F2EA;color:#24704A}.chip.r{background:#F8E4E1;color:#A3372D}.chip.n{background:#E6E9F2;color:#1D2742}
+.tog{width:42px;height:24px;border-radius:999px;background:var(--ok);position:relative;flex:none;display:inline-block}
+.tog:after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff}
+.tog.off{background:#CFC8BA}.tog.off:after{right:auto;left:3px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi .l{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:8px}
+.kpi .l svg{width:18px;height:18px;color:var(--acc)}
+.kpi .v{font-family:Manrope;font-weight:600;font-size:32px;margin-top:6px;letter-spacing:-.01em}
+.kpi .d{font-size:12.5px;color:var(--ok);margin-top:2px}
+.g2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-top:14px}
+.heat{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.heat span{border-radius:8px;height:40px;display:grid;place-items:center;font-size:11.5px;font-weight:600}
+.top5 .r{display:flex;align-items:center;gap:12px;padding:7px 0}
+.top5 img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+.top5 b{font-weight:600;font-size:14.5px;display:block}
+.top5 i{display:block;height:6px;border-radius:3px;background:#F0EADF;margin-top:5px;width:150px}
+.top5 i u{display:block;height:100%;border-radius:3px;background:var(--acc)}
+.top5 .num{margin-left:auto;font-size:14px}
+.log .r{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #F0EBE1;font-size:13.5px}
+.log .r:last-child{border:0}
+.log .d{width:8px;height:8px;border-radius:50%;background:var(--acc);margin-top:6px;flex:none}
+.log small{display:block;color:var(--muted);font-size:12px}
+.banner{display:flex;align-items:center;gap:14px;background:var(--navy);color:#F4EDE1;border-radius:18px;padding:14px 20px;
+  margin-top:14px}
+.banner b{font-family:Fraunces;font-size:26px}.banner span{color:#E2B86A;letter-spacing:2px}
+.banner small{color:#C9C5D6}
+
+body{background:#121318;color:#EDE8DE}
+.kh{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid #24262E}
+.kh b{font-family:Fraunces;font-size:24px}
+.kh small{color:#8F8A80}
+.kh .clk{margin-left:auto;font-family:Manrope;font-weight:600;font-size:24px}
+.kh svg{width:24px;height:24px;color:#C8963E}
+.calls{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 24px 4px}
+.call{display:flex;align-items:center;gap:14px;border-radius:16px;padding:14px 16px}
+.call.w{background:#C8963E;color:#17191F}
+.call.h{background:#2B3A6B;color:#fff}
+.call svg{width:30px;height:30px}
+.call b{font-size:18px;display:block}
+.call small{opacity:.8}
+.call span.ok{margin-left:auto;background:rgba(0,0,0,.18);border-radius:10px;padding:8px 12px;font-weight:600}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px 24px}
+.col h4{font-size:13px;letter-spacing:.16em;color:#8F8A80;margin-bottom:10px;font-weight:600}
+.col h4 em{font-style:normal;background:#2A2D36;color:#EDE8DE;border-radius:999px;padding:1px 8px;margin-left:6px}
+.oc{background:#1D1F26;border:1px solid #2A2D36;border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.oc.n{border-color:#C8963E}
+.oc .h{display:flex;justify-content:space-between;align-items:baseline}
+.oc .h b{font-size:18px}
+.oc .h small{color:#8F8A80}
+.oc ul{list-style:none;margin:10px 0;font-size:14.5px}
+.oc li{display:flex;justify-content:space-between;padding:3px 0}
+.oc li i{font-style:normal;color:#8F8A80}
+.oc .note{font-size:12.5px;color:#E2B86A;margin-bottom:10px}
+.oc .f{display:flex;justify-content:space-between;align-items:center}
+.oc .f .num{font-size:16px}
+.oc .b{background:#C8963E;color:#17191F;border-radius:10px;padding:8px 14px;font-weight:600;font-size:14px}
+.oc .b.s{background:#2E8B57;color:#fff}
+.oc.d{opacity:.55}
+</style></head><body><div class="kh"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l-1 12h-11z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span><b>Siparişler</b><br><small>Palmiye · bar ve mutfak ekranı</small></span><span class="clk">18:42</span><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></div><div class="calls"><div class="call w"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span><b>Şezlong 07 garson çağırıyor</b><small>40 sn önce</small></span><span class="ok">Gidiyorum</span></div><div class="call h"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="12.5" rx="2.5"/><path d="M3.5 10h17M7 15h4"/></svg><span><b>Şezlong 15 hesap istiyor</b><small>Kartla ödeyecek</small></span><span class="ok">Tamam</span></div></div><div class="board"><div class="col"><h4>YENİ<em>2</em></h4><div class="oc n"><div class="h"><b>Şezlong 12</b><small>1 dk önce</small></div><ul><li><span>Aperol spritz</span><i>× 2</i></li><li><span>Poke bowl</span><i>× 1</i></li></ul><div class="f"><span class="num">1.300 ₺</span><span class="b">Kabul et</span></div></div><div class="oc n"><div class="h"><b>Şezlong 04</b><small>3 dk önce</small></div><ul><li><span>Mojito</span><i>× 1</i></li><li><span>Margherita</span><i>× 1</i></li><li><span>Su</span><i>× 2</i></li></ul><div class="note">Not: pizza ikiye bölünsün</div><div class="f"><span class="num">860 ₺</span><span class="b">Kabul et</span></div></div></div><div class="col"><h4>HAZIRLANIYOR<em>2</em></h4><div class="oc "><div class="h"><b>Şezlong 09</b><small>8 dk</small></div><ul><li><span>Virgin colada</span><i>× 2</i></li><li><span>Burger</span><i>× 1</i></li></ul><div class="f"><span class="num">980 ₺</span><span class="b">Hazır</span></div></div><div class="oc "><div class="h"><b>Masa 03</b><small>11 dk</small></div><ul><li><span>Negroni</span><i>× 2</i></li><li><span>San Sebastian</span><i>× 1</i></li></ul><div class="f"><span class="num">1.250 ₺</span><span class="b">Hazır</span></div></div></div><div class="col"><h4>HAZIR / TESLİM<em>2</em></h4><div class="oc "><div class="h"><b>Şezlong 17</b><small>hazır · 2 dk</small></div><ul><li><span>Gün batımı</span><i>× 2</i></li></ul><div class="f"><span class="num">900 ₺</span><span class="b s">Teslim edildi</span></div></div><div class="oc d"><div class="h"><b>Şezlong 21</b><small>teslim · 14 dk</small></div><ul><li><span>Flat white</span><i>× 2</i></li></ul><div class="f"><span class="num">280 ₺</span></div></div></div></div></body></html>

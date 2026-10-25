@@ -1,0 +1,76 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Palmiye</title><style>
+@font-face{font-family:Jost;src:url(../../restoran_masalik/siteler/fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../../restoran_masalik/siteler/fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../../restoran_masalik/siteler/fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../../restoran_masalik/siteler/fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../../restoran_masalik/siteler/fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../../restoran_masalik/siteler/fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../../restoran_masalik/siteler/fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../../restoran_masalik/siteler/fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../../restoran_masalik/siteler/fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#F4EDE1;color:#1D2742}
+.sky{position:relative;height:330px;overflow:hidden;color:#fff;text-align:center;
+  background:linear-gradient(180deg,#2B3A6B 0%,#C9667A 46%,#F2A86C 76%,#F7CB8E 100%)}
+.sky .sun{position:absolute;left:50%;bottom:50px;width:160px;height:160px;margin-left:-80px;border-radius:50%;
+  background:radial-gradient(circle,#FFE3A8 0%,#FFC777 58%,rgba(255,199,119,0) 72%)}
+.sky svg.w{position:absolute;bottom:0;left:0;width:100%}
+.sky .pl{position:absolute;right:-6px;bottom:28px;width:150px;height:200px}
+.sky .tt{position:relative;padding-top:44px}
+.sky b{font-family:Norican;font-weight:400;font-size:76px;line-height:1}
+.sky span{display:block;font-size:12px;letter-spacing:.34em;text-transform:uppercase;margin-top:4px}
+.sky em{display:inline-block;margin-top:12px;font-style:normal;font-size:12px;letter-spacing:.16em;padding:7px 14px;
+  border-radius:999px;background:rgba(255,255,255,.22);backdrop-filter:blur(8px)}
+.dr{display:flex;gap:12px;padding:0 18px;margin-top:-30px;position:relative}
+.dr a{flex:1;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 12px 26px rgba(29,39,66,.16)}
+.dr img{width:100%;height:118px;object-fit:cover}
+.dr span{display:block;padding:8px 10px 10px;font-size:12.5px;font-weight:600}
+.dr span i{display:block;font-style:normal;font-weight:400;color:#B98A4A}
+.pr{display:flex;justify-content:space-between;align-items:center;margin:16px 18px 0;padding:18px 20px;
+  border-radius:22px;background:#1D2742;color:#F4EDE1;font-size:17px;font-weight:600}
+.pr small{display:block;font-weight:400;font-size:12.5px;color:#D8BE95}
+.pr svg{width:24px;height:24px}
+.pl2{display:flex;gap:10px;padding:12px 18px 0}
+.pl2 a{flex:1;display:flex;align-items:center;gap:8px;padding:12px;border-radius:18px;border:1px solid #E4D9C6;
+  background:#FFFDF8;font-size:13px}
+.pl2 svg{width:20px;height:20px;color:#B98A4A}
+.day{margin:14px 18px 20px;padding:14px 16px;border-radius:18px;background:#EFE4D0;display:flex;
+  justify-content:space-between;font-size:12.5px}
+.day b{display:block;font-size:16px}
+.top{background:#1D2742;color:#F4EDE1;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+.top b{font-family:Norican;font-weight:400;font-size:34px;line-height:1}
+.top span{font-size:11px;letter-spacing:.18em;border:1px solid #D8BE95;border-radius:999px;padding:5px 11px}
+.pills{display:flex;gap:8px;padding:14px 18px 6px;overflow:hidden;white-space:nowrap}
+.pills span{padding:9px 16px;border-radius:999px;background:#FFFDF8;border:1px solid #E4D9C6;font-size:14px}
+.pills span.on{background:#F2A86C;border-color:#F2A86C;color:#1D2742;font-weight:600}
+.ms{columns:2;column-gap:12px;padding:8px 18px 24px}
+.mc{break-inside:avoid;margin-bottom:12px;background:#FFFDF8;border-radius:24px;overflow:hidden;
+  box-shadow:0 8px 20px rgba(29,39,66,.08)}
+.mc img{width:100%;object-fit:cover}
+.mc div{padding:10px 12px 12px}
+.mc b{font-weight:600;font-size:15px;display:block}
+.mc p{font-size:12px;color:#7C7F8F;line-height:1.35;margin-top:2px}
+.mc .num{display:inline-block;margin-top:8px;background:#1D2742;color:#F4EDE1;border-radius:999px;padding:4px 11px;
+  font-size:13px}
+.mc em{font-style:normal;font-size:10.5px;color:#B98A4A;margin-left:6px}
+
+.mc{position:relative}
+.mc.out img{filter:grayscale(1);opacity:.55}
+.mc .so{position:absolute;left:10px;top:10px;background:#C4473B;color:#fff;border-radius:999px;padding:4px 10px;
+  font-size:11.5px;font-weight:600;letter-spacing:.04em}
+.top .lg{display:flex;gap:2px;font-size:11px;border:1px solid #D8BE95;border-radius:999px;padding:3px}
+.top .lg i{font-style:normal;padding:2px 8px;border-radius:999px}
+.top .lg i.on{background:#D8BE95;color:#1D2742;font-weight:600}
+.nw{display:inline-block;margin-left:6px;font-size:10.5px;color:#2E8B57;font-weight:600}
+</style></head><body><div class="top"><b>Palmiye</b><span class="lg"><i class="on">TR</i><i class="">EN</i></span><span>ŞEZLONG 12</span></div><div class="pills"><span class="on">Kokteyller</span><span class="">Bowl</span><span class="">Pizza</span><span class="">Tatlı</span></div><div class="ms"><div class="mc"><img src="../../restoran_masalik/siteler/img/icki_aperol.jpg" style="height:236px" alt=""><div><b>Aperol spritz</b><p>Prosecco, soda, portakal</p><span class="num">420 ₺</span></div></div><div class="mc out"><img src="../../restoran_masalik/siteler/img/icki_mojito.jpg" style="height:178px" alt=""><span class="so">TÜKENDİ</span><div><b>Mojito</b><p>Taze nane, lime, kırık buz</p><span class="num">380 ₺</span></div></div><div class="mc"><img src="../../restoran_masalik/siteler/img/icki_colada.jpg" style="height:200px" alt=""><div><b>Virgin colada<em>Alkolsüz</em></b><p>Ananas, hindistancevizi</p><span class="num">260 ₺</span></div></div><div class="mc"><img src="../../restoran_masalik/siteler/img/poke_bowl.jpg" style="height:168px" alt=""><div><b>Poke bowl<em>Yeni</em></b><p>Somon, avokado, edamame, mango</p><span class="num">460 ₺</span></div></div></div></body></html>
