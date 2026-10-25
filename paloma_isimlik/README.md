@@ -90,6 +90,9 @@ Soldan sağa: açılış ekranı, tüm sayfa, koyu tema.
 
 Telefonda "hareketi azalt" açıksa animasyonlar oynamaz; sayfa doğrudan son hâliyle açılır.
 
+**Denemek için:** `sayfa_deneme.html` tek dosya; yazı tipleri, görseller ve rehber kartı içinde. Yüklemeye gerek
+yok, telefonda ya da tarayıcıda açılır. Yayına giden sürüm `site/` klasörü ve zip.
+
 **Bilgiler:** hepsi `bilgiler.json` içinde. Değişince sayfa betiği yeniden çalıştırılır.
 
 **Yayın:** ortak Cloudflare hesabında (`qrsistem`) yeni bir Worker açılır, adı tam olarak `suleymanboylu` olur ve

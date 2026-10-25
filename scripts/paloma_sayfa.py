@@ -24,7 +24,8 @@ Bilgiler `paloma_isimlik/bilgiler.json`; logo paloma_isimlik/logo/ (scripts/palo
 Yayın: ortak Cloudflare hesabında (`qrsistem`) `suleymanboylu` adlı Worker'a `paloma_site.zip` yüklenir; adres
 `https://suleymanboylu.qrsistem.workers.dev` (isimliklerdeki QR bu adresi açar).
 
-Çıktı : paloma_isimlik/site/, paloma_site.zip, sayfa_onizleme.png (açık, tam sayfa, koyu), sayfa_tur.gif
+Çıktı : paloma_isimlik/site/, paloma_site.zip, sayfa_onizleme.png (açık, tam sayfa, koyu), sayfa_tur.gif,
+        sayfa_deneme.html (denemelik tek dosya: her şey içinde)
 
 Kullanım:
   python3 scripts/paloma_gorsel.py           # önce görseller (bir kez)
@@ -53,6 +54,7 @@ IMG = os.path.join(BASE, "gorsel")
 ZIP = os.path.join(BASE, "paloma_site.zip")
 PREVIEW = os.path.join(BASE, "sayfa_onizleme.png")
 TOUR = os.path.join(BASE, "sayfa_tur.gif")
+STANDALONE = os.path.join(BASE, "sayfa_deneme.html")
 CHROMIUM = "/opt/pw-browsers/chromium"
 FONTS = {"f3": "Figtree_300Light.ttf", "f4": "Figtree_400Regular.ttf", "f6": "Figtree_600SemiBold.ttf",
          "f8": "Figtree_800ExtraBold.ttf"}
@@ -594,6 +596,27 @@ def tour_gif(path=TOUR):
     return _gif(frames, durs, path)
 
 
+def standalone(doc, path=STANDALONE):
+    """Denemelik tek dosya: yazı tipleri, görseller ve rehber kartı (vCard) sayfanın içine gömülü; hiçbir yere
+    yüklemeden telefonda ya da tarayıcıda açılır. (Asıl yayın site/ klasörü ve zip.)"""
+    import base64
+    import re
+
+    def data(rel, mime):
+        with open(os.path.join(OUT, rel), "rb") as f:
+            return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
+
+    doc = re.sub(r'<link rel="preload"[^>]*>', "", doc)
+    for rel in sorted(set(re.findall(r"fonts/f\d\.woff2?", doc))):
+        doc = doc.replace(f"url({rel})", f"url({data(rel, 'font/' + rel.rsplit('.', 1)[1])})")
+    for rel in ("img/ufuk.jpg", "img/sig.jpg"):
+        doc = doc.replace(f'src="{rel}"', f'src="{data(rel, "image/jpeg")}"')
+    doc = doc.replace(f'href="{VCF}" download', f'href="{data(VCF, "text/vcard")}" download="{VCF}"')
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(doc)
+    return path
+
+
 def pack():
     with zipfile.ZipFile(ZIP, "w", zipfile.ZIP_DEFLATED) as z:
         for d, _, files in os.walk(OUT):
@@ -614,9 +637,11 @@ def main():
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(doc)
     pack()
+    standalone(doc)
     size = sum(os.path.getsize(os.path.join(dp, fn)) for dp, _, fs in os.walk(OUT) for fn in fs)
     print("sayfa:", os.path.relpath(os.path.join(OUT, "index.html"), A.ROOT), f"(toplam {size // 1024} KB) →",
           d["sayfa_url"])
+    print("deneme:", os.path.relpath(STANDALONE, A.ROOT), f"({os.path.getsize(STANDALONE) // 1024} KB, tek dosya)")
     print("önizleme:", os.path.relpath(screenshot(), A.ROOT))
     if "--hizli" not in sys.argv:
         print("tur:", os.path.relpath(tour_gif(), A.ROOT))
