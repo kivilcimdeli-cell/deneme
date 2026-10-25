@@ -51,44 +51,53 @@ python3 scripts/paloma_isimlik.py katalog          # yalnız katalog sayfaları
 
 ![Tur](sayfa_tur.gif)
 
-İsimliklerle aynı konsept, aynı logo ve yazı tipleri (Montserrat, Lora). Soldan sağa: açık tema, tüm sayfa, koyu tema.
+Soldan sağa: açılış ekranı, tüm sayfa, koyu tema.
 
-- **Üst:** Paloma mavisi bant içinde PALOMA HOTELS | GRIDA (isimliklerdeki gibi), altında BELEK · ANTALYA ve akan
-  dalgalar.
-- **Kart:** iki satır ad soyad (Lora), yanında ince mavi dikey çizgi (1. model gibi). Altında aralıklı büyük
-  harflerle görev ve Paloma Grida.
-- **Düğmeler:** Ara, WhatsApp (cep numarası), E-posta, Konum (Google Haritalar).
-- **Liste:** cep 0536 458 79 25, şirket hattı 0553 277 94 86, e-posta, adres (İskele Mevkii, Belek, Serik / Antalya).
-- **Rehbere kaydet:** `suleyman-boylu.vcf` iner; bütün bilgiler tek dokunuşla telefonun rehberine eklenir.
-- **Kartviziti paylaş:** telefonun paylaş menüsünü açar; o yoksa bağlantıyı kopyalar.
-- **QR:** mavi kart içinde isimlikteki QR'ın aynısı, altında DİJİTAL | KARTVİZİT. Kartvizit ekrandan okutularak
-  paylaşılabilir.
-- **Alt şerit:** ara düğmeleri ekrandan çıkınca altta Ara / WhatsApp şeridi açılır.
-- **Koyu mod:** telefon koyu moddaysa sayfa siyah tabla renklerine geçer: koyu zemin, beyaz yazı, mavi detay.
-- **Paylaşım görseli:** bağlantı WhatsApp'ta paylaşılınca logo, ad ve görev görünür (`site/paylas.png`).
+**Yazı sistemi Paloma Hotels'ten:**
+
+- Otelin sitesi bu ortamdan açılmadığı için logonun harfleri (PALOMA / HOTELS) Google yazı tipleriyle harf harf
+  karşılaştırıldı. En yakını **Figtree**: PALOMA satırı ExtraBold, HOTELS satırı Light ile örtüşüyor; Montserrat
+  daha geniş kalıyor.
+- Sayfada da aynı düzen: büyük harf, geniş aralık; ad PALOMA gibi kalın (SÜLEYMAN), soyad HOTELS gibi ince ve aynı
+  genişliğe yayılmış (B O Y L U). Etiketler küçük ve aralıklı; tırnaklı yazı tipi yok.
+
+**Tasarım (otel sitesi gibi):**
+
+- **Açılış:** tam ekran görsel, ufukta Akdeniz. Üstte PALOMA HOTELS | GRIDA, altta ad, soyad ve görev; sağda KAYDIR
+  işareti.
+- **Yüzen çubuk:** Ara, WhatsApp, E-posta ve Konum, ince çizgili yuvarlak simgelerle.
+- **01 İletişim:** cep, şirket hattı ve e-posta; değerler büyük ve ince harfle.
+- **02 Otel:** yukarıdan sığ, turkuaz deniz görseli üstünde PALOMA / G R I D A; adres ve Yol tarifi.
+- **03 Kartvizit:** mavi kart içinde isimlikteki QR'ın aynısı, Rehbere kaydet ve Kartviziti paylaş.
+- **Sonda:** logo. Telefon koyu moddaysa sayfa gece renklerine geçer.
+- **Görseller:** Blender'da çizildi (`gorsel/`, `scripts/paloma_gorsel.py`), telif sorunu yok.
+- **Paylaşım görseli:** bağlantı WhatsApp'ta paylaşılınca deniz, logo, ad ve görev görünür (`site/paylas.jpg`).
+- **Boyut:** sayfanın tamamı yaklaşık 460 KB.
 
 **Animasyon** (`sayfa_tur.gif`):
 
-- **Açılış (~2 sn):**
-  - PALOMA harfleri sırayla iner, HOTELS harfleri ortadan yerlerine açılır.
-  - Ayraç uzar, GRIDA soldan belirir.
-  - Kart yükselir; ad ve soyad maskeden çıkar, yanındaki mavi çizgi yukarıdan aşağı uzar.
-  - Görevin harf aralığı açılır; düğmeler sırayla gelir, simgeleri çizilir.
+- **Açılış (~2,6 sn):**
+  - Görsel yavaşça yaklaşır; PALOMA harfleri iner, HOTELS harfleri ortadan açılır, ayraç ve GRIDA gelir.
+  - SÜLEYMAN harfleri maskeden çıkar, B O Y L U ortadan yerlerine yayılır; ince çizgi uzar, görevin harf aralığı
+    açılır.
+  - İletişim çubuğu aşağıdan gelir, simgeleri çizilir.
 - **Kaydırma:**
-  - Logo yavaş kayar ve solar.
-  - Satırlar soldan, alt çizgileri uzayarak gelir.
-  - QR kareleri çapraz bir dalgayla belirir, üstünden bir kez tarama ışığı geçer.
-- **Sürekli:** dalgalar akar, QR'ın vizör köşeleri nefes alır, Rehbere kaydet'in üstünden ara ara ışık geçer.
+  - Açılış görseli yavaş kayar.
+  - Bölüm başlıklarında numara, çizgi ve başlık açılır; satırlar alt çizgileriyle sırayla gelir.
+  - Otel görseli alttan perde gibi açılır ve içinde kayar; QR kareleri çapraz dalgayla belirir.
+  - İletişim çubuğu ekrandan çıkınca altta Ara / WhatsApp şeridi açılır.
+- **Sürekli:** KAYDIR çizgisi akar, QR'ın vizör köşeleri nefes alır, Rehbere kaydet'in üstünden ışık geçer.
 
 Telefonda "hareketi azalt" açıksa animasyonlar oynamaz; sayfa doğrudan son hâliyle açılır.
 
-**Bilgiler:** hepsi `bilgiler.json` içinde. Değişince iki betik yeniden çalıştırılır.
+**Bilgiler:** hepsi `bilgiler.json` içinde. Değişince sayfa betiği yeniden çalıştırılır.
 
 **Yayın:** ortak Cloudflare hesabında (`qrsistem`) yeni bir Worker açılır, adı tam olarak `suleymanboylu` olur ve
 `paloma_site.zip` yüklenir. Adres `https://suleymanboylu.qrsistem.workers.dev` olur; isimliklerdeki QR bu adresi
 açar.
 
 ```bash
+python3 scripts/paloma_gorsel.py           # deniz görselleri (Blender, ~9 dk)
 python3 scripts/paloma_sayfa.py            # site, zip, önizleme ve tur GIF'i
 python3 scripts/paloma_sayfa.py --hizli    # GIF'siz
 ```

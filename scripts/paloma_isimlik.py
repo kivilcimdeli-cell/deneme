@@ -457,8 +457,9 @@ def catalog(ds):
     y = 330
     for line in ("Telefonla QR okutulunca Süleyman Bey'in kartviziti açılır: tek dokunuşla arama (cep ve şirket hattı), "
                  "WhatsApp, e-posta, otelin konumu ve rehbere kaydetme.",
-                 "İsimliklerle aynı logo, yazı tipleri ve renkler. Açılışta logo harf harf, isim ve düğmeler sırayla "
-                 "hareketle gelir; telefon koyu moddaysa sayfa siyah tabla renklerine geçer (sağda).",
+                 "Yazılar Paloma Hotels logosunun yazı sisteminde: ad PALOMA gibi kalın, soyad HOTELS gibi ince. Tam "
+                 "ekran Akdeniz görseli ve numaralı bölümler; açılışta logo ve isim harf harf gelir. Telefon koyu "
+                 "moddaysa sayfa gece renklerine geçer (sağda).",
                  "Bilgiler değişirse yalnız sayfa güncellenir; isimlik ve QR aynı kalır."):
         for row in N.wrap(dr, line, f(28), W - 140):
             dr.text((70, y), row, font=f(28), fill=INK)
