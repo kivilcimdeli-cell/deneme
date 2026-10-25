@@ -24,12 +24,12 @@ import os
 import sys
 
 import manifold3d as m3
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
 import ince_isimlik as N  # noqa: E402
+import paloma_logo as L  # noqa: E402
 import qr_sistemi as Q  # noqa: E402
 import uzar_isimlik as I  # noqa: E402
 import uzar_isimlik_baski as B  # noqa: E402
@@ -372,26 +372,9 @@ def sheet(d, i):
 NAVY, PAPER, INK, MUTED = (20, 44, 62), (246, 247, 249), (20, 26, 34), (98, 106, 118)
 
 
-def logo_image(height, colour=(255, 255, 255)):
-    """Logoyu (çift-tek kuralıyla delikli) RGBA görsele çizer."""
-    ss = 4
-    w = int(round(height * LOGO["en_boy"]))
-    mask = Image.new("1", (w * ss, height * ss), 0)
-    k = w * ss
-    for key in ("paloma", "hotels"):
-        for ring in LOGO[key]:
-            m = Image.new("1", mask.size, 0)
-            ImageDraw.Draw(m).polygon([(x * k, height * ss - y * k) for x, y in ring], fill=1)
-            mask = Image.fromarray(np.asarray(mask) ^ np.asarray(m))
-    a = mask.convert("L").resize((w, height), Image.LANCZOS)
-    im = Image.new("RGBA", (w, height), colour + (0,))
-    im.putalpha(a)
-    return im
-
-
 def header(im, dr, W, page, n, sub):
     dr.rectangle((0, 0, W, 230), fill=PALOMA_BLUE)
-    lg = logo_image(118)
+    lg = L.raster(118)
     im.paste(lg, (70, 56), lg)
     dr.text((70 + lg.width + 46, 66), "GRIDA", font=font_ui(46), fill=(255, 255, 255))
     dr.text((70 + lg.width + 46, 128), "Belek · Antalya", font=font_ui(28), fill=(232, 242, 247))
@@ -474,6 +457,8 @@ def catalog(ds):
     y = 330
     for line in ("Telefonla QR okutulunca Süleyman Bey'in kartviziti açılır: tek dokunuşla arama (cep ve şirket hattı), "
                  "WhatsApp, e-posta, otelin konumu ve rehbere kaydetme.",
+                 "İsimliklerle aynı logo, yazı tipleri ve renkler. Açılışta logo harf harf, isim ve düğmeler sırayla "
+                 "hareketle gelir; telefon koyu moddaysa sayfa siyah tabla renklerine geçer (sağda).",
                  "Bilgiler değişirse yalnız sayfa güncellenir; isimlik ve QR aynı kalır."):
         for row in N.wrap(dr, line, f(28), W - 140):
             dr.text((70, y), row, font=f(28), fill=INK)

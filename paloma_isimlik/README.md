@@ -49,13 +49,38 @@ python3 scripts/paloma_isimlik.py katalog          # yalnız katalog sayfaları
 
 ![Sayfa](sayfa_onizleme.png)
 
-- **Üst:** Paloma mavisi, beyaz Paloma Hotels logosu, altında GRIDA; altta kayan dalgalar.
-- **Kart:** SB rozeti, ad soyad (Lora), görev, Paloma Grida · Paloma Hotels.
+![Tur](sayfa_tur.gif)
+
+İsimliklerle aynı konsept, aynı logo ve yazı tipleri (Montserrat, Lora). Soldan sağa: açık tema, tüm sayfa, koyu tema.
+
+- **Üst:** Paloma mavisi bant içinde PALOMA HOTELS | GRIDA (isimliklerdeki gibi), altında BELEK · ANTALYA ve akan
+  dalgalar.
+- **Kart:** iki satır ad soyad (Lora), yanında ince mavi dikey çizgi (1. model gibi). Altında aralıklı büyük
+  harflerle görev ve Paloma Grida.
 - **Düğmeler:** Ara, WhatsApp (cep numarası), E-posta, Konum (Google Haritalar).
 - **Liste:** cep 0536 458 79 25, şirket hattı 0553 277 94 86, e-posta, adres (İskele Mevkii, Belek, Serik / Antalya).
 - **Rehbere kaydet:** `suleyman-boylu.vcf` iner; bütün bilgiler tek dokunuşla telefonun rehberine eklenir.
 - **Kartviziti paylaş:** telefonun paylaş menüsünü açar; o yoksa bağlantıyı kopyalar.
-- **Yazı tipleri:** isimliklerle aynı, Montserrat ve Lora. `site/fonts` içinde, yalnız kullanılan harfler (OFL).
+- **QR:** mavi kart içinde isimlikteki QR'ın aynısı, altında DİJİTAL | KARTVİZİT. Kartvizit ekrandan okutularak
+  paylaşılabilir.
+- **Alt şerit:** ara düğmeleri ekrandan çıkınca altta Ara / WhatsApp şeridi açılır.
+- **Koyu mod:** telefon koyu moddaysa sayfa siyah tabla renklerine geçer: koyu zemin, beyaz yazı, mavi detay.
+- **Paylaşım görseli:** bağlantı WhatsApp'ta paylaşılınca logo, ad ve görev görünür (`site/paylas.png`).
+
+**Animasyon** (`sayfa_tur.gif`):
+
+- **Açılış (~2 sn):**
+  - PALOMA harfleri sırayla iner, HOTELS harfleri ortadan yerlerine açılır.
+  - Ayraç uzar, GRIDA soldan belirir.
+  - Kart yükselir; ad ve soyad maskeden çıkar, yanındaki mavi çizgi yukarıdan aşağı uzar.
+  - Görevin harf aralığı açılır; düğmeler sırayla gelir, simgeleri çizilir.
+- **Kaydırma:**
+  - Logo yavaş kayar ve solar.
+  - Satırlar soldan, alt çizgileri uzayarak gelir.
+  - QR kareleri çapraz bir dalgayla belirir, üstünden bir kez tarama ışığı geçer.
+- **Sürekli:** dalgalar akar, QR'ın vizör köşeleri nefes alır, Rehbere kaydet'in üstünden ara ara ışık geçer.
+
+Telefonda "hareketi azalt" açıksa animasyonlar oynamaz; sayfa doğrudan son hâliyle açılır.
 
 **Bilgiler:** hepsi `bilgiler.json` içinde. Değişince iki betik yeniden çalıştırılır.
 
@@ -64,5 +89,6 @@ python3 scripts/paloma_isimlik.py katalog          # yalnız katalog sayfaları
 açar.
 
 ```bash
-python3 scripts/paloma_sayfa.py
+python3 scripts/paloma_sayfa.py            # site, zip, önizleme ve tur GIF'i
+python3 scripts/paloma_sayfa.py --hizli    # GIF'siz
 ```
