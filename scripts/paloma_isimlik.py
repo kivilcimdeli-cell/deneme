@@ -301,7 +301,7 @@ def secilen_20(sc=WHITE_SC):
         d.inlay.append((white, WHITE))
     x0 = -86.0
     y = name_lines(d, "lora", 13.5, x0, 82.0, lead=1.52)
-    d.add("görev", t("ms6", TITLE, 6.2, x0, y - 18.0, "l", 0.15, 108.0), BLUE)
+    d.add("görev", t("ms6", TITLE, 7.0, x0, y - 18.8, "l", 0.15, 108.0), BLUE)
     return d
 
 

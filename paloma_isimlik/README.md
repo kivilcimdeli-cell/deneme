@@ -70,7 +70,7 @@ tablaya **bir takım** (panel + sehpa) sığar; ikinci takım için dosya bir ke
 | AMS | 1 siyah · 2 beyaz · 3 mavi. Beyaz ana nozulda (gövde, sehpa); siyah ve mavi yardımcı nozulda (yalnız üst 4 katman) |
 | Mavi | logonun mavisi (#69A1BA); en yakın açık / çelik mavisi filament |
 | Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Generic PLA |
-| Filament | ~82 g (beyaz 77, mavi 3,8, siyah 1,3) + kule; PrusaSlicer ~2 sa 27 dk (Bambu Studio kendi süresini gösterir) |
+| Filament | ~82 g (beyaz 77, mavi 3,9, siyah 1,3) + kule; PrusaSlicer ~2 sa 27 dk (Bambu Studio kendi süresini gösterir) |
 | Sehpa | 170 × 40 × 10 mm, beyaz, aynı tablada; 5 mm'lik panel yuvaya (5,3 mm) 15° eğik takılır, tutkal gerekmez |
 
 ```bash
