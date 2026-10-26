@@ -282,6 +282,29 @@ def secilen(sc=WHITE_SC):
     return d
 
 
+def secilen_20(sc=WHITE_SC):
+    """Seçilen tasarımın 200 × 100 mm (2:1 dikdörtgen) hâli: sağda mavi kart (logo, çizgi, GRIDA, QR, KARTVİZİT),
+    solda iki satır ad soyad ve görev. Panel ölçüsü I.PW × I.PH = 200 × 100 iken kullanılır (paloma_isimlik_baski)."""
+    d = Design(f"{sc['key']}_3_mavi_kart_200", "Mavi kart (200 × 100)", "Sağda mavi kart: içinde beyaz PALOMA HOTELS "
+               "logosu, GRIDA, QR ve KARTVİZİT; solda iki satır ad soyad (Lora) ve görev.", sc)
+    cx = 61.0
+    card = A.rrect(62.0, 81.0, 5.0, cx, 53.5)                   # x 30..92, y 13..94 (sehpanın üstünde biter)
+    lg, yb = logo(cx, 89.0, 48.0, "c")
+    div = rule(cx - 7.5, cx + 7.5, yb - 3.8, 0.7)
+    gr = t("ms6", GRIDA, 4.4, cx, yb - 8.9, "c", 2.6)
+    tile = qr(d, cx, 41.0, 34.0)
+    cap = t("ms7", "KARTVİZİT", 3.6, cx, tile.bounds()[1] - 6.6, "c", 1.4)
+    white = lg + div + gr + cap
+    d.lines.update({"logo": lg, "çizgi": div, "GRIDA": gr, "KARTVİZİT": cap})
+    d.add(None, card - tile - white, BLUE)                      # beyazlar kartta oyuk: tablanın beyazı görünür
+    if sc["dark"]:
+        d.inlay.append((white, WHITE))
+    x0 = -86.0
+    y = name_lines(d, "lora", 13.5, x0, 82.0, lead=1.52)
+    d.add("görev", t("ms6", TITLE, 6.2, x0, y - 18.0, "l", 0.15, 108.0), BLUE)
+    return d
+
+
 LAYOUTS = [m1_sutun, m2_genis, m3_mavi_kart, m4_ust_bant, m5_ortali]
 DESIGNS = [(fn, sc) for fn in LAYOUTS for sc in (WHITE_SC, BLACK_SC)]   # 1 beyaz, 2 siyah, 3 beyaz, ...
 
@@ -330,7 +353,7 @@ def problems(d):
         for b, cb in cols[k + 1:]:
             if ca != cb and (a ^ b).area() > 0.01:
                 found.append(f"{NAMES[ca]}/{NAMES[cb]} dolgu çakışıyor")
-    safe = I.outline().offset(-3.0, J) ^ A.rect(-70, 10.0, 70, 100)
+    safe = I.outline().offset(-3.0, J) ^ A.rect(-I.PW, 10.0, I.PW, I.PH + 10.0)   # altta sehpa ~9,5 mm örter
     items = list(d.lines.items())
     for k, (n, cs) in enumerate(items):
         if (cs - safe).area() > 0.05:
