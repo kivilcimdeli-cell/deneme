@@ -136,8 +136,8 @@ de ayrı tasarımlar gibi duruyordu. Şimdi tek ekran var ve her bilgi bir kez g
 
 - **Arkada:** ufukta Akdeniz, sabit. Açık gökyüzünde logo | GRIDA, ad soyad ve görev koyu deniz mavisiyle yazılı.
 - **Altta tek kart:**
-  - cep telefonu (ara ve WhatsApp), şirket hattı, e-posta ve adres (haritada açılır), ince çizgili yuvarlak
-    simgelerle;
+  - cep telefonu ve şirket hattı (ikisinde de ara ve WhatsApp), e-posta ve adres (haritada açılır), ince çizgili
+    yuvarlak simgelerle;
   - altta **Rehbere kaydet** ve **Paylaş**.
   - Kısa ekranlı telefonda kart görselin üstünden kayar.
 - **Paylaş:** alttan bir pencere açılır. İçinde mavi kartta isimlikteki QR'ın aynısı (DİJİTAL | KARTVİZİT) ve sayfa
@@ -146,7 +146,8 @@ de ayrı tasarımlar gibi duruyordu. Şimdi tek ekran var ve her bilgi bir kez g
 - **Koyu mod:** telefon koyu moddaysa kart ve pencere gece renklerine geçer.
 - **Görsel:** Blender'da çizildi (`gorsel/ufuk.jpg`, `scripts/paloma_gorsel.py`), telif sorunu yok.
 - **Paylaşım görseli:** bağlantı WhatsApp'ta paylaşılınca deniz, logo, ad ve görev görünür (`site/paylas.jpg`).
-- **Boyut:** sayfanın tamamı yaklaşık 420 KB.
+- **Simge:** ana ekrana eklenince Paloma mavisinde beyaz logo (`site/simge.png`).
+- **Boyut:** sayfanın tamamı yaklaşık 430 KB.
 
 **Animasyon** (`sayfa_tur.gif`), sakin ve tek akış:
 
@@ -155,8 +156,13 @@ de ayrı tasarımlar gibi duruyordu. Şimdi tek ekran var ve her bilgi bir kez g
   - SÜLEYMAN harfleri maskeden çıkar, B O Y L U ortadan yerlerine yayılır; ince çizgi uzar, görevin harf aralığı
     açılır.
   - Kart alttan gelir; satırlar çizgileriyle sırayla belirir, simgeler çizilir.
+- **Canlı arka plan:**
+  - Deniz dalgalanır: fotoğraf telefonda WebGL ile perspektife göre kaydırılır; ufukta az, önde çok.
+  - Dalgalar kıyıya doğru akar, güneş pırıltıları yanıp söner; gökyüzü kıpırdamaz.
+  - Gökyüzünden ara ara küçük bir kuş sürüsü süzülür (paloma: güvercin), biri ufukta.
+  - Görsel çok yavaş yaklaşıp uzaklaşır. WebGL olmayan telefonda fotoğraf durağan kalır.
+- **Düğmeler:** WhatsApp düğmelerinden ara ara su halkası yayılır, Rehbere kaydet'in üstünden ışık geçer.
 - **Paylaş:** pencere alttan kayar, QR kareleri çapraz dalgayla belirir, vizör köşeleri nefes alır.
-- **Sürekli:** deniz çok yavaş yaklaşıp uzaklaşır, Rehbere kaydet'in üstünden ara ara ışık geçer.
 
 Telefonda "hareketi azalt" açıksa animasyonlar oynamaz; sayfa doğrudan son hâliyle açılır.
 

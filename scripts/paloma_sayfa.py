@@ -7,7 +7,8 @@ Figtree çıktı (PALOMA satırı ExtraBold, HOTELS satırı Light). Sayfada da 
 Tasarım: tek ekran, tek parça; her bilgi bir kez geçer.
   * Arkada sabit görsel: ufukta Akdeniz (Blender, scripts/paloma_gorsel.py). Açık gökyüzünde logo | GRIDA ve isim
     koyu deniz mavisiyle; altta deniz.
-  * Alttan gelen tek kart: cep (ara + WhatsApp), şirket hattı, e-posta, adres (harita); Rehbere kaydet ve Paylaş.
+  * Alttan gelen tek kart: cep ve şirket hattı (ara + WhatsApp), e-posta, adres (harita); Rehbere kaydet ve
+    Paylaş.
     Kısa ekranda kart görselin üstünden kayar.
   * Paylaş: alttan açılan pencerede isimlikteki QR'ın aynısı (DİJİTAL | KARTVİZİT), bağlantıyı kopyala / gönder.
   * Telefon koyu moddaysa kart ve pencere gece renklerine geçer.
@@ -16,7 +17,10 @@ Animasyon (sakin, tek akış):
   * Açılış (~2,6 sn): görsel yavaşça yaklaşır; PALOMA harfleri iner, HOTELS harfleri ortadan açılır, ayraç ve
     GRIDA; SÜLEYMAN harfleri maskeden çıkar, BOYLU harfleri ortadan yerlerine yayılır, ince çizgi uzar, görevin harf
     aralığı açılır; kart alttan gelir, satırlar çizgileriyle sırayla, simgeler çizilir.
-  * Sürekli: deniz çok yavaş yaklaşıp uzaklaşır; Rehbere kaydet'in üstünden ara ara ışık geçer.
+  * Canlı arka plan: deniz dalgalanır (WebGL: fotoğraf perspektife göre kaydırılır, dalgalar kıyıya akar, güneş
+    pırıltıları yanıp söner; gökyüzü kıpırdamaz), gökyüzünden ara ara kuş sürüsü süzülür, görsel çok yavaş
+    yaklaşıp uzaklaşır. WebGL yoksa fotoğraf durağan kalır.
+  * Sürekli: WhatsApp düğmelerinden ara ara su halkası yayılır; Rehbere kaydet'in üstünden ışık geçer.
   * Paylaş penceresi alttan kayar, QR kareleri çapraz dalgayla belirir, vizör köşeleri nefes alır.
   "Hareketi azalt" açıksa hiçbiri oynamaz, sayfa doğrudan son hâliyle açılır.
 
@@ -35,6 +39,7 @@ Kullanım:
   python3 scripts/paloma_sayfa.py            # site, zip, önizleme ve tur
   python3 scripts/paloma_sayfa.py --hizli    # GIF'siz
 """
+import contextlib
 import html
 import io
 import json
@@ -49,7 +54,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
 import paloma_logo as L  # noqa: E402
 import qr_sistemi as Q  # noqa: E402
-from ince_sayfa import _finish, _gif, _seek  # noqa: E402
+from ince_sayfa import _gif, _seek  # noqa: E402
 
 BASE = os.path.join(A.ROOT, "paloma_isimlik")
 OUT = os.path.join(BASE, "site")
@@ -64,8 +69,10 @@ FONTS = {"f3": "Figtree_300Light.ttf", "f4": "Figtree_400Regular.ttf", "f6": "Fi
 LICENSES = ("OFL-figtree.txt",)
 VCF = "suleyman-boylu.vcf"
 OG = "paylas.jpg"
+ICON_PNG = "simge.png"
 LOGO = json.load(open(L.JSON, encoding="utf-8"))
 SKY = "#D2E1F1"                              # görselin üstündeki gökyüzü: tarayıcı çubuğunun rengi
+HORIZON = 0.26                               # ufuk görselin üstten %26'sında (deniz dokusu orada başlar)
 
 ICON = {
     "phone": '<path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 '
@@ -146,9 +153,17 @@ def images():
     """Blender görseli sayfa için: hafif renk ayarı, JPEG (ufuk 1080 × 1920)."""
     os.makedirs(os.path.join(OUT, "img"), exist_ok=True)
     im = Image.open(os.path.join(IMG, "ufuk.jpg")).convert("RGB")
-    im = ImageEnhance.Color(im).enhance(1.12)
+    im = ImageEnhance.Color(im).enhance(1.3)                    # biraz daha Akdeniz turkuazı
     im = ImageEnhance.Contrast(im).enhance(1.05)
     im.save(os.path.join(OUT, "img", "ufuk.jpg"), "JPEG", quality=80, optimize=True, progressive=True)
+
+
+def touch_icon():
+    """Ana ekrana eklenince ve sekmede görünen simge (180 × 180): Paloma mavisinde beyaz logo."""
+    im = Image.new("RGB", (180, 180), (105, 161, 186))
+    lg = L.raster(46)
+    im.paste(lg, ((180 - lg.width) // 2, (180 - lg.height) // 2), lg)
+    im.save(os.path.join(OUT, ICON_PNG), optimize=True)
 
 
 def vcard(d):
@@ -272,7 +287,15 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* ---------------- arka plan: ufukta Akdeniz, sabit; kart üstünden kayar */
 .bg{position:fixed;top:0;left:50%;width:min(440px,100%);height:100vh;height:100lvh;transform:translateX(-50%);
   overflow:hidden;background:#BCD3E2}
-.bg img{width:100%;height:100%;object-fit:cover;display:block}
+.sea{position:absolute;inset:0}
+.sea img,.sea canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.sea canvas{opacity:0;transition:opacity 1.2s ease}
+.sea canvas.on{opacity:1}
+.birds{position:absolute;inset:0;pointer-events:none;color:var(--head);overflow:hidden}
+.bird{position:absolute;left:0;top:var(--y);width:calc(32px*var(--s));opacity:0;transform:translateX(-60px)}
+.bird svg{display:block;width:100%;height:auto;overflow:visible}
+.bird path{fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;
+  transform-origin:50% 72%}
 
 /* ---------------- üst: logo ve isim (açık gökyüzünde koyu deniz mavisi) */
 .top{position:relative;flex:1 0 auto;min-height:350px;padding:30px 28px 64px;color:var(--head)}
@@ -362,7 +385,13 @@ dialog.on.out .panel{transform:translate(-50%,104%)}
 .pbtns>*{flex:1}
 
 /* ---------------- açılış: görsel yaklaşır, logo ve isim harf harf, kart alttan gelir */
-.bg img{animation:kb 3.2s cubic-bezier(.15,.7,.25,1) both,drift 20s ease-in-out 3.2s infinite alternate}
+.sea{animation:kb 3.2s cubic-bezier(.15,.7,.25,1) both,drift 20s ease-in-out 3.2s infinite alternate}
+.mo .bird{animation:fly var(--dur) linear var(--del) infinite}
+.mo .bird svg{animation:bob calc(var(--dur)/4) ease-in-out var(--del) infinite alternate}
+.mo .bird path{animation:flap .46s ease-in-out calc(var(--del)*-.37) infinite alternate}
+.ic.wa:before{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid var(--wa);opacity:0;
+  pointer-events:none}
+.mo .ic.wa:before{animation:ring 5s ease-out calc(3.4s + var(--i)*1.2s) infinite}
 .pl{transform-box:fill-box;transform-origin:50% 100%;animation:drop .65s var(--e) calc(.35s + var(--i)*.07s) both}
 .ht{animation:spread 1s var(--e) calc(.6s + var(--i)*.02s) both}
 .top .lock .bar{animation:grow-y .5s var(--e) 1s both}
@@ -403,13 +432,60 @@ h1 .l span{animation:spread2 1.1s var(--e) calc(1.2s + var(--i)*.03s) both}
 @keyframes sweep{0%{opacity:0;top:0}15%{opacity:1}85%{opacity:1}100%{opacity:0;top:78%}}
 @keyframes breathe{0%,100%{transform:none;opacity:1}50%{transform:scale(1.12);opacity:.6}}
 @keyframes shine{0%,78%{left:-45%}100%{left:125%}}
-@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+@keyframes fly{0%{opacity:0;transform:translateX(-60px)}5%,66%{opacity:.7}72%,100%{opacity:0;transform:translateX(480px)}}
+@keyframes bob{from{translate:0 -5px}to{translate:0 6px}}
+@keyframes flap{0%{transform:none}100%{transform:scaleY(-.45)}}
+@keyframes ring{0%{opacity:.6;transform:scale(1)}40%,100%{opacity:0;transform:scale(1.6)}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}
+  .birds,.sea canvas{display:none}}
 """
+
+SEA_VS = "attribute vec2 p;varying vec2 v;void main(){v=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}"
+# Deniz: fotoğraf perspektife göre (ufukta az, önde çok) iki katlı gürültüyle kaydırılır, dalgalar kıyıya doğru
+# akar; güneş pırıltıları yanıp söner. Ufkun üstü (gökyüzü) kıpırdamaz. HZ: ufkun görseldeki yeri (0 üst, 1 alt).
+SEA_FS = """#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+uniform sampler2D s;uniform vec2 r,i;uniform float t,h;varying vec2 v;
+vec2 hs(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return fract(sin(p)*43758.5453)*2.-1.;}
+float nz(vec2 p){vec2 a=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(dot(hs(a),f),dot(hs(a+vec2(1,0)),
+f-vec2(1,0)),u.x),mix(dot(hs(a+vec2(0,1)),f-vec2(0,1)),dot(hs(a+vec2(1,1)),f-vec2(1,1)),u.x),u.y);}
+void main(){float rc=r.x/r.y,ri=i.x/i.y;vec2 q=(v-.5)*(rc>ri?vec2(1.,ri/rc):vec2(rc/ri,1.))+.5;
+float d=(q.y-h)/(1.-h);vec2 o=vec2(0.);float g=0.;
+if(d>0.){float z=1./(d+.08);vec2 w=vec2((q.x-.5)*z*2.4,z*1.2);
+float n=nz(w*2.5+vec2(t*.04,t*.32))+.5*nz(w*5.+vec2(-t*.07,t*.55)+7.3);
+float m=nz(w*2.5+vec2(3.1-t*.05,t*.28));
+float a=smoothstep(0.,.3,d)*(.002+.006*d);o=vec2(.7*m*a,n*a);
+g=smoothstep(.3,.56,nz(w*6.+vec2(t*.12,t*.8)))*smoothstep(.04,.3,d)*(1.-.4*d);}
+gl_FragColor=vec4(texture2D(s,q+o).rgb+g*.3*vec3(1.,.98,.94),1.);}"""
 
 JS = """
 (()=>{const R=document.documentElement,D=document.getElementById('qr'),P=D.querySelector('.panel'),U=D.dataset.url,
   send=document.getElementById('send'),copy=document.getElementById('copy'),
   calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sea=()=>{const img=document.querySelector('.sea img'),cv=document.querySelector('.sea canvas');
+  if(!R.classList.contains('mo'))return;const gl=cv.getContext('webgl',{alpha:false,antialias:false});if(!gl)return;
+  const sh=(k,src)=>{const x=gl.createShader(k);gl.shaderSource(x,src);gl.compileShader(x);
+    return gl.getShaderParameter(x,gl.COMPILE_STATUS)?x:null},vs=sh(gl.VERTEX_SHADER,`__VS__`),fs=sh(gl.FRAGMENT_SHADER,`__FS__`);
+  if(!vs||!fs)return;const pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return;gl.useProgram(pr);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+  gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
+  for(const[k,x]of[[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE],
+    [gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR]])gl.texParameteri(gl.TEXTURE_2D,k,x);
+  try{gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img)}catch(x){return}
+  const u=n=>gl.getUniformLocation(pr,n),ur=u('r'),ut=u('t');
+  gl.uniform2f(u('i'),img.naturalWidth,img.naturalHeight);gl.uniform1f(u('h'),__HZ__);
+  const draw=t=>{const k=Math.min(devicePixelRatio||1,2),w=Math.round(cv.clientWidth*k),hh=Math.round(cv.clientHeight*k);
+    if(cv.width!==w||cv.height!==hh){cv.width=w;cv.height=hh;gl.viewport(0,0,w,hh)}
+    gl.uniform2f(ur,w,hh);gl.uniform1f(ut,t);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)};
+  let raf=0;const loop=now=>{draw(window.__seaT??now/1000);raf=document.hidden?0:requestAnimationFrame(loop)};
+  addEventListener('visibilitychange',()=>{if(!document.hidden&&!raf)raf=requestAnimationFrame(loop)});
+  window.__seaDraw=draw;draw(0);cv.classList.add('on');raf=requestAnimationFrame(loop)};
+{const im=document.querySelector('.sea img');im.complete&&im.naturalWidth?sea():im.addEventListener('load',sea,{once:true})}
 if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
   addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
 const open=()=>{if(D.open)return;D.showModal();R.classList.add('hold');void P.offsetWidth;D.classList.add('on')};
@@ -429,16 +505,30 @@ if(location.hash==='#qr')open();})();
 """
 
 
+def wa_link(d, number):
+    return f"https://wa.me/{number}?text=" + d["whatsapp_mesaj"].replace(" ", "%20").replace(",", "%2C")
+
+
+def birds():
+    """Gökyüzünde süzülen kuşlar (paloma: güvercin): üçlü sürü logo ile isim arasında, biri ufukta; ara ara geçer."""
+    flock = [(88, 1.0, 26, 2.5), (102, .8, 26, 3.1), (80, .62, 26, 3.6), (300, .85, 34, 14.0)]
+    one = ('<svg viewBox="0 0 24 10"><path d="M1 8.5C4.5 3 8.5 2.5 12 7.2 15.5 2.5 19.5 3 23 8.5"/></svg>')
+    return ('<div class="birds">' + "".join(
+        f'<i class="bird" style="--y:{y}px;--s:{sc};--dur:{dur}s;--del:{dl}s">{one}</i>'
+        for y, sc, dur, dl in flock) + "</div>")
+
+
 def page(d):
     first, last = tr_upper(d["isim"]).split(" ", 1)
-    wa = f"https://wa.me/{d['cep_e164']}?text=" + d["whatsapp_mesaj"].replace(" ", "%20").replace(",", "%2C")
     hotel = d["otel"].split()[-1].upper()
     street, district, city, _ = d["adres"]
     deco = lambda k: f'<span class="ic" aria-hidden="true">{icon(k, True)}</span>'  # noqa: E731
+    wa = lambda num, lab: (f'<a class="ic wa" href="{e(wa_link(d, num))}" target=_blank rel=noopener '  # noqa: E731
+                           f'aria-label="{lab}: WhatsApp ile yazın">{icon("whatsapp", True)}</a>')
     rows = [("", "Cep telefonu", e(d["cep_txt"]), f"tel:+{d['cep_e164']}",
-             f'<a class="ic wa" href="{e(wa)}" target=_blank rel=noopener aria-label="WhatsApp ile yazın">'
-             f'{icon("whatsapp", True)}</a>{deco("phone")}'),
-            ("", "Şirket hattı", e(d["sirket_txt"]), f"tel:+{d['sirket_e164']}", deco("phone")),
+             wa(d["cep_e164"], "Cep") + deco("phone")),
+            ("", "Şirket hattı", e(d["sirket_txt"]), f"tel:+{d['sirket_e164']}",
+             wa(d["sirket_e164"], "Şirket hattı") + deco("phone")),
             ("em", "E-posta", e(d["eposta"]), f"mailto:{d['eposta']}", deco("mail")),
             ("ad", "Adres", f"{e(street)}<br>{e(district)} / {e(city)}", d["harita"], deco("pin"))]
     li = "".join(f'<li class="{c}" style="--i:{k}"><a class="v" href="{e(h)}"'
@@ -446,7 +536,8 @@ def page(d):
                  f'<span class="acts">{acts}</span></li>' for k, (c, lab, v, h, acts) in enumerate(rows))
     url = d["qr"]
     body = (
-        f'<div class="bg" aria-hidden="true"><img src="img/ufuk.jpg" alt="" fetchpriority="high"></div>'
+        f'<div class="bg" aria-hidden="true"><div class="sea"><img src="img/ufuk.jpg" alt="" fetchpriority="high">'
+        f'<canvas></canvas></div>{birds()}</div>'
         f'<div class="wrap"><header class="top">{lockup("lock", hotel, True)}'
         f'<div class="who"><h1 aria-label="{e(d["isim"])}"><span class="b" aria-hidden="true">{letters(first)}</span>'
         f'<span class="l" aria-hidden="true">{letters(last)}</span></h1>'
@@ -469,6 +560,7 @@ def page(d):
     og = d["sayfa_url"].rstrip("/") + "/" + OG
     ext_, fmt = ("woff2", "woff2") if _has_brotli() else ("woff", "woff")
     css = CSS.replace("EXT", ext_).replace("FMT", fmt)
+    js = JS.replace("__VS__", SEA_VS).replace("__FS__", SEA_FS).replace("__HZ__", f"{HORIZON:g}")
     return (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" '
             f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="{SKY}">'
             f'<title>{e(title)}</title><meta name="description" content="{e(desc)}">'
@@ -476,11 +568,12 @@ def page(d):
             f'<meta property="og:description" content="{e(desc)}"><meta property="og:image" content="{e(og)}">'
             f'<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
             f'<meta name="twitter:card" content="summary_large_image">'
+            f'<link rel="icon" href="{ICON_PNG}"><link rel="apple-touch-icon" href="{ICON_PNG}">'
             f'<link rel="preload" as="image" href="img/ufuk.jpg">'
             f'<link rel="preload" as="font" type="font/{fmt}" href="fonts/f8.{ext_}" crossorigin>'
             f"<script>matchMedia('(prefers-reduced-motion: reduce)').matches||"
             f"document.documentElement.classList.add('mo')</script>"
-            f'<style>{css}</style></head><body>{body}<script>{JS}</script></body></html>')
+            f'<style>{css}</style></head><body>{body}<script>{js}</script></body></html>')
 
 
 # ---------------------------------------------------------------- önizlemeler
@@ -490,6 +583,7 @@ def screenshot(path=PREVIEW):
     yatay taşma yok, yazılar kutularına sığıyor, kart tek ekrana sığıyor, penceredeki QR okunuyor."""
     from playwright.sync_api import sync_playwright
     url = load()["qr"]
+    errors = []
     fits = ("[...document.querySelectorAll('SEL')].every(e=>e.offsetParent===null||e.scrollWidth<=e.clientWidth+1)")
     shots = []
     with sync_playwright() as p:
@@ -498,6 +592,7 @@ def screenshot(path=PREVIEW):
             pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, reduced_motion="reduce",
                             color_scheme=scheme)
             pg.add_init_script("navigator.share=async()=>{}")      # telefondaki gibi: Gönder düğmesi görünür
+            pg.on("pageerror", lambda x: errors.append(str(x)))
             pg.goto("file://" + os.path.join(OUT, "index.html"))
             pg.wait_for_timeout(500)
             assert pg.evaluate("[300,400,600,800].every(w=>document.fonts.check(w+' 20px Figtree'))"), \
@@ -516,6 +611,7 @@ def screenshot(path=PREVIEW):
             shots.append(Image.open(io.BytesIO(pg.screenshot())))
             pg.close()
         b.close()
+    assert not errors, errors
     h = max(s.height for s in shots)
     canvas = Image.new("RGB", (sum(s.width for s in shots) + 160, h + 120), (52, 56, 64))
     x = 40
@@ -526,36 +622,62 @@ def screenshot(path=PREVIEW):
     return path
 
 
+@contextlib.contextmanager
+def served():
+    """site/ yerel sunucuda (WebGL dosyadan açılan görseli doku olarak kullanamaz; telefondaki gibi http)."""
+    import functools
+    import http.server
+    import threading
+
+    class Quiet(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=OUT))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        yield f"http://127.0.0.1:{srv.server_port}/index.html"
+    finally:
+        srv.shutdown()
+
+
 def tour_gif(path=TOUR):
-    """Tur (390 × 844): açılış zamanda adım adım, bekleme, sonra Paylaş penceresi (QR dalgası) adım adım."""
+    """Tur (390 × 844), zamanda adım adım: açılış, sonra canlı arka plan (deniz, kuşlar, halkalar), sonra Paylaş
+    penceresi (QR dalgası). Deniz WebGL'de çizilir: zamanı __seaT ile verilir."""
     from playwright.sync_api import sync_playwright
-    frames, durs = [], []
-    with sync_playwright() as p:
+    frames, durs, errors = [], [], []
+    with sync_playwright() as p, served() as url:
         b = p.chromium.launch(executable_path=CHROMIUM)
         pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=1)
+        pg.on("pageerror", lambda x: errors.append(str(x)))
         pg.add_init_script("navigator.share=async()=>{}")
 
         def shot(ms):
             frames.append(Image.open(io.BytesIO(pg.screenshot())).convert("RGB"))
             durs.append(ms)
 
-        pg.goto("file://" + os.path.join(OUT, "index.html"))
-        pg.wait_for_timeout(300)
-        _seek(pg, 0)
+        def at(ms):
+            _seek(pg, ms)
+            pg.evaluate(f"window.__seaT={ms / 1000};window.__seaDraw&&__seaDraw({ms / 1000})")
+
+        pg.goto(url)
+        pg.wait_for_function("document.querySelector('.sea canvas').classList.contains('on')", timeout=15000)
         for k in range(0, 3000, 90):
-            _seek(pg, k)
+            at(k)
             shot(90)
-        _finish(pg)
-        shot(1600)
+        for k in range(3000, 9000, 160):
+            at(k)
+            shot(160)
         pg.evaluate("document.getElementById('share').click();window._dl=document.getAnimations().filter(a=>{"
                     "const t=a.effect&&a.effect.target;return t&&t.closest&&t.closest('dialog')});"
                     "_dl.forEach(a=>{a.pause();a.currentTime=0})")
         for k in range(0, 1700, 85):
-            pg.evaluate(f"_dl.forEach(a=>a.currentTime={k})")
+            pg.evaluate(f"_dl.forEach(a=>a.currentTime={k});window.__seaT={9 + k / 1000};__seaDraw(__seaT)")
             shot(85)
         pg.evaluate("_dl.forEach(a=>{try{a.finish()}catch(e){a.play()}})")
         shot(2600)
         b.close()
+    assert not errors, errors
     return _gif(frames, durs, path)
 
 
@@ -573,6 +695,7 @@ def standalone(doc, path=STANDALONE):
     for rel in sorted(set(re.findall(r"fonts/f\d\.woff2?", doc))):
         doc = doc.replace(f"url({rel})", f"url({data(rel, 'font/' + rel.rsplit('.', 1)[1])})")
     doc = doc.replace('src="img/ufuk.jpg"', f'src="{data("img/ufuk.jpg", "image/jpeg")}"')
+    doc = doc.replace(f'href="{ICON_PNG}"', f'href="{data(ICON_PNG, "image/png")}"')
     doc = doc.replace(f'href="{VCF}" download', f'href="{data(VCF, "text/vcard")}" download="{VCF}"')
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)
@@ -596,6 +719,7 @@ def main():
     images()
     vcard(d)
     og_image(d)
+    touch_icon()
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
         f.write(doc)
     pack()
