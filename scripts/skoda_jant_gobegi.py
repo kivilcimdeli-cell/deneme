@@ -1,14 +1,16 @@
-"""Škoda jant göbeği amblemi – Ø55 mm yuvarlak disk, çift taraflı bantla yapıştırılır; 4 adet, Bambu Lab X2D 3MF.
+"""Škoda jant göbeği amblemi – Ø55 mm, hafif bombeli, çift taraflı bantla yapıştırılır; 4 adet, Bambu Lab X2D 3MF.
 
-Yapı (kesit; z = 0 arka yüz, ön yüz z = T):
-  * Ø55 × 2,6 mm disk. Ön kenarda 0,6 mm × 45° pah (tablada ilk katmanlar: fil ayağı da görünmez), arkada 0,4 mm pah.
-  * Ön yüzde Škoda logosu yüzeyle aynı hizada (orijinal amblem gibi düz): siyah zemin üstünde açık renk halka ve
-    kanatlı ok, okun gözü siyah; logonun dışında 1,6 mm siyah kenar. Açık renk 1,0 mm (5 katman), arkası siyah.
+Yapı (kesit; z = 0 arka yüz):
+  * Ø55 mm. Kenarda 1,8 mm, ortada 2,8 mm: ön yüz 1,0 mm bombeli (küre kapağı, orijinal reçineli amblemler gibi);
+    üst kenar R0,8 yuvarlatılmış, tabladaki alt kenarda 0,4 mm pah (fil ayağı görünmez).
+  * Ön yüzde Škoda logosu bombeyi izler, yüzeyle aynı hizada: siyah zemin üstünde açık renk halka ve kanatlı ok, okun
+    gözü siyah; logonun dışında 1,6 mm siyah kenar. Açık renk yüzeyin 1,0 mm altına kadar (düşey), arkası siyah.
     Logo çizimi Simple Icons'tan (scripts/logolar/skoda.svg, CC0); Škoda logosu Škoda Auto'nun markasıdır.
   * Arka yüz düz: çift taraflı bant (3M VHB gibi otomotiv bandı) buraya.
 
-Baskı: ÖN YÜZ TABLADA (en düzgün ve keskin yüz), destek yok. Siyah ana nozulda, açık renk yardımcı nozulda:
-filament değişimi yok. Alt ve üst 5'er katman dolu: renkli yüz boşluksuz, disk sağlam ve düz.
+Baskı: ARKA YÜZ TABLADA, bombe yukarıda: hiçbir yerde sarkma yok, destek gerekmez; arka yüz kusursuz düz çıkar.
+Katman 0,12 mm: bombedeki basamaklar ince kalır. Üst 9 katman dolu: renkli kısım boşluksuz, beyaz opak.
+Siyah ana nozulda, açık renk yardımcı nozulda: filament değişimi yok.
 Malzeme: ASA önerilir (güneşte jant ısınır, PLA yumuşar); dosyada PLA ayarı var, Bambu Studio'da iki filamenti de
 ASA seçmek yeter. Açık renk için beyaz, gümüş ya da Škoda yeşili: yalnız 2. filamentin rengi değişir.
 
@@ -23,6 +25,7 @@ import sys
 import zipfile
 
 import manifold3d as m3
+import numpy as np
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -36,17 +39,37 @@ from cift_tarafli_isimlik import render, rotation  # noqa: E402
 OUT_DIR = os.path.join(A.ROOT, "skoda_jant_gobegi")
 SVG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logolar", "skoda.svg")
 D = 55.0                        # disk çapı
-T = 2.6                         # kalınlık (13 katman)
+EDGE = 1.8                      # kenar yüksekliği (bombenin başladığı yer)
+RISE = 1.0                      # bombe: kenardan ortaya yükselme
+T = EDGE + RISE                 # ortada kalınlık
+FILLET = 0.8                    # üst kenar yuvarlatma
+BACK_CH = 0.4                   # tabladaki alt kenar pahı
+LAYER_H = 0.12                  # ince katman: bombedeki basamaklar küçük
 LOGO_D = 51.8                   # logonun dış halkası; dışında 1,6 mm siyah kenar
-INLAY = 1.0                     # açık renk ön yüz derinliği (5 katman): beyaz opak çıksın
-FRONT_CH, BACK_CH = 0.6, 0.4    # ön ve arka kenar pahı (45°)
+INLAY = 1.0                     # açık renk yüzeyden aşağı (düşey): beyaz opak çıksın
 PITCH = 64.0                    # tablada diskler arası (merkezden merkeze)
 SEG = 360
 R_OUT, R_RING = 12.0, 10.964    # simgedeki dış halka (24 birimlik kutu)
 J = m3.JoinType.Round
 LIGHT = A.WHITE                 # açık renk (halka ve ok)
 OPTIONS = [("Beyaz", (246, 246, 242)), ("Gümüş", (178, 182, 188)), ("Škoda yeşili", (72, 168, 46))]
-TOWER, TOWER_BRIM = tower_size(n_fil=2, prime=45.0, change_len=10.0, height=T)
+TOWER, TOWER_BRIM = tower_size(n_fil=2, prime=45.0, change_len=10.0, layer=LAYER_H, height=T)
+R = D / 2
+RS = (R ** 2 + RISE ** 2) / (2 * RISE)                 # bombenin küre yarıçapı
+
+
+def top(r):
+    """Ön yüzün yüksekliği (küre kapağı): kenarda EDGE, ortada T."""
+    return EDGE + np.sqrt(RS ** 2 - r ** 2) - np.sqrt(RS ** 2 - R ** 2)
+
+
+def section():
+    """Döndürülecek yarım kesit (x = yarıçap, y = z): alt pah, dik yan yüz, R FILLET kenar, bombe."""
+    r0 = R - FILLET
+    cz = top(r0) - FILLET                              # kenar yuvarlatmanın merkezi (r0, cz)
+    arc = [(r0 + FILLET * np.cos(a), cz + FILLET * np.sin(a)) for a in np.linspace(0, np.pi / 2, 12)]
+    dome = [(r, top(r)) for r in np.linspace(r0, 0, 60)[1:]]
+    return [(0, 0), (R - BACK_CH, 0), (R, BACK_CH), *arc, *dome]
 
 
 def logo_light():
@@ -59,30 +82,20 @@ def logo_light():
     return A.union(*[p for p in light.decompose() if p.area() > 0.2])
 
 
-def disc():
-    """Pahlı disk, kendi ekseninde: z = 0 arka yüz, z = T ön yüz."""
-    R = D / 2
-    sec = A.polygon([(0, 0), (R - BACK_CH, 0), (R, BACK_CH), (R, T - FRONT_CH), (R - FRONT_CH, T), (0, T)])
-    return m3.Manifold.revolve(sec, SEG)
-
-
-def face_down(m):
-    """Ön yüzü tablaya yatırır: x ekseni etrafında 180° (aynalama değil: logo ters basılmaz)."""
-    return m.rotate((180, 0, 0)).translate((0, 0, T))
-
-
-def solids_face_up():
-    light2d = logo_light()
-    light = light2d.extrude(INLAY).translate((0, 0, T - INLAY))
-    cutter = light2d.extrude(INLAY + 1.0).translate((0, 0, T - INLAY))     # ön yüzün dışına taşar: cep açık kalsın
-    body = P.clean(disc() - cutter)
-    return [("Gövde ve zemin (siyah)", body, A.BLACK), ("Halka ve kanatlı ok (açık renk)", light, LIGHT)]
+def solids():
+    """Siyah gövde ve açık renk logo; z = 0 arka yüz (tabla), bombe yukarıda."""
+    body = m3.Manifold.revolve(A.polygon(section()), SEG)
+    prism = logo_light().extrude(T + 2.0).translate((0, 0, -0.5))
+    cutter = prism - body.translate((0, 0, -INLAY))     # logo izinde, yüzeyin INLAY altından yukarısı (dışa taşar)
+    light = body ^ cutter
+    black = P.clean(body - cutter)
+    return [("Gövde ve zemin (siyah)", black, A.BLACK), ("Halka ve kanatlı ok (açık renk)", light, LIGHT)]
 
 
 class Emblem:
     def __init__(self):
         self.key, self.title = "skoda_jant_gobegi_55mm", "SKODA_jant_gobegi_55mm"
-        self._solids = [(n, face_down(m), c) for n, m, c in solids_face_up()]
+        self._solids = solids()
         self.man = m3.Manifold.batch_boolean([m for _, m, _ in self._solids], m3.OpType.Add)
         cx = A.BED_CENTER[0] - 12.0                              # sağda prime kulesine yer
         cy = A.BED_CENTER[1]
@@ -93,8 +106,8 @@ class Emblem:
         self.tower_xy = (tx, ty)
         self.nozzle_map = {A.BLACK: 1, LIGHT: 2}                  # siyah ana nozulda, açık renk yardımcıda
         self.filament_profiles = {A.BLACK: A.GENERIC_PLA, LIGHT: A.GENERIC_PLA}
-        self.object_settings = {"wall_loops": "3", "bottom_shell_layers": "5", "top_shell_layers": "5",
-                                "brim_type": "no_brim", "enable_support": "0"}
+        self.object_settings = {"layer_height": f"{LAYER_H:g}", "wall_loops": "3", "bottom_shell_layers": "4",
+                                "top_shell_layers": "9", "brim_type": "no_brim", "enable_support": "0"}
         self.project_overrides = {"curr_bed_type": "Textured PEI Plate",
                                   "wipe_tower_x": [f"{tx:g}"], "wipe_tower_y": [f"{ty:g}"]}
 
@@ -106,8 +119,8 @@ class Emblem:
 
     def layer_colours(self):
         layers = []
-        for i in range(int(round(T / A.LAYER))):
-            z = (i + 0.5) * A.LAYER
+        for i in range(int(np.ceil(T / LAYER_H))):
+            z = min((i + 0.5) * LAYER_H, T - 0.01)
             layers.append({c for _, m, c in self._solids if m.slice(z).area() > 0.01})
         return layers
 
@@ -130,10 +143,17 @@ def checks(e):
     ok_tower = TOWER_MARGIN <= tx <= lim and TOWER_MARGIN <= ty <= lim and tx - TOWER_BRIM >= X_AUX
     xs = [x for x, _, _ in e.instances]
     in_reach = min(xs) - D / 2 >= X_AUX and max(xs) + D / 2 <= 256 - TOWER_MARGIN / 3
+    # sarkma: her katman bir alttakinden en çok bir katman yüksekliği kadar taşabilir (45°, destek gerekmez)
+    zs = np.arange(LAYER_H / 2, T, LAYER_H)
+    over = max((e.man.slice(z1) - e.man.slice(z0).offset(LAYER_H + 0.005, J)).area() for z0, z1 in zip(zs, zs[1:]))
+    under_light = min(m.slice(0.6).area() for m in mans[1:]) if mans[1].slice(0.6).area() else 0.0
     return {
         "sağlam": all(str(m.status()).endswith("NoError") for m in mans),
         "örtüşme mm³": round(overlap, 4),
-        "tek gövde": len(e.man.decompose()) == 1,
+        "tek gövde": sum(p.volume() > 0.01 for p in e.man.decompose()) == 1,     # renk sınırında 0 hacimli kırıntılar
+        "45°'den fazla sarkan alan mm²": round(over, 3),
+        "açık renk z": f"{mans[1].bounding_box()[2]:.2f}..{mans[1].bounding_box()[5]:.2f}",
+        "z 0,6'da açık renk mm²": round(under_light, 2),
         "açık renk <0,45 mm %": thin(light, 0.45), "açık renk <0,8 mm %": thin(light, 0.8),
         "siyah ara <0,45 mm %": thin(dark, 0.45),
         "kule": f"{TOWER:.1f} mm ({tx:g}, {ty:g}) Bambu sınırında: {ok_tower}",
@@ -141,25 +161,50 @@ def checks(e):
     }
 
 
+def section_drawing(dr, box):
+    """Kesit, dikeyde büyütülmüş (kutuya sığacak kadar): siyah gövde, açık renk katman, ölçüler."""
+    x0, y0, x1, y1 = box
+    sx = (x1 - x0 - 360) / D
+    ex = round((y1 - y0 - 130) / (T * sx) * 2) / 2                   # dikey büyütme, 0,5'in katı
+    cx, base = (x0 + x1) / 2, y1 - 70
+    pts = section()
+    poly = [(cx + r * sx, base - z * sx * ex) for r, z in pts] + [(cx - r * sx, base - z * sx * ex) for r, z in pts[::-1]]
+    dr.polygon(poly, fill=A.SHOW[A.BLACK])
+    band = [(r, top(r)) for r in np.linspace(-LOGO_D / 2, LOGO_D / 2, 120)]
+    up = [(cx + r * sx, base - z * sx * ex) for r, z in band]
+    down = [(cx + r * sx, base - (z - INLAY) * sx * ex) for r, z in band[::-1]]
+    dr.polygon(up + down, fill=(214, 216, 212))
+    f, grey, ink = K.fnt(17), (110, 114, 124), (60, 64, 74)
+    dr.line((cx - R * sx, base + 22, cx + R * sx, base + 22), fill=grey, width=2)
+    for x in (cx - R * sx, cx + R * sx):
+        dr.line((x, base + 14, x, base + 30), fill=grey, width=2)
+    lab = f"Ø{D:.0f} mm"
+    dr.text((cx - dr.textlength(lab, font=f) / 2, base + 30), lab, fill=ink, font=f)
+    xr = cx + R * sx + 14
+    dr.text((xr, base - EDGE * sx * ex - 10), f"kenar {EDGE:.1f} mm", fill=ink, font=f)
+    dr.text((cx + 8, base - T * sx * ex - 30), f"ortası {T:.1f} mm (bombe {RISE:.1f} mm)", fill=ink, font=f)
+    dr.text((x0 + 20, y0 + 14), f"KESİT (dikey {ex:g}× büyütülmüş) · açık gri: logonun renkli katmanı, yüzeyden "
+            f"{INLAY:.1f} mm · alt yüz düz: bant", fill=grey, font=K.fnt(15))
+
+
 def preview(e, path, stats):
-    up = solids_face_up()
-    shaded = lambda col: [(*A.mesh_arrays(m), A.SHOW[c] if c != LIGHT else col) for _, m, c in up]  # noqa: E731
-    W, H = 1500, 700
+    shaded = lambda col: [(*A.mesh_arrays(m), A.SHOW[c] if c != LIGHT else col) for _, m, c in e.solids()]  # noqa: E731
+    W, H = 1500, 960
     canvas = Image.new("RGB", (W, H), (244, 245, 247))
     dr = ImageDraw.Draw(canvas)
-    dr.text((40, 24), "ŠKODA JANT GÖBEĞİ AMBLEMİ – Ø55 mm, 4 ADET (X2D)", fill=(24, 26, 30), font=K.fnt(32))
-    dr.text((40, 68), f"Ø{D:.0f} × {T:.1f} mm düz disk · logo yüzle aynı hizada · arka yüz düz: çift taraflı bant · "
-                      "ön yüz tablada basılır, destek yok", fill=(96, 100, 110), font=K.fnt(20))
+    dr.text((40, 24), "ŠKODA JANT GÖBEĞİ AMBLEMİ – Ø55 mm, HAFİF BOMBELİ, 4 ADET (X2D)", fill=(24, 26, 30),
+            font=K.fnt(32))
+    dr.text((40, 68), f"Ø{D:.0f} mm · kenarda {EDGE:.1f}, ortada {T:.1f} mm · logo bombeyi izler · arka yüz düz: "
+                      "çift taraflı bant · arka yüz tablada basılır, destek yok", fill=(96, 100, 110), font=K.fnt(20))
     panels = [(f"{name.upper()} (2. filament)", shaded(col), rotation(0, 0), 0.9) for name, col in OPTIONS]
-    panels.append(("KENAR VE KALINLIK", shaded(OPTIONS[0][1]), rotation(-25, -55), None))
-    for i, (label, mesh, R, flat) in enumerate(panels):
+    panels.append(("BOMBE", shaded(OPTIONS[0][1]), rotation(-62, -30), None))
+    for i, (label, mesh, Rm, flat) in enumerate(panels):
         box = (40 + i * 287, 120, 40 + i * 287 + 271, 470)
         K.panel(dr, box)
-        img = A.fit_into(render(mesh, 1000, R, flat=flat, margin=0.04), 235, 280)
+        img = A.fit_into(render(mesh, 1000, Rm, flat=flat, margin=0.04), 235, 280)
         K.paste_center(canvas, img, (box[0], box[1] + 30, box[2], box[3]))
         dr.text((box[0] + 18, box[1] + 16), label, fill=(120, 124, 134), font=K.fnt(15))
-    # tabla: 4 disk ve prime kulesi
-    box = (40 + 4 * 287, 120, 40 + 4 * 287 + 271, 470)
+    box = (40 + 4 * 287, 120, 40 + 4 * 287 + 271, 470)                 # tabla: 4 disk ve prime kulesi
     K.panel(dr, box)
     bed = m3.Manifold.cube((256, 256, 0.2)).translate((0, 0, -0.4))
     tx, ty = e.tower_xy
@@ -169,14 +214,17 @@ def preview(e, path, stats):
         items += [(*A.mesh_arrays(m.translate((x, y, 0))), A.SHOW[c]) for _, m, c in e.solids()]
     img = A.fit_into(render(items, 1000, A.R_TOP, flat=0.8, margin=0.02), 235, 280)
     K.paste_center(canvas, img, (box[0], box[1] + 30, box[2], box[3]))
-    dr.text((box[0] + 18, box[1] + 16), "TABLADA (ön yüzler aşağıda)", fill=(120, 124, 134), font=K.fnt(15))
+    dr.text((box[0] + 18, box[1] + 16), "TABLADA (bombe yukarıda)", fill=(120, 124, 134), font=K.fnt(15))
+    sbox = (40, 490, W - 40, 790)
+    K.panel(dr, sbox)
+    section_drawing(dr, sbox)
     lines = [f"AMS: 1 siyah · 2 beyaz (ya da gümüş / yeşil)   ·   siyah ana nozulda, açık renk yardımcı nozulda: "
-             f"filament değişimi {stats['değişim']}",
+             f"filament değişimi {stats['değişim']}   ·   katman {LAYER_H:g} mm",
              f"Malzeme: ASA önerilir (güneşte jant ısınır)   ·   ~{stats['g']:.0f} g (4 adet)   ·   "
              f"açık renk çizgiler ve siyah aralar en az 0,45 mm"]
     for k, line in enumerate(lines):
-        dr.text((40, 510 + 36 * k), line, fill=(70, 74, 84), font=K.fnt(19))
-    dr.text((40, 600), "Logo: Simple Icons (CC0). Škoda logosu Škoda Auto'nun markasıdır; kişisel kullanım içindir.",
+        dr.text((40, 816 + 36 * k), line, fill=(70, 74, 84), font=K.fnt(19))
+    dr.text((40, 900), "Logo: Simple Icons (CC0). Škoda logosu Škoda Auto'nun markasıdır; kişisel kullanım içindir.",
             fill=(140, 144, 154), font=K.fnt(16))
     canvas.save(path)
 
