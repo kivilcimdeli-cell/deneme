@@ -1,34 +1,37 @@
-"""PALOMA GRIDA – Süleyman Boylu'nun dijital kartviziti (isimlikteki QR bu sayfayı açar). 3. sürüm.
+"""PALOMA GRIDA – Süleyman Boylu'nun dijital kartviziti (isimlikteki QR bu sayfayı açar). 4. sürüm: tek parça kart.
 
 Yazı sistemi Paloma Hotels logosundan: logonun harfleri Google yazı tipleriyle harf harf karşılaştırıldı, en yakını
-Figtree çıktı (PALOMA satırı ExtraBold, HOTELS satırı Light). Sayfada da öyle: kalın ve aralıklı büyük harf başlıklar
-(SÜLEYMAN), ince ve aynı genişliğe yayılmış ikinci satırlar (B O Y L U), küçük aralıklı etiketler; tırnaklı yazı yok.
+Figtree çıktı (PALOMA satırı ExtraBold, HOTELS satırı Light). Sayfada da öyle: kalın ve aralıklı büyük harf ad
+(SÜLEYMAN), ince ve aynı genişliğe yayılmış soyad (B O Y L U), küçük aralıklı etiketler; tırnaklı yazı yok.
 
-Tasarım: otel sitesi gibi tam ekran açılış (ufukta Akdeniz), altında yüzen hızlı iletişim çubuğu, numaralı bölümler
-(01 İletişim, 02 Otel: yukarıdan sığ deniz, 03 Kartvizit: QR), sonda logo. Görseller Blender'da çizildi
-(scripts/paloma_gorsel.py). Açık temada kum beyazı, telefon koyu moddaysa gece renkleri.
+Tasarım: tek ekran, tek parça; her bilgi bir kez geçer.
+  * Arkada sabit görsel: ufukta Akdeniz (Blender, scripts/paloma_gorsel.py). Açık gökyüzünde logo | GRIDA ve isim
+    koyu deniz mavisiyle; altta deniz.
+  * Alttan gelen tek kart: cep (ara + WhatsApp), şirket hattı, e-posta, adres (harita); Rehbere kaydet ve Paylaş.
+    Kısa ekranda kart görselin üstünden kayar.
+  * Paylaş: alttan açılan pencerede isimlikteki QR'ın aynısı (DİJİTAL | KARTVİZİT), bağlantıyı kopyala / gönder.
+  * Telefon koyu moddaysa kart ve pencere gece renklerine geçer.
 
-Animasyon:
-  * Açılış (~2,6 sn): görsel yavaşça yaklaşır (Ken Burns), PALOMA harfleri iner, HOTELS harfleri ortadan açılır,
-    ayraç ve GRIDA; SÜLEYMAN harfleri maskeden çıkar, BOYLU harfleri ortadan yerlerine yayılır, ince çizgi uzar,
-    görevin harf aralığı açılır; iletişim çubuğu aşağıdan gelir, simgeler çizilir; KAYDIR işareti akar.
-  * Kaydırma: açılış görseli yavaş kayar (parallax); bölüm başlıklarında numara ve çizgi, başlık soldan açılır;
-    satırlar ve alt çizgiler sırayla; otel görseli alttan perde gibi açılır ve kaydırdıkça içinde kayar; QR kareleri
-    çapraz dalgayla belirir; iletişim çubuğu ekrandan çıkınca altta Ara / WhatsApp şeridi.
-  * Sürekli: QR'ın vizör köşeleri nefes alır, Rehbere kaydet'in üstünden ara ara ışık geçer.
+Animasyon (sakin, tek akış):
+  * Açılış (~2,6 sn): görsel yavaşça yaklaşır; PALOMA harfleri iner, HOTELS harfleri ortadan açılır, ayraç ve
+    GRIDA; SÜLEYMAN harfleri maskeden çıkar, BOYLU harfleri ortadan yerlerine yayılır, ince çizgi uzar, görevin harf
+    aralığı açılır; kart alttan gelir, satırlar çizgileriyle sırayla, simgeler çizilir.
+  * Sürekli: deniz çok yavaş yaklaşıp uzaklaşır; Rehbere kaydet'in üstünden ara ara ışık geçer.
+  * Paylaş penceresi alttan kayar, QR kareleri çapraz dalgayla belirir, vizör köşeleri nefes alır.
   "Hareketi azalt" açıksa hiçbiri oynamaz, sayfa doğrudan son hâliyle açılır.
 
-Dış bağlantı yok: yazı tipi (Figtree, OFL), görseller, logo ve simgeler sayfanın yanında ya da içinde.
+Dış bağlantı yok: yazı tipi (Figtree, OFL), görsel, logo ve simgeler sayfanın yanında ya da içinde.
 Bilgiler `paloma_isimlik/bilgiler.json`; logo paloma_isimlik/logo/ (scripts/paloma_logo.py).
 
 Yayın: ortak Cloudflare hesabında (`qrsistem`) `suleymanboylu` adlı Worker'a `paloma_site.zip` yüklenir; adres
-`https://suleymanboylu.qrsistem.workers.dev` (isimliklerdeki QR bu adresi açar).
+`https://suleymanboylu.qrsistem.workers.dev` (isimliklerdeki QR bu adresi açar). Sayfa `#qr` ile açılırsa Paylaş
+penceresi açık gelir.
 
-Çıktı : paloma_isimlik/site/, paloma_site.zip, sayfa_onizleme.png (açık, tam sayfa, koyu), sayfa_tur.gif,
+Çıktı : paloma_isimlik/site/, paloma_site.zip, sayfa_onizleme.png (açık, Paylaş penceresi, koyu), sayfa_tur.gif,
         sayfa_deneme.html (denemelik tek dosya: her şey içinde)
 
 Kullanım:
-  python3 scripts/paloma_gorsel.py           # önce görseller (bir kez)
+  python3 scripts/paloma_gorsel.py ufuk      # önce görsel (bir kez)
   python3 scripts/paloma_sayfa.py            # site, zip, önizleme ve tur
   python3 scripts/paloma_sayfa.py --hizli    # GIF'siz
 """
@@ -62,6 +65,7 @@ LICENSES = ("OFL-figtree.txt",)
 VCF = "suleyman-boylu.vcf"
 OG = "paylas.jpg"
 LOGO = json.load(open(L.JSON, encoding="utf-8"))
+SKY = "#D2E1F1"                              # görselin üstündeki gökyüzü: tarayıcı çubuğunun rengi
 
 ICON = {
     "phone": '<path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 '
@@ -75,7 +79,11 @@ ICON = {
     "save": '<circle cx="9" cy="8.5" r="3.5"/><path d="M3.5 19c.8-3.2 3-4.8 5.5-4.8 1.4 0 2.7.4 3.7 1.3M17.5 13v7M14 16.5h7"/>',
     "share": '<circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/>'
              '<path d="M8.7 10.8l6.6-4M8.7 13.2l6.6 4"/>',
-    "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    "qr": '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/>'
+          '<rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5M20 14v.5M14 20h.5M17.5 17.5H20V20"/>',
+    "copy": '<rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.5"/><path d="M15.5 5.5A2 2 0 0 0 13.5 4H6a2 2 0 0 0-2 '
+            '2v7.5a2 2 0 0 0 1.5 1.94"/>',
+    "close": '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
 }
 
 
@@ -135,13 +143,12 @@ def _has_brotli():
 
 
 def images():
-    """Blender görselleri sayfa için: hafif renk ayarı, JPEG (ufuk 1080 × 1920, sığ 1080 × 1350)."""
+    """Blender görseli sayfa için: hafif renk ayarı, JPEG (ufuk 1080 × 1920)."""
     os.makedirs(os.path.join(OUT, "img"), exist_ok=True)
-    for name in ("ufuk", "sig"):
-        im = Image.open(os.path.join(IMG, name + ".jpg")).convert("RGB")
-        im = ImageEnhance.Color(im).enhance(1.12)
-        im = ImageEnhance.Contrast(im).enhance(1.05)
-        im.save(os.path.join(OUT, "img", name + ".jpg"), "JPEG", quality=80, optimize=True, progressive=True)
+    im = Image.open(os.path.join(IMG, "ufuk.jpg")).convert("RGB")
+    im = ImageEnhance.Color(im).enhance(1.12)
+    im = ImageEnhance.Contrast(im).enhance(1.05)
+    im.save(os.path.join(OUT, "img", "ufuk.jpg"), "JPEG", quality=80, optimize=True, progressive=True)
 
 
 def vcard(d):
@@ -242,101 +249,100 @@ def letters(text, cls=""):
     return "".join(f'<span class="{cls}" style="--i:{k}">{e(ch)}</span>' for k, ch in enumerate(text))
 
 
-def head(no, title):
-    return (f'<div class="sh rv"><span class="no">{no}</span><i></i><h2>{e(title)}</h2></div>')
-
-
 CSS = """
 @font-face{font-family:Figtree;src:url(fonts/f3.EXT) format("FMT");font-weight:300;font-display:swap}
 @font-face{font-family:Figtree;src:url(fonts/f4.EXT) format("FMT");font-weight:400;font-display:swap}
 @font-face{font-family:Figtree;src:url(fonts/f6.EXT) format("FMT");font-weight:600;font-display:swap}
 @font-face{font-family:Figtree;src:url(fonts/f8.EXT) format("FMT");font-weight:800;font-display:swap}
-:root{--pb:#69A1BA;--pbd:#2F6F8C;--deep:#16303C;--bg:#F5F2EC;--surface:#FFFFFF;--ink:#14212A;--ink2:#41505A;
-  --muted:#7B8790;--line:#E2DDD3;--tint:#EAF2F5;--btn:#16303C;--btnfg:#fff;--qr:#14212A;--shadow:rgba(22,48,60,.14);
-  --e:cubic-bezier(.2,.75,.2,1);--tr:.34em;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#0F1519;--surface:#162027;--ink:#EEF2F4;--ink2:#C3CDD3;--muted:#8796A0;
-  --line:#26333B;--tint:#1E2C35;--pbd:#8EC2D8;--btn:#69A1BA;--btnfg:#0B1A21;--shadow:rgba(0,0,0,.45);color-scheme:dark}}
+:root{--pb:#69A1BA;--pbd:#2F6F8C;--head:#17384A;--card:#FBFAF7;--ink:#14212A;--muted:#7B8790;--line:#E6E1D8;
+  --tint:#EEF4F6;--btn:#17384A;--btnfg:#fff;--wa:#1E9E5A;--qr:#14212A;--shadow:rgba(16,44,58,.2);
+  --e:cubic-bezier(.2,.75,.2,1);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--card:#111A20;--ink:#EEF2F4;--muted:#8796A0;--line:#24323A;--tint:#1B2932;
+  --pbd:#8EC2D8;--btn:#69A1BA;--btnfg:#0B1A21;--wa:#3CC57F;--shadow:rgba(0,0,0,.5);color-scheme:dark}}
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:#0E1A20}
+html.hold{overflow:hidden}
 body{font-family:Figtree,system-ui,sans-serif;font-weight:400;color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-.wrap{position:relative;max-width:440px;margin:0 auto;min-height:100vh;background:var(--bg);overflow:hidden;
-  padding-bottom:90px;box-shadow:0 0 80px rgba(0,0,0,.35)}
-.caps{text-transform:uppercase;letter-spacing:var(--tr)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+[hidden]{display:none!important}
+.wrap{position:relative;max-width:440px;margin:0 auto;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;
+  box-shadow:0 0 80px rgba(0,0,0,.35)}
 
-/* ---------------- açılış: tam ekran görsel */
-.hero{position:relative;height:100svh;min-height:620px;max-height:980px;color:#fff;overflow:hidden}
-.hero .bg{position:absolute;inset:-6% 0;width:100%;height:112%;object-fit:cover;object-position:50% 46%;
-  transform:translateY(calc(var(--sy,0)*.32px));will-change:transform}
-.hero .bg img{width:100%;height:100%;object-fit:cover;display:block}
-.hero:after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(14,40,52,.3) 0%,rgba(14,40,52,0) 20%,rgba(14,40,52,0) 54%,
-  rgba(10,44,58,.3) 70%,rgba(8,34,46,.64) 100%)}
-.lock{position:relative;z-index:1;display:flex;align-items:center;gap:13px}
+/* ---------------- arka plan: ufukta Akdeniz, sabit; kart üstünden kayar */
+.bg{position:fixed;top:0;left:50%;width:min(440px,100%);height:100vh;height:100lvh;transform:translateX(-50%);
+  overflow:hidden;background:#BCD3E2}
+.bg img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ---------------- üst: logo ve isim (açık gökyüzünde koyu deniz mavisi) */
+.top{position:relative;flex:1 0 auto;min-height:350px;padding:30px 28px 64px;color:var(--head)}
+.lock{display:flex;align-items:center;gap:13px}
 .lock .logo{width:118px;height:auto;display:block;overflow:visible}
-.lock .bar{width:1.2px;height:31px;background:currentColor;opacity:.9}
+.lock .bar{width:1.2px;height:31px;background:currentColor;opacity:.75}
 .lock .grida{font-weight:600;font-size:11px;letter-spacing:.42em;margin-right:-.42em}
-.hero .lock{position:absolute;top:30px;left:28px}
-.who{position:absolute;z-index:1;left:28px;right:28px;bottom:148px}
-.kick{font-weight:600;font-size:10.5px;letter-spacing:.42em;opacity:.85}
-h1{display:inline-grid;margin-top:16px;font-size:clamp(28px,8.6vw,36px);line-height:1;text-transform:uppercase}
+.who{margin-top:clamp(34px,6.5vh,64px)}
+h1{display:inline-grid;font-size:clamp(28px,8.6vw,36px);line-height:1;text-transform:uppercase}
 h1 .b{display:block;font-weight:800;letter-spacing:.3em;overflow:hidden;padding:.12em 0 .04em;margin-top:-.12em}
 h1 .b span{display:inline-block}
 h1 .b span:last-child{letter-spacing:0}
 h1 .l{display:flex;justify-content:space-between;font-weight:300;margin-top:.2em}
 h1 .l span{display:inline-block}
-.who .rule{display:block;width:44px;height:1.5px;background:#fff;margin:22px 0 14px;transform-origin:left}
-.role{font-weight:600;font-size:12px;letter-spacing:.3em}
-.cue{position:absolute;z-index:1;right:26px;bottom:150px;display:flex;flex-direction:column;align-items:center;gap:10px;
-  font-weight:600;font-size:9.5px;letter-spacing:.34em;writing-mode:vertical-rl}
-.cue i{position:relative;width:1px;height:46px;background:rgba(255,255,255,.35);overflow:hidden}
-.cue i:after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:#fff}
+.who .rule{display:block;width:44px;height:1.5px;background:var(--pb);margin:20px 0 13px;transform-origin:left}
+.role{font-weight:600;font-size:12px;letter-spacing:.3em;color:var(--pbd)}
+@media (prefers-color-scheme:dark){.role{color:#2F6F8C}}
 
-/* ---------------- yüzen iletişim çubuğu */
-.dock{position:relative;z-index:2;margin:-104px 16px 0;display:grid;grid-template-columns:repeat(4,1fr);
-  background:var(--surface);border-radius:18px;box-shadow:0 20px 50px var(--shadow);padding:18px 6px 16px}
-.dock a{display:flex;flex-direction:column;align-items:center;gap:10px;font-weight:600;font-size:9.5px;
-  letter-spacing:.2em;color:var(--ink);position:relative}
-.dock a+a:before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--line)}
-.dock a span{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
-  border:1px solid var(--line);color:var(--pbd);transition:transform .15s,background .15s}
-.dock a:active span{transform:scale(.92);background:var(--tint)}
-.dock a span svg{width:21px;height:21px}
-.dock a.wa span{color:#1E9E5A}
+/* ---------------- kart: her bilgi bir kez */
+.card{position:relative;z-index:1;margin-top:-26px;background:var(--card);border-radius:26px 26px 0 0;
+  padding:8px 24px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -12px 36px var(--shadow)}
+.rows{list-style:none}
+.rows li{position:relative;display:flex;align-items:center;gap:14px;padding:16px 0}
+.rows li:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);transform-origin:left}
+.v{flex:1;min-width:0}
+.v:after{content:"";position:absolute;inset:0}
+.v small{display:block;font-weight:600;font-size:9.5px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase}
+.v b{display:block;margin-top:6px;font-weight:300;font-size:23px;letter-spacing:.02em;font-variant-numeric:lining-nums;
+  white-space:nowrap}
+.em b,.ad b{font-size:17.5px;letter-spacing:0}
+.ad b{line-height:1.3;white-space:normal}
+.acts{display:flex;gap:8px;flex:none}
+.ic{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);
+  color:var(--pbd);transition:transform .15s,background .15s}
+span.ic{pointer-events:none}
+a.ic{z-index:1}
+.ic svg{width:20px;height:20px}
+.ic.wa{color:var(--wa)}
+.v:active~.acts span.ic,a.ic:active{transform:scale(.92);background:var(--tint)}
+@media (hover:hover){.rows li:hover span.ic,a.ic:hover{background:var(--tint)}}
+.btns{display:grid;grid-template-columns:1.55fr 1fr;gap:10px;margin-top:22px}
+.save,.share{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;height:56px;
+  border-radius:14px;font-weight:600;font-size:11px;letter-spacing:.22em;white-space:nowrap}
+.save{background:var(--btn);color:var(--btnfg)}
+.share{border:1px solid var(--line);color:var(--ink)}
+.save svg{width:20px;height:20px}
+.share svg{width:19px;height:19px}
+.save b,.share b{font-weight:600;margin-right:-.22em}
+.save:after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:40%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent)}
 
-/* ---------------- bölümler */
-.sec{padding:54px 26px 0}
-.sh{display:flex;align-items:center;gap:14px;margin-bottom:26px}
-.sh .no{font-weight:300;font-size:13px;letter-spacing:.12em;color:var(--pbd)}
-.sh i{width:34px;height:1px;background:var(--pb);transform-origin:left}
-.sh h2{font-weight:800;font-size:13px;letter-spacing:var(--tr);text-transform:uppercase}
-.rows a{position:relative;display:flex;align-items:center;gap:14px;padding:18px 0}
-.rows a:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);transform-origin:left}
-.rows small{display:block;font-weight:600;font-size:9.5px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase}
-.rows b{display:block;margin-top:6px;font-weight:300;font-size:25px;letter-spacing:.02em;font-variant-numeric:lining-nums}
-.rows a.em b{font-size:18.5px;letter-spacing:0}
-.rows a.ad b{font-size:19px;line-height:1.25}
-.rows .go{margin-left:auto;width:20px;height:20px;color:var(--pb);flex:none;transition:transform .2s}
-.rows a:active .go{transform:translateX(4px)}
-
-.pic{position:relative;margin:0 -26px;height:420px;overflow:hidden;color:#fff}
-.pic img{position:absolute;inset:-12% 0;width:100%;height:124%;object-fit:cover;
-  transform:translateY(calc(var(--p,0)*-34px))}
-.pic:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,30,40,0) 40%,rgba(10,30,40,.55))}
-.pic .cap{position:absolute;z-index:1;left:26px;right:26px;bottom:26px}
-.pic .cap .t{display:inline-grid;font-size:24px;line-height:1;text-transform:uppercase}
-.pic .cap .t b{font-weight:800;letter-spacing:.3em;margin-right:-.3em}
-.pic .cap .t span{display:flex;justify-content:space-between;font-weight:300;margin-top:.22em}
-.pic .cap p{margin-top:12px;font-weight:600;font-size:10px;letter-spacing:.34em}
-.addr{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:26px 0 4px}
-.addr p{font-weight:300;font-size:19px;line-height:1.4}
-.link{display:inline-flex;align-items:center;gap:10px;flex:none;font-weight:600;font-size:10px;letter-spacing:.28em;
-  color:var(--pbd);padding-bottom:6px;border-bottom:1px solid var(--pb)}
-.link svg{width:16px;height:16px}
-
-.qcard{position:relative;display:flex;flex-direction:column;align-items:center;padding:34px 20px 24px;border-radius:20px;
-  background:linear-gradient(160deg,#86B8CD,#69A1BA 55%,#5690AA);color:#fff;box-shadow:0 16px 36px var(--shadow)}
-.tile{position:relative;width:196px;padding:10px;background:#fff;border-radius:10px}
+/* ---------------- paylaş penceresi: isimlikteki QR */
+dialog{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;
+  background:transparent;color:var(--ink);overflow:hidden}
+dialog::backdrop{background:transparent}
+.scrim{position:absolute;inset:0;background:rgba(6,20,28,.55);opacity:0;transition:opacity .35s ease}
+.panel{position:absolute;left:50%;bottom:0;width:min(440px,100%);max-height:100%;overflow:auto;
+  transform:translate(-50%,104%);transition:transform .5s var(--e);background:var(--card);border-radius:26px 26px 0 0;
+  padding:18px 24px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -12px 36px var(--shadow)}
+dialog.on .scrim{opacity:1}
+dialog.on .panel{transform:translate(-50%,0)}
+dialog.on.out .scrim{opacity:0}
+dialog.on.out .panel{transform:translate(-50%,104%)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.ph p{font-weight:800;font-size:12px;letter-spacing:.34em}
+.x{width:40px;height:40px;margin-right:-8px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.x svg{width:20px;height:20px}
+.qcard{display:flex;flex-direction:column;align-items:center;padding:34px 20px 24px;border-radius:20px;
+  background:linear-gradient(160deg,#86B8CD,#69A1BA 55%,#5690AA);color:#fff}
+.tile{position:relative;width:200px;padding:10px;background:#fff;border-radius:10px}
 .tile svg{display:block;width:100%;height:auto}
 .tile .m{fill:var(--qr);transform-box:fill-box;transform-origin:center}
 .tile:after{content:"";position:absolute;left:0;right:0;top:0;height:22%;border-radius:10px;opacity:0;pointer-events:none;
@@ -347,76 +353,39 @@ h1 .l span{display:inline-block}
 .vf i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
 .vf i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
 .vf i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
-.qcap{display:flex;align-items:center;gap:14px;margin-top:26px;font-weight:600;font-size:11px;letter-spacing:.34em}
-.qcap span:last-child{margin-right:-.34em}
+.qcap{display:flex;align-items:center;gap:14px;margin-top:26px;padding-left:.34em;font-weight:600;font-size:11px;
+  letter-spacing:.34em}
 .qcap i{width:1.2px;height:15px;background:#fff}
-.qtxt{margin-top:16px;color:var(--muted);font-size:13.5px;line-height:1.55;text-align:center}
-.btns{display:grid;gap:12px;margin-top:26px}
-.save{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;padding:19px;
-  border-radius:14px;background:var(--btn);color:var(--btnfg);font-weight:600;font-size:11.5px;letter-spacing:.28em}
-.save svg{width:20px;height:20px}
-.save:after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:40%;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent)}
-.share{display:flex;align-items:center;justify-content:center;gap:12px;padding:17px;border-radius:14px;
-  border:1px solid var(--line);background:transparent;color:var(--ink);font-family:inherit;font-weight:600;font-size:11.5px;
-  letter-spacing:.28em;cursor:pointer}
-.share svg{width:18px;height:18px}
-.share b{font-weight:600}
+.hint{margin-top:16px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.5}
+.hint b{display:block;font-weight:600;color:var(--pbd)}
+.pbtns{display:flex;gap:10px;margin-top:18px}
+.pbtns>*{flex:1}
 
-footer{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:62px;padding:40px 0 10px;
-  border-top:1px solid var(--line);color:var(--pbd)}
-footer .lock .logo{width:104px}
-footer p{font-weight:600;font-size:9.5px;letter-spacing:.38em;color:var(--muted)}
-
-.callbar{position:fixed;left:50%;bottom:0;width:min(440px,100%);transform:translate(-50%,110%);display:flex;gap:10px;
-  padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line);
-  box-shadow:0 -8px 24px var(--shadow);transition:transform .35s var(--e);z-index:5}
-.callbar.show{transform:translate(-50%,0)}
-.callbar a{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;border-radius:12px;
-  font-weight:600;font-size:11px;letter-spacing:.24em;background:var(--btn);color:var(--btnfg)}
-.callbar a.wa{background:#1E9E5A;color:#fff}
-.callbar svg{width:19px;height:19px}
-
-/* ---------------- açılış animasyonu */
-.hero .bg img{animation:kb 3.2s cubic-bezier(.15,.7,.25,1) both}
-.hero:after{animation:fade 1.2s ease-out both}
+/* ---------------- açılış: görsel yaklaşır, logo ve isim harf harf, kart alttan gelir */
+.bg img{animation:kb 3.2s cubic-bezier(.15,.7,.25,1) both,drift 20s ease-in-out 3.2s infinite alternate}
 .pl{transform-box:fill-box;transform-origin:50% 100%;animation:drop .65s var(--e) calc(.35s + var(--i)*.07s) both}
 .ht{animation:spread 1s var(--e) calc(.6s + var(--i)*.02s) both}
-.hero .lock .bar{animation:grow-y .5s var(--e) 1s both}
-.hero .lock .grida{animation:wipe .8s var(--e) 1.1s both}
-.kick{animation:fade-up .7s var(--e) .9s both}
-h1 .b span{animation:rise .8s var(--e) calc(1s + var(--i)*.045s) both}
-h1 .l span{animation:spread2 1.1s var(--e) calc(1.35s + var(--i)*.03s) both}
-.who .rule{animation:grow-x .8s var(--e) 1.7s both}
-.role{animation:track 1.1s var(--e) 1.8s both}
-.cue{animation:fade .8s ease-out 2.4s both}
-.cue i:after{animation:flow 2.2s ease-in-out 2.6s infinite}
-.dock{animation:lift .9s var(--e) 1.9s both}
-.mo .dock [pathLength]{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .8s ease-out calc(2.2s + var(--i)*.08s) forwards}
-.dock .f{animation:fade .4s ease-out calc(2.7s + var(--i)*.08s) both}
-.save:after{animation:shine 4.8s ease-in-out 3s infinite}
+.top .lock .bar{animation:grow-y .5s var(--e) 1s both}
+.top .lock .grida{animation:wipe .8s var(--e) 1.1s both}
+h1 .b span{animation:rise .8s var(--e) calc(.85s + var(--i)*.045s) both}
+h1 .l span{animation:spread2 1.1s var(--e) calc(1.2s + var(--i)*.03s) both}
+.who .rule{animation:grow-x .8s var(--e) 1.55s both}
+.role{animation:track 1.1s var(--e) 1.65s both}
+.card{animation:up 1s var(--e) 1.3s both}
+.rows li{animation:slide .65s var(--e) calc(1.8s + var(--i)*.09s) both}
+.rows li:after{animation:grow-x .9s var(--e) calc(1.9s + var(--i)*.09s) both}
+.mo .ic [pathLength]{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .8s ease-out calc(2.05s + var(--i)*.09s) forwards}
+.ic .f{animation:fade .4s ease-out calc(2.55s + var(--i)*.09s) both}
+.btns{animation:fade-up .8s var(--e) 2.25s both}
+.save:after{animation:shine 5s ease-in-out 3.4s infinite}
+.mo dialog .m{opacity:0}
+.mo dialog.on .m{animation:px .45s var(--e) calc(.25s + var(--d)*1ms) both}
+.mo dialog.on .tile:after{animation:sweep 1.5s ease-in-out 1.2s}
 .vf i{animation:breathe 2.8s ease-in-out infinite}
 .vf i:nth-child(2),.vf i:nth-child(3){animation-delay:.2s}
 
-/* ---------------- kaydırınca (yalnız hareket açıksa gizli başlar; ilk ekrandakiler açılıştan sonra, --b) */
-.mo .rv{opacity:0}
-.mo .rv.in{opacity:1}
-.mo .sh.in .no{animation:fade .6s ease-out var(--b,0s) both}
-.mo .sh.in i{animation:grow-x .7s var(--e) calc(var(--b,0s) + .1s) both}
-.mo .sh.in h2{animation:wipe .8s var(--e) calc(var(--b,0s) + .25s) both}
-.mo .rows.in a{animation:slide .65s var(--e) calc(var(--b,0s) + var(--i)*.09s) both}
-.mo .rows.in a:after{animation:grow-x .9s var(--e) calc(var(--b,0s) + .15s + var(--i)*.09s) both}
-.mo .pic.in{animation:curtain 1.1s cubic-bezier(.6,0,.2,1) var(--b,0s) both}
-.mo .pic.in img{animation:kb2 1.6s var(--e) var(--b,0s) both}
-.mo .pic.in .cap{animation:fade-up .8s var(--e) calc(var(--b,0s) + .7s) both}
-.mo .addr.in,.mo .btns.in,.mo footer.in,.mo .qtxt.in{animation:fade-up .8s var(--e) var(--b,0s) both}
-.mo .qcard.in{animation:lift .8s var(--e) var(--b,0s) both}
-.mo .qcard .m{opacity:0}
-.mo .qcard.in .m{animation:px .45s var(--e) calc(var(--b,0s) + .3s + var(--d)*1ms) both}
-.mo .qcard.in .tile:after{animation:sweep 1.5s ease-in-out calc(var(--b,0s) + 1.25s)}
-
-@keyframes kb{from{transform:scale(1.16)}to{transform:none}}
-@keyframes kb2{from{transform:scale(1.18)}to{transform:none}}
+@keyframes kb{from{transform:scale(1.14)}to{transform:none}}
+@keyframes drift{from{scale:1}to{scale:1.05}}
 @keyframes drop{from{opacity:0;transform:translateY(-38%)}to{opacity:1;transform:none}}
 @keyframes spread{from{opacity:0;transform:translateX(var(--dx))}to{opacity:1;transform:none}}
 @keyframes spread2{from{opacity:0;transform:translateX(calc((2 - var(--i))*.95em))}to{opacity:1;transform:none}}
@@ -426,43 +395,37 @@ h1 .l span{animation:spread2 1.1s var(--e) calc(1.35s + var(--i)*.03s) both}
 @keyframes wipe{from{clip-path:inset(0 100% 0 0);transform:translateX(-8px)}to{clip-path:inset(0);transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@keyframes lift{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
 @keyframes track{from{opacity:0;letter-spacing:.9em}to{opacity:1;letter-spacing:.3em}}
-@keyframes flow{0%{top:-40%}100%{top:100%}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes slide{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
-@keyframes curtain{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0)}}
 @keyframes px{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:none}}
 @keyframes sweep{0%{opacity:0;top:0}15%{opacity:1}85%{opacity:1}100%{opacity:0;top:78%}}
 @keyframes breathe{0%,100%{transform:none;opacity:1}50%{transform:scale(1.12);opacity:.6}}
 @keyframes shine{0%,78%{left:-45%}100%{left:125%}}
-@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}
-  .hero .bg,.pic img{transform:none}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 """
 
 JS = """
-(()=>{const R=document.documentElement,mo=R.classList.contains('mo');
-const px=[...document.querySelectorAll('.pic')];
-if(mo){let q=0;const f=()=>{R.style.setProperty('--sy',Math.min(scrollY,900).toFixed(0));
-  px.forEach(el=>{const r=el.getBoundingClientRect();
-    el.style.setProperty('--p',Math.max(-1,Math.min(1,(r.top+r.height/2-innerHeight/2)/innerHeight)).toFixed(3))});q=0};
-  addEventListener('scroll',()=>{if(!q)q=requestAnimationFrame(f)},{passive:true});f()}
-const rv=[...document.querySelectorAll('.rv')];
-if(mo&&'IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{
-  if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.18,rootMargin:'0px 0px -6% 0px'});
-  rv.forEach(el=>{if(el.getBoundingClientRect().top<innerHeight){el.style.setProperty('--b','2.3s');
-    el.classList.add('in')}else io.observe(el)})}
-else rv.forEach(el=>el.classList.add('in'));
-const bar=document.querySelector('.callbar'),dock=document.querySelector('.dock');
-if('IntersectionObserver' in window)new IntersectionObserver(([x])=>bar.classList.toggle('show',
-  !x.isIntersecting&&x.boundingClientRect.top<0)).observe(dock);
+(()=>{const R=document.documentElement,D=document.getElementById('qr'),P=D.querySelector('.panel'),U=D.dataset.url,
+  send=document.getElementById('send'),copy=document.getElementById('copy'),
+  calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
   addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
-document.getElementById('share').onclick=async ev=>{const u=location.href.split('#')[0],t=document.title,
-  b=ev.currentTarget.querySelector('b');
-  if(navigator.share){try{await navigator.share({title:t,url:u})}catch(x){}}
-  else{try{await navigator.clipboard.writeText(u);b.textContent='BAĞLANTI KOPYALANDI';
-    setTimeout(()=>b.textContent='KARTVİZİTİ PAYLAŞ',2200)}catch(x){}}}})();
+const open=()=>{if(D.open)return;D.showModal();R.classList.add('hold');void P.offsetWidth;D.classList.add('on')};
+const close=()=>{if(!D.open||D.classList.contains('out'))return;D.classList.add('out');
+  const done=()=>{D.classList.remove('on','out');D.close();R.classList.remove('hold')};calm()?done():setTimeout(done,420)};
+document.getElementById('share').onclick=open;
+D.addEventListener('cancel',ev=>{ev.preventDefault();close()});
+D.querySelectorAll('[data-close]').forEach(el=>el.onclick=close);
+if(!navigator.share)send.hidden=true;
+send.onclick=async()=>{try{await navigator.share({title:document.title,url:U})}catch(x){}};
+copy.onclick=async()=>{const b=copy.querySelector('b');let ok=false;
+  try{await navigator.clipboard.writeText(U);ok=true}catch(x){const t=document.createElement('textarea');t.value=U;
+    t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0';P.appendChild(t);t.select();
+    try{ok=document.execCommand('copy')}catch(y){}t.remove()}
+  if(ok){b.textContent='KOPYALANDI';setTimeout(()=>b.textContent='KOPYALA',2000)}};
+if(location.hash==='#qr')open();})();
 """
 
 
@@ -470,53 +433,44 @@ def page(d):
     first, last = tr_upper(d["isim"]).split(" ", 1)
     wa = f"https://wa.me/{d['cep_e164']}?text=" + d["whatsapp_mesaj"].replace(" ", "%20").replace(",", "%2C")
     hotel = d["otel"].split()[-1].upper()
-    ext = lambda h: " target=_blank rel=noopener" if h.startswith("http") else ""  # noqa: E731
-    dock = [("phone", "ARA", f"tel:+{d['cep_e164']}", ""), ("whatsapp", "WHATSAPP", wa, "wa"),
-            ("mail", "E-POSTA", f"mailto:{d['eposta']}", ""), ("pin", "KONUM", d["harita"], "")]
-    dk = "".join(f'<a class="{c}" style="--i:{k}" href="{e(h)}"{ext(h)}><span>{icon(ic, True)}</span>{e(t)}</a>'
-                 for k, (ic, t, h, c) in enumerate(dock))
-    rows = [("Cep telefonu", d["cep_txt"], f"tel:+{d['cep_e164']}", ""),
-            ("Şirket hattı", d["sirket_txt"], f"tel:+{d['sirket_e164']}", ""),
-            ("E-posta", d["eposta"], f"mailto:{d['eposta']}", "em")]
-    r = "".join(f'<a class="{c}" style="--i:{k}" href="{e(h)}"><span><small>{e(lab)}</small><b>{e(v)}</b></span>'
-                f'{icon("arrow", width=1.3).replace("<svg ", "<svg class=go ", 1)}</a>'
-                for k, (lab, v, h, c) in enumerate(rows))
     street, district, city, _ = d["adres"]
+    deco = lambda k: f'<span class="ic" aria-hidden="true">{icon(k, True)}</span>'  # noqa: E731
+    rows = [("", "Cep telefonu", e(d["cep_txt"]), f"tel:+{d['cep_e164']}",
+             f'<a class="ic wa" href="{e(wa)}" target=_blank rel=noopener aria-label="WhatsApp ile yazın">'
+             f'{icon("whatsapp", True)}</a>{deco("phone")}'),
+            ("", "Şirket hattı", e(d["sirket_txt"]), f"tel:+{d['sirket_e164']}", deco("phone")),
+            ("em", "E-posta", e(d["eposta"]), f"mailto:{d['eposta']}", deco("mail")),
+            ("ad", "Adres", f"{e(street)}<br>{e(district)} / {e(city)}", d["harita"], deco("pin"))]
+    li = "".join(f'<li class="{c}" style="--i:{k}"><a class="v" href="{e(h)}"'
+                 f'{" target=_blank rel=noopener" if h.startswith("http") else ""}><small>{lab}</small><b>{v}</b></a>'
+                 f'<span class="acts">{acts}</span></li>' for k, (c, lab, v, h, acts) in enumerate(rows))
+    url = d["qr"]
     body = (
-        f'<div class="wrap"><header class="hero"><picture class="bg"><img src="img/ufuk.jpg" alt="" '
-        f'fetchpriority="high"></picture>{lockup("lock", hotel, True)}'
-        f'<div class="who"><p class="kick">BELEK · ANTALYA</p>'
-        f'<h1 aria-label="{e(d["isim"])}"><span class="b" aria-hidden="true">{letters(first)}</span>'
+        f'<div class="bg" aria-hidden="true"><img src="img/ufuk.jpg" alt="" fetchpriority="high"></div>'
+        f'<div class="wrap"><header class="top">{lockup("lock", hotel, True)}'
+        f'<div class="who"><h1 aria-label="{e(d["isim"])}"><span class="b" aria-hidden="true">{letters(first)}</span>'
         f'<span class="l" aria-hidden="true">{letters(last)}</span></h1>'
-        f'<i class="rule"></i><p class="role">{e(tr_upper(d["gorev"]))}</p></div>'
-        f'<a class="cue" href="#iletisim" aria-label="Aşağı kaydır">KAYDIR<i></i></a></header>'
-        f'<nav class="dock" aria-label="Hızlı iletişim">{dk}</nav>'
-        f'<main><section class="sec" id="iletisim">{head("01", "İletişim")}<div class="rows rv">{r}</div></section>'
-        f'<section class="sec">{head("02", "Otel")}'
-        f'<figure class="pic rv"><img src="img/sig.jpg" alt="Belek kıyısında sığ, turkuaz deniz" loading="lazy">'
-        f'<figcaption class="cap"><span class="t"><b>PALOMA</b><span>{letters(hotel)}</span></span>'
-        f'<p>{e(tr_upper(d["grup"]))}</p></figcaption></figure>'
-        f'<div class="addr rv"><p>{e(street)}<br>{e(district)} / {e(city)}</p>'
-        f'<a class="link" href="{e(d["harita"])}" target=_blank rel=noopener>YOL TARİFİ{icon("arrow")}</a></div>'
-        f'</section>'
-        f'<section class="sec">{head("03", "Kartvizit")}'
-        f'<div class="qcard rv"><div class="tile">{qr_svg(d["qr"])}<span class="vf" aria-hidden="true">'
-        f'<i></i><i></i><i></i><i></i></span></div><p class="qcap"><span>DİJİTAL</span><i></i><span>KARTVİZİT</span>'
-        f'</p></div><p class="qtxt rv">Masadaki isimlikte de aynı kod var.<br>Ekrandan okutarak kartviziti '
-        f'paylaşabilirsiniz.</p>'
-        f'<div class="btns rv"><a class="save" href="{VCF}" download>{icon("save")}REHBERE KAYDET</a>'
-        f'<button class="share" id="share" type="button">{icon("share")}<b>KARTVİZİTİ PAYLAŞ</b></button></div>'
-        f'</section></main>'
-        f'<footer class="rv">{lockup("lock", hotel)}<p>BELEK · ANTALYA</p></footer></div>'
-        f'<nav class="callbar" aria-label="Hemen iletişim"><a href="tel:+{d["cep_e164"]}">{icon("phone")}ARA</a>'
-        f'<a class="wa" href="{e(wa)}" target=_blank rel=noopener>{icon("whatsapp")}WHATSAPP</a></nav>')
+        f'<i class="rule"></i><p class="role">{e(tr_upper(d["gorev"]))}</p></div></header>'
+        f'<main class="card"><ul class="rows">{li}</ul>'
+        f'<div class="btns"><a class="save" href="{VCF}" download>{icon("save")}<b>REHBERE KAYDET</b></a>'
+        f'<button class="share" id="share" type="button" aria-haspopup="dialog">{icon("qr")}<b>PAYLAŞ</b></button>'
+        f'</div></main></div>'
+        f'<dialog id="qr" aria-labelledby="qrt" data-url="{e(url)}"><div class="scrim" data-close></div>'
+        f'<div class="panel"><div class="ph"><p id="qrt">KARTVİZİTİ PAYLAŞ</p>'
+        f'<button class="x" type="button" data-close aria-label="Kapat">{icon("close", width=1.6)}</button></div>'
+        f'<div class="qcard"><div class="tile">{qr_svg(url)}<span class="vf" aria-hidden="true"><i></i><i></i><i></i>'
+        f'<i></i></span></div><p class="qcap"><span>DİJİTAL</span><i></i><span>KARTVİZİT</span></p></div>'
+        f'<p class="hint">Kodu kamerayla okutun ya da bağlantıyı gönderin.'
+        f'<b>{e(url.replace("https://", ""))}</b></p>'
+        f'<div class="pbtns"><button class="share" id="copy" type="button">{icon("copy")}<b>KOPYALA</b></button>'
+        f'<button class="save" id="send" type="button">{icon("share")}<b>GÖNDER</b></button></div></div></dialog>')
     title = f"{d['isim']} · {d['gorev']} · {d['otel']}"
     desc = f"{d['isim']} – {d['gorev']}, {d['otel']} ({d['grup']}). Ara, WhatsApp, e-posta, rehbere kaydet."
     og = d["sayfa_url"].rstrip("/") + "/" + OG
     ext_, fmt = ("woff2", "woff2") if _has_brotli() else ("woff", "woff")
     css = CSS.replace("EXT", ext_).replace("FMT", fmt)
     return (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" '
-            f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#16303C">'
+            f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="{SKY}">'
             f'<title>{e(title)}</title><meta name="description" content="{e(desc)}">'
             f'<meta property="og:type" content="profile"><meta property="og:title" content="{e(title)}">'
             f'<meta property="og:description" content="{e(desc)}"><meta property="og:image" content="{e(og)}">'
@@ -532,25 +486,34 @@ def page(d):
 # ---------------------------------------------------------------- önizlemeler
 
 def screenshot(path=PREVIEW):
-    """Telefon ekranında (390 × 844): açık tema üst görünüm, açık tema tüm sayfa, koyu tema üst görünüm."""
+    """Telefon ekranında (390 × 844): açık tema, Paylaş penceresi (QR), koyu tema. Kontroller: yazı tipleri yüklü,
+    yatay taşma yok, yazılar kutularına sığıyor, kart tek ekrana sığıyor, penceredeki QR okunuyor."""
     from playwright.sync_api import sync_playwright
+    url = load()["qr"]
+    fits = ("[...document.querySelectorAll('SEL')].every(e=>e.offsetParent===null||e.scrollWidth<=e.clientWidth+1)")
     shots = []
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path=CHROMIUM)
-        for scheme, full in (("light", False), ("light", True), ("dark", False)):
+        for scheme, share in (("light", False), ("light", True), ("dark", False)):
             pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, reduced_motion="reduce",
                             color_scheme=scheme)
+            pg.add_init_script("navigator.share=async()=>{}")      # telefondaki gibi: Gönder düğmesi görünür
             pg.goto("file://" + os.path.join(OUT, "index.html"))
             pg.wait_for_timeout(500)
             assert pg.evaluate("[300,400,600,800].every(w=>document.fonts.check(w+' 20px Figtree'))"), \
                 "yazı tipi yüklenmedi"
             assert pg.evaluate("document.documentElement.scrollWidth") <= 390, "yatay taşma"
-            assert pg.evaluate("[...document.querySelectorAll('.rows b,.rows small,.role,h1,.dock a,.addr p')]"
-                               ".every(e=>e.scrollWidth<=e.clientWidth+1)"), "yazı sığmadı"
+            assert pg.evaluate(fits.replace("SEL", ".v b,.v small,.role,h1,.save,.share,.lock")), "yazı sığmadı"
             assert pg.evaluate("[...document.images].every(i=>i.complete&&i.naturalWidth>0)"), "görsel yüklenmedi"
-            if full:
-                pg.add_style_tag(content=".callbar{display:none}")
-            shots.append(Image.open(io.BytesIO(pg.screenshot(full_page=full))))
+            assert pg.evaluate("document.querySelector('.card').getBoundingClientRect().bottom") <= 845, \
+                "kart tek ekrana sığmadı"
+            if share:
+                pg.click("#share")
+                pg.wait_for_timeout(300)
+                assert pg.evaluate(fits.replace("SEL", ".ph p,.qcap,.hint b,.pbtns button")), "pencerede yazı sığmadı"
+                tile = Image.open(io.BytesIO(pg.locator(".tile").screenshot()))
+                assert url in Q.decode(tile), "penceredeki QR okunmadı"
+            shots.append(Image.open(io.BytesIO(pg.screenshot())))
             pg.close()
         b.close()
     h = max(s.height for s in shots)
@@ -564,12 +527,13 @@ def screenshot(path=PREVIEW):
 
 
 def tour_gif(path=TOUR):
-    """Tur (390 × 844): açılış zamanda adım adım, sonra aşağı kaydırma."""
+    """Tur (390 × 844): açılış zamanda adım adım, bekleme, sonra Paylaş penceresi (QR dalgası) adım adım."""
     from playwright.sync_api import sync_playwright
     frames, durs = [], []
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path=CHROMIUM)
         pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=1)
+        pg.add_init_script("navigator.share=async()=>{}")
 
         def shot(ms):
             frames.append(Image.open(io.BytesIO(pg.screenshot())).convert("RGB"))
@@ -578,26 +542,25 @@ def tour_gif(path=TOUR):
         pg.goto("file://" + os.path.join(OUT, "index.html"))
         pg.wait_for_timeout(300)
         _seek(pg, 0)
-        for k in range(0, 3000, 85):
+        for k in range(0, 3000, 90):
             _seek(pg, k)
-            shot(85)
+            shot(90)
         _finish(pg)
-        shot(1100)
-        h = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
-        for y in range(0, h + 1, 52):
-            pg.evaluate(f"scrollTo(0,{y})")
-            pg.wait_for_timeout(70)
-            shot(75)
-        for _ in range(8):
-            pg.wait_for_timeout(160)
-            shot(160)
-        durs[-1] = 2200
+        shot(1600)
+        pg.evaluate("document.getElementById('share').click();window._dl=document.getAnimations().filter(a=>{"
+                    "const t=a.effect&&a.effect.target;return t&&t.closest&&t.closest('dialog')});"
+                    "_dl.forEach(a=>{a.pause();a.currentTime=0})")
+        for k in range(0, 1700, 85):
+            pg.evaluate(f"_dl.forEach(a=>a.currentTime={k})")
+            shot(85)
+        pg.evaluate("_dl.forEach(a=>{try{a.finish()}catch(e){a.play()}})")
+        shot(2600)
         b.close()
     return _gif(frames, durs, path)
 
 
 def standalone(doc, path=STANDALONE):
-    """Denemelik tek dosya: yazı tipleri, görseller ve rehber kartı (vCard) sayfanın içine gömülü; hiçbir yere
+    """Denemelik tek dosya: yazı tipleri, görsel ve rehber kartı (vCard) sayfanın içine gömülü; hiçbir yere
     yüklemeden telefonda ya da tarayıcıda açılır. (Asıl yayın site/ klasörü ve zip.)"""
     import base64
     import re
@@ -609,8 +572,7 @@ def standalone(doc, path=STANDALONE):
     doc = re.sub(r'<link rel="preload"[^>]*>', "", doc)
     for rel in sorted(set(re.findall(r"fonts/f\d\.woff2?", doc))):
         doc = doc.replace(f"url({rel})", f"url({data(rel, 'font/' + rel.rsplit('.', 1)[1])})")
-    for rel in ("img/ufuk.jpg", "img/sig.jpg"):
-        doc = doc.replace(f'src="{rel}"', f'src="{data(rel, "image/jpeg")}"')
+    doc = doc.replace('src="img/ufuk.jpg"', f'src="{data("img/ufuk.jpg", "image/jpeg")}"')
     doc = doc.replace(f'href="{VCF}" download', f'href="{data(VCF, "text/vcard")}" download="{VCF}"')
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)

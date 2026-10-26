@@ -1,7 +1,8 @@
 """PALOMA kartvizit sitesinin görselleri (Blender, Cycles): fotoğraf siteleri bu ortamdan açılmadığı için çizilir.
 
-  ufuk : ufukta Akdeniz, öğleden sonra güneşi ve denizde ışık yolu (açılış ekranı, 1080 × 1920)
-  sig  : yukarıdan sığ, turkuaz deniz; kum dalgacıkları ve ışık desenleri (otel bölümü, 1080 × 1350)
+  ufuk : ufukta Akdeniz, öğleden sonra güneşi; ufuk üstte, ekranın çoğu deniz (sayfanın sabit arka planı, 1080 × 1920)
+  sig  : yukarıdan sığ, turkuaz deniz; kum dalgacıkları ve ışık desenleri (1080 × 1350; sayfanın 4. sürümünde
+         kullanılmıyor)
 
 Deniz yüzeyi büyük bir düzlem; dalgalar ses (noise) dokusundan kabartma (bump). Gökyüzü Nishita. Sığ denizde su
 yüzeyi kırar; turkuaz ve derinlikle koyulaşma kumun renginde (hacimli su bu ölçekte fazla kararıyordu), kumda sahte
@@ -148,7 +149,7 @@ def ufuk(test=False):
               distance=0.35, strength=0.55)
     nt.links.new(b.outputs["Normal"], p.inputs["Normal"])
     plane("deniz", 40000.0, mat=m)
-    camera(sc, (0, 0, 2.2), (88.0, 0, 0), 34)
+    camera(sc, (0, 0, 2.2), (74.5, 0, 0), 34)                    # 15° aşağı: ufuk üstten %24'te, altı deniz
     return sc
 
 
