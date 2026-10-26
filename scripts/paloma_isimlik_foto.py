@@ -4,11 +4,12 @@ Baskı dosyasındaki modelin aynısı (scripts/paloma_isimlik_baski.py) ahşap m
 (restoran_masalik_foto.py'nin sahnesi ve malzemeleri): beyaz PLA panel ve sehpa, siyah ad soyad ve QR, Paloma
 mavisi kart; arkası alan derinliğiyle bulanık.
 
-Çıktı : paloma_isimlik/foto/isimlik_on.jpg (3/4 önden), isimlik_karsi.jpg (karşıdan)
+Çıktı : paloma_isimlik/foto/isimlik_on.jpg (3/4 önden), isimlik_karsi.jpg (karşıdan);
+        --kabartma ile kabartmalı sürüm: isimlik_kabartmali_on.jpg, isimlik_kabartmali_karsi.jpg
 
 Kullanım:
   pip install bpy==4.2.0
-  python3 scripts/paloma_isimlik_foto.py [--ornek 128]
+  python3 scripts/paloma_isimlik_foto.py [--kabartma] [--ornek 128]
 """
 import math
 import os
@@ -51,7 +52,8 @@ def add(name, man, col, layers):
 
 def main():
     samples = int(sys.argv[sys.argv.index("--ornek") + 1]) if "--ornek" in sys.argv else 128
-    plate = PB.Plate()
+    relief = "--kabartma" in sys.argv
+    plate = PB.Plate(relief)
     z0, y0 = plate.mount
     panel = B.assembled(plate.panel, z0, y0)                   # sehpada: yüz −y'ye bakar, 15° arkaya eğik
     R.SIZE = SIZE
@@ -94,7 +96,7 @@ def main():
         R.light("ana", 20.0, 0.9, centre + r * (0.45 * flat - 0.85 * right) + [0, 0, 0.85], centre, (1.0, 0.97, 0.93))
         R.light("dolgu", 5.0, 1.0, centre + r * (0.9 * flat + 0.7 * right) + [0, 0, 0.25], centre, (0.93, 0.96, 1.0))
         R.light("arka", 12.0, 0.4, centre - r * flat + r * 0.5 * right + [0, 0, 0.7], centre, (1.0, 0.95, 0.88))
-        sc.render.filepath = os.path.join(OUT, f"isimlik_{view}.jpg")
+        sc.render.filepath = os.path.join(OUT, f"isimlik{'_kabartmali' if relief else ''}_{view}.jpg")
         bpy.ops.render.render(write_still=True)
         print("yazıldı:", os.path.relpath(sc.render.filepath, A.ROOT))
 

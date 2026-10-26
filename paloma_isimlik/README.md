@@ -55,7 +55,7 @@ python3 scripts/paloma_isimlik.py katalog          # yalnız katalog sayfaları
 - Boyu 20 cm, daha ince, biraz daha yüksek: 2:1 dikdörtgen.
 
 **Düzen:** kartın içinde üstten aşağı logo, ince çizgi, GRIDA, QR ve KARTVİZİT. Solda iki satır ad soyad (Lora) ve
-görev.
+görev ("Satın Alma Müdürü", büyük harf yüksekliği 6,2 mm: büyütülmüştü, istek üzerine eski boyutuna döndü).
 
 **`baski/paloma_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Panel 200 mm olduğu için
 tablaya **bir takım** (panel + sehpa) sığar; ikinci takım için dosya bir kez daha basılır. Diğer ayarlar Uzar, İNCE,
@@ -73,8 +73,46 @@ tablaya **bir takım** (panel + sehpa) sığar; ikinci takım için dosya bir ke
 | Filament | ~82 g (beyaz 77, mavi 3,9, siyah 1,3) + kule; PrusaSlicer ~2 sa 27 dk (Bambu Studio kendi süresini gösterir) |
 | Sehpa | 170 × 40 × 10 mm, beyaz, aynı tablada; 5 mm'lik panel yuvaya (5,3 mm) 15° eğik takılır, tutkal gerekmez |
 
+### Yazıların baskıya uygunluğu (dilimleyici kontrolü)
+
+![Dilimleyici kontrolü](baski/dilim_kontrol.png)
+
+İki aşamada kontrol edildi:
+
+- **Tasarım ölçüleri (0,4 mm nozul):**
+  - En ince çizgi 0,56 mm (HOTELS harfleri; bunun için kalınlaştırıldı).
+  - Harf içleri en az 0,75 mm.
+  - Aralar en az 0,5 mm (KARTVİZİT'teki İ noktası ile harfi arası).
+- **Dilimleyici çıktısı:** dosya PrusaSlicer'da Bambu standart ayarlarının karşılığıyla dilimlendi (`scripts/dilim.py`).
+  G-code'daki çizgiler gerçek genişlikleriyle tasarımın üstüne kondu (`scripts/paloma_isimlik_dilim.py`):
+  - Her yazının %93–97'si kendi renginde dolu. Kalan pay çizgilerin kenarlarındaki ince aralar; baskıda ezilerek
+    kapanır.
+  - En kötü harf bile %88 dolu. Basılmayan en büyük parça 0,1 mm².
+  - Harf içleri ve aralar çevre renkle (beyaz ya da kartın mavisi) %99–100 dolu: harfler birbirine kaynaşmıyor.
+  - **Sonuç:** bütün yazılar basılıyor. HOTELS'in ince çizgileri, İ ve Ü noktaları ve QR kareleri de buna dahil.
+
+## Kabartmalı sürüm (ek)
+
+![Kabartmalı](baski/onizleme_kabartmali.png)
+
+**`baski/paloma_isimlik_kabartmali_x2d.3mf`**: aynı isimlik, yazılar kabartma. Ölçü, sehpa, AMS sırası ve ayarlar düz
+sürümle aynı.
+
+| | |
+| --- | --- |
+| Kabartma | yüzeyden **2 mm** (10 katman, Uzar'ın isimliğindeki gibi): ad soyad siyah, görev mavi; kartın içindeki logo, çizgi, GRIDA ve KARTVİZİT beyaz (kartın boşluklarından yükselir) |
+| Aralar | kabartmada harf içleri ve aralar en az 0,7 mm (dolmasın diye); bunun için İ ve Ü noktaları harften biraz daha uzak |
+| Düz kalanlar | mavi kart ve QR yüzeyle aynı hizada. Kabartma QR'da kare kenarlarının gölgesi okumayı bozar; düz QR keskin çıkar |
+| Nozullar | beyaz ana nozulda; siyah ve mavi yardımcı nozulda. Renkli katman: üst 4 + kabartmanın 10 katmanı |
+| Filament | ~85 g (beyaz 79, mavi 4,1, siyah 2,6) + kule. PrusaSlicer ~2 sa 36 dk; renk değişimi daha çok katmanda olduğu için Bambu Studio düz sürümden uzun gösterir |
+| Kontrol | dilimleyicide bütün yazılar basılıyor: kabartmanın alt katmanında harflerin kenarı tam, üst katmanında %94–97 dolu; harf aralarına taşma yok ([kontrol](baski/dilim_kontrol_kabartmali.png)). QR okundu, baskı hatası benzetiminde de |
+
+![Kabartmalı, masada](foto/isimlik_kabartmali_on.jpg)
+
 ```bash
-python3 scripts/paloma_isimlik_baski.py    # baski/paloma_isimlik_x2d.3mf, baski/onizleme.png
+python3 scripts/paloma_isimlik_baski.py            # iki 3MF, önizlemeler, ölçüm ve dilimleyici kontrolü (~4 dk)
+python3 scripts/paloma_isimlik_baski.py kabartma   # yalnız kabartmalı (ya da: duz)
+python3 scripts/paloma_isimlik_foto.py --kabartma  # kabartmalı sürümün fotoğrafları (Blender)
 ```
 
 ## Dijital kartvizit sayfası
@@ -83,7 +121,7 @@ python3 scripts/paloma_isimlik_baski.py    # baski/paloma_isimlik_x2d.3mf, baski
 
 ![Tur](sayfa_tur.gif)
 
-Soldan sağa: açılış ekranı, tüm sayfa, koyu tema.
+Soldan sağa: açık tema, Paylaş penceresi, koyu tema.
 
 **Yazı sistemi Paloma Hotels'ten:**
 
@@ -93,36 +131,36 @@ Soldan sağa: açılış ekranı, tüm sayfa, koyu tema.
 - Sayfada da aynı düzen: büyük harf, geniş aralık; ad PALOMA gibi kalın (SÜLEYMAN), soyad HOTELS gibi ince ve aynı
   genişliğe yayılmış (B O Y L U). Etiketler küçük ve aralıklı; tırnaklı yazı tipi yok.
 
-**Tasarım (otel sitesi gibi):**
+**Tasarım (4. sürüm: tek parça).** Önceki sürümde logo, telefon ve WhatsApp birkaç yerde tekrar ediyordu; bölümler
+de ayrı tasarımlar gibi duruyordu. Şimdi tek ekran var ve her bilgi bir kez geçiyor:
 
-- **Açılış:** tam ekran görsel, ufukta Akdeniz. Üstte PALOMA HOTELS | GRIDA, altta ad, soyad ve görev; sağda KAYDIR
-  işareti.
-- **Yüzen çubuk:** Ara, WhatsApp, E-posta ve Konum, ince çizgili yuvarlak simgelerle.
-- **01 İletişim:** cep, şirket hattı ve e-posta; değerler büyük ve ince harfle.
-- **02 Otel:** yukarıdan sığ, turkuaz deniz görseli üstünde PALOMA / G R I D A; adres ve Yol tarifi.
-- **03 Kartvizit:** mavi kart içinde isimlikteki QR'ın aynısı, Rehbere kaydet ve Kartviziti paylaş.
-- **Sonda:** logo. Telefon koyu moddaysa sayfa gece renklerine geçer.
-- **Görseller:** Blender'da çizildi (`gorsel/`, `scripts/paloma_gorsel.py`), telif sorunu yok.
+- **Arkada:** ufukta Akdeniz, sabit. Açık gökyüzünde logo | GRIDA, ad soyad ve görev koyu deniz mavisiyle yazılı.
+- **Altta tek kart:**
+  - cep telefonu (ara ve WhatsApp), şirket hattı, e-posta ve adres (haritada açılır), ince çizgili yuvarlak
+    simgelerle;
+  - altta **Rehbere kaydet** ve **Paylaş**.
+  - Kısa ekranlı telefonda kart görselin üstünden kayar.
+- **Paylaş:** alttan bir pencere açılır. İçinde mavi kartta isimlikteki QR'ın aynısı (DİJİTAL | KARTVİZİT) ve sayfa
+  adresi var. Kopyala ve Gönder (telefonun paylaşma menüsü) düğmeleriyle bağlantı iletilir. Adres `#qr` ile
+  açılırsa pencere açık gelir.
+- **Koyu mod:** telefon koyu moddaysa kart ve pencere gece renklerine geçer.
+- **Görsel:** Blender'da çizildi (`gorsel/ufuk.jpg`, `scripts/paloma_gorsel.py`), telif sorunu yok.
 - **Paylaşım görseli:** bağlantı WhatsApp'ta paylaşılınca deniz, logo, ad ve görev görünür (`site/paylas.jpg`).
-- **Boyut:** sayfanın tamamı yaklaşık 460 KB.
+- **Boyut:** sayfanın tamamı yaklaşık 420 KB.
 
-**Animasyon** (`sayfa_tur.gif`):
+**Animasyon** (`sayfa_tur.gif`), sakin ve tek akış:
 
 - **Açılış (~2,6 sn):**
   - Görsel yavaşça yaklaşır; PALOMA harfleri iner, HOTELS harfleri ortadan açılır, ayraç ve GRIDA gelir.
   - SÜLEYMAN harfleri maskeden çıkar, B O Y L U ortadan yerlerine yayılır; ince çizgi uzar, görevin harf aralığı
     açılır.
-  - İletişim çubuğu aşağıdan gelir, simgeleri çizilir.
-- **Kaydırma:**
-  - Açılış görseli yavaş kayar.
-  - Bölüm başlıklarında numara, çizgi ve başlık açılır; satırlar alt çizgileriyle sırayla gelir.
-  - Otel görseli alttan perde gibi açılır ve içinde kayar; QR kareleri çapraz dalgayla belirir.
-  - İletişim çubuğu ekrandan çıkınca altta Ara / WhatsApp şeridi açılır.
-- **Sürekli:** KAYDIR çizgisi akar, QR'ın vizör köşeleri nefes alır, Rehbere kaydet'in üstünden ışık geçer.
+  - Kart alttan gelir; satırlar çizgileriyle sırayla belirir, simgeler çizilir.
+- **Paylaş:** pencere alttan kayar, QR kareleri çapraz dalgayla belirir, vizör köşeleri nefes alır.
+- **Sürekli:** deniz çok yavaş yaklaşıp uzaklaşır, Rehbere kaydet'in üstünden ara ara ışık geçer.
 
 Telefonda "hareketi azalt" açıksa animasyonlar oynamaz; sayfa doğrudan son hâliyle açılır.
 
-**Denemek için:** `sayfa_deneme.html` tek dosya; yazı tipleri, görseller ve rehber kartı içinde. Yüklemeye gerek
+**Denemek için:** `sayfa_deneme.html` tek dosya; yazı tipleri, görsel ve rehber kartı içinde. Yüklemeye gerek
 yok, telefonda ya da tarayıcıda açılır. Yayına giden sürüm `site/` klasörü ve zip.
 
 **Bilgiler:** hepsi `bilgiler.json` içinde. Değişince sayfa betiği yeniden çalıştırılır.
@@ -132,7 +170,7 @@ yok, telefonda ya da tarayıcıda açılır. Yayına giden sürüm `site/` klas�
 açar.
 
 ```bash
-python3 scripts/paloma_gorsel.py           # deniz görselleri (Blender, ~9 dk)
+python3 scripts/paloma_gorsel.py ufuk      # deniz görseli (Blender, ~5 dk)
 python3 scripts/paloma_sayfa.py            # site, zip, önizleme ve tur GIF'i
 python3 scripts/paloma_sayfa.py --hizli    # GIF'siz
 ```

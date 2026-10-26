@@ -46,6 +46,7 @@ J = m3.JoinType.Round
 X0, X1 = -52.0, 52.0                                            # yan boşluklar 8 mm
 TOP, BOTTOM = 83.0, 12.0                                        # üst boşluk 7 mm; altta sehpa (~9,5 mm) örter
 MIN_LINE, MIN_GAP = 0.5, 0.4
+DOT_LIFT = 0.15                         # İ / Ü noktası yukarı (mm); kabartmalı baskıda daha çok (paloma_isimlik_baski)
 N.FONT_FILES.update({"ms6": "Montserrat_600SemiBold.ttf", "ms7": "Montserrat_700Bold.ttf",
                      "lora": "Lora_700Bold.ttf"})
 WHITE_SC = {"key": "beyaz", "body": WHITE, "fg": BLACK, "logo": BLUE, "dark": False}
@@ -98,11 +99,11 @@ def t(font, s, cap, x, y, align="l", tr=0.0, max_w=None):
     kullanılmaz; noktalar küçültülmez, biraz yukarı alınır.)"""
     cs = I.text(N.font(font), s, cap, x, y, align, tr, max_w)
     out = []
-    for p in cs.decompose():                    # İ / Ü noktaları 0,15 mm yukarı: harfle arası ≥ 0,4 mm
+    for p in cs.decompose():                    # İ / Ü noktaları DOT_LIFT yukarı: harfle arası ≥ 0,4 mm
         b = p.bounds()
         w, h = b[2] - b[0], b[3] - b[1]
         dot = p.area() < 2.5 and w * h > 0 and p.area() / (w * h) > 0.6 and 0.6 < w / h < 1.7 and b[1] > y
-        out.append(p.translate((0.0, 0.15)) if dot else p)
+        out.append(p.translate((0.0, DOT_LIFT)) if dot else p)
     return A.union(*out)
 
 
@@ -301,7 +302,7 @@ def secilen_20(sc=WHITE_SC):
         d.inlay.append((white, WHITE))
     x0 = -86.0
     y = name_lines(d, "lora", 13.5, x0, 82.0, lead=1.52)
-    d.add("görev", t("ms6", TITLE, 7.0, x0, y - 18.8, "l", 0.15, 108.0), BLUE)
+    d.add("görev", t("ms6", TITLE, 6.2, x0, y - 18.0, "l", 0.15, 108.0), BLUE)
     return d
 
 
@@ -502,9 +503,10 @@ def catalog(ds):
     y = 330
     for line in ("Telefonla QR okutulunca Süleyman Bey'in kartviziti açılır: tek dokunuşla arama (cep ve şirket hattı), "
                  "WhatsApp, e-posta, otelin konumu ve rehbere kaydetme.",
-                 "Yazılar Paloma Hotels logosunun yazı sisteminde: ad PALOMA gibi kalın, soyad HOTELS gibi ince. Tam "
-                 "ekran Akdeniz görseli ve numaralı bölümler; açılışta logo ve isim harf harf gelir. Telefon koyu "
-                 "moddaysa sayfa gece renklerine geçer (sağda).",
+                 "Yazılar Paloma Hotels logosunun yazı sisteminde: ad PALOMA gibi kalın, soyad HOTELS gibi ince. Tek "
+                 "ekran, tek parça: arkada Akdeniz, üstte logo ve isim, altta her bilginin bir kez geçtiği kart. "
+                 "Paylaş'a basınca isimlikteki QR açılır (ortada). Telefon koyu moddaysa kart gece renklerine geçer "
+                 "(sağda).",
                  "Bilgiler değişirse yalnız sayfa güncellenir; isimlik ve QR aynı kalır."):
         for row in N.wrap(dr, line, f(28), W - 140):
             dr.text((70, y), row, font=f(28), fill=INK)
