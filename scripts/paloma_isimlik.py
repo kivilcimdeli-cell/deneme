@@ -260,6 +260,28 @@ def m5_ortali(sc):
     return d
 
 
+def secilen(sc=WHITE_SC):
+    """Müşterinin seçtiği: 3 · Mavi kart (beyaz tabla), PALOMA HOTELS logosu ve GRIDA mavi kartın içinde; solda
+    yalnız ad soyad ve görev (ayrıca "Paloma Grida" satırı yok)."""
+    d = Design(f"{sc['key']}_3_mavi_kart_logolu", "Mavi kart (logo kartta)", "Sağda mavi kart: içinde beyaz PALOMA "
+               "HOTELS logosu, GRIDA, QR ve KARTVİZİT; solda iki satır ad soyad (Lora) ve görev.", sc)
+    cx = 32.0
+    card = A.rrect(48.0, 73.0, 4.0, cx, 49.5)                   # x 8..56, y 13..86 (sehpanın üstünde biter)
+    lg, yb = logo(cx, 81.5, 38.0, "c")
+    div = rule(cx - 6.0, cx + 6.0, yb - 3.2, 0.6)
+    gr = t("ms6", GRIDA, 3.6, cx, yb - 7.6, "c", 2.2)
+    tile = qr(d, cx, 41.0, 30.0)
+    cap = t("ms7", "KARTVİZİT", 3.0, cx, tile.bounds()[1] - 6.6, "c", 1.2)
+    white = lg + div + gr + cap
+    d.lines.update({"logo": lg, "çizgi": div, "GRIDA": gr, "KARTVİZİT": cap})
+    d.add(None, card - tile - white, BLUE)                      # beyazlar kartta oyuk: tablanın beyazı görünür
+    if sc["dark"]:
+        d.inlay.append((white, WHITE))
+    y = name_lines(d, "lora", 7.8, X0, 64.0, lead=1.58)
+    d.add("görev", t("ms6", TITLE, 4.2, X0, y - 11.0, "l", 0.1, 54.0), BLUE)
+    return d
+
+
 LAYOUTS = [m1_sutun, m2_genis, m3_mavi_kart, m4_ust_bant, m5_ortali]
 DESIGNS = [(fn, sc) for fn in LAYOUTS for sc in (WHITE_SC, BLACK_SC)]   # 1 beyaz, 2 siyah, 3 beyaz, ...
 

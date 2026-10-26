@@ -45,6 +45,33 @@ python3 scripts/paloma_isimlik.py bant             # yalnız eşleşen düzenler
 python3 scripts/paloma_isimlik.py katalog          # yalnız katalog sayfaları
 ```
 
+## Baskı dosyası: seçilen 3 · Mavi kart, beyaz tabla (X2D)
+
+![Baskı](baski/onizleme.png)
+
+Müşterinin isteği: 3 numara, ama PALOMA HOTELS ve GRIDA mavi kartın içinde; ayrıca "Paloma Grida" satırı yok.
+Kartın içinde üstten aşağı: logo, ince çizgi, GRIDA, QR ve KARTVİZİT. Solda iki satır ad soyad (Lora) ve görev.
+
+**`baski/paloma_isimlik_x2d.3mf`**: Bambu Studio'da proje olarak açılıp doğrudan basılır. Tablada **iki takım**
+(panel + sehpa) var; biri silinirse tek takım basılır. Ölçüler ve ayarlar Uzar, İNCE, Çalık ve Soylu'nun
+isimlikleriyle aynı.
+
+| | |
+| --- | --- |
+| Panel | 120 × 90 mm, beyaz gövde **1 cm**, köşeler R8, kenarlar basamaklı pahlı; yüzü yukarı basılır |
+| Yazılar | yüzeyle aynı hizada renkli dolgu, üst 4 katman (0,8 mm): siyah ad soyad ve QR kareleri; mavi kart ve görev. Logo, çizgi, GRIDA ve KARTVİZİT kartta boşluk: tablanın beyazı görünür |
+| QR | siteyi açar (**https://suleymanboylu.qrsistem.workers.dev**); 30 mm, kare 0,90 mm; görüntüden ve baskı hatası benzetiminden okundu |
+| Kontrol | çizgiler en az 0,5 mm, harf içleri ve aralar en az 0,4 mm, öğeler arası en az 2 mm |
+| AMS | 1 siyah · 2 beyaz · 3 mavi. Beyaz ana nozulda (gövde, sehpa); siyah ve mavi yardımcı nozulda (yalnız üst 4 katman) |
+| Mavi | logonun mavisi (#69A1BA); en yakın açık / çelik mavisi filament |
+| Ayarlar | Bambu standart 0,20 mm; **ütüleme kapalı**; destek yok; Textured PEI; Generic PLA |
+| Filament | iki takım ~113 g (beyaz 107, siyah 1,2, mavi 5,0) + kule; PrusaSlicer ~3 sa 20 dk (Bambu Studio kendi süresini gösterir) |
+| Sehpa | 100 × 40 × 10 mm, beyaz, aynı tablada; panel yuvaya (10,3 mm) 15° eğik takılır, tutkal gerekmez |
+
+```bash
+python3 scripts/paloma_isimlik_baski.py    # baski/paloma_isimlik_x2d.3mf, baski/onizleme.png
+```
+
 ## Dijital kartvizit sayfası
 
 ![Sayfa](sayfa_onizleme.png)
