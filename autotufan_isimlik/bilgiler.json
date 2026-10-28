@@ -14,5 +14,8 @@
   "iban_ornek": true,
   "iban_alici": "",
   "iban_karekod": "",
-  "whatsapp_mesaj": "Merhaba, aracım için bilgi almak istiyorum."
+  "whatsapp_mesaj": "Merhaba, aracım için bilgi almak istiyorum.",
+  "aciklama": "Aracınızdaki hasarı titizlikle onarıyoruz. Tek dokunuşla arayın, yazın.",
+  "renk": "#E0B65E",
+  "isaret": "logo/tufan_t.svg"
 }

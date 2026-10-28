@@ -74,66 +74,40 @@ python3 scripts/autotufan_isimlik_baski.py   # 3MF, önizleme, ölçüm, dilimle
 
 ![Tur](sayfa_tur.gif)
 
-Solda ilk ekran, sağda tüm sayfa (karekod ve paylaş kutuları açık). Tur GIF'inde açılış.
+Solda ilk ekran, sağda tüm sayfa (karekod açık). Tur GIF'inde açılış, kaydırma, IBAN kopyalama ve karekod.
 
-**4. sürüm: kurumsal oto stüdyosu dili.**
+**Lastikçi tarzı, şablon 5 · Gösterge** (`site_sablonlari/`).
 
-- **Geçmiş:**
-  - 1. sürüm (sakin, tek kart) beğenilmedi: "lastikçilere yaptığımız gibi, havalı olsun".
-  - 2. sürüm (çizgi araba) için: "hizalamalar iyi değil, arabayı sil, boyama animasyonu ekle".
-  - 3. sürüm (boya tabancası, damlayan altın bant) için: "mantık çok iyi ama daha profesyonel olsun, çocuk işi gibi
-    kalmış". Yapı aynı kaldı; görünüş baştan yapıldı.
-- **Başlık, boya kabini:**
-  - parlak siyah boyalı bir kaportada kabin ışıklarının yansıması (WebGL);
-  - açılışta ışıklar birer birer, titreyerek yanar; yansımalar kaportanın kıvrımı ve bel çizgisi boyunca eğilir,
-    yavaşça kayar; ışığa yakın metalik boya pulları parlar; ışıklardan biri altın;
-  - logodaki altın fırça T fırça darbesiyle boyanır (önce üst kol, sonra gövde), üstünden bir parlama geçer;
-  - "Auto Tufan" (logodaki yazı tipi), HASAR ONARIM ve kısa açıklama gelir.
-- **Sadelik:**
-  - tek yazı tipi (Poppins, logodaki), eğik ve kalın yazı yok;
-  - tek vurgu rengi (şampanya altını), ince çizgiler;
-  - damla, tabanca, eğik şerit gibi süsler kalktı.
-- **Hemen ulaşın:** başlıkta altın Ara düğmesi (numara üstünde) ve WhatsApp. Ekrandan çıkınca sağ altta altın ara
-  düğmesi belirir.
-- **01 Bağlantılar:** tek listede Instagram @autotufan1, Google yorumları, konum (Kepez / Antalya, yol tarifi), web
-  sitesi autotufan.com.
-- **Hizalama:**
-  - Ara, WhatsApp ve bağlantı satırları aynı iskelette: simge, başlık ve alt satır, ok;
-  - simgeler, yazılar ve oklar sayfa boyunca aynı çizgide (önizlemede denetlenir);
-  - her bölüm aynı kenar payında (20 px).
-- **02 Ödeme bilgileri:** banka kartı gibi bir kart.
-  - IBAN; Kopyala düğmesi.
-  - Karekod: açılır, kaydedilir; banka uygulamasında galeriden okutulur.
-- **03 Kartvizit:** Rehbere ekle ve Paylaş (isimlikteki QR, Kopyala / Gönder); altbilgi.
-- **Paylaşım görseli ve simge:** aynı kabin ışıkları, altın T, Auto Tufan.
-- **Bağlantılar aynı sekmede açılır.** Yeni sekme, QR okuyucuların uygulama içi tarayıcılarında ve önizlemelerde
-  çoğu zaman açılmıyor.
-- **Açılır kutular (karekod, paylaş):** JavaScript'siz de açılır (`#karekod`, `#paylas` bağlantısı).
-- **Hareketi azalt ya da WebGL yok:** animasyonlar oynamaz; başlığın arkasında aynı görüntünün durgun hâli
-  (`boya.jpg`, aynı çiziciyle üretilir) görünür, sayfa son hâliyle açılır.
-- **Pil:** ışıklar başlık ekrandayken çizilir; aşağı kaydırınca durur.
-- **Boyut:** ~145 KB.
+- **Geçmiş:** önceki dört sürümden sonra istek: "lastikçilere yaptığımız tarzda olsun". Bundan sonra bütün işletme
+  siteleri lastikçi tarzındaki beş şablondan sırayla biriyle yapılıyor; Auto Tufan sıradaki şablonu, yeni
+  eklenen 5 · Gösterge'yi aldı.
+- **Başlık:**
+  - sağ üstte devir göstergesi; açılışta ibre kırmızı bölgeye kadar çıkıp rölantiye iner, kaydırınca yükselir;
+  - altın fırça T, alt alta AUTO / TUFAN, HASAR ONARIM, açıklama.
+- **İçerik:**
+  - altın Hemen Ara;
+  - konsol tuşları: WhatsApp (hazır mesajlı), Instagram, Google yorumları, konum, web sitesi, Rehbere ekle;
+  - ödeme bilgileri: IBAN sayaç gibi döner, Kopyala, Karekod.
+- **Renk:** altın (`renk`: `#E0B65E`), siyah zemin.
+- **Denendi:** telefon taklidinde, JavaScript kapalıyken ve uygulama önizlemesinde (sandbox); karekod okunuyor.
 
 **Bilgiler** (`bilgiler.json`):
 
-- **IBAN şimdilik örnek:** `TR12 3456 7890 1234 5678 9012 34` (`iban_ornek: true`). Sayfada küçük "Örnek IBAN"
-  notu var.
-  - Gerçeği gelince `iban` alanına yazılır ve `iban_ornek` silinir; IBAN mod-97 ile doğrulanır.
-  - Alıcı adı istenirse `iban_alici` alanına yazılır.
-- **Banka karekodu:** şimdilik karekod yalnız IBAN'ı içeriyor.
-  - Bankanın "karekod ile para gönder" ekran görüntüsünün içeriği `iban_karekod` alanına yazılınca (Uzar'daki gibi;
-    CRC ve IBAN doğrulanır) banka uygulaması okutunca alıcı ve IBAN dolu açılır.
+- **IBAN şimdilik örnek:** `TR12 3456 7890 1234 5678 9012 34` (`iban_ornek: true`).
+  - Sayfada küçük bir "Örnek IBAN" notu var; karekod şimdilik yalnız IBAN'ı taşıyor.
+  - Gerçeği gelince `iban` (mod-97 ile doğrulanır), `iban_alici`, `banka` yazılır ve `iban_ornek` silinir.
+- **Banka karekodu:** bankanın "karekod ile para gönder" ekran görüntüsünün içeriği `iban_karekod` alanına yazılınca
+  (CRC ve IBAN doğrulanır) banka uygulaması okutunca alıcı ve IBAN dolu açılır.
 - **Google yorumları:** şimdilik "auto tufan kepez yorumları" araması.
-  - İşletme profilindeki **Yorum iste** bağlantısı (`https://g.page/r/…/review`) `google` alanına yazılırsa doğrudan
-    yorum penceresi açılır.
+  - İşletme profilindeki **Yorum iste** bağlantısı (`https://g.page/r/…/review`) `google` alanına yazılırsa
+    doğrudan yorum penceresi açılır.
 
-**Denemek için:** `sayfa_deneme.html` tek dosya (yazı tipleri, karekod, simge ve rehber kartı içinde); en iyisi
-Chrome ile açmak.
+**Denemek için:** `sayfa_deneme.html` tek dosya (yazı tipleri, karekod ve rehber kartı içinde).
 
-**Yayın:** ortak Cloudflare hesabında (`qrsistem`) yeni bir Worker açılır, adı tam olarak `deneme123` olur ve
-`autotufan_site.zip` yüklenir. Adres `https://deneme123.qrsistem.workers.dev` olur; isimlikteki QR bu adresi açar.
+**Yayın:** ortak Cloudflare hesabında (`qrsistem`) `deneme123` adlı Worker'a `autotufan_site.zip` yüklenir.
+Adres `https://deneme123.qrsistem.workers.dev` olur; isimlikteki QR bu adresi açar.
 
 ```bash
-python3 scripts/autotufan_sayfa.py            # site, zip, önizleme ve tur GIF'i
-python3 scripts/autotufan_sayfa.py --hizli    # GIF'siz
+python3 scripts/sablon_site.py autotufan_isimlik            # site, zip, önizleme ve tur (şablon 5)
+python3 scripts/sablon_site.py autotufan_isimlik --hizli    # GIF'siz
 ```

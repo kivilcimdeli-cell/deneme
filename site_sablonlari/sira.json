@@ -1,0 +1,32 @@
+[
+  {
+    "isletme": "Uzar Oto Lastik",
+    "klasor": "uzar_isimlik",
+    "sablon": 1,
+    "tarih": "2026-10-18"
+  },
+  {
+    "isletme": "İnce Oto Lastik",
+    "klasor": "ince_isimlik",
+    "sablon": 2,
+    "tarih": "2026-10-20"
+  },
+  {
+    "isletme": "Çalık Oto Lastik",
+    "klasor": "calik_isimlik",
+    "sablon": 3,
+    "tarih": "2026-10-21"
+  },
+  {
+    "isletme": "Soylu Oto Lastik",
+    "klasor": "soylu_isimlik",
+    "sablon": 4,
+    "tarih": "2026-10-23"
+  },
+  {
+    "isletme": "Auto Tufan",
+    "klasor": "autotufan_isimlik",
+    "sablon": 5,
+    "tarih": "2026-10-28"
+  }
+]
