@@ -11,6 +11,8 @@ tipi logodaki Poppins, logo fırça T (scripts/autotufan_logo.py).
     IBAN (dokununca kopyalanır; QR düğmesi ödeme penceresini açar). Rehbere kaydet ve Paylaş.
   * Paylaş: alttan açılan pencerede isimlikteki QR (DİJİTAL | KARTVİZİT), Kopyala / Gönder.
   * Ödeme: IBAN karekodu (bilgiler.json'da `iban_karekod` varsa bankanın karekodu, yoksa IBAN'ın kendisi) ve IBAN.
+  * Pencereler <dialog> değil: JavaScript açar (geri tuşu kapatır); JavaScript yoksa (Android'in HTML
+    görüntüleyicisi gibi) #qr / #odeme bağlantısı CSS :target ile açar. Uygulama içi önizlemede de çalışır.
 IBAN şimdilik örnek (`iban_ornek`); gerçeği gelince bilgiler.json'a yazılıp betik yeniden çalıştırılır.
 
 Yayın: ortak Cloudflare hesabında (`qrsistem`) `deneme123` adlı Worker'a `autotufan_site.zip` yüklenir; adres
@@ -255,7 +257,6 @@ CSS = """
   --e:cubic-bezier(.2,.75,.2,1);color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:#08080A}
-html.hold{overflow:hidden}
 body{font-family:Poppins,system-ui,sans-serif;font-weight:400;color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
@@ -321,18 +322,17 @@ a.ic,button.ic{z-index:1}
 .toast.on{transform:translate(-50%,0);visibility:visible}
 
 /* ---------------- pencereler: Paylaş (site QR) ve Ödeme (IBAN karekodu) */
-dialog{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;
-  background:transparent;color:var(--ink);overflow:hidden}
-dialog::backdrop{background:transparent}
-.scrim{position:absolute;inset:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .35s ease}
+/* Pencere: JavaScript açar (.on; telefonun geri tuşu kapatır). JavaScript yoksa (ör. Android'in HTML
+   görüntüleyicisi) #qr / #odeme bağlantısı :target ile açar, # kapatır. Kapanırken görünürlük gecikmeli kalkar. */
+.sheet{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30;visibility:hidden;transition:visibility 0s .5s}
+.sheet:target,.sheet.on{visibility:visible;transition:none}
+.scrim{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .35s ease}
 .panel{position:absolute;left:50%;bottom:0;width:min(440px,100%);max-height:100%;overflow:auto;
   transform:translate(-50%,104%);transition:transform .5s var(--e);background:#121214;border:1px solid var(--edge);
   border-bottom:0;border-radius:26px 26px 0 0;padding:18px 22px calc(22px + env(safe-area-inset-bottom));
   box-shadow:0 -14px 40px rgba(0,0,0,.6)}
-dialog.on .scrim{opacity:1}
-dialog.on .panel{transform:translate(-50%,0)}
-dialog.on.out .scrim{opacity:0}
-dialog.on.out .panel{transform:translate(-50%,104%)}
+.sheet:target .scrim,.sheet.on .scrim{opacity:1}
+.sheet:target .panel,.sheet.on .panel{transform:translate(-50%,0)}
 .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .ph p{font-weight:700;font-size:12px;letter-spacing:.32em}
 .x{width:40px;height:40px;margin-right:-8px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
@@ -353,6 +353,7 @@ dialog.on.out .panel{transform:translate(-50%,104%)}
 .qcap i{width:1.2px;height:15px;background:var(--gold)}
 .hint{margin-top:14px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
 .hint b{display:block;font-weight:500;color:var(--ink);letter-spacing:.03em}
+.sel{-webkit-user-select:all;user-select:all}
 .pbtns{display:flex;gap:10px;margin-top:16px}
 .pbtns>*{flex:1}
 
@@ -374,8 +375,8 @@ h1 span{animation:rise .8s var(--e) calc(.95s + var(--i)*.04s) both}
 .ic.wa:before{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid var(--wa);opacity:0;
   pointer-events:none}
 .mo .ic.wa:before{animation:ring 5s ease-out 3.4s infinite}
-.mo dialog .m{opacity:0}
-.mo dialog.on .m{animation:px .45s var(--e) calc(.25s + var(--d)*1ms) both}
+.mo .sheet .m{opacity:0}
+.mo .sheet:target .m,.mo .sheet.on .m{animation:px .45s var(--e) calc(.25s + var(--d)*1ms) both}
 .vf i{animation:breathe 2.8s ease-in-out infinite}
 .vf i:nth-child(2),.vf i:nth-child(3){animation-delay:.2s}
 
@@ -424,8 +425,7 @@ col*=1.-.3*pow(length((v-.5)*vec2(1.,.9)),1.8);
 gl_FragColor=vec4(col,1.);}"""
 
 JS = """
-(()=>{const R=document.documentElement,mo=R.classList.contains('mo'),
-  calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+(()=>{const R=document.documentElement,mo=R.classList.contains('mo');
 const bg=()=>{const cv=document.querySelector('.bg canvas');const gl=cv.getContext('webgl',{alpha:false,antialias:false});
   if(!gl)return;const sh=(x,src)=>{const s=gl.createShader(x);gl.shaderSource(s,src);gl.compileShader(s);
     return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null},vs=sh(gl.VERTEX_SHADER,`__VS__`),fs=sh(gl.FRAGMENT_SHADER,`__FS__`);
@@ -441,7 +441,7 @@ const bg=()=>{const cv=document.querySelector('.bg canvas');const gl=cv.getConte
   let raf=0;const loop=now=>{draw(window.__bgT??6+now/1000);raf=document.hidden?0:requestAnimationFrame(loop)};
   addEventListener('visibilitychange',()=>{if(!document.hidden&&!raf)raf=requestAnimationFrame(loop)});
   raf=requestAnimationFrame(loop)};
-bg();
+try{bg()}catch(x){}
 if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
   addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
 const toast=document.querySelector('.toast');let tt=0;
@@ -449,21 +449,23 @@ const say=s=>{toast.textContent=s;toast.classList.add('on');clearTimeout(tt);tt=
 const copy=async s=>{try{await navigator.clipboard.writeText(s);return true}catch(x){const t=document.createElement('textarea');
   t.value=s;t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();
   let ok=false;try{ok=document.execCommand('copy')}catch(y){}t.remove();return ok}};
-const sheet=D=>{const P=D.querySelector('.panel');
-  const open=()=>{if(D.open)return;D.showModal();R.classList.add('hold');void P.offsetWidth;D.classList.add('on')};
-  const close=()=>{if(!D.open||D.classList.contains('out'))return;D.classList.add('out');
-    const done=()=>{D.classList.remove('on','out');D.close();R.classList.remove('hold')};calm()?done():setTimeout(done,420)};
-  D.addEventListener('cancel',ev=>{ev.preventDefault();close()});D.querySelectorAll('[data-close]').forEach(el=>el.onclick=close);
-  return open};
-const share=sheet(document.getElementById('qr')),pay=sheet(document.getElementById('odeme'));
-document.getElementById('share').onclick=share;document.getElementById('payqr').onclick=pay;
+const sheets=[...document.querySelectorAll('.sheet')];
+const open=id=>{const S=document.getElementById(id);if(S.classList.contains('on'))return;S.classList.add('on');
+  try{history.pushState({s:id},'')}catch(x){}};
+const close=()=>{const S=sheets.find(x=>x.classList.contains('on'));if(S){S.classList.remove('on');
+  try{if(history.state&&history.state.s)history.back()}catch(x){}}
+  if(/^#(qr|odeme)$/.test(location.hash))location.hash=''};
+addEventListener('popstate',()=>sheets.forEach(x=>x.classList.remove('on')));
+document.querySelectorAll('a[href="#qr"]:not([data-copy-iban]),a[href="#odeme"]:not([data-copy-iban])').forEach(a=>
+  a.addEventListener('click',ev=>{ev.preventDefault();open(a.getAttribute('href').slice(1))}));
+document.querySelectorAll('.sheet a[href="#"]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();close()}));
+addEventListener('keydown',ev=>{if(ev.key==='Escape')close()});
 const U=document.getElementById('qr').dataset.url,IB=document.getElementById('odeme').dataset.iban;
-document.querySelectorAll('[data-iban]').forEach(b=>{if(b.id!=='odeme')b.onclick=async()=>{
-  if(await copy(IB))say('IBAN kopyalandı')}});
+document.querySelectorAll('[data-copy-iban]').forEach(b=>b.addEventListener('click',async ev=>{
+  if(b.tagName==='A')ev.preventDefault();if(await copy(IB))say('IBAN kopyalandı');else if(b.tagName==='A')open('odeme')}));
 const send=document.getElementById('send');if(!navigator.share)send.hidden=true;
 send.onclick=async()=>{try{await navigator.share({title:document.title,url:U})}catch(x){}};
-document.getElementById('copy').onclick=async()=>{if(await copy(U))say('Bağlantı kopyalandı')};
-if(location.hash==='#qr')share();if(location.hash==='#odeme')pay();})();
+document.getElementById('copy').onclick=async()=>{if(await copy(U))say('Bağlantı kopyalandı')};})();
 """
 
 
@@ -483,10 +485,9 @@ def page(d):
              f'<b>{e(d["konum"].replace(", ", " / "))}</b></a>', deco("pin")),
         ("", f'<a class="v" href="{e(d["google"])}"{ext}><small>Google yorumları</small><b>{stars_svg()}Bizi '
              f'değerlendirin</b></a>', deco("star")),
-        ("ib", f'<button class="v" type="button" data-iban aria-label="IBAN\'ı kopyala"><small>IBAN · dokunun, '
-               f'kopyalansın</small><b>{e(d["iban_txt"])}</b></button>',
-         f'<button class="ic" id="payqr" type="button" aria-haspopup="dialog" aria-label="Ödeme karekodu">'
-         f'{icon("qr", True)}</button>'),
+        ("ib", f'<a class="v" href="#odeme" data-copy-iban aria-label="IBAN\'ı kopyala"><small>IBAN · dokunun, '
+               f'kopyalansın</small><b>{e(d["iban_txt"])}</b></a>',
+         f'<a class="ic" id="payqr" href="#odeme" aria-label="Ödeme karekodu">{icon("qr", True)}</a>'),
     ]
     li = "".join(f'<li class="{c}" style="--i:{k}">{main}<span class="acts">{acts}</span></li>'
                  for k, (c, main, acts) in enumerate(rows))
@@ -500,28 +501,30 @@ def page(d):
         f'<p class="loc">{icon("pin")}{e(d["konum"].replace(", ", " · ").upper())}</p></header>'
         f'<main class="card"><ul class="rows">{li}</ul>'
         f'<div class="btns"><a class="save" href="{VCF}" download>{icon("save")}<b>REHBERE KAYDET</b></a>'
-        f'<button class="share" id="share" type="button" aria-haspopup="dialog">{icon("qr")}<b>PAYLAŞ</b></button>'
+        f'<a class="share" id="share" href="#qr">{icon("qr")}<b>PAYLAŞ</b></a>'
         f'</div></main></div><div class="toast" role="status" aria-live="polite"></div>'
         # Paylaş
-        f'<dialog id="qr" aria-labelledby="qrt" data-url="{e(url)}"><div class="scrim" data-close></div>'
+        f'<div class="sheet" id="qr" role="dialog" aria-modal="true" aria-labelledby="qrt" data-url="{e(url)}">'
+        f'<a class="scrim" href="#" aria-label="Kapat"></a>'
         f'<div class="panel"><div class="ph"><p id="qrt">KARTVİZİTİ PAYLAŞ</p>'
-        f'<button class="x" type="button" data-close aria-label="Kapat">{icon("close", width=1.6)}</button></div>'
+        f'<a class="x" href="#" aria-label="Kapat">{icon("close", width=1.6)}</a></div>'
         f'<div class="qcard"><div class="tile">{qr_svg(url, "Kartvizit QR kodu")}<span class="vf" aria-hidden="true">'
         f'<i></i><i></i><i></i><i></i></span></div><p class="qcap"><span>DİJİTAL</span><i></i><span>KARTVİZİT</span>'
         f'</p></div><p class="hint">Kodu kamerayla okutun ya da bağlantıyı gönderin.'
         f'<b>{e(url.replace("https://", ""))}</b></p>'
         f'<div class="pbtns"><button class="share" id="copy" type="button">{icon("copy")}<b>KOPYALA</b></button>'
-        f'<button class="save" id="send" type="button">{icon("share")}<b>GÖNDER</b></button></div></div></dialog>'
+        f'<button class="save" id="send" type="button">{icon("share")}<b>GÖNDER</b></button></div></div></div>'
         # Ödeme
-        f'<dialog id="odeme" aria-labelledby="odt" data-iban="{e(d["iban_raw"])}"><div class="scrim" data-close></div>'
+        f'<div class="sheet" id="odeme" role="dialog" aria-modal="true" aria-labelledby="odt" '
+        f'data-iban="{e(d["iban_raw"])}"><a class="scrim" href="#" aria-label="Kapat"></a>'
         f'<div class="panel"><div class="ph"><p id="odt">ÖDEME BİLGİLERİ</p>'
-        f'<button class="x" type="button" data-close aria-label="Kapat">{icon("close", width=1.6)}</button></div>'
+        f'<a class="x" href="#" aria-label="Kapat">{icon("close", width=1.6)}</a></div>'
         f'<div class="qcard"><div class="tile">{qr_svg(d["pay_qr"], "IBAN karekodu")}<span class="vf" '
         f'aria-hidden="true"><i></i><i></i><i></i><i></i></span></div><p class="qcap"><span>IBAN</span><i></i>'
         f'<span>KAREKOD</span></p></div>'
-        f'<p class="hint">Banka uygulamanızla okutun ya da IBAN\'ı kopyalayın.{holder}<b>{e(d["iban_txt"])}</b></p>'
-        f'<div class="pbtns"><button class="save" type="button" data-iban>{icon("copy")}<b>IBAN\'I KOPYALA</b>'
-        f'</button></div></div></dialog>')
+        f'<p class="hint">Banka uygulamanızla okutun ya da IBAN\'ı kopyalayın.{holder}<b class="sel">{e(d["iban_txt"])}</b></p>'
+        f'<div class="pbtns"><button class="save" type="button" data-copy-iban>{icon("copy")}<b>IBAN\'I KOPYALA</b>'
+        f'</button></div></div></div>')
     title = f"{d['isim']} · {AT.SERVICE.title()} · {d['konum']}"
     desc = f"{d['isim']} – hasar onarım, {d['konum']}. Ara, WhatsApp, Instagram, konum, Google yorumları, IBAN."
     og = d["sayfa_url"].rstrip("/") + "/" + OG

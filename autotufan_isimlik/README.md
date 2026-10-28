@@ -92,6 +92,11 @@ Soldan sağa: sayfa, Paylaş penceresi, Ödeme penceresi.
 - **Paylaş:** isimlikteki QR'ın aynısı (DİJİTAL | KARTVİZİT); Kopyala ve Gönder.
 - **Ödeme:** IBAN karekodu ve IBAN; IBAN'ı kopyala.
 - **Bağlantıyla açma:** adres `#qr` ile açılırsa Paylaş, `#odeme` ile açılırsa Ödeme penceresi açık gelir.
+- **Her tarayıcıda açılır:**
+  - Pencereleri JavaScript açar; telefonun geri tuşu kapatır.
+  - JavaScript kapalıysa (ör. Android'in HTML görüntüleyicisi) pencereler `#qr` / `#odeme` bağlantısıyla açılır.
+  - Uygulama içi önizlemelerde (sandbox) de çalışır.
+  - Üçü de denendi.
 - **Hareketi azalt:** telefonda açıksa animasyonlar oynamaz; arka plan tek kare, durağan.
 
 **Bilgiler** (`bilgiler.json`):
