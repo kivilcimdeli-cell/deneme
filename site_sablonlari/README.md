@@ -5,6 +5,8 @@
 İsimliklerdeki QR'ın açtığı işletme siteleri (dijital kartvizit) bu beş şablondan biriyle yapılır.
 
 - **Kural:** aksi söylenmedikçe tarz değişmez; yeni bir tasarım icat edilmez.
+- **Süs yok:** "diğerleri gibi sade, modern olsun; değişik şeyler ekliyorsun". Gösterge, konsol tuşu, sayaç gibi
+  ek süsler eklenmez; ilk denenen 5. şablon (Gösterge) bu yüzden kaldırıldı, yerine Sade geldi.
 - **Sıra:** her yeni işletme bir sonraki şablonu alır: 1 → 2 → 3 → 4 → 5 → 1 …
 - **Kayıt:** sıra `sira.json`da tutulur. Bir işletme bir kez şablon aldıysa yeniden üretimde aynı şablonda kalır.
 
@@ -14,7 +16,7 @@
 | 2 | **Lastik izi** | İnce Oto Lastik | eğik dar ad, lastik izi bandı, Hemen Ara'da diş baskısı, 3'erli kutucuklar, koyu banka kartı, sağ altta ara düğmesi |
 | 3 | **İkaz** | Çalık Oto Lastik | ikaz şeridi, harf harf yükselen ad ve renkli nokta, 2 sütun kutucuk, altta arama şeridi |
 | 4 | **Kurumsal** | Soylu Oto Lastik | sağ üstte eğik şerit, ızgara, numaralı liste (01, 02 …), üst çizgili ödeme kartı, altta arama şeridi |
-| 5 | **Gösterge** | yeni (ilk: Auto Tufan) | devir göstergesi (açılışta ibre kırmızı bölgeye çıkıp iner), geniş kalın ad, konsol tuşu gibi bağlantılar, sayaç gibi dönen IBAN |
+| 5 | **Sade** | yeni (ilk: Auto Tufan) | süssüz ve modern: solda büyük ad, kısa renkli çizgi, bağlantılar tek kartta liste, ödeme kartı, altta arama şeridi |
 
 **Hepsinde aynı içerik:**
 

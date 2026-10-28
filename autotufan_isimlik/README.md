@@ -76,18 +76,19 @@ python3 scripts/autotufan_isimlik_baski.py   # 3MF, önizleme, ölçüm, dilimle
 
 Solda ilk ekran, sağda tüm sayfa (karekod açık). Tur GIF'inde açılış, kaydırma, IBAN kopyalama ve karekod.
 
-**Lastikçi tarzı, şablon 5 · Gösterge** (`site_sablonlari/`).
+**Lastikçi tarzı, şablon 5 · Sade** (`site_sablonlari/`).
 
-- **Geçmiş:** önceki dört sürümden sonra istek: "lastikçilere yaptığımız tarzda olsun". Bundan sonra bütün işletme
-  siteleri lastikçi tarzındaki beş şablondan sırayla biriyle yapılıyor; Auto Tufan sıradaki şablonu, yeni
-  eklenen 5 · Gösterge'yi aldı.
-- **Başlık:**
-  - sağ üstte devir göstergesi; açılışta ibre kırmızı bölgeye kadar çıkıp rölantiye iner, kaydırınca yükselir;
-  - altın fırça T, alt alta AUTO / TUFAN, HASAR ONARIM, açıklama.
+- **Geçmiş:**
+  - önceki dört sürümden sonra istek: "lastikçilere yaptığımız tarzda olsun". Bundan sonra bütün işletme siteleri
+    lastikçi tarzındaki beş şablondan sırayla biriyle yapılıyor; Auto Tufan sıradaki 5. şablonu aldı;
+  - ilk 5. şablon (Gösterge: devir göstergesi, konsol tuşları) için: "diğerleri gibi sade modern olsun, değişik
+    şeyler ekliyorsun". 5. şablon süssüz Sade ile değişti.
+- **Başlık:** KEPEZ · ANTALYA, altın fırça T, alt alta AUTO / TUFAN, kısa altın çizgi, HASAR ONARIM, açıklama.
 - **İçerik:**
   - altın Hemen Ara;
-  - konsol tuşları: WhatsApp (hazır mesajlı), Instagram, Google yorumları, konum, web sitesi, Rehbere ekle;
-  - ödeme bilgileri: IBAN sayaç gibi döner, Kopyala, Karekod.
+  - tek kartta liste: WhatsApp (hazır mesajlı), Instagram, Google yorumları, konum, web sitesi, Rehbere kaydet;
+  - ödeme bilgileri: IBAN, Kopyala, Karekod.
+- **Hemen Ara ekrandan çıkınca** altta arama şeridi belirir.
 - **Renk:** altın (`renk`: `#E0B65E`), siyah zemin.
 - **Denendi:** telefon taklidinde, JavaScript kapalıyken ve uygulama önizlemesinde (sandbox); karekod okunuyor.
 
@@ -108,6 +109,6 @@ Solda ilk ekran, sağda tüm sayfa (karekod açık). Tur GIF'inde açılış, ka
 Adres `https://deneme123.qrsistem.workers.dev` olur; isimlikteki QR bu adresi açar.
 
 ```bash
-python3 scripts/sablon_site.py autotufan_isimlik            # site, zip, önizleme ve tur (şablon 5)
+python3 scripts/sablon_site.py autotufan_isimlik            # site, zip, önizleme ve tur (şablon 5 · Sade)
 python3 scripts/sablon_site.py autotufan_isimlik --hizli    # GIF'siz
 ```

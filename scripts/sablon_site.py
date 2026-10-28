@@ -12,8 +12,7 @@ Kural (kullanıcının isteği): aksi söylenmedikçe her yeni işletmenin sites
                 altta arama şeridi
   4 Kurumsal    Soylu Oto Lastik'in sitesi: sağ üstte eğik renkli şerit, ızgara, numaralı liste (01–04), üst
                 çizgili ödeme kartı, altta arama şeridi
-  5 Gösterge    yeni, aynı aileden: araç göstergesi; açılışta ibre kırmızı çizgiye kadar çıkıp iner, düğmeler
-                konsol tuşları gibi, IBAN kilometre sayacı gibi döner
+  5 Sade        yeni, aynı aileden ve süssüz: solda büyük ad, kısa renkli çizgi, bağlantılar tek kartta liste
 
 Hepsinde aynı işler: Hemen Ara, WhatsApp (hazır mesajlı), Instagram, Google yorumları, konum ve web sitesi (varsa),
 Rehbere kaydet (vCard), ödeme bilgileri (banka, alıcı, IBAN + tek dokunuşla kopyala, banka karekodu: kaydedilip

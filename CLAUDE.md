@@ -4,7 +4,8 @@
 
 - Kullanıcı aksini söylemedikçe her yeni işletmenin sitesi **lastikçi tarzındaki 5 şablondan biriyle** yapılır:
   `python3 scripts/sablon_site.py <işletme klasörü>`. Yeni bir tarz icat edilmez, şablonun dışına çıkılmaz.
-  - Şablonlar: 1 Şimşek (Uzar), 2 Lastik izi (İnce), 3 İkaz (Çalık), 4 Kurumsal (Soylu), 5 Gösterge (Auto Tufan).
+  - Şablonlar: 1 Şimşek (Uzar), 2 Lastik izi (İnce), 3 İkaz (Çalık), 4 Kurumsal (Soylu), 5 Sade (Auto Tufan).
+  - Sade ve modern kalınır: gösterge, konsol tuşu, sayaç gibi "değişik" süsler eklenmez (kullanıcı istemedi).
   - Ayrıntı ve katalog: `site_sablonlari/README.md`, `site_sablonlari/katalog.png`.
 - **Sıra:** şablonlar sırayla döndürülür (1 → 2 → 3 → 4 → 5 → 1); sıra `site_sablonlari/sira.json`da.
   - Üretici sıradakini kendisi seçip kaydeder.
