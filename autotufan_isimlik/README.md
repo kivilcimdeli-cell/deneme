@@ -74,30 +74,40 @@ python3 scripts/autotufan_isimlik_baski.py   # 3MF, önizleme, ölçüm, dilimle
 
 ![Tur](sayfa_tur.gif)
 
-Solda ilk ekran, sağda tüm sayfa (karekod ve paylaş kutuları açık).
+Solda ilk ekran, sağda tüm sayfa (karekod ve paylaş kutuları açık). Tur GIF'inde boyama animasyonu.
 
-**2. sürüm.** İlk sürüm (sakin, tek kart) beğenilmedi: "lastikçilere yaptığımız gibi, havalı olsun". Soylu ve
-İNCE'nin sayfalarının dili, Auto Tufan'ın renkleri ve işiyle kuruldu: siyah zemin, tek vurgu rengi altın, kaporta &
-boya havası.
+**3. sürüm.**
 
-- **Başlık:**
-  - karbon fiber zemin, üzerinden ara ara ışık geçer;
-  - altın fırça T, AUTO ve dev, eğik, gümüş TUFAN; HASAR ONARIM;
-  - altın çizgilerle kendini çizen araba: tekerlekler dönerek gelir, far yanar, gövdesinden ara ara boya parlaması
-    geçer. Arkasından iki altın boya şeridi geçer.
-- **Hemen Ara:** altın blok, numara büyük. Ekrandan çıkınca sağ altta altın ara düğmesi belirir.
+- **Geçmiş:**
+  - 1. sürüm (sakin, tek kart) beğenilmedi: "lastikçilere yaptığımız gibi, havalı olsun".
+  - 2. sürüm (lastikçi dili, çizgi araba) için: "hizalamalar iyi değil, arabayı sil, boyama animasyonu ekle, daha
+    havalı".
+- **Başlık (ortalı):**
+  - karbon fiber zemin, altın fırça T;
+  - açılışın gösterisi:
+    - boya tabancası soldan sağa geçip altın fırça darbesini boyar. Bant isimliğin 5 numarasındaki bantın aynısı,
+      içinde oyma AUTO TUFAN; tabanca 4 numaradaki şekil;
+    - etrafa boya zerrecikleri saçılır, bir kısmı bantın çevresinde kalır;
+    - sonunda bantın altından boya damlaları akar; havada ince altın toz kalır;
+  - altında HASAR ONARIM ve kısa açıklama.
+- **Hizalama:**
+  - her bölüm aynı kenar payında (20 px);
+  - kutucuklar aynı iskelette (simge ve ok, başlık, alt satır) ve aynı yükseklikte: başlıklar ve alt satırlar aynı
+    çizgide (önizlemede denetlenir);
+  - ödeme ve paylaş düğmeleri ikişer yan yana, altbilgi ortalı.
+- **Hemen Ara:** altın blok. Ekrandan çıkınca sağ altta altın ara düğmesi belirir.
 - **Kutucuklar:** WhatsApp (hazır mesajlı), Instagram @autotufan1, Google yorumları (beş yıldız), konum (Kepez /
   Antalya, haritada), web sitesi autotufan.com.
 - **Ödeme bilgileri:**
   - IBAN; Kopyala düğmesi.
   - Karekod: açılır, kaydedilir; banka uygulamasında galeriden okutulur.
-- **Sonda:** Rehbere kaydet, Kartviziti paylaş (isimlikteki QR, Kopyala / Gönder), altbilgi.
+- **Sonda:** Rehbere ekle ve Paylaş (isimlikteki QR, Kopyala / Gönder), altbilgi.
 - **Bağlantılar aynı sekmede açılır.** Yeni sekme, QR okuyucuların uygulama içi tarayıcılarında ve önizlemelerde
   çoğu zaman açılmıyor.
-- **Karekod ve paylaş kutuları `<details>`:** JavaScript kapalıyken de açılır. Telefon taklidinde, JavaScript
-  kapalıyken ve uygulama önizlemesinde (sandbox) denendi.
+- **Açılır kutular (karekod, paylaş):** JavaScript'siz de açılır (`#karekod`, `#paylas` bağlantısı). Telefon
+  taklidinde, JavaScript kapalıyken ve uygulama önizlemesinde (sandbox) denendi.
 - **Hareketi azalt:** telefonda açıksa animasyonlar oynamaz, sayfa son hâliyle açılır.
-- **Boyut:** ~140 KB.
+- **Boyut:** ~180 KB.
 
 **Bilgiler** (`bilgiler.json`):
 
