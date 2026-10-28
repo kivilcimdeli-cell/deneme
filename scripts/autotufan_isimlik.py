@@ -63,9 +63,9 @@ QR = make_qr()
 # ---------------------------------------------------------------- logo ve ortak öğeler
 
 def tufan_t(h, x, y, anchor="bl"):
-    """Fırça T (altın), yükseklik h mm. anchor: "bl" sol alt köşe (x, y), "c" merkez. Uçlar 0,5 mm'den
-    incelmesin diye kenar 0,15 mm dışa alınır."""
-    cs = m3.CrossSection(L.polygons(), m3.FillRule.EvenOdd).scale((h, h)).offset(0.15, J)
+    """Fırça T (altın), yükseklik h mm. anchor: "bl" sol alt köşe (x, y), "c" merkez. Sivri uçlar 0,4 mm nozulla
+    basılabilsin diye kenar 0,3 mm dışa alınır (dilimleyici kontrolü: uçlar en az ~0,8 mm)."""
+    cs = m3.CrossSection(L.polygons(), m3.FillRule.EvenOdd).scale((h, h)).offset(0.3, J)
     b = cs.bounds()
     if anchor == "c":
         return cs.translate((x - (b[0] + b[2]) / 2, y - (b[1] + b[3]) / 2))
@@ -76,19 +76,20 @@ def name(cap, x, y, align="l", max_w=None):
     return t("pop6", NAME, cap, x, y, align, 0.15, max_w)
 
 
-def sub(cap, x, y, align="l", width=None, tr=1.0):
-    """KAPORTA & BOYA (Poppins Bold: logodaki Medium 2 mm kabartmada fazla ince kalır); width verilirse harf aralığı
-    açılıp o genişliğe yayılır (logodaki gibi ad genişliğinde)."""
-    cs = t("pop7", SUB, cap, x, y, align, tr)
+def sub(cap, x, y, align="l", width=None, tr=1.0, text=SUB):
+    """Adın altındaki satır, KAPORTA & BOYA (Poppins Bold: logodaki Medium 2 mm kabartmada fazla ince kalır); width
+    verilirse harf aralığı açılıp o genişliğe yayılır (logodaki gibi ad genişliğinde)."""
+    cs = t("pop7", text, cap, x, y, align, tr)
     if width:
         b = cs.bounds()
-        tr = max(0.5, tr + (width - (b[2] - b[0])) / (len(SUB) - 1))      # harfler sıkışmasın
-        cs = t("pop7", SUB, cap, x, y, align, tr)
+        tr = max(0.5, tr + (width - (b[2] - b[0])) / (len(text) - 1))      # harfler sıkışmasın
+        cs = t("pop7", text, cap, x, y, align, tr)
     return cs
 
 
-def lockup(d, x, y_top, h, align="l", sub_col=WHITE):
-    """Logo: fırça T, yanında Auto Tufan ve altında KAPORTA & BOYA (adın genişliğinde). Döner: kutu (x0, y0, x1, y1)."""
+def lockup(d, x, y_top, h, align="l", sub_col=WHITE, sub_text=SUB):
+    """Logo: fırça T, yanında Auto Tufan ve altında KAPORTA & BOYA (ya da sub_text; adın genişliğinde). Döner: kutu
+    (x0, y0, x1, y1)."""
     T = tufan_t(h, 0, 0)
     tb = T.bounds()
     cap = 0.40 * h
@@ -96,13 +97,13 @@ def lockup(d, x, y_top, h, align="l", sub_col=WHITE):
     nm = name(cap, tb[2] + gap, h * 0.62)
     nb = nm.bounds()
     sb_cap = max(4.4, 0.2 * h)
-    sb = sub(sb_cap, nb[0], h * 0.62 - cap / 2 - 2.6 - sb_cap / 2, "l", nb[2] - nb[0])
+    sb = sub(sb_cap, nb[0], h * 0.62 - cap / 2 - 2.6 - sb_cap / 2, "l", nb[2] - nb[0], text=sub_text)
     w = max(nb[2], sb.bounds()[2]) - tb[0]
     dx = {"l": x - tb[0], "c": x - tb[0] - w / 2, "r": x - tb[0] - w}[align]
     dy = y_top - max(tb[3], nb[3])
     d.add(None, T.translate((dx, dy)), GOLD)
     d.add("Auto Tufan", nm.translate((dx, dy)), WHITE)
-    d.add("KAPORTA & BOYA", sb.translate((dx, dy)), sub_col)
+    d.add(sub_text, sb.translate((dx, dy)), sub_col)
     return (tb[0] + dx, min(tb[1], sb.bounds()[1]) + dy, tb[0] + dx + w, y_top)
 
 
@@ -394,6 +395,20 @@ def d10_alt_bant():
     d.add("bant", band - ic - num, GOLD)
     s = 30.0
     d.inlay += qr_block(X1 - s / 2, 29.0 + s / 2, s)
+    return d
+
+
+def secilen():
+    """Müşterinin seçtiği: 1 · Klasik logo, ama KAPORTA & BOYA yazmasın, yalnız HASAR ONARIM: logonun altındaki satır
+    HASAR ONARIM olur (alttaki ayrı satır kalkar, tekrar etmez); altta ANTALYA, HEMEN ARA, telefon ve QR."""
+    d = Design("1_klasik_logo_hasar_onarim", "Klasik logo (seçilen)", "Logo: altın fırça T, Auto Tufan ve altında "
+               "HASAR ONARIM; altta Antalya, hemen ara, telefon ve QR.", SC)
+    lockup(d, X0, 84.0, 18.0, sub_text=SERVICE)
+    d.add(None, bar(X0, X0 + 22.0, 59.0), GOLD)
+    d.add("ANTALYA", t("pop7", CITY, 4.6, X0, 50.0, "l", 1.4), WHITE)
+    d.add("HEMEN ARA", t("pop7", "HEMEN ARA", 4.6, X0, 33.0, "l", 1.2), GOLD)
+    phone_line(d, X0, 22.0, 5.2, max_w=72.0)
+    scan(d, X1 - 16.0, 17.0 + 6.5 + 4.6 + 16.0, 32.0)
     return d
 
 

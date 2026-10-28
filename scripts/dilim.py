@@ -147,3 +147,33 @@ class Grid:
             ImageDraw.Draw(im).polygon([self.px(u + dx, v + dy) for u, v in p], fill=1)
             acc ^= np.array(im)
         return acc
+
+
+def coverage(gcode, items, tools, layers_, ppm=20.0, edge=0.45, speck=0.05):
+    """Yazılar dilimleyicide basılıyor mu (kabartmalı isimlikler için genel kontrol).
+    items  : [(ad, CrossSection (tabla koordinatında), renk)]
+    tools  : {renk: G-code aracı (AMS yuvası − 1)}
+    layers_: [(z, "yüzey" | "kenar")]; kenar katmanında yalnız dış şerit (edge mm) sayılır (içi üstle örtülür).
+    Döner: [(ad, z, tür, kaplama, en kötü parça, parça sayısı, basılmayan en büyük parça mm²)]."""
+    from scipy import ndimage
+    bs = np.array([cs.bounds() for _, cs, _ in items])
+    grid = Grid((bs[:, 0].min() - 2, bs[:, 1].min() - 2, bs[:, 2].max() + 2, bs[:, 3].max() + 2), ppm)
+    segs = layers(gcode, {z for z, _ in layers_})
+    paths, out = {}, []
+    for name, cs, col in items:
+        M = grid.fill(cs)
+        lab, n = ndimage.label(M)
+        area = ndimage.sum(M, lab, range(1, n + 1))
+        big = area >= speck * ppm ** 2
+        for z, kind in layers_:
+            if (z, col) not in paths:
+                paths[(z, col)] = grid.paths(segs[z], tools[col])
+            X = paths[(z, col)]
+            S = M & ~ndimage.binary_erosion(M, iterations=int(round(edge * ppm))) if kind == "kenar" else M
+            per = (ndimage.sum(X & S, lab, range(1, n + 1)) / np.maximum(ndimage.sum(S, lab, range(1, n + 1)), 1))[big]
+            lost = ndimage.binary_opening(S & ~X, np.ones((3, 3), bool))
+            ll, nl = ndimage.label(lost)
+            worst = ndimage.sum(lost, ll, range(1, nl + 1)).max() / ppm ** 2 if nl else 0.0
+            out.append((name, z, kind, (S & X).sum() / max(S.sum(), 1), per.min() if len(per) else 1.0,
+                        int(big.sum()), worst))
+    return out
