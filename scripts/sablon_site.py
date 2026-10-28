@@ -100,6 +100,7 @@ class Site:
     sayfa: str
     isaret: str       # logo işareti: <svg> içeriği ve viewBox ("" ise yok)
     isaret_box: str
+    isaret_cizgi: list = field(default_factory=list)   # fırça darbeleri [(kalınlık, [(x, y) …])]: logo yazılır gibi
     sablon: int = 0
     extra: dict = field(default_factory=dict)
 
@@ -184,6 +185,10 @@ def load(folder, overrides=None):
         box = re.search(r'viewBox="([^"]+)"', src).group(1)
         isaret = "".join(re.findall(r"<path[^>]*/>", src))
         isaret = re.sub(r'\s(fill|class)="[^"]*"', "", isaret)
+    cizgi = []
+    if d.get("isaret_cizgi"):
+        c = json.load(open(os.path.join(folder, d["isaret_cizgi"]), encoding="utf-8"))
+        cizgi = [(k["genislik"], [tuple(p) for p in k["noktalar"]]) for k in c["darbeler"]]
     slug = re.sub(r"[^a-z0-9]+", "", tr_upper(marka).translate(str.maketrans("ÇĞİÖŞÜ", "CGIOSU")).lower()) or "site"
     return Site(folder=folder, slug=slug, isletme=tr_title(name), marka=marka, hizmet=hizmet,
                 etiket=tr_upper(d.get("etiket") or (konum.replace(", ", " · ") if konum else sehir)),
@@ -195,7 +200,8 @@ def load(folder, overrides=None):
                 web=d.get("web", ""), iban=iban, iban_ornek=ornek, alici=tr_upper(d.get("iban_alici", "")),
                 banka=d.get("banka", ""), karekod=karekod, karekod_hata=d.get("karekod_hata", "m"),
                 sayfa=Q.https_url(d["sayfa_url"]) if d.get("sayfa_url") else "", isaret=isaret, isaret_box=box,
-                sablon=int(d.get("sablon", 0)), extra={k: v for k, v in d.items() if k.startswith("sablon_")})
+                isaret_cizgi=cizgi, sablon=int(d.get("sablon", 0)),
+                extra={k: v for k, v in d.items() if k.startswith("sablon_")})
 
 
 # ---------------------------------------------------------------- sıra
@@ -431,6 +437,16 @@ def check_page(pg, site, T):
     right = pg.evaluate(f"Math.max(...[...document.querySelectorAll({json.dumps(T.MARK)})].map(x=>"
                         "x.getBoundingClientRect().right))")
     assert right <= w - 8, f"büyük ad taştı ({right:.0f} > {w - 8})"
+    if pg.locator("svg.drawn g[mask]").count():                    # fırça darbeleri logonun tamamını örtüyor mu
+        import numpy as np
+        el = pg.locator("svg.drawn").first
+        a = np.asarray(Image.open(io.BytesIO(el.screenshot())).convert("L"), float)
+        pg.evaluate("document.querySelectorAll('svg.drawn g[mask]').forEach(g=>{g.dataset.m=g.getAttribute('mask');"
+                    "g.removeAttribute('mask')})")
+        b = np.asarray(Image.open(io.BytesIO(el.screenshot())).convert("L"), float)
+        pg.evaluate("document.querySelectorAll('svg.drawn g[data-m]').forEach(g=>g.setAttribute('mask',g.dataset.m))")
+        miss = (np.abs(a - b) > 40).mean()
+        assert miss < 0.002, f"logo çizimi eksik kalıyor (%{100 * miss:.2f})"
 
 
 def screenshot(site, T, out, path):

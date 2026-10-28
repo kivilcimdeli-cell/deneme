@@ -4,9 +4,13 @@
 olsun, sade modern; değişik şeyler ekliyorsun". Bu yüzden ek süs yok; düzen öbür dördüyle aynı: koyu zemin, solda
 büyük ad (Figtree), altında kısa renkli çizgi ve hizmet, renkli Hemen Ara, bağlantılar tek kartta liste (simge,
 başlık ve alt satır, ok), ödeme bilgileri kartı, altbilgi, Hemen Ara ekrandan çıkınca altta arama şeridi.
-Logo işareti varsa adın üstünde küçük. Açılış: yazılar ve düğmeler sırayla belirir, çizgi uzar.
+Logo işareti varsa adın üstünde.
+Açılış ("animasyonu biraz artıralım, logo çizim gibi gelsin"): logo çizilerek gelir (fırça darbeleri verilmişse
+yazılır gibi, yoksa dış hattı çizilip içi dolar); adın harfleri sırayla yükselir, çizgi uzar, hizmetin harf aralığı
+daralarak oturur, Hemen Ara ve bağlantı satırları sırayla gelir; birkaç saniyede bir Hemen Ara'nın üstünden ışık
+geçer ve telefon simgesi çalar.
 """
-from .ortak import e, fit, svg
+from .ortak import DRAW_CSS, drawn_mark, e, fit, svg
 
 NO, AD, SLUG = 5, "Sade", "sade"
 KAYNAK = "yeni"
@@ -18,7 +22,7 @@ LICENSES = ("OFL-figtree.txt",)
 MARK_FONT = ("Figtree_800ExtraBold.ttf", -0.035)
 MARK = ".mark .ln"
 FITS = ".iban,.call b,.row b,.row small,.rows dd,.btn,.eyebrow,.kind"
-INTRO_MS = 1900
+INTRO_MS = 2600
 ORNEK = ("autotufan_isimlik", {})
 ARROW = "M9 6l6 6-6 6"
 
@@ -54,17 +58,22 @@ button{font:inherit;color:inherit}
 .eyebrow{display:flex;align-items:center;gap:10px;font:600 12px/1 var(--ui);letter-spacing:.24em;color:var(--muted);
   white-space:nowrap}
 .eyebrow::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--ac)}
-.own{display:block;height:30px;width:auto;margin-top:26px;fill:var(--ac)}
+.own{display:block;height:56px;width:auto;margin-top:24px;fill:var(--ac);color:var(--ac);overflow:visible;
+  filter:drop-shadow(0 6px 18px rgba(var(--ac-rgb),.25))}
 .mark{display:flex;flex-direction:column;margin-top:16px;
   font:800 min(clamp(64px,20vw,96px),calc(var(--avail) * var(--mk)))/.92 var(--ui);letter-spacing:-.035em}
 .mark .ln{display:block;width:max-content}
+.mark .ch{display:inline-block}
 .bar{width:56px;height:4px;margin-top:22px;border-radius:2px;background:var(--ac);transform-origin:left}
 .kind{margin-top:16px;font:800 14px/1 var(--ui);letter-spacing:.38em;color:var(--ac);white-space:nowrap}
 .lead{margin-top:14px;max-width:32ch;color:var(--muted);font-size:15.5px}
 /* ---- Hemen Ara ---- */
-.call{display:flex;align-items:center;gap:14px;margin-top:4px;padding:18px 16px 18px 22px;border-radius:16px;
+.call{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;margin-top:4px;
+  padding:18px 16px 18px 22px;border-radius:16px;
   background:var(--ac);color:var(--ac-ink);text-decoration:none;box-shadow:0 18px 40px -22px rgba(var(--ac-rgb),.7);
   transition:transform .15s,filter .15s}
+.call::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-45%;width:30%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg)}
 .call:active{transform:scale(.985);filter:brightness(.96)}
 .call .t{flex:1;min-width:0}
 .call small{display:block;font:800 12px/1 var(--ui);letter-spacing:.22em;opacity:.72}
@@ -137,26 +146,31 @@ footer b{font:800 18px/1 var(--ui);letter-spacing:-.02em;color:var(--text)}
   border:1px solid var(--line2);border-left:4px solid var(--ac);padding:12px 18px;border-radius:12px;font-weight:600;
   box-shadow:0 14px 34px rgba(0,0,0,.6);transition:transform .25s,opacity .25s;opacity:0;pointer-events:none}
 .toast.show{transform:translate(-50%,0);opacity:1}
-/* ---- animasyonlar: yalnız belirme ---- */
+/* ---- animasyonlar: logo çizilir, harfler sırayla yükselir; gecikmeler satır içinde (sırayla) ---- */
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(55%)}to{opacity:1;transform:none}}
+@keyframes left{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes track{from{letter-spacing:.9em;opacity:0}to{letter-spacing:.38em;opacity:1}}
 @keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+@keyframes shine{0%,82%{left:-45%}100%{left:125%}}
+@keyframes ring{0%,84%,100%{transform:none}86%,90%,94%{transform:rotate(-14deg)}88%,92%,96%{transform:rotate(14deg)}}
 @keyframes flash{0%{color:var(--ac)}100%{color:var(--text)}}
 @keyframes open{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .eyebrow{animation:fade .6s .1s both}
-.own{animation:fade .6s .2s both}
-.mark .ln{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
-.mark .ln:nth-child(1){animation-delay:.25s}.mark .ln:nth-child(2){animation-delay:.35s}
-.bar{animation:grow .6s .6s cubic-bezier(.2,.8,.2,1) both}
-.kind{animation:fade .6s .7s both}
-.lead{animation:fade .6s .85s both}
-.call{animation:rise .6s .95s cubic-bezier(.2,.8,.2,1) both}
-.list{animation:rise .6s 1.1s cubic-bezier(.2,.8,.2,1) both}
+.mark .ch{animation:up .65s cubic-bezier(.2,.9,.25,1.1) both}
+.bar{animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
+.kind{animation:track .9s cubic-bezier(.2,.8,.2,1) both}
+.lead{animation:fade .7s both}
+.call{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.call::after{animation:shine 5s 3.2s infinite}
+.call .ib .ic{animation:ring 5s 3.2s infinite}
+.row{animation:left .5s cubic-bezier(.2,.8,.2,1) both}
 .pay.in .iban{animation:flash 1.2s .2s ease-out}
 .iban.flash{animation:flash .9s ease-out}
 .kk.on,.kk:target{animation:open .35s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-"""
+""" + DRAW_CSS
 
 OG_CSS = """
 body.og{margin:0;width:1200px;height:630px;overflow:hidden}
@@ -171,28 +185,41 @@ def css(site):
     return CSS + f":root{{--mk:{fit(MARK_FONT, site, 0.04):.4f}}}\n"
 
 
-def _own(site):
-    if not site.isaret:
-        return ""
-    return f'<svg class="own" viewBox="{site.isaret_box}" aria-hidden="true">{site.isaret}</svg>'
+def _d(t):
+    return f' style="animation-delay:{t:.2f}s"'
 
 
-def _mark(site):
-    return "".join(f'<span class="ln">{e(t)}</span>' for t in site.lines)
+def _mark(site, t0):
+    """Adın harfleri: sırayla yükselir (t0'dan başlayarak)."""
+    k, lines = 0, []
+    for t in site.lines:
+        chars = ""
+        for c in t:
+            chars += f'<span class="ch"{_d(t0 + .045 * k)}>{"&nbsp;" if c == " " else e(c)}</span>'
+            k += 1
+        lines.append(f'<span class="ln">{chars}</span>')
+    return "".join(lines), t0 + .045 * k
 
 
 def og(site):
-    return (f'<div class="wrap"><header class="hero"><p class="eyebrow">{e(site.etiket)}</p>{_own(site)}'
-            f'<h1 class="mark">{_mark(site)}</h1><div class="bar"></div><p class="kind">{e(site.hizmet)}</p>'
+    logo, _ = drawn_mark(site, "own")
+    name, _ = _mark(site, 0)
+    return (f'<div class="wrap"><header class="hero"><p class="eyebrow">{e(site.etiket)}</p>{logo}'
+            f'<h1 class="mark">{name}</h1><div class="bar"></div><p class="kind">{e(site.hizmet)}</p>'
             f'</header></div>')
 
 
 def body(site, ctx):
+    # zaman çizelgesi: logo çizilirken ad yükselir; ardından çizgi, hizmet, açıklama, Hemen Ara, satırlar
+    logo, _ = drawn_mark(site, "own", 0.2)
+    base = 0.2 if site.isaret else 0.0
+    name, _ = _mark(site, 0.25 + base)
     go = f'<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="{ARROW}"/></svg>'
     rows = "\n  ".join(
-        f'<a class="row" href="{e(L.href)}"{f" download={chr(34)}{e(L.download)}{chr(34)}" if L.download else ""}>'
-        f'<span class="ib">{svg(L.icon)}</span><span><b>{e(L.title)}</b><small>{e(L.sub)}</small></span>{go}</a>'
-        for L in site.links(vcf_href=ctx.vcf))
+        f'<a class="row" href="{e(L.href)}"{f" download={chr(34)}{e(L.download)}{chr(34)}" if L.download else ""}'
+        f'{_d(1.3 + base + .07 * k)}><span class="ib">{svg(L.icon)}</span><span><b>{e(L.title)}</b>'
+        f'<small>{e(L.sub)}</small></span>{go}</a>'
+        for k, L in enumerate(site.links(vcf_href=ctx.vcf)))
     who = "".join(f"<dt>{k}</dt><dd>{e(v)}</dd>" for k, v in (("Banka", site.banka), ("Alıcı", site.alici)) if v)
     kk_btn = kk_box = ""
     if ctx.kk:
@@ -208,14 +235,14 @@ def body(site, ctx):
     right = f"@{site.instagram}" if site.instagram else e(site.etiket)
     return f"""<div class="wrap">
 <header class="hero">
-  <p class="eyebrow">{e(site.etiket)}</p>{_own(site)}
-  <h1 class="mark" aria-label="{e(site.isletme)}">{_mark(site)}</h1>
-  <div class="bar" aria-hidden="true"></div>
-  <p class="kind">{e(site.hizmet)}</p>
-  <p class="lead">{e(site.aciklama)}</p>
+  <p class="eyebrow">{e(site.etiket)}</p>{logo}
+  <h1 class="mark" aria-label="{e(site.isletme)}">{name}</h1>
+  <div class="bar" aria-hidden="true"{_d(.75 + base)}></div>
+  <p class="kind"{_d(.85 + base)}>{e(site.hizmet)}</p>
+  <p class="lead"{_d(1.05 + base)}>{e(site.aciklama)}</p>
 </header>
 <main>
-<a class="call" href="tel:+{site.tel}"><span class="t"><small>HEMEN ARA</small><b>{e(site.phone)}</b></span>
+<a class="call" href="tel:+{site.tel}"{_d(1.15 + base)}><span class="t"><small>HEMEN ARA</small><b>{e(site.phone)}</b></span>
   <span class="ib">{svg("phone")}</span></a>
 <nav class="list" aria-label="Bağlantılar">
   {rows}

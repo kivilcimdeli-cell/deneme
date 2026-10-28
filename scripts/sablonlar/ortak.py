@@ -57,3 +57,54 @@ def fit(mark_font, site, extra_em=0.0):
     f = ImageFont.truetype(os.path.join(FONT_DIR, fn), 1000)
     w = max(f.getlength(t) / 1000 + tracking * (len(t) - 1) for t in site.lines) + extra_em
     return 0.97 / w
+
+
+def smooth(pts):
+    """Noktalardan geçen yumuşak SVG yolu (Catmull-Rom → kübik Bézier)."""
+    p = [pts[0]] + list(pts) + [pts[-1]]
+    d = f"M{p[1][0]:g} {p[1][1]:g}"
+    for i in range(1, len(p) - 2):
+        c1 = (p[i][0] + (p[i + 1][0] - p[i - 1][0]) / 6, p[i][1] + (p[i + 1][1] - p[i - 1][1]) / 6)
+        c2 = (p[i + 1][0] - (p[i + 2][0] - p[i][0]) / 6, p[i + 1][1] - (p[i + 2][1] - p[i][1]) / 6)
+        d += f"C{c1[0]:.0f} {c1[1]:.0f} {c2[0]:.0f} {c2[1]:.0f} {p[i + 1][0]:g} {p[i + 1][1]:g}"
+    return d
+
+
+# Çizilerek gelen logo: .br fırça darbesi (maskede, yazılır gibi), .tr dış hat (çizilir), .fl iç (sonra dolar).
+# Hareketi azalt açıkken şablonların kuralı animasyonu kapatır: darbeler tam, logo son hâliyle görünür.
+DRAW_CSS = """
+.drawn .br{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 2;stroke-dashoffset:0;
+  animation:draw .7s cubic-bezier(.5,.05,.3,1) both}
+.drawn .tr{fill:none;stroke:currentColor;stroke-linejoin:round;stroke-dasharray:1 2;stroke-dashoffset:0;
+  animation:draw 1.2s cubic-bezier(.45,0,.3,1) both}
+.drawn .fl{animation:fillin .6s ease-out both}
+@keyframes draw{from{stroke-dashoffset:1.02}to{stroke-dashoffset:0}}
+@keyframes fillin{from{opacity:0}to{opacity:1}}
+"""
+
+
+def drawn_mark(site, cls, start=0.2):
+    """Logo işareti çizilerek gelir. Fırça darbeleri (isaret_cizgi) varsa logo yazılır gibi açılır (darbeler sırayla,
+    uzunluğuyla orantılı sürede); yoksa önce dış hattı çizilir, sonra içi dolar. Döner: (svg, bitiş anı sn)."""
+    if not site.isaret:
+        return "", start
+    x0, y0, w, h = (float(v) for v in site.isaret_box.split())
+    box = f'viewBox="{site.isaret_box}"'
+    if site.isaret_cizgi:
+        t, strokes = start, []
+        for wd, pts in site.isaret_cizgi:
+            n = sum(((pts[i + 1][0] - pts[i][0]) ** 2 + (pts[i + 1][1] - pts[i][1]) ** 2) ** .5
+                    for i in range(len(pts) - 1))
+            dur = 0.25 + n / (1.6 * max(w, h))
+            strokes.append(f'<path class="br" pathLength="1" d="{smooth(pts)}" stroke-width="{wd}" '
+                           f'style="animation-delay:{t:.2f}s;animation-duration:{dur:.2f}s"/>')
+            t += dur * 0.85
+        mid = f"dm-{cls}"
+        pad = max(w, h) * 0.15
+        return (f'<svg class="{cls} drawn" {box} aria-hidden="true"><defs><mask id="{mid}" maskUnits="userSpaceOnUse" '
+                f'x="{x0 - pad:g}" y="{y0 - pad:g}" width="{w + 2 * pad:g}" height="{h + 2 * pad:g}">{"".join(strokes)}'
+                f'</mask></defs><g mask="url(#{mid})">{site.isaret}</g></svg>'), t + 0.15
+    outline = site.isaret.replace("<path ", f'<path class="tr" pathLength="1" stroke-width="{max(w, h) * .012:.1f}" '
+                                            f'style="animation-delay:{start:.2f}s" ')
+    return (f'<svg class="{cls} drawn" {box} aria-hidden="true"><g class="fl" style="animation-delay:{start + .9:.2f}s">'
+            f'{site.isaret}</g>{outline}</svg>'), start + 1.5

@@ -84,6 +84,11 @@ Solda ilk ekran, sağda tüm sayfa (karekod açık). Tur GIF'inde açılış, ka
   - ilk 5. şablon (Gösterge: devir göstergesi, konsol tuşları) için: "diğerleri gibi sade modern olsun, değişik
     şeyler ekliyorsun". 5. şablon süssüz Sade ile değişti.
 - **Başlık:** KEPEZ · ANTALYA, altın fırça T, alt alta AUTO / TUFAN, kısa altın çizgi, HASAR ONARIM, açıklama.
+- **Açılış** ("animasyonu biraz artıralım, logo çizim gibi gelsin"):
+  - fırça T yazılır gibi çizilir: önce üst kol, sonra gövde (`logo/tufan_t_cizgi.json`);
+  - AUTO TUFAN'ın harfleri sırayla yükselir, çizgi uzar, HASAR ONARIM'ın harf aralığı daralarak oturur;
+  - Hemen Ara ve bağlantı satırları sırayla gelir; birkaç saniyede bir Hemen Ara'nın üstünden ışık geçer, telefon
+    simgesi çalar.
 - **İçerik:**
   - altın Hemen Ara;
   - tek kartta liste: WhatsApp (hazır mesajlı), Instagram, Google yorumları, konum, web sitesi, Rehbere kaydet;

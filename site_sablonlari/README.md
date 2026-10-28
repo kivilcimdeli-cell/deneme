@@ -16,7 +16,7 @@
 | 2 | **Lastik izi** | İnce Oto Lastik | eğik dar ad, lastik izi bandı, Hemen Ara'da diş baskısı, 3'erli kutucuklar, koyu banka kartı, sağ altta ara düğmesi |
 | 3 | **İkaz** | Çalık Oto Lastik | ikaz şeridi, harf harf yükselen ad ve renkli nokta, 2 sütun kutucuk, altta arama şeridi |
 | 4 | **Kurumsal** | Soylu Oto Lastik | sağ üstte eğik şerit, ızgara, numaralı liste (01, 02 …), üst çizgili ödeme kartı, altta arama şeridi |
-| 5 | **Sade** | yeni (ilk: Auto Tufan) | süssüz ve modern: solda büyük ad, kısa renkli çizgi, bağlantılar tek kartta liste, ödeme kartı, altta arama şeridi |
+| 5 | **Sade** | yeni (ilk: Auto Tufan) | süssüz ve modern: logo çizilerek gelir, solda büyük ad (harfler sırayla), kısa renkli çizgi, bağlantılar tek kartta liste, ödeme kartı, altta arama şeridi |
 
 **Hepsinde aynı içerik:**
 
@@ -84,6 +84,8 @@ betikleriyle (`scripts/uzar_sayfa.py` …) üretilmeye devam eder; şablonlar on
    - **İsteğe bağlı:**
      - `marka`: büyük yazılan ad; yoksa işletme adından hizmet çıkarılır.
      - `isaret`: logo işaretinin SVG'si, klasöre göre (`logo/…svg`).
+     - `isaret_cizgi`: logonun fırça darbeleri (orta çizgi ve kalınlık, JSON). Verilirse 5 · Sade'de logo yazılır
+       gibi çizilir; verilmezse dış hattı çizilip içi dolar. Örnek: `autotufan_isimlik/logo/tufan_t_cizgi.json`.
      - `iban_ornek: true`: gerçek IBAN gelene kadar.
      - `sablon`: şablonu sabitlemek için.
 2. Çalıştır:
