@@ -4,5 +4,15 @@
   "hizmet": "HASAR ONARIM",
   "sehir": "ANTALYA",
   "telefon": "0546 475 45 08",
-  "sayfa_url": "https://deneme123.qrsistem.workers.dev/"
+  "sayfa_url": "https://deneme123.qrsistem.workers.dev/",
+  "konum": "Kepez, Antalya",
+  "instagram": "@autotufan1",
+  "web": "https://autotufan.com/",
+  "google": "https://www.google.com/search?q=auto+tufan+kepez+yorumlar%C4%B1",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Auto+Tufan+Kepez+Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "iban_alici": "",
+  "iban_karekod": "",
+  "whatsapp_mesaj": "Merhaba, aracım için bilgi almak istiyorum."
 }

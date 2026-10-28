@@ -67,3 +67,53 @@ lastikçilerin isimlikleriyle aynı.
 ```bash
 python3 scripts/autotufan_isimlik_baski.py   # 3MF, önizleme, ölçüm, dilimleyici kontrolü (~2 dk)
 ```
+
+## Dijital kartvizit sayfası (isimlikteki QR'ın açtığı site)
+
+![Sayfa](sayfa_onizleme.png)
+
+![Tur](sayfa_tur.gif)
+
+Soldan sağa: sayfa, Paylaş penceresi, Ödeme penceresi.
+
+**Tasarım (Paloma'nın son sitesi gibi tek parça, her bilgi bir kez):**
+
+- **Arka plan canlı:** araba boyası gibi parlak siyah yüzey (WebGL).
+  - İçinde altın metalik pullar ışıkta yanıp söner.
+  - Üzerinden yavaşça ışık bandı geçer (galeride kaportaya vuran ışık gibi).
+  - Görsel dosyası yok, sayfa hafif (~180 KB).
+- **Üstte:** altın fırça T (açılışta fırçayla çizilir gibi açılır, ara ara üstünden parıltı geçer), Auto Tufan, HASAR
+  ONARIM, Kepez · Antalya. Yazı tipi logodaki Poppins.
+- **Altta tek kart:**
+  - telefon (ara ve WhatsApp), Instagram @autotufan1, web sitesi autotufan.com;
+  - konum (haritada açılır), Google yorumları (beş altın yıldız);
+  - IBAN: satıra dokununca kopyalanır; QR düğmesi Ödeme penceresini açar;
+  - altta Rehbere kaydet ve Paylaş.
+- **Paylaş:** isimlikteki QR'ın aynısı (DİJİTAL | KARTVİZİT); Kopyala ve Gönder.
+- **Ödeme:** IBAN karekodu ve IBAN; IBAN'ı kopyala.
+- **Bağlantıyla açma:** adres `#qr` ile açılırsa Paylaş, `#odeme` ile açılırsa Ödeme penceresi açık gelir.
+- **Hareketi azalt:** telefonda açıksa animasyonlar oynamaz; arka plan tek kare, durağan.
+
+**Bilgiler** (`bilgiler.json`):
+
+- **IBAN şimdilik örnek:** `TR12 3456 7890 1234 5678 9012 34` (`iban_ornek: true`).
+  - Gerçeği gelince `iban` alanına yazılır ve `iban_ornek` silinir; IBAN mod-97 ile doğrulanır.
+  - Alıcının adı istenirse `iban_alici` alanına yazılır.
+- **Banka karekodu:** şimdilik QR yalnız IBAN'ı gösteriyor.
+  - Bankanın "karekod ile para gönder" ekran görüntüsü gelince içeriği `iban_karekod` alanına yazılır (Uzar'daki
+    gibi; CRC ve IBAN doğrulanır).
+  - O zaman banka uygulaması okutunca alıcı ve IBAN dolu açılır.
+- **Google yorumları:** şimdilik "auto tufan kepez yorumları" araması.
+  - Google İşletme Profili'nde **Yorum iste** bağlantısı (`https://g.page/r/…/review`) alınıp `google` alanına
+    yazılırsa doğrudan yorum penceresi açılır.
+
+**Denemek için:** `sayfa_deneme.html` tek dosya; yazı tipleri, simge ve rehber kartı içinde. Telefonda ya da
+tarayıcıda açılır.
+
+**Yayın:** ortak Cloudflare hesabında (`qrsistem`) yeni bir Worker açılır, adı tam olarak `deneme123` olur ve
+`autotufan_site.zip` yüklenir. Adres `https://deneme123.qrsistem.workers.dev` olur; isimlikteki QR bu adresi açar.
+
+```bash
+python3 scripts/autotufan_sayfa.py            # site, zip, önizleme ve tur GIF'i
+python3 scripts/autotufan_sayfa.py --hizli    # GIF'siz
+```
