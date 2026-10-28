@@ -74,40 +74,45 @@ python3 scripts/autotufan_isimlik_baski.py   # 3MF, önizleme, ölçüm, dilimle
 
 ![Tur](sayfa_tur.gif)
 
-Solda ilk ekran, sağda tüm sayfa (karekod ve paylaş kutuları açık). Tur GIF'inde boyama animasyonu.
+Solda ilk ekran, sağda tüm sayfa (karekod ve paylaş kutuları açık). Tur GIF'inde açılış.
 
-**3. sürüm.**
+**4. sürüm: kurumsal oto stüdyosu dili.**
 
 - **Geçmiş:**
   - 1. sürüm (sakin, tek kart) beğenilmedi: "lastikçilere yaptığımız gibi, havalı olsun".
-  - 2. sürüm (lastikçi dili, çizgi araba) için: "hizalamalar iyi değil, arabayı sil, boyama animasyonu ekle, daha
-    havalı".
-- **Başlık (ortalı):**
-  - karbon fiber zemin, altın fırça T;
-  - açılışın gösterisi:
-    - boya tabancası soldan sağa geçip altın fırça darbesini boyar. Bant isimliğin 5 numarasındaki bantın aynısı,
-      içinde oyma AUTO TUFAN; tabanca 4 numaradaki şekil;
-    - etrafa boya zerrecikleri saçılır, bir kısmı bantın çevresinde kalır;
-    - sonunda bantın altından boya damlaları akar; havada ince altın toz kalır;
-  - altında HASAR ONARIM ve kısa açıklama.
+  - 2. sürüm (çizgi araba) için: "hizalamalar iyi değil, arabayı sil, boyama animasyonu ekle".
+  - 3. sürüm (boya tabancası, damlayan altın bant) için: "mantık çok iyi ama daha profesyonel olsun, çocuk işi gibi
+    kalmış". Yapı aynı kaldı; görünüş baştan yapıldı.
+- **Başlık, boya kabini:**
+  - parlak siyah boyalı bir kaportada kabin ışıklarının yansıması (WebGL);
+  - açılışta ışıklar birer birer, titreyerek yanar; yansımalar kaportanın kıvrımı ve bel çizgisi boyunca eğilir,
+    yavaşça kayar; ışığa yakın metalik boya pulları parlar; ışıklardan biri altın;
+  - logodaki altın fırça T fırça darbesiyle boyanır (önce üst kol, sonra gövde), üstünden bir parlama geçer;
+  - "Auto Tufan" (logodaki yazı tipi), HASAR ONARIM ve kısa açıklama gelir.
+- **Sadelik:**
+  - tek yazı tipi (Poppins, logodaki), eğik ve kalın yazı yok;
+  - tek vurgu rengi (şampanya altını), ince çizgiler;
+  - damla, tabanca, eğik şerit gibi süsler kalktı.
+- **Hemen ulaşın:** başlıkta altın Ara düğmesi (numara üstünde) ve WhatsApp. Ekrandan çıkınca sağ altta altın ara
+  düğmesi belirir.
+- **01 Bağlantılar:** tek listede Instagram @autotufan1, Google yorumları, konum (Kepez / Antalya, yol tarifi), web
+  sitesi autotufan.com.
 - **Hizalama:**
-  - her bölüm aynı kenar payında (20 px);
-  - kutucuklar aynı iskelette (simge ve ok, başlık, alt satır) ve aynı yükseklikte: başlıklar ve alt satırlar aynı
-    çizgide (önizlemede denetlenir);
-  - ödeme ve paylaş düğmeleri ikişer yan yana, altbilgi ortalı.
-- **Hemen Ara:** altın blok. Ekrandan çıkınca sağ altta altın ara düğmesi belirir.
-- **Kutucuklar:** WhatsApp (hazır mesajlı), Instagram @autotufan1, Google yorumları (beş yıldız), konum (Kepez /
-  Antalya, haritada), web sitesi autotufan.com.
-- **Ödeme bilgileri:**
+  - Ara, WhatsApp ve bağlantı satırları aynı iskelette: simge, başlık ve alt satır, ok;
+  - simgeler, yazılar ve oklar sayfa boyunca aynı çizgide (önizlemede denetlenir);
+  - her bölüm aynı kenar payında (20 px).
+- **02 Ödeme bilgileri:** banka kartı gibi bir kart.
   - IBAN; Kopyala düğmesi.
   - Karekod: açılır, kaydedilir; banka uygulamasında galeriden okutulur.
-- **Sonda:** Rehbere ekle ve Paylaş (isimlikteki QR, Kopyala / Gönder), altbilgi.
+- **03 Kartvizit:** Rehbere ekle ve Paylaş (isimlikteki QR, Kopyala / Gönder); altbilgi.
+- **Paylaşım görseli ve simge:** aynı kabin ışıkları, altın T, Auto Tufan.
 - **Bağlantılar aynı sekmede açılır.** Yeni sekme, QR okuyucuların uygulama içi tarayıcılarında ve önizlemelerde
   çoğu zaman açılmıyor.
-- **Açılır kutular (karekod, paylaş):** JavaScript'siz de açılır (`#karekod`, `#paylas` bağlantısı). Telefon
-  taklidinde, JavaScript kapalıyken ve uygulama önizlemesinde (sandbox) denendi.
-- **Hareketi azalt:** telefonda açıksa animasyonlar oynamaz, sayfa son hâliyle açılır.
-- **Boyut:** ~180 KB.
+- **Açılır kutular (karekod, paylaş):** JavaScript'siz de açılır (`#karekod`, `#paylas` bağlantısı).
+- **Hareketi azalt ya da WebGL yok:** animasyonlar oynamaz; başlığın arkasında aynı görüntünün durgun hâli
+  (`boya.jpg`, aynı çiziciyle üretilir) görünür, sayfa son hâliyle açılır.
+- **Pil:** ışıklar başlık ekrandayken çizilir; aşağı kaydırınca durur.
+- **Boyut:** ~145 KB.
 
 **Bilgiler** (`bilgiler.json`):
 
