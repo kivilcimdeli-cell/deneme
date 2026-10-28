@@ -1,25 +1,27 @@
-"""AUTO TUFAN – Hasar Onarım (Kepez, Antalya): dijital kartvizit sayfası (isimlikteki QR bu sayfayı açar).
+"""AUTO TUFAN – Hasar Onarım (Kepez, Antalya): isimlikteki QR ile açılan işletme sayfası. 2. sürüm.
 
-Paloma'nın 4. sürümü gibi tek parça: her bilgi bir kez geçer. Renkler isimlikteki gibi siyah, altın ve beyaz; yazı
-tipi logodaki Poppins, logo fırça T (scripts/autotufan_logo.py).
-  * Arka plan canlı: araba boyası gibi parlak siyah yüzey (WebGL). İçinde altın metalik pullar ışıkta yanıp söner,
-    üzerinden yavaşça ışık bandı geçer (galeride kaportaya vuran ışık gibi). Telefon "hareketi azalt" diyorsa tek
-    kare, durağan; WebGL yoksa koyu degrade.
-  * Üstte ortada: altın fırça T (açılışta fırçayla çizilir gibi açılır, ara ara üstünden parıltı geçer), Auto
-    Tufan, HASAR ONARIM, Kepez · Antalya.
-  * Altta tek kart: telefon (ara + WhatsApp), Instagram, web sitesi, konum, Google yorumları (beş altın yıldız),
-    IBAN (dokununca kopyalanır; QR düğmesi ödeme penceresini açar). Rehbere kaydet ve Paylaş.
-  * Paylaş: alttan açılan pencerede isimlikteki QR (DİJİTAL | KARTVİZİT), Kopyala / Gönder.
-  * Ödeme: IBAN karekodu (bilgiler.json'da `iban_karekod` varsa bankanın karekodu, yoksa IBAN'ın kendisi) ve IBAN.
-  * Pencereler <dialog> değil: JavaScript açar (geri tuşu kapatır); JavaScript yoksa (Android'in HTML
-    görüntüleyicisi gibi) #qr / #odeme bağlantısı CSS :target ile açar. Uygulama içi önizlemede de çalışır.
-IBAN şimdilik örnek (`iban_ornek`); gerçeği gelince bilgiler.json'a yazılıp betik yeniden çalıştırılır.
+İlk sürüm (sakin, tek kart) beğenilmedi: "lastikçilere yaptığımız gibi, havalı olsun". Lastikçi sayfalarının
+(Soylu, İNCE) dili, Auto Tufan'ın renkleri ve işiyle: siyah, tek vurgu rengi altın, kaporta & boya havası.
+  * Başlık: karbon fiber zemin, sağ üstten giren iki altın boya şeridi; altın fırça T, AUTO ve dev TUFAN (eğik,
+    gümüş), HASAR ONARIM; altında altın çizgilerle kendini çizen araba (tekerlekler dönerek gelir, far yanar,
+    gövdesinden ara ara boya parlaması geçer).
+  * Altın HEMEN ARA bloğu (numara büyük), altında kutucuklar: WhatsApp, Instagram, Google yorumları (beş yıldız),
+    konum, web sitesi.
+  * Ödeme bilgileri kartı: IBAN (tek dokunuşla kopyala), karekod (aç / kaydet: banka uygulamasında galeriden
+    okutulur). IBAN şimdilik örnek (`iban_ornek`).
+  * Rehbere kaydet, kartviziti paylaş (isimlikteki QR), altbilgi. Ara düğmesi ekrandan çıkınca sağ altta altın
+    ara düğmesi belirir.
+Bağlantılar aynı sekmede açılır (yeni sekme QR okuyucuların iç tarayıcılarında ve önizlemelerde çoğu zaman açılmaz).
+Karekod ve paylaş kutusu <details>: JavaScript olmadan da açılır.
+
+Animasyon: açılış (~2,6 sn) şeritler, T, harfler, araba çizimi, düğmeler sırayla; kaydırınca bölümler gelir;
+sürekli olarak yalnız ufak işaretler (karbonun üstünden ışık, ara düğmesinin parlaması ve halkası, arabadaki
+boya parlaması). "Hareketi azalt" açıksa hiçbiri oynamaz.
 
 Yayın: ortak Cloudflare hesabında (`qrsistem`) `deneme123` adlı Worker'a `autotufan_site.zip` yüklenir; adres
-`https://deneme123.qrsistem.workers.dev` (isimlikteki QR bu adresi açar). `#qr` Paylaş, `#odeme` ödeme penceresini
-açık getirir.
+`https://deneme123.qrsistem.workers.dev` (isimlikteki QR bu adresi açar).
 
-Çıktı : autotufan_isimlik/site/, autotufan_site.zip, sayfa_onizleme.png (sayfa, Paylaş, Ödeme), sayfa_tur.gif,
+Çıktı : autotufan_isimlik/site/, autotufan_site.zip, sayfa_onizleme.png (ilk ekran, tüm sayfa), sayfa_tur.gif,
         sayfa_deneme.html (denemelik tek dosya: her şey içinde)
 
 Kullanım:
@@ -53,28 +55,31 @@ PREVIEW = os.path.join(BASE, "sayfa_onizleme.png")
 TOUR = os.path.join(BASE, "sayfa_tur.gif")
 STANDALONE = os.path.join(BASE, "sayfa_deneme.html")
 CHROMIUM = "/opt/pw-browsers/chromium"
-FONTS = {"p4": "Poppins-Regular.ttf", "p5": "Poppins-Medium.ttf", "p6": "Poppins-SemiBold.ttf",
-         "p7": "Poppins-Bold.ttf"}
+FONTS = {"p4": ("Poppins-Regular.ttf", 400, "normal"), "p5": ("Poppins-Medium.ttf", 500, "normal"),
+         "p6": ("Poppins-SemiBold.ttf", 600, "normal"), "p7": ("Poppins-Bold.ttf", 700, "normal"),
+         "p8": ("Poppins-ExtraBold.ttf", 800, "normal"), "p8i": ("Poppins-ExtraBoldItalic.ttf", 800, "italic"),
+         "p6i": ("Poppins-SemiBoldItalic.ttf", 600, "italic")}
 LICENSES = ("OFL-poppins.txt",)
 VCF = "auto-tufan.vcf"
 OG = "paylas.jpg"
 ICON_PNG = "simge.png"
+KAREKOD = "karekod.png"
 LOGO = json.load(open(L.JSON, encoding="utf-8"))
 GOLD = (232, 182, 90)
 
 ICON = {
     "phone": '<path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 '
              '4.6 5.7a2 2 0 0 1 2-2.2z"/>',
-    "whatsapp": '<path d="M4.5 19.5l1.2-4A8 8 0 1 1 9 18.6z"/><path class="f" fill="currentColor" stroke="none" '
+    "whatsapp": '<path d="M4.5 19.5l1.2-4A8 8 0 1 1 9 18.6z"/><path fill="currentColor" stroke="none" '
                 'd="M9.2 8.6c.2-.5.6-.6.9-.6.4 0 .6.6.9 1.4.2.5-.4.9-.6 1.2.6 1.2 1.6 2.2 2.9 2.8.3-.3.7-.9 1.2-.7.8.3 '
                 '1.4.6 1.4 1 0 .3-.1.7-.6.9-.7.4-1.7.4-3-.2a8 8 0 0 1-3.4-3.3c-.5-1.1-.5-1.9.3-2.5z"/>',
     "instagram": '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/>'
-                 '<circle class="f" fill="currentColor" stroke="none" cx="17.2" cy="6.8" r="1.1"/>',
+                 '<circle fill="currentColor" stroke="none" cx="17.2" cy="6.8" r="1.1"/>',
     "globe": '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.6 5.4 3.6 8.5s-1.1 5.9-3.6 8.5M12 '
              '3.5C9.5 6.1 8.4 8.9 8.4 12s1.1 5.9 3.6 8.5"/>',
     "pin": '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
-    "star": '<path d="M12 3.8l2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7z"/>',
-    "bank": '<path d="M3.5 9.5L12 4.5l8.5 5M5.5 10.5v6.5M9.8 10.5v6.5M14.2 10.5v6.5M18.5 10.5v6.5M3.5 19.5h17"/>',
+    "star": '<path fill="currentColor" stroke="none" d="M12 3.8l2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 '
+            '5.6-.7z"/>',
     "save": '<circle cx="9" cy="8.5" r="3.5"/><path d="M3.5 19c.8-3.2 3-4.8 5.5-4.8 1.4 0 2.7.4 3.7 1.3M17.5 13v7M14 16.5h7"/>',
     "share": '<circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/>'
              '<path d="M8.7 10.8l6.6-4M8.7 13.2l6.6 4"/>',
@@ -82,23 +87,25 @@ ICON = {
           '<rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5M20 14v.5M14 20h.5M17.5 17.5H20V20"/>',
     "copy": '<rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.5"/><path d="M15.5 5.5A2 2 0 0 0 13.5 4H6a2 2 0 0 0-2 '
             '2v7.5a2 2 0 0 0 1.5 1.94"/>',
-    "close": '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+    "arrow": '<path d="M7 17L17 7M9 7h8v8"/>',
+    "down": '<path d="M12 4v12M6 11l6 6 6-6M5 20h14"/>',
 }
 
 
-def icon(k, draw=False, width=1.4):
-    """draw: çizgiler açılışta çizilsin diye her çizgi parçasına pathLength=1 (dolgulu parça, class="f", hariç)."""
-    body = ICON[k]
-    if draw:
-        for tag in ("<path ", "<rect ", "<circle "):
-            body = body.replace(tag + "d=", tag + 'pathLength="1" d=').replace(tag + "x=", tag + 'pathLength="1" x=')
-            body = body.replace(tag + "cx=", tag + 'pathLength="1" cx=')
-    return (f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{width}" stroke-linecap="round" '
-            f'stroke-linejoin="round" aria-hidden="true">{body}</svg>')
+def icon(k, width=1.7, cls=""):
+    c = f' class="{cls}"' if cls else ""
+    return (f'<svg{c} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{width}" '
+            f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICON[k]}</svg>')
 
 
 def e(s):
     return html.escape(str(s))
+
+
+def tr_title(s):
+    """Türkçe baş harfler: HASAR ONARIM → Hasar Onarım (Python'un title()'ı I'yı i yapar)."""
+    low = s.replace("I", "ı").replace("İ", "i").lower()
+    return " ".join(w[:1].replace("i", "İ").replace("ı", "I").upper() + w[1:] for w in low.split())
 
 
 def load():
@@ -118,6 +125,7 @@ def load():
         Q.karekod_check(d["iban_karekod"], None if d.get("iban_ornek") else d["iban_raw"])
     d["pay_qr"] = d.get("iban_karekod") or d["iban_raw"]
     d["web_txt"] = re.sub(r"^https?://(www\.)?", "", d["web"]).rstrip("/")
+    d["wa"] = f"https://wa.me/{d['tel_e164']}?text=" + d["whatsapp_mesaj"].replace(" ", "%20").replace(",", "%2C")
     return d
 
 
@@ -134,7 +142,7 @@ def subset_fonts(text):
     fdir = os.path.join(OUT, "fonts")
     os.makedirs(fdir, exist_ok=True)
     chars = text + "ABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZabcçdefgğhıijklmnoöpqrsştuüvwxyz0123456789 .,:;·+-–—/@&()'\"!?→"
-    for key, fn in FONTS.items():
+    for key, (fn, _, _) in FONTS.items():
         opts = subset.Options()
         opts.flavor = "woff2" if _has_brotli() else "woff"
         opts.layout_features = ["kern", "liga", "locl", "tnum", "lnum"]
@@ -149,400 +157,416 @@ def subset_fonts(text):
 
 def vcard(d):
     lines = ["BEGIN:VCARD", "VERSION:3.0", f"N:;{d['isim']};;;", f"FN:{d['isim']}", f"ORG:{d['isim']}",
-             f"TITLE:{d['hizmet'].title()}", f"TEL;TYPE=WORK,CELL,VOICE:+{d['tel_e164']}",
+             f"TITLE:{tr_title(d['hizmet'])}", f"TEL;TYPE=WORK,CELL,VOICE:+{d['tel_e164']}",
              f"ADR;TYPE=WORK:;;;{d['konum'].split(',')[0].strip()};{d['sehir'].title()};;Türkiye",
-             f"URL:{d['web']}", f"URL:{d['sayfa_url']}", f"X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/{d['insta']}",
-             "END:VCARD"]
+             f"URL:{d['web']}", f"URL:{d['sayfa_url']}",
+             f"X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/{d['insta']}", "END:VCARD"]
     with open(os.path.join(OUT, VCF), "w", encoding="utf-8", newline="\r\n") as f:
         f.write("\n".join(lines) + "\n")
 
 
-def flakes_bg(W, H, seed=4):
-    """Koyu, altın pullu boya yüzeyi (paylaşım görseli ve simge için durağan)."""
-    rng = np.random.default_rng(seed)
+def karekod_png(d):
+    """Ödeme karekodu PNG (kaydedilip banka uygulamasında galeriden okutulur)."""
+    import segno
+    segno.make(d["pay_qr"], error="m", micro=False).save(os.path.join(OUT, KAREKOD), scale=12, border=3)
+
+
+def carbon(W, H):
+    """Karbon fiber dokusu (paylaşım görseli ve simge için)."""
     y, x = np.mgrid[0:H, 0:W]
-    base = 14 + 10 * np.exp(-(((x - W * 0.5) / (W * 0.55)) ** 2 + ((y - H * 0.3) / (H * 0.7)) ** 2))
-    band = np.exp(-(((x * 0.55 + y) / H - 0.9) / 0.22) ** 2)
-    img = np.stack([base + 40 * band * 0.95, base + 40 * band * 0.72, base + 40 * band * 0.32], -1)
-    n = int(W * H / 90)
-    px, py = rng.integers(0, W, n), rng.integers(0, H, n)
-    k = rng.random(n) ** 6 * (0.3 + band[py, px] * 1.5)
-    for c, g in enumerate(GOLD):
-        np.add.at(img[..., c], (py, px), k * g)
-    im = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
-    return im.filter(ImageFilter.GaussianBlur(0.6))
-
-
-def t_image(h, colour=GOLD):
-    return AT.t_raster(h, colour)
+    cell = 12
+    u, v = (x % (2 * cell)) / cell, (y % (2 * cell)) / cell
+    weave = np.where((u < 1) ^ (v < 1), 0.6 + 0.4 * np.sin(np.pi * (y % cell) / cell),
+                     0.6 + 0.4 * np.sin(np.pi * (x % cell) / cell))
+    base = 16 + 14 * weave
+    img = np.stack([base, base, base * 1.04], -1)
+    return Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8))
 
 
 def og_image(d):
-    """Bağlantı paylaşılınca görünen görsel (1200 × 630): altın pullu siyah zemin, T, Auto Tufan, HASAR ONARIM."""
+    """Bağlantı paylaşılınca görünen görsel (1200 × 630): karbon zemin, altın şeritler, T, AUTO TUFAN."""
     W, H = 1200, 630
-    im = flakes_bg(W, H).convert("RGBA")
-    T = t_image(170)
-    im.paste(T, ((W - T.width) // 2, 70), T)
+    im = carbon(W, H).convert("RGBA")
     dr = ImageDraw.Draw(im)
-    f = lambda k, n: ImageFont.truetype(os.path.join(A.FONT_DIR, FONTS[k]), n)  # noqa: E731
-    big = f("p6", 92)
-    dr.text((W / 2 - dr.textlength(d["isim"], font=big) / 2, 268), d["isim"], font=big, fill=(246, 246, 242))
-    sm = f("p6", 30)
-    s, gap = AT.SERVICE, 16
-    w = sum(dr.textlength(ch, font=sm) for ch in s) + gap * (len(s) - 1)
-    x = W / 2 - w / 2
-    for ch in s:
-        dr.text((x, 400), ch, font=sm, fill=GOLD)
-        x += dr.textlength(ch, font=sm) + gap
-    loc = f"{d['konum'].replace(', ', ' · ')}  ·  {d['tel_txt']}"
-    dr.text((W / 2 - dr.textlength(loc, font=f("p4", 28)) / 2, 470), loc, font=f("p4", 28), fill=(200, 200, 204))
+    dr.polygon([(860, 0), (1040, 0), (760, H), (580, H)], fill=GOLD + (255,))
+    dr.polygon([(1080, 0), (1120, 0), (840, H), (800, H)], fill=(180, 130, 50, 255))
+    shade = Image.new("RGBA", (W, H))
+    sd = ImageDraw.Draw(shade)
+    for x in range(W):
+        sd.line([(x, 0), (x, H)], fill=(10, 10, 12, int(235 * max(0, 1 - x / 820) ** 0.6)))
+    im = Image.alpha_composite(im, shade)
+    T = AT.t_raster(150, GOLD)
+    im.paste(T, (70, 70), T)
+    dr = ImageDraw.Draw(im)
+    f = lambda fn, n: ImageFont.truetype(os.path.join(A.FONT_DIR, fn), n)  # noqa: E731
+    dr.text((76, 250), "AUTO", font=f("Poppins-Bold.ttf", 46), fill=GOLD)
+    dr.text((66, 290), "TUFAN", font=f("Poppins-ExtraBoldItalic.ttf", 150), fill=(246, 246, 242))
+    dr.text((78, 488), "HASAR ONARIM", font=f("Poppins-SemiBold.ttf", 34), fill=(246, 246, 242))
+    dr.text((78, 538), f"{d['konum'].replace(', ', ' · ')}  ·  {d['tel_txt']}", font=f("Poppins-Regular.ttf", 28),
+            fill=(190, 190, 194))
     im.convert("RGB").save(os.path.join(OUT, OG), "JPEG", quality=86, optimize=True)
 
 
 def touch_icon():
-    """Ana ekran / sekme simgesi (180 × 180): siyah zeminde altın fırça T."""
-    im = flakes_bg(180, 180, 9).convert("RGBA")
-    T = t_image(84)
+    """Ana ekran / sekme simgesi (180 × 180): karbon zeminde altın fırça T."""
+    im = carbon(180, 180).convert("RGBA")
+    T = AT.t_raster(84, GOLD)
     im.paste(T, ((180 - T.width) // 2, (180 - T.height) // 2), T)
     im.convert("RGB").save(os.path.join(OUT, ICON_PNG), optimize=True)
 
 
-# ---------------------------------------------------------------- parçalar
+# ---------------------------------------------------------------- çizimler
 
 def t_svg(cls):
-    """Fırça T (altın degrade) ve üstünden geçen parıltı (T'nin içiyle kırpılır)."""
+    """Fırça T (altın degrade)."""
     w, h = LOGO["svg_boyut"]
     return (f'<svg class="{cls}" viewBox="0 0 {w:.0f} {h:.0f}" role="img" aria-label="Auto Tufan logosu">'
-            f'<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7CB72"/>'
-            f'<stop offset=".55" stop-color="#E8AE4C"/><stop offset="1" stop-color="#D4902E"/></linearGradient>'
-            f'<clipPath id="tc"><path d="{LOGO["d"]}" fill-rule="evenodd"/></clipPath></defs>'
-            f'<path class="tp" d="{LOGO["d"]}" fill="url(#g)" fill-rule="evenodd"/>'
-            f'<g clip-path="url(#tc)"><rect class="gleam" x="-400" y="-200" width="260" height="{h + 400:.0f}" '
-            f'fill="#fff" opacity=".55" transform="skewX(-20)"/></g></svg>')
+            f'<defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F9D27E"/>'
+            f'<stop offset=".55" stop-color="#E8AE4C"/><stop offset="1" stop-color="#C98526"/></linearGradient></defs>'
+            f'<path d="{LOGO["d"]}" fill="url(#tg)" fill-rule="evenodd"/></svg>')
 
 
-def stars_svg():
-    one = "M12 3.8l2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7z"
-    return ('<span class="stars" aria-label="5 yıldız">' + "".join(
-        f'<svg viewBox="0 0 24 24" style="--s:{k}" aria-hidden="true"><path d="{one}"/></svg>' for k in range(5))
-        + "</span>")
+def _path(poly, H):
+    return "M" + "L".join(f"{x:.2f} {H - y:.2f}" for x, y in poly) + "Z"
+
+
+def car_svg():
+    """Araba (yandan) altın çizgilerle: gövde (tekerlek kemerleri açık), cam, iki tekerlek (jant kolları), far ve
+    yol çizgisi. Her çizgi pathLength=1: açılışta kendini çizer. viewBox 100 birim uzunluk."""
+    shape, body, wc, wr, s = A.car_silhouette(100.0)
+    arches = A.union(*[A.circle(wr + 1.4 * s, x, y) for x, y in wc])
+    b = shape.bounds()
+    H = b[3] + 1.0
+    outline = shape - arches
+    window = A.car_window(body, s, 2.6, 23.8, 80.0, 0.6)
+    paths = [f'<path class="ln" pathLength="1" d="{_path(p, H)}"/>' for p in outline.to_polygons()]
+    paths += [f'<path class="ln w" pathLength="1" d="{_path(p, H)}"/>' for p in window.to_polygons()]
+    wheels = []
+    for k, (x, y) in enumerate(wc):
+        cy = H - y
+        spokes = "".join(f'<path d="M{x:.2f} {cy:.2f}L{x + wr * 0.62 * np.cos(a):.2f} {cy + wr * 0.62 * np.sin(a):.2f}"/>'
+                         for a in np.radians(np.arange(5) * 72 - 90))
+        wheels.append(f'<g class="wh" style="--i:{k}"><circle class="ln" pathLength="1" cx="{x:.2f}" cy="{cy:.2f}" '
+                      f'r="{wr * 0.86:.2f}"/><circle cx="{x:.2f}" cy="{cy:.2f}" r="{wr * 0.5:.2f}"/>{spokes}'
+                      f'<circle class="hub" cx="{x:.2f}" cy="{cy:.2f}" r="{wr * 0.13:.2f}"/></g>')
+    fx = b[2] - 2.2
+    fy = H - 15.5
+    return (f'<svg class="car" viewBox="{b[0] - 2:.1f} -2 {b[2] - b[0] + 4:.1f} {H + 6:.1f}" aria-hidden="true">'
+            f'<defs><linearGradient id="cg" x1="0" x2="1"><stop offset="0" stop-color="#F9D27E"/>'
+            f'<stop offset="1" stop-color="#D99A3A"/></linearGradient>'
+            f'<radialGradient id="hl"><stop offset="0" stop-color="#FFF2C8"/><stop offset="1" stop-color="#FFF2C8" '
+            f'stop-opacity="0"/></radialGradient>'
+            f'<linearGradient id="gl" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/>'
+            f'<stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" '
+            f'stop-opacity="0"/></linearGradient>'
+            f'<clipPath id="cc"><path d="{"".join(_path(p, H) for p in shape.to_polygons())}"/></clipPath></defs>'
+            f'<g class="body">{"".join(paths)}</g>'
+            f'<g clip-path="url(#cc)"><rect class="gleam" x="-30" y="-5" width="16" height="{H + 10:.1f}" '
+            f'fill="url(#gl)" transform="skewX(-25)"/></g>{"".join(wheels)}'
+            f'<circle class="head" cx="{fx:.2f}" cy="{fy:.2f}" r="7" fill="url(#hl)"/>'
+            f'<path class="road" pathLength="1" d="M{b[0] - 1:.1f} {H + 1.6:.1f}H{b[2] + 1:.1f}"/></svg>')
+
+
+def stars(n=5):
+    return '<span class="stars">' + "".join(icon("star", 0) for _ in range(n)) + "</span>"
 
 
 def qr_svg(content, label):
-    """QR: koyu kareler ayrı ayrı; --d çapraz dalganın gecikmesi (ms)."""
     import segno
     q = segno.make(content, error="m", micro=False, boost_error=True)
     m = [[bool(v) for v in row] for row in q.matrix]
     n, qz = len(m), 2
-    k = 1100 / (2 * n)
-    rects = "".join(f'<rect class="m" x="{x + qz}" y="{y + qz}" width="1" height="1" style="--d:{(x + y) * k:.0f}"/>'
+    rects = "".join(f'<rect x="{x + qz}" y="{y + qz}" width="1" height="1"/>'
                     for y, row in enumerate(m) for x, v in enumerate(row) if v)
     s = n + 2 * qz
     return (f'<svg viewBox="0 0 {s} {s}" shape-rendering="crispEdges" role="img" aria-label="{e(label)}">'
-            f'<rect width="{s}" height="{s}" fill="#fff"/>{rects}</svg>')
+            f'<rect width="{s}" height="{s}" fill="#fff"/><g fill="#111">{rects}</g></svg>')
 
 
 def letters(text, cls=""):
-    return "".join(f'<span class="{cls}" style="--i:{k}">{e(ch) if ch != " " else "&nbsp;"}</span>'
-                   for k, ch in enumerate(text))
+    return "".join(f'<span class="{cls}" style="--i:{k}">{e(ch)}</span>' for k, ch in enumerate(text))
 
+
+# ---------------------------------------------------------------- sayfa
 
 CSS = """
-@font-face{font-family:Poppins;src:url(fonts/p4.EXT) format("FMT");font-weight:400;font-display:swap}
-@font-face{font-family:Poppins;src:url(fonts/p5.EXT) format("FMT");font-weight:500;font-display:swap}
-@font-face{font-family:Poppins;src:url(fonts/p6.EXT) format("FMT");font-weight:600;font-display:swap}
-@font-face{font-family:Poppins;src:url(fonts/p7.EXT) format("FMT");font-weight:700;font-display:swap}
-:root{--gold:#E8B65A;--gold2:#F7CB72;--ink:#F4F2EE;--muted:#8E8C88;--line:rgba(255,255,255,.08);
-  --card:rgba(17,17,19,.94);--edge:rgba(232,182,90,.22);--tint:rgba(232,182,90,.10);--wa:#3CC57F;
-  --e:cubic-bezier(.2,.75,.2,1);color-scheme:dark}
+FONTFACES
+:root{--gold:#E8B65A;--gold2:#F7CB72;--gold3:#C98526;--ink:#F4F2EE;--muted:#9A978F;--line:rgba(255,255,255,.08);
+  --tile:#141416;--edge:rgba(232,182,90,.2);--wa:#3CC57F;--e:cubic-bezier(.2,.75,.2,1);color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:#08080A}
-body{font-family:Poppins,system-ui,sans-serif;font-weight:400;color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:Poppins,system-ui,sans-serif;color:var(--ink);background:#0B0B0D;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
-[hidden]{display:none!important}
-.wrap{position:relative;max-width:440px;margin:0 auto;min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+button,summary{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+summary{list-style:none}summary::-webkit-details-marker{display:none}
+.wrap{position:relative;max-width:440px;margin:0 auto;min-height:100vh;background:#0B0B0D;overflow:hidden;
+  box-shadow:0 0 80px rgba(0,0,0,.6)}
 
-/* ---------------- arka plan: parlak siyah boya, altın pullar, geçen ışık (WebGL); yoksa degrade */
-.bg{position:fixed;top:0;left:50%;width:min(440px,100%);height:100vh;height:100lvh;transform:translateX(-50%);
-  overflow:hidden;background:radial-gradient(120% 70% at 50% 25%,#26221c 0,#0f0f11 55%,#08080a 100%)}
-.bg canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.2s ease}
-.bg canvas.on{opacity:1}
+/* ---------------- başlık: karbon fiber, altın boya şeritleri, logo, dev TUFAN, araba */
+.hero{position:relative;padding:22px 24px 8px;overflow:hidden}
+.carbon{position:absolute;inset:0;z-index:0;background:
+  linear-gradient(27deg,#151517 5px,transparent 5px) 0 5px,linear-gradient(207deg,#151517 5px,transparent 5px) 10px 0,
+  linear-gradient(27deg,#1f1f22 5px,transparent 5px) 0 10px,linear-gradient(207deg,#1f1f22 5px,transparent 5px) 10px 5px,
+  linear-gradient(90deg,#1a1a1c 10px,transparent 10px),
+  linear-gradient(#1c1c1f 25%,#18181a 25%,#18181a 50%,transparent 50%,transparent 75%,#222226 75%,#222226);
+  background-color:#131315;background-size:20px 20px;
+  -webkit-mask-image:linear-gradient(#000 0,#000 55%,transparent 100%);mask-image:linear-gradient(#000 0,#000 55%,transparent 100%)}
+.carbon:after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,
+  rgba(255,255,255,.07) 45%,transparent 60%);background-size:250% 100%;background-position:120% 0}
+/* altın boya şeritleri yalnız arabanın arkasında: yazıların üstünden geçmez */
+.stripes{position:absolute;z-index:0;top:196px;right:-10px;width:240px;height:250px;pointer-events:none}
+.stripes i{position:absolute;top:0;height:100%;transform:skewX(-24deg);transform-origin:top}
+.stripes i:nth-child(1){right:70px;width:64px;background:linear-gradient(180deg,rgba(247,203,114,0),#F7CB72 30%,
+  #E3A447 62%,rgba(201,133,38,0))}
+.stripes i:nth-child(2){right:36px;width:14px;background:linear-gradient(180deg,rgba(201,133,38,0),#C98526 35%,
+  rgba(201,133,38,0))}
+.hero>*:not(.carbon):not(.stripes){position:relative;z-index:1}
+.kick{display:flex;align-items:center;gap:10px;font-weight:600;font-size:11px;letter-spacing:.32em;color:var(--muted)}
+.kick i{width:22px;height:2px;background:var(--gold)}
+.brand{display:flex;align-items:flex-end;gap:12px;margin-top:22px}
+.tlogo{width:92px;height:auto;flex:none;display:block;overflow:visible;filter:drop-shadow(0 6px 16px rgba(232,170,70,.3))}
+h1{line-height:.82}
+h1 .auto{display:block;font-weight:700;font-size:18px;letter-spacing:.5em;color:var(--gold);margin:0 0 6px 4px}
+h1 .tufan{display:block;font-weight:800;font-style:italic;font-size:clamp(56px,17vw,74px);letter-spacing:-.01em;
+  padding-right:.08em}
+/* gümüş geçiş her harfte ayrı: animasyonlu (dönüşümlü) harfte üst öğenin background-clip:text'i çalışmaz */
+h1 .tufan span{display:inline-block;padding-right:.04em;margin-right:-.04em;
+  background:linear-gradient(180deg,#FFFFFF 0%,#E8E6E1 45%,#A9A6A0 100%);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.svc{display:flex;align-items:center;gap:14px;margin-top:16px}
+.svc b{font-weight:700;font-size:15px;letter-spacing:.34em;white-space:nowrap}
+.svc i{flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transform-origin:left}
+.tag{margin-top:10px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.car{display:block;width:100%;height:auto;margin:12px 0 0;overflow:visible}
+.car .ln{fill:none;stroke:url(#cg);stroke-width:.6;stroke-linejoin:round;stroke-linecap:round}
+.car .ln.w{stroke-width:.45;opacity:.8}
+.car .wh{transform-box:fill-box;transform-origin:center}
+.car .wh circle:not(.ln),.car .wh path{fill:none;stroke:var(--gold);stroke-width:.45;stroke-linecap:round}
+.car .wh .hub{fill:var(--gold);stroke:none}
+.car .road{fill:none;stroke:url(#cg);stroke-width:.35;opacity:.6}
+.car .head{opacity:0}
+.car .gleam{opacity:.5}
 
-/* ---------------- üst: logo, ad, hizmet, yer */
-.top{position:relative;flex:1 0 auto;min-height:300px;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:34px 24px 58px;text-align:center}
-.tlogo{width:142px;height:auto;display:block;overflow:visible;filter:drop-shadow(0 6px 18px rgba(232,170,70,.25))}
-h1{margin-top:14px;font-weight:600;font-size:clamp(34px,10vw,42px);line-height:1.05;letter-spacing:.01em}
-h1 span{display:inline-block}
-.svc{margin-top:10px;font-weight:600;font-size:12.5px;letter-spacing:.42em;margin-right:-.42em;color:var(--gold)}
-.loc{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
-.loc svg{width:14px;height:14px;color:var(--gold)}
-.rule{display:block;width:46px;height:1.5px;margin:16px auto 0;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+/* ---------------- hemen ara */
+.call{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 24px 0;
+  padding:16px 16px 16px 22px;border-radius:18px;overflow:hidden;color:#16120B;
+  background:linear-gradient(120deg,#F9D27E,#E8AE4C 55%,#D4902E);box-shadow:0 16px 40px rgba(232,170,70,.25)}
+.call:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-60deg,rgba(255,255,255,0) 0 14px,
+  rgba(255,255,255,.08) 14px 22px);pointer-events:none}
+.call:after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:35%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent)}
+.call small{display:block;font-weight:700;font-size:11px;letter-spacing:.3em}
+.call b{display:block;margin-top:2px;font-weight:800;font-style:italic;font-size:clamp(28px,8.4vw,34px);
+  letter-spacing:-.005em;white-space:nowrap}
+.call .ph{position:relative;flex:none;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;
+  background:#141416;color:var(--gold)}
+.call .ph svg{width:26px;height:26px}
+.call .ph:before{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #141416;opacity:0}
 
-/* ---------------- kart: her bilgi bir kez */
-.card{position:relative;z-index:1;margin-top:-26px;background:var(--card);border-radius:26px 26px 0 0;
-  border:1px solid var(--edge);border-bottom:0;padding:6px 22px calc(22px + env(safe-area-inset-bottom));
-  box-shadow:0 -14px 40px rgba(0,0,0,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.rows{list-style:none}
-.rows li{position:relative;display:flex;align-items:center;gap:12px;padding:12px 0}
-.rows li:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);transform-origin:left}
-.v{flex:1;min-width:0;display:block}
-.v:after{content:"";position:absolute;inset:0}
-.v small{display:block;font-weight:500;font-size:9.5px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase}
-.v b{display:block;margin-top:3px;font-weight:400;font-size:19px;letter-spacing:.01em;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;font-variant-numeric:lining-nums}
-.tel b{font-size:22px;letter-spacing:.02em}
-.ib b{font-size:15px;letter-spacing:.04em}
-.acts{display:flex;gap:8px;flex:none}
-.ic{position:relative;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
-  border:1px solid rgba(232,182,90,.35);color:var(--gold);transition:transform .15s,background .15s}
-span.ic{pointer-events:none}
-a.ic,button.ic{z-index:1}
-.ic svg{width:19px;height:19px}
-.ic.wa{color:var(--wa);border-color:rgba(60,197,127,.4)}
-.v:active~.acts span.ic,.ic:active{transform:scale(.92);background:var(--tint)}
-@media (hover:hover){.rows li:hover span.ic,a.ic:hover,button.ic:hover{background:var(--tint)}}
-.stars{display:inline-flex;gap:3px;vertical-align:-2px;margin-right:8px}
-.stars svg{width:15px;height:15px;fill:var(--gold)}
-.btns{display:grid;grid-template-columns:1.55fr 1fr;gap:10px;margin-top:18px}
-.save,.share{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;height:54px;
-  border-radius:14px;font-weight:600;font-size:11px;letter-spacing:.22em;white-space:nowrap}
-.save{background:linear-gradient(135deg,#F7CB72,#E3A447);color:#16120B}
-.share{border:1px solid rgba(232,182,90,.45);color:var(--ink)}
-.save svg{width:20px;height:20px}
-.share svg{width:19px;height:19px}
-.save b,.share b{font-weight:600;margin-right:-.22em}
-.save:after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:40%;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent)}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,calc(100% + 60px));
-  z-index:20;visibility:hidden;
-  padding:12px 18px;border-radius:12px;background:#1b1a17;border:1px solid var(--edge);color:var(--ink);font-size:13px;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);transition:transform .35s var(--e),visibility .35s;white-space:nowrap}
-.toast.on{transform:translate(-50%,0);visibility:visible}
+/* ---------------- kutucuklar */
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:12px 24px 0}
+.tile{position:relative;grid-column:span 2;display:flex;flex-direction:column;gap:8px;min-height:104px;padding:14px 12px 12px;
+  border-radius:16px;background:var(--tile);border:1px solid var(--edge);overflow:hidden}
+.tile.wide{grid-column:span 3;min-height:84px}
+.tile:after{content:"";position:absolute;right:-18px;bottom:-18px;width:60px;height:60px;transform:rotate(45deg);
+  background:linear-gradient(135deg,rgba(232,182,90,.12),transparent)}
+.tile svg.i{width:24px;height:24px;color:var(--gold)}
+.tile.wa svg.i{color:var(--wa)}
+.tile .go{position:absolute;top:12px;right:12px;width:14px;height:14px;color:var(--muted)}
+.tile b{margin-top:auto;font-weight:700;font-style:italic;font-size:12.5px;letter-spacing:.02em;text-transform:uppercase}
+.tile small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile:active{transform:scale(.97)}
+.stars{display:flex;gap:2px}
+.stars svg{width:13px;height:13px;color:var(--gold)}
 
-/* ---------------- pencereler: Paylaş (site QR) ve Ödeme (IBAN karekodu) */
-/* Pencere: JavaScript açar (.on; telefonun geri tuşu kapatır). JavaScript yoksa (ör. Android'in HTML
-   görüntüleyicisi) #qr / #odeme bağlantısı :target ile açar, # kapatır. Kapanırken görünürlük gecikmeli kalkar. */
-.sheet{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30;visibility:hidden;transition:visibility 0s .5s}
-.sheet:target,.sheet.on{visibility:visible;transition:none}
-.scrim{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .35s ease}
-.panel{position:absolute;left:50%;bottom:0;width:min(440px,100%);max-height:100%;overflow:auto;
-  transform:translate(-50%,104%);transition:transform .5s var(--e);background:#121214;border:1px solid var(--edge);
-  border-bottom:0;border-radius:26px 26px 0 0;padding:18px 22px calc(22px + env(safe-area-inset-bottom));
-  box-shadow:0 -14px 40px rgba(0,0,0,.6)}
-.sheet:target .scrim,.sheet.on .scrim{opacity:1}
-.sheet:target .panel,.sheet.on .panel{transform:translate(-50%,0)}
-.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.ph p{font-weight:700;font-size:12px;letter-spacing:.32em}
-.x{width:40px;height:40px;margin-right:-8px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
-.x svg{width:20px;height:20px}
-.qcard{display:flex;flex-direction:column;align-items:center;padding:30px 20px 22px;border-radius:20px;
-  background:radial-gradient(120% 90% at 50% 0,#2a2419,#141311 70%);border:1px solid rgba(232,182,90,.35)}
-.tile{position:relative;width:196px;padding:10px;background:#fff;border-radius:10px}
-.tile svg{display:block;width:100%;height:auto}
-.tile .m{fill:#111;transform-box:fill-box;transform-origin:center}
-.vf{position:absolute;inset:-12px;pointer-events:none}
-.vf i{position:absolute;width:22px;height:22px;border:2px solid var(--gold)}
-.vf i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}
-.vf i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
-.vf i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
-.vf i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
-.qcap{display:flex;align-items:center;gap:14px;margin-top:24px;padding-left:.34em;font-weight:600;font-size:11px;
-  letter-spacing:.34em;color:var(--gold)}
-.qcap i{width:1.2px;height:15px;background:var(--gold)}
-.hint{margin-top:14px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
-.hint b{display:block;font-weight:500;color:var(--ink);letter-spacing:.03em}
-.sel{-webkit-user-select:all;user-select:all}
-.pbtns{display:flex;gap:10px;margin-top:16px}
-.pbtns>*{flex:1}
+/* ---------------- bölüm başlığı */
+.sh{display:flex;align-items:center;gap:12px;margin:34px 24px 14px}
+.sh i{width:14px;height:20px;background:linear-gradient(var(--gold2),var(--gold3));transform:skewX(-18deg)}
+.sh h2{font-weight:800;font-style:italic;font-size:17px;letter-spacing:.08em;white-space:nowrap}
+.sh:after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------------- ödeme */
+.pay{position:relative;margin:0 24px;padding:18px 18px 16px;border-radius:18px;background:linear-gradient(160deg,#1a1814,#121214 60%);
+  border:1px solid var(--edge);overflow:hidden}
+.pay:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--gold2),var(--gold3))}
+.pay .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted)}
+.pay .row b{color:var(--ink);font-weight:600}
+.iban{margin-top:12px;padding:12px 14px;border-radius:12px;background:#0d0d0f;border:1px solid var(--line)}
+.iban small{display:block;font-weight:600;font-size:10px;letter-spacing:.3em;color:var(--gold)}
+.iban b{display:block;margin-top:4px;font-weight:600;font-size:15px;letter-spacing:.03em;white-space:nowrap;
+  -webkit-user-select:all;user-select:all}
+.pbtn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:12px}
+details{min-width:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;height:48px;border-radius:12px;font-weight:700;
+  font-style:italic;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.btn svg{width:18px;height:18px}
+.btn.gold{background:linear-gradient(120deg,#F9D27E,#E3A447);color:#16120B}
+.btn.out{border:1px solid rgba(232,182,90,.45)}
+details.kk,.pbtn>.btn.gold:first-child{grid-column:1/-1}
+details.kk>summary{width:100%}
+.qrbox{margin-top:12px;padding:16px;border-radius:14px;background:#0d0d0f;border:1px solid var(--line);text-align:center}
+.qrbox>img,.qrbox>svg{display:block;width:190px;height:auto;margin:0 auto;border-radius:10px;background:#fff;padding:8px}
+.qrbox p{margin-top:12px;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.qrbox p b{color:var(--ink);font-weight:600}
+.qrbox a.dl{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-weight:600;font-size:13px;color:var(--gold);
+  border-bottom:1px solid var(--gold);padding-bottom:2px}
+.qrbox a.dl svg{width:15px;height:15px}
+.note{margin-top:10px;font-size:11px;color:#6f6c66;text-align:center}
+
+/* ---------------- kaydet, paylaş, altbilgi */
+.acts{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:22px 24px 0}
+.acts .btn{height:54px}
+details.sh2>summary{width:100%}
+footer{margin:36px 24px 0;padding:22px 0 calc(34px + env(safe-area-inset-bottom));border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:12px}
+footer svg{width:46px;height:auto}
+footer p{font-weight:800;font-style:italic;font-size:16px;letter-spacing:.02em}
+footer p span{color:var(--gold);font-style:normal;font-weight:600;font-size:10px;letter-spacing:.3em;display:block}
+footer small{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
+.fab{position:fixed;right:max(18px,calc(50vw - 202px));bottom:calc(18px + env(safe-area-inset-bottom));z-index:9;
+  width:60px;height:60px;border-radius:50%;display:grid;place-items:center;color:#16120B;
+  background:linear-gradient(135deg,#F9D27E,#E3A447);box-shadow:0 10px 30px rgba(232,170,70,.35);
+  transform:scale(0);transition:transform .35s var(--e)}
+.fab.on{transform:none}
+.fab svg{width:26px;height:26px}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));z-index:20;transform:translate(-50%,20px);
+  opacity:0;visibility:hidden;padding:12px 18px;border-radius:12px;background:#1b1a17;border:1px solid var(--edge);
+  font-size:13px;white-space:nowrap;transition:all .3s var(--e)}
+.toast.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
 
 /* ---------------- açılış */
-.mo .tp{animation:brush 1.1s cubic-bezier(.6,.05,.3,1) .25s both}
-.mo .gleam{animation:gleam 6s ease-in-out 2.6s infinite}
-h1 span{animation:rise .8s var(--e) calc(.95s + var(--i)*.04s) both}
-.svc{animation:track 1.1s var(--e) 1.35s both}
-.loc{animation:fade-up .8s var(--e) 1.6s both}
-.rule{animation:grow-x .9s var(--e) 1.5s both}
-.card{animation:up 1s var(--e) 1.35s both}
-.rows li{animation:slide .65s var(--e) calc(1.8s + var(--i)*.08s) both}
-.rows li:after{animation:grow-x .9s var(--e) calc(1.9s + var(--i)*.08s) both}
-.mo .ic [pathLength]{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .8s ease-out calc(2.05s + var(--i)*.08s) forwards}
-.ic .f{animation:fade .4s ease-out calc(2.5s + var(--i)*.08s) both}
-.stars svg{animation:pop .5s var(--e) calc(2.4s + var(--s)*.09s) both}
-.btns{animation:fade-up .8s var(--e) 2.3s both}
-.save:after{animation:shine 5s ease-in-out 3.4s infinite}
-.ic.wa:before{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid var(--wa);opacity:0;
-  pointer-events:none}
-.mo .ic.wa:before{animation:ring 5s ease-out 3.4s infinite}
-.mo .sheet .m{opacity:0}
-.mo .sheet:target .m,.mo .sheet.on .m{animation:px .45s var(--e) calc(.25s + var(--d)*1ms) both}
-.vf i{animation:breathe 2.8s ease-in-out infinite}
-.vf i:nth-child(2),.vf i:nth-child(3){animation-delay:.2s}
+.stripes i{animation:stripe .8s var(--e) .9s both}
+.stripes i:nth-child(2){animation-delay:1.02s}
+.mo .carbon:after{animation:sheen 7s ease-in-out 2s infinite}
+.kick{animation:fade .6s ease-out .3s both}
+.tlogo{animation:brush 1s cubic-bezier(.6,.05,.3,1) .35s both}
+h1 .auto{animation:track .9s var(--e) .55s both}
+h1 .tufan span{animation:slam .55s var(--e) calc(.7s + var(--i)*.06s) both}
+.svc b{animation:fade .6s ease-out 1.1s both}
+.svc i{animation:grow .8s var(--e) 1.15s both}
+.tag{animation:fade .7s ease-out 1.3s both}
+.mo .car .ln,.mo .car .road{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.5s ease-in-out 1.1s forwards}
+.mo .car .ln.w{animation-delay:1.7s;animation-duration:.9s}
+.car .wh{animation:roll 1.6s cubic-bezier(.2,.6,.3,1) 1.1s both}
+.car .wh circle:not(.ln),.car .wh path{animation:fade .5s ease-out 1.9s both}
+.car .head{animation:light .6s ease-out 2.5s forwards,pulse 3s ease-in-out 3.2s infinite}
+.mo .car .gleam{animation:gleam 5s ease-in-out 3s infinite}
+.call{animation:up .7s var(--e) 1.45s both}
+.call:after{animation:shine 4.5s ease-in-out 3s infinite}
+.mo .call .ph:before{animation:ring 2.4s ease-out 2.6s infinite}
+.tiles .tile{animation:pop .55s var(--e) calc(1.65s + var(--i)*.08s) both}
+.mo .rv{opacity:0;transform:translateY(24px);transition:opacity .7s var(--e),transform .7s var(--e)}
+.mo .rv.in{opacity:1;transform:none}
 
-@keyframes brush{from{clip-path:inset(0 100% 0 0);opacity:.2}to{clip-path:inset(0 0 0 0);opacity:1}}
-@keyframes gleam{0%,70%{transform:skewX(-20deg) translateX(0)}100%{transform:skewX(-20deg) translateX(1900px)}}
-@keyframes rise{from{opacity:0;transform:translateY(60%)}to{opacity:1;transform:none}}
-@keyframes track{from{opacity:0;letter-spacing:.9em}to{opacity:1;letter-spacing:.42em}}
-@keyframes grow-x{from{transform:scaleX(0)}to{transform:none}}
+@keyframes stripe{from{transform:skewX(-24deg) translateY(-70%);opacity:0}to{transform:skewX(-24deg);opacity:1}}
+@keyframes sheen{0%{background-position:120% 0}60%,100%{background-position:-20% 0}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes up{from{transform:translateY(100%)}to{transform:none}}
-@keyframes slide{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@keyframes brush{from{clip-path:inset(0 100% 0 0);opacity:.2}to{clip-path:inset(0);opacity:1}}
+@keyframes track{from{opacity:0;letter-spacing:1.2em}to{opacity:1;letter-spacing:.5em}}
+@keyframes slam{from{opacity:0;transform:translateX(-40px) skewX(-20deg)}70%{opacity:1;transform:translateX(3px)}
+  to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
 @keyframes draw{to{stroke-dashoffset:0}}
-@keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
-@keyframes px{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:none}}
-@keyframes breathe{0%,100%{transform:none;opacity:1}50%{transform:scale(1.12);opacity:.6}}
-@keyframes shine{0%,78%{left:-45%}100%{left:125%}}
-@keyframes ring{0%{opacity:.6;transform:scale(1)}40%,100%{opacity:0;transform:scale(1.6)}}
-@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+@keyframes roll{from{transform:translateX(-160px) rotate(-720deg);opacity:0}20%{opacity:1}to{transform:none;opacity:1}}
+@keyframes light{to{opacity:.9}}
+@keyframes pulse{0%,100%{opacity:.9}50%{opacity:.45}}
+@keyframes gleam{0%,60%{transform:skewX(-25deg) translateX(0)}100%{transform:skewX(-25deg) translateX(160px)}}
+@keyframes up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes shine{0%,75%{left:-40%}100%{left:120%}}
+@keyframes ring{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}
+  .mo .rv{opacity:1;transform:none}}
 """
-
-SEA_VS = "attribute vec2 p;varying vec2 v;void main(){v=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}"
-# Boya: kaportanın kıvrımı (yavaş değişen gürültü) koyu yüzeyi aydınlatır; çapraz ışık bandı bu kıvrıma göre bükülerek
-# geçer; ızgaradaki pulların her biri kendi hızında yanıp söner, ışık bandında daha parlak. k: css piksel → cihaz.
-SEA_FS = """#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-uniform vec2 r;uniform float t,k;varying vec2 v;
-float h(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
-float nz(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);
-return mix(mix(h(i),h(i+vec2(1,0)),u.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),u.x),u.y);}
-void main(){vec2 fc=v*r;vec2 q=fc/r.y;
-float c=nz(q*1.2+vec2(0.,t*.03))*.6+nz(q*2.6-vec2(t*.02,0.))*.4;
-float s=dot(q,normalize(vec2(1.,.6)))+c*.45;float pos=mod(t*.075,2.6)-.7;
-float band=exp(-pow((s-pos)/.16,2.)),glow=exp(-pow((s-pos)/.55,2.));
-vec3 base=mix(vec3(.035,.034,.036),vec3(.11,.10,.09),c*c);
-vec3 gold=vec3(.96,.73,.36);
-vec3 col=base+gold*(band*.20+glow*.07)+vec3(.15,.12,.08)*smoothstep(.55,0.,length(v-vec2(.5,.22)));
-vec2 g=fc/(k*2.6);vec2 id=floor(g);vec2 f=fract(g)-.5;float a=h(id),b=h(id+17.3);
-float fl=smoothstep(.36,0.,length(f-(vec2(a,b)-.5)*.5))*step(.5,a);
-float tw=pow(max(0.,sin(t*(.8+b*1.8)+a*40.)),14.);
-col+=gold*fl*(.05+tw*(.35+band*2.2))+vec3(1.)*fl*tw*band*.5;
-col*=1.-.3*pow(length((v-.5)*vec2(1.,.9)),1.8);
-gl_FragColor=vec4(col,1.);}"""
 
 JS = """
 (()=>{const R=document.documentElement,mo=R.classList.contains('mo');
-const bg=()=>{const cv=document.querySelector('.bg canvas');const gl=cv.getContext('webgl',{alpha:false,antialias:false});
-  if(!gl)return;const sh=(x,src)=>{const s=gl.createShader(x);gl.shaderSource(s,src);gl.compileShader(s);
-    return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null},vs=sh(gl.VERTEX_SHADER,`__VS__`),fs=sh(gl.FRAGMENT_SHADER,`__FS__`);
-  if(!vs||!fs)return;const pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
-  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return;gl.useProgram(pr);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  const ap=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
-  const u=n=>gl.getUniformLocation(pr,n),ur=u('r'),ut=u('t'),uk=u('k');
-  const draw=t=>{const k=Math.min(devicePixelRatio||1,2),w=Math.round(cv.clientWidth*k),hh=Math.round(cv.clientHeight*k);
-    if(cv.width!==w||cv.height!==hh){cv.width=w;cv.height=hh;gl.viewport(0,0,w,hh)}
-    gl.uniform2f(ur,w,hh);gl.uniform1f(uk,k);gl.uniform1f(ut,t);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)};
-  window.__bgDraw=draw;draw(6);cv.classList.add('on');if(!mo)return;
-  let raf=0;const loop=now=>{draw(window.__bgT??6+now/1000);raf=document.hidden?0:requestAnimationFrame(loop)};
-  addEventListener('visibilitychange',()=>{if(!document.hidden&&!raf)raf=requestAnimationFrame(loop)});
-  raf=requestAnimationFrame(loop)};
-try{bg()}catch(x){}
 if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
   addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
 const toast=document.querySelector('.toast');let tt=0;
-const say=s=>{toast.textContent=s;toast.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('on'),2000)};
-const copy=async s=>{try{await navigator.clipboard.writeText(s);return true}catch(x){const t=document.createElement('textarea');
+const say=s=>{toast.textContent=s;toast.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('on'),2200)};
+const copy=async s=>{try{await navigator.clipboard.writeText(s);return true}catch(x){}const t=document.createElement('textarea');
   t.value=s;t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();
-  let ok=false;try{ok=document.execCommand('copy')}catch(y){}t.remove();return ok}};
-const sheets=[...document.querySelectorAll('.sheet')];
-const open=id=>{const S=document.getElementById(id);if(S.classList.contains('on'))return;S.classList.add('on');
-  try{history.pushState({s:id},'')}catch(x){}};
-const close=()=>{const S=sheets.find(x=>x.classList.contains('on'));if(S){S.classList.remove('on');
-  try{if(history.state&&history.state.s)history.back()}catch(x){}}
-  if(/^#(qr|odeme)$/.test(location.hash))location.hash=''};
-addEventListener('popstate',()=>sheets.forEach(x=>x.classList.remove('on')));
-document.querySelectorAll('a[href="#qr"]:not([data-copy-iban]),a[href="#odeme"]:not([data-copy-iban])').forEach(a=>
-  a.addEventListener('click',ev=>{ev.preventDefault();open(a.getAttribute('href').slice(1))}));
-document.querySelectorAll('.sheet a[href="#"]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();close()}));
-addEventListener('keydown',ev=>{if(ev.key==='Escape')close()});
-const U=document.getElementById('qr').dataset.url,IB=document.getElementById('odeme').dataset.iban;
-document.querySelectorAll('[data-copy-iban]').forEach(b=>b.addEventListener('click',async ev=>{
-  if(b.tagName==='A')ev.preventDefault();if(await copy(IB))say('IBAN kopyalandı');else if(b.tagName==='A')open('odeme')}));
-const send=document.getElementById('send');if(!navigator.share)send.hidden=true;
-send.onclick=async()=>{try{await navigator.share({title:document.title,url:U})}catch(x){}};
-document.getElementById('copy').onclick=async()=>{if(await copy(U))say('Bağlantı kopyalandı')};})();
+  let ok=false;try{ok=document.execCommand('copy')}catch(y){}t.remove();return ok};
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async ev=>{ev.preventDefault();
+  if(await copy(b.dataset.copy))say(b.dataset.msg);else say('Kopyalanamadı: yazıya basılı tutun')}));
+const sh=document.getElementById('send');if(sh&&!navigator.share)sh.hidden=true;
+if(sh)sh.onclick=async()=>{try{await navigator.share({title:document.title,url:sh.dataset.url})}catch(x){}};
+const fab=document.querySelector('.fab'),call=document.querySelector('.call');
+if('IntersectionObserver' in window){new IntersectionObserver(([x])=>fab.classList.toggle('on',!x.isIntersecting&&
+  x.boundingClientRect.top<0)).observe(call);
+  const rv=[...document.querySelectorAll('.rv')];
+  if(mo){const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');
+    io.unobserve(x.target)}}),{threshold:.15});
+    rv.forEach(el=>{if(el.getBoundingClientRect().top<innerHeight)el.style.transitionDelay='2.1s';io.observe(el)})}
+  else rv.forEach(el=>el.classList.add('in'))}
+else document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));})();
 """
 
 
 def page(d):
-    wa = f"https://wa.me/{d['tel_e164']}?text=" + d["whatsapp_mesaj"].replace(" ", "%20").replace(",", "%2C")
-    deco = lambda k: f'<span class="ic" aria-hidden="true">{icon(k, True)}</span>'  # noqa: E731
-    ext = ' target=_blank rel=noopener'
-    rows = [
-        ("tel", f'<a class="v" href="tel:+{d["tel_e164"]}"><small>Telefon</small><b>{e(d["tel_txt"])}</b></a>',
-         f'<a class="ic wa" href="{e(wa)}"{ext} aria-label="WhatsApp ile yazın">{icon("whatsapp", True)}</a>'
-         + deco("phone")),
-        ("", f'<a class="v" href="https://instagram.com/{e(d["insta"])}"{ext}><small>Instagram</small>'
-             f'<b>@{e(d["insta"])}</b></a>', deco("instagram")),
-        ("", f'<a class="v" href="{e(d["web"])}"{ext}><small>Web sitesi</small><b>{e(d["web_txt"])}</b></a>',
-         deco("globe")),
-        ("", f'<a class="v" href="{e(d["harita"])}"{ext}><small>Konum · yol tarifi</small>'
-             f'<b>{e(d["konum"].replace(", ", " / "))}</b></a>', deco("pin")),
-        ("", f'<a class="v" href="{e(d["google"])}"{ext}><small>Google yorumları</small><b>{stars_svg()}Bizi '
-             f'değerlendirin</b></a>', deco("star")),
-        ("ib", f'<a class="v" href="#odeme" data-copy-iban aria-label="IBAN\'ı kopyala"><small>IBAN · dokunun, '
-               f'kopyalansın</small><b>{e(d["iban_txt"])}</b></a>',
-         f'<a class="ic" id="payqr" href="#odeme" aria-label="Ödeme karekodu">{icon("qr", True)}</a>'),
-    ]
-    li = "".join(f'<li class="{c}" style="--i:{k}">{main}<span class="acts">{acts}</span></li>'
-                 for k, (c, main, acts) in enumerate(rows))
-    url = d["qr"]
-    holder = (f'<b>{e(d["iban_alici"])}</b>' if d.get("iban_alici") else "")
-    body = (
-        f'<div class="bg" aria-hidden="true"><canvas></canvas></div>'
-        f'<div class="wrap"><header class="top">{t_svg("tlogo")}'
-        f'<h1 aria-label="{e(d["isim"])}">{letters(d["isim"])}</h1>'
-        f'<p class="svc">{e(AT.SERVICE)}</p><i class="rule"></i>'
-        f'<p class="loc">{icon("pin")}{e(d["konum"].replace(", ", " · ").upper())}</p></header>'
-        f'<main class="card"><ul class="rows">{li}</ul>'
-        f'<div class="btns"><a class="save" href="{VCF}" download>{icon("save")}<b>REHBERE KAYDET</b></a>'
-        f'<a class="share" id="share" href="#qr">{icon("qr")}<b>PAYLAŞ</b></a>'
-        f'</div></main></div><div class="toast" role="status" aria-live="polite"></div>'
-        # Paylaş
-        f'<div class="sheet" id="qr" role="dialog" aria-modal="true" aria-labelledby="qrt" data-url="{e(url)}">'
-        f'<a class="scrim" href="#" aria-label="Kapat"></a>'
-        f'<div class="panel"><div class="ph"><p id="qrt">KARTVİZİTİ PAYLAŞ</p>'
-        f'<a class="x" href="#" aria-label="Kapat">{icon("close", width=1.6)}</a></div>'
-        f'<div class="qcard"><div class="tile">{qr_svg(url, "Kartvizit QR kodu")}<span class="vf" aria-hidden="true">'
-        f'<i></i><i></i><i></i><i></i></span></div><p class="qcap"><span>DİJİTAL</span><i></i><span>KARTVİZİT</span>'
-        f'</p></div><p class="hint">Kodu kamerayla okutun ya da bağlantıyı gönderin.'
-        f'<b>{e(url.replace("https://", ""))}</b></p>'
-        f'<div class="pbtns"><button class="share" id="copy" type="button">{icon("copy")}<b>KOPYALA</b></button>'
-        f'<button class="save" id="send" type="button">{icon("share")}<b>GÖNDER</b></button></div></div></div>'
-        # Ödeme
-        f'<div class="sheet" id="odeme" role="dialog" aria-modal="true" aria-labelledby="odt" '
-        f'data-iban="{e(d["iban_raw"])}"><a class="scrim" href="#" aria-label="Kapat"></a>'
-        f'<div class="panel"><div class="ph"><p id="odt">ÖDEME BİLGİLERİ</p>'
-        f'<a class="x" href="#" aria-label="Kapat">{icon("close", width=1.6)}</a></div>'
-        f'<div class="qcard"><div class="tile">{qr_svg(d["pay_qr"], "IBAN karekodu")}<span class="vf" '
-        f'aria-hidden="true"><i></i><i></i><i></i><i></i></span></div><p class="qcap"><span>IBAN</span><i></i>'
-        f'<span>KAREKOD</span></p></div>'
-        f'<p class="hint">Banka uygulamanızla okutun ya da IBAN\'ı kopyalayın.{holder}<b class="sel">{e(d["iban_txt"])}</b></p>'
-        f'<div class="pbtns"><button class="save" type="button" data-copy-iban>{icon("copy")}<b>IBAN\'I KOPYALA</b>'
-        f'</button></div></div></div>')
-    title = f"{d['isim']} · {AT.SERVICE.title()} · {d['konum']}"
-    desc = f"{d['isim']} – hasar onarım, {d['konum']}. Ara, WhatsApp, Instagram, konum, Google yorumları, IBAN."
-    og = d["sayfa_url"].rstrip("/") + "/" + OG
     ext_, fmt = ("woff2", "woff2") if _has_brotli() else ("woff", "woff")
-    css = CSS.replace("EXT", ext_).replace("FMT", fmt)
-    js = JS.replace("__VS__", SEA_VS).replace("__FS__", SEA_FS)
+    faces = "".join(f'@font-face{{font-family:Poppins;src:url(fonts/{k}.{ext_}) format("{fmt}");font-weight:{w};'
+                    f'font-style:{st};font-display:swap}}' for k, (_, w, st) in FONTS.items())
+    css = CSS.replace("FONTFACES", faces)
+    tel = f"tel:+{d['tel_e164']}"
+    tiles = [("wa", d["wa"], "whatsapp", "WhatsApp", "Yazın", ""),
+             ("", f"https://instagram.com/{d['insta']}", "instagram", "Instagram", f"@{d['insta']}", ""),
+             ("", d["google"], "star", "Google", stars(), " Yorumlar"),
+             ("wide", d["harita"], "pin", "Konum", d["konum"].replace(", ", " / "), ""),
+             ("wide", d["web"], "globe", "Web sitesi", d["web_txt"], "")]
+    tl = "".join(f'<a class="tile {c}" href="{e(h)}" style="--i:{k}" aria-label="{e(t)}{e(extra)}">{icon(ic, 1.7, "i")}'
+                 f'{icon("arrow", 1.8, "go")}<b>{e(t)}</b><small>{s if s.startswith("<") else e(s)}</small></a>'
+                 for k, (c, h, ic, t, s, extra) in enumerate(tiles))
+    holder = (f'<div class="row"><span>Alıcı</span><b>{e(d["iban_alici"])}</b></div>' if d.get("iban_alici") else "")
+    note = '<p class="note">Örnek IBAN: gerçek bilgiler eklenecek.</p>' if d.get("iban_ornek") else ""
+    url = d["qr"]
+    body = (
+        f'<div class="wrap"><header class="hero"><div class="carbon"></div><div class="stripes"><i></i><i></i></div>'
+        f'<p class="kick"><i></i>{e(d["konum"].replace(", ", " · ").upper())}</p>'
+        f'<div class="brand">{t_svg("tlogo")}<h1 aria-label="{e(d["isim"])}"><span class="auto">AUTO</span>'
+        f'<span class="tufan" aria-hidden="true">{letters("TUFAN")}</span></h1></div>'
+        f'<div class="svc"><b>{e(AT.SERVICE)}</b><i></i></div>'
+        f'<p class="tag">Aracınızdaki hasarı ustalıkla onarıyoruz. Tek dokunuşla arayın, yazın.</p>'
+        f'{car_svg()}</header>'
+        f'<a class="call" href="{tel}"><span><small>HEMEN ARA</small><b>{e(d["tel_txt"])}</b></span>'
+        f'<i class="ph">{icon("phone", 1.9)}</i></a>'
+        f'<nav class="tiles" aria-label="Bağlantılar">{tl}</nav>'
+        f'<div class="sh rv"><i></i><h2>ÖDEME BİLGİLERİ</h2></div>'
+        f'<section class="pay rv">{holder}<div class="iban"><small>IBAN</small><b>{e(d["iban_txt"])}</b></div>'
+        f'<div class="pbtn"><a class="btn gold" href="#karekod" data-copy="{e(d["iban_raw"])}" data-msg="IBAN kopyalandı – '
+        f'banka uygulamanıza yapıştırın">{icon("copy", 1.9)}Kopyala</a>'
+        f'<details class="kk" id="karekod"><summary class="btn out">{icon("qr", 1.9)}Karekod</summary>'
+        f'<div class="qrbox"><img src="{KAREKOD}" alt="IBAN karekodu" width="190" height="190">'
+        f'<p>Karekodu kaydedin, banka uygulamanızda <b>Karekod ile Öde</b>, ardından <b>Galeriden seç</b>.</p>'
+        f'<a class="dl" href="{KAREKOD}" download="auto-tufan-karekod.png">{icon("down", 1.9)}Karekodu kaydet</a>'
+        f'</div></details></div>{note}</section>'
+        f'<div class="acts rv"><a class="btn out" href="{VCF}" download>{icon("save", 1.9)}Rehbere kaydet</a>'
+        f'<details class="sh2"><summary class="btn out">{icon("share", 1.9)}Kartviziti paylaş</summary>'
+        f'<div class="qrbox">{qr_svg(url, "Kartvizit QR kodu")}<p>Kodu kamerayla okutun ya da bağlantıyı gönderin.<br>'
+        f'<b>{e(url.replace("https://", ""))}</b></p><div class="pbtn"><a class="btn out" href="{e(url)}" '
+        f'data-copy="{e(url)}" data-msg="Bağlantı kopyalandı">{icon("copy", 1.9)}Kopyala</a>'
+        f'<button class="btn gold" id="send" type="button" data-url="{e(url)}">{icon("share", 1.9)}Gönder</button>'
+        f'</div></div></details></div>'
+        f'<footer class="rv">{t_svg("")}<p><span>AUTO</span>TUFAN</p><small>{e(tr_title(AT.SERVICE))}<br>'
+        f'@{e(d["insta"])}</small></footer></div>'
+        f'<a class="fab" href="{tel}" aria-label="Hemen ara">{icon("phone", 2)}</a>'
+        f'<div class="toast" role="status" aria-live="polite"></div>')
+    title = f"{d['isim']} · {tr_title(AT.SERVICE)} · {d['konum']}"
+    desc = f"{d['isim']} – hasar onarım, {d['konum']}. Hemen arayın, WhatsApp'tan yazın, Instagram, konum, ödeme."
+    og = d["sayfa_url"].rstrip("/") + "/" + OG
     return (f'<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" '
-            f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0B0B0D">'
+            f'content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#131315">'
             f'<title>{e(title)}</title><meta name="description" content="{e(desc)}">'
             f'<meta property="og:type" content="website"><meta property="og:title" content="{e(title)}">'
             f'<meta property="og:description" content="{e(desc)}"><meta property="og:image" content="{e(og)}">'
             f'<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
             f'<meta name="twitter:card" content="summary_large_image">'
             f'<link rel="icon" href="{ICON_PNG}"><link rel="apple-touch-icon" href="{ICON_PNG}">'
-            f'<link rel="preload" as="font" type="font/{fmt}" href="fonts/p6.{ext_}" crossorigin>'
+            f'<link rel="preload" as="font" type="font/{fmt}" href="fonts/p8i.{ext_}" crossorigin>'
             f"<script>matchMedia('(prefers-reduced-motion: reduce)').matches||"
             f"document.documentElement.classList.add('mo')</script>"
-            f'<style>{css}</style></head><body>{body}<script>{js}</script></body></html>')
+            f'<style>{css}</style></head><body>{body}<script>{JS}</script></body></html>')
 
 
 # ---------------------------------------------------------------- önizlemeler
@@ -567,42 +591,39 @@ def served():
 
 
 def screenshot(d, path=PREVIEW):
-    """Telefon ekranında (390 × 844, "hareketi azalt": son hâli): sayfa, Paylaş penceresi, Ödeme penceresi.
-    Kontroller: yazı tipleri yüklü, yatay taşma yok, yazılar sığıyor, kart tek ekrana sığıyor, iki QR okunuyor."""
+    """Telefon ekranında (390 × 844, son hâli): ilk ekran ve tüm sayfa (karekod ve paylaş kutuları açık).
+    Kontroller: yazı tipleri yüklü, yatay taşma yok, yazılar sığıyor, iki QR okunuyor, sayfa hatası yok."""
     from playwright.sync_api import sync_playwright
     errors, shots = [], []
     fits = "[...document.querySelectorAll('SEL')].every(e=>e.offsetParent===null||e.scrollWidth<=e.clientWidth+1)"
     with sync_playwright() as p, served() as url:
         b = p.chromium.launch(executable_path=CHROMIUM)
-        for which in ("", "share", "payqr"):
+        for full in (False, True):
             pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, reduced_motion="reduce")
             pg.add_init_script("navigator.share=async()=>{}")
             pg.on("pageerror", lambda x: errors.append(str(x)))
             pg.goto(url)
             pg.wait_for_timeout(600)
-            pg.evaluate("Promise.all([400,500,600,700].map(w=>document.fonts.load(w+' 20px Poppins')))")  # 700: pencerede
-            assert pg.evaluate("[400,500,600,700].every(w=>document.fonts.check(w+' 20px Poppins'))"), \
-                "yazı tipi yüklenmedi"
+            pg.evaluate("Promise.all(['400','500','600','700','800','italic 800','italic 600'].map(w=>"
+                        "document.fonts.load(w+' 20px Poppins')))")
+            assert pg.evaluate("['400','500','600','700','800','italic 800'].every(w=>"
+                               "document.fonts.check(w+' 20px Poppins'))"), "yazı tipi yüklenmedi"
             assert pg.evaluate("document.documentElement.scrollWidth") <= 390, "yatay taşma"
-            assert pg.evaluate(fits.replace("SEL", ".v b,.v small,h1,.svc,.save,.share")), "yazı sığmadı"
-            assert pg.evaluate("document.querySelector('.card').getBoundingClientRect().bottom") <= 845, \
-                "kart tek ekrana sığmadı"
-            assert pg.evaluate("document.querySelector('.bg canvas').classList.contains('on')"), "arka plan çizilmedi"
-            if which:
-                pg.click("#" + which)
+            assert pg.evaluate(fits.replace("SEL", ".call b,.tile b,.svc b,.iban b,.sh h2,.btn")), "yazı sığmadı"
+            assert pg.evaluate("document.querySelector('h1 .tufan').getBoundingClientRect().right") <= 390, "TUFAN taştı"
+            if full:
+                pg.evaluate("document.querySelectorAll('details').forEach(x=>x.open=true)")
                 pg.wait_for_timeout(300)
-                dlg = "#qr" if which == "share" else "#odeme"
-                assert pg.evaluate(fits.replace("SEL", f"{dlg} .ph p,{dlg} .qcap,{dlg} .hint b,{dlg} .pbtns button")), \
-                    "pencerede yazı sığmadı"
-                tile = Image.open(io.BytesIO(pg.locator(f"{dlg} .tile").screenshot()))
-                want = d["qr"] if which == "share" else d["pay_qr"]
-                assert want in Q.decode(tile), f"{dlg} QR okunmadı"
-            shots.append(Image.open(io.BytesIO(pg.screenshot())))
+                img = Image.open(io.BytesIO(pg.locator("#karekod img").screenshot()))
+                assert d["pay_qr"] in Q.decode(img), "karekod okunmadı"
+                svg = Image.open(io.BytesIO(pg.locator(".sh2 .qrbox > svg").screenshot()))
+                assert d["qr"] in Q.decode(svg), "paylaş QR'ı okunmadı"
+            shots.append(Image.open(io.BytesIO(pg.screenshot(full_page=full))))
             pg.close()
         b.close()
     assert not errors, errors
     h = max(s.height for s in shots)
-    canvas = Image.new("RGB", (sum(s.width for s in shots) + 160, h + 120), (52, 52, 56))
+    canvas = Image.new("RGB", (sum(s.width for s in shots) + 120, h + 120), (52, 52, 56))
     x = 40
     for s in shots:
         canvas.paste(s, (x, 60))
@@ -612,51 +633,50 @@ def screenshot(d, path=PREVIEW):
 
 
 def tour_gif(path=TOUR):
-    """Tur (390 × 844), zamanda adım adım: açılış, canlı arka plan (pullar, ışık, T'nin parıltısı), Ödeme penceresi."""
+    """Tur (390 × 844), zamanda adım adım: açılış, bekleme (araba parlaması), aşağı kaydırma, karekod açılır."""
     from playwright.sync_api import sync_playwright
     frames, durs, errors = [], [], []
     with sync_playwright() as p, served() as url:
         b = p.chromium.launch(executable_path=CHROMIUM)
         pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=1)
         pg.on("pageerror", lambda x: errors.append(str(x)))
-        pg.add_init_script("navigator.share=async()=>{}")
 
         def shot(ms):
             frames.append(Image.open(io.BytesIO(pg.screenshot())).convert("RGB"))
             durs.append(ms)
 
-        def at(ms):
-            _seek(pg, ms)
-            pg.evaluate(f"window.__bgT={6 + ms / 1000};window.__bgDraw&&__bgDraw(__bgT)")
-
         pg.goto(url)
-        pg.wait_for_function("document.querySelector('.bg canvas').classList.contains('on')", timeout=15000)
-        for k in range(0, 3000, 100):
-            at(k)
+        pg.wait_for_timeout(300)
+        for k in range(0, 3200, 100):
+            _seek(pg, k)
             shot(100)
-        for k in range(3000, 9600, 240):
-            at(k)
-            shot(240)
-        pg.evaluate("document.getElementById('payqr').click();window._dl=document.getAnimations().filter(a=>{"
-                    "const t=a.effect&&a.effect.target;return t&&t.closest&&t.closest('#odeme')});"
-                    "_dl.forEach(a=>{a.pause();a.currentTime=0})")
-        for k in range(0, 1700, 100):
-            pg.evaluate(f"_dl.forEach(a=>a.currentTime={k});window.__bgT={15.6 + k / 1000};__bgDraw(__bgT)")
-            shot(100)
-        pg.evaluate("_dl.forEach(a=>{try{a.finish()}catch(e){a.play()}})")
+        for k in range(3200, 8200, 250):
+            _seek(pg, k)
+            shot(250)
+        pg.evaluate("document.getAnimations().forEach(a=>a.play())")
+        h = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
+        for y in range(0, h + 1, 60):
+            pg.evaluate(f"scrollTo(0,{y})")
+            pg.wait_for_timeout(60)
+            shot(70)
+        pg.evaluate("scrollTo(0,0);document.querySelector('.pay').scrollIntoView({block:'center'})")
+        pg.wait_for_timeout(500)
+        pg.evaluate("document.getElementById('karekod').open=true;"
+                    "document.getElementById('karekod').scrollIntoView({block:'center'})")
+        pg.wait_for_timeout(400)
         shot(2600)
         b.close()
     assert not errors, errors
-    # pullar titreşimli renk dağıtmayla (dither) GIF'te sıkışmaz: ortak palet, dağıtmasız, biraz küçük
+    # ortak palet, dağıtmasız (dither'sız): GIF küçük kalır
     frames = [f.resize((312, 675), Image.LANCZOS) for f in frames]
-    pal = frames[len(frames) // 2].quantize(colors=128, method=Image.Quantize.MEDIANCUT)
+    pal = frames[len(frames) // 3].quantize(colors=160, method=Image.Quantize.MEDIANCUT)
     out = [f.quantize(palette=pal, dither=Image.Dither.NONE) for f in frames]
     out[0].save(path, save_all=True, append_images=out[1:], duration=durs, loop=0, optimize=True)
     return path
 
 
 def standalone(doc, path=STANDALONE):
-    """Denemelik tek dosya: yazı tipleri, simge ve rehber kartı (vCard) sayfanın içine gömülü."""
+    """Denemelik tek dosya: yazı tipleri, karekod, simge ve rehber kartı sayfanın içine gömülü."""
     import base64
 
     def data(rel, mime):
@@ -664,9 +684,11 @@ def standalone(doc, path=STANDALONE):
             return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
 
     doc = re.sub(r'<link rel="preload"[^>]*>', "", doc)
-    for rel in sorted(set(re.findall(r"fonts/p\d\.woff2?", doc))):
+    for rel in sorted(set(re.findall(r"fonts/p\d+i?\.woff2?", doc))):
         doc = doc.replace(f"url({rel})", f"url({data(rel, 'font/' + rel.rsplit('.', 1)[1])})")
     doc = doc.replace(f'href="{ICON_PNG}"', f'href="{data(ICON_PNG, "image/png")}"')
+    doc = doc.replace(f'src="{KAREKOD}"', f'src="{data(KAREKOD, "image/png")}"')
+    doc = doc.replace(f'href="{KAREKOD}"', f'href="{data(KAREKOD, "image/png")}"')
     doc = doc.replace(f'href="{VCF}" download', f'href="{data(VCF, "text/vcard")}" download="{VCF}"')
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)
@@ -688,6 +710,7 @@ def main():
     doc = page(d)
     subset_fonts(html.unescape(doc))
     vcard(d)
+    karekod_png(d)
     og_image(d)
     touch_icon()
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
