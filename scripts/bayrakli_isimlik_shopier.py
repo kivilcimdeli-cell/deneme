@@ -184,7 +184,9 @@ def shopier():
               <span style="position:absolute;right:-30px;top:50%;transform:translate(50%,-50%) rotate(90deg);
                 background:{PAPER};padding:0 12px;font-weight:700;font-size:24px">56 mm</span></div></div>
           <ul style="margin-top:70px;list-style:none;display:grid;gap:14px;font-size:27px;line-height:1.35">{feats}</ul>
-          <div style="position:absolute;right:64px;bottom:56px">{K.logo("acik", 260, 52)}</div></div>""",
+          <img src="{foto('detay', 1100)}" style="position:absolute;left:64px;top:792px;width:1072px;height:344px;
+            object-fit:cover;object-position:50% 40%;border-radius:22px;display:block">
+          <div style="position:absolute;right:64px;top:64px">{K.logo("acik", 240, 48)}</div></div>""",
              out(6, "olcu_ozellik"))
 
         # nasıl sipariş verilir (katalogdaki "nasıl çalışır" gibi)
@@ -199,7 +201,7 @@ def shopier():
           <p style="margin-top:22px;font-size:26px;color:rgba(244,241,234,.8)">Her isimlik sipariş üzerine, adınızla
             basılır.</p>
           <div style="margin-top:34px">{rows}</div>
-          <img src="{foto('masa', 1100)}" style="margin-top:18px;width:100%;height:170px;object-fit:cover;
+          <img src="{foto('masa', 1100)}" style="margin-top:18px;width:100%;height:230px;object-fit:cover;
             border-radius:22px;display:block">
           <div style="position:absolute;left:64px;bottom:50px">{K.logo("koyu", 300, 60)}</div>
           <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{K.TEL}</p></div>""",
