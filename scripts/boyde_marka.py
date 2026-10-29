@@ -1569,8 +1569,8 @@ def kit(P, n):
         <div style="margin-top:34px;display:flex;flex-wrap:wrap;gap:12px">{chip_html}</div></div>
       <div style="position:absolute;left:80px;right:80px;bottom:70px;display:flex;justify-content:space-between;
         align-items:flex-end"><div><p style="font-size:24px;color:rgba(244,241,234,.6)">site dahil</p>
-        <p class="u" style="margin-top:6px;font-size:40px;font-weight:700">1 adet <span style="color:{ORANGE}">1.200 TL
-        </span> · 2 adet <span style="color:{ORANGE}">1.500 TL</span></p></div></div></div>""",
+        <p class="u" style="margin-top:6px;font-size:40px;font-weight:700">1 adet <span style="color:{ORANGE}">1.700 TL
+        </span> · 2 adet <span style="color:{ORANGE}">2.000 TL</span></p></div></div></div>""",
           1080, 1350, os.path.join(ig, "gonderi_2_urun.png"))
 
     steps = [("Shopier'dan sipariş verin", "Adet seçin, ödemeyi güvenle Shopier'dan yapın."),
