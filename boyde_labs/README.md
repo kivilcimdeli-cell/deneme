@@ -37,6 +37,14 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
   - **SVG:** büyütülebilir, yazılar çizgiye çevrili; matbaa ve tabela için;
   - **saydam PNG:** sosyal medya ve belgeler için.
 
+## Ürün kataloğu ve Shopier ürün görselleri
+
+İki kategori: 9 × 12 cm QR'lı masa isimliği (17 model), 10 × 20 cm kurumsal isimlik (7 model).
+- Katalog: `urunler/katalog.pdf`.
+- Shopier ürün görselleri: `urunler/shopier/`.
+- Fotoğraflar: `urunler/fotograf/`.
+- Ayrıntılar: [`urunler/README.md`](urunler/README.md).
+
 ## Nereye ne yüklenir
 
 | Dosya | Yer | Ölçü |

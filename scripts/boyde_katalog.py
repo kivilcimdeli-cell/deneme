@@ -1,0 +1,329 @@
+"""BOYDE LABS – ürün kataloğu (PDF) ve Shopier ürün görselleri, iki kategori: 9 × 12 cm ve 10 × 20 cm isimlik.
+
+Girdi : scripts/boyde_urunler.py (ürünler, kategoriler), boyde_labs/urunler/fotograf/ (scripts/boyde_urun_foto.py),
+        boyde_labs/urunler/kaynak/<ürün>_duz.png (düz görünüş). Marka: scripts/boyde_marka.py (logo 3a, renkler,
+        yazı tipleri).
+Çıktı : boyde_labs/urunler/katalog.pdf (A4), katalog.png (sayfaların önizlemesi)
+        boyde_labs/urunler/shopier/<kategori>/ (1200 × 1200 JPG, yükleme sırasıyla numaralı):
+          01_kapak, 02_modeller_1 (ve _2), sonra olcu_ozellik, nasil_calisir, sonra her model (M01_…)
+
+Model kodları kategoride sırayla: önce müşterilerin bastırdıkları, sonra farklı sektörlere örnekler, en son
+önerilerden beğenilenler. Örneklerdeki işletme ve kişi adları, telefon ve QR'lar örnektir (QR'lar okunmaz).
+
+Kullanım: python3 scripts/boyde_katalog.py
+"""
+import base64
+import io
+import os
+import shutil
+import sys
+
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import boyde_marka as BM  # noqa: E402
+import boyde_urunler as U  # noqa: E402
+
+INK, PAPER, ORANGE, SAND, GRAY, CHAR = BM.INK, BM.PAPER, BM.ORANGE, BM.SAND, BM.GRAY, BM.CHAR
+OUT = U.OUT
+FOTO = os.path.join(OUT, "fotograf")
+LOGO = "3a"
+TEL = "0546 475 45 08"
+TUR = {"musteri": "Müşterimizin seçtiği", "oneri": "Müşterimize çizilen öneri", "ornek": "Örnek tasarım"}
+NOT_ORNEK = "Örneklerdeki işletme adları, telefon ve QR'lar örnektir; tasarım sizin bilgilerinizle hazırlanır."
+
+
+def models(cat):
+    """Kategorinin modelleri, kodlarıyla: [(kod, ürün)]."""
+    us = [u for u in U.URUNLER if u.kat == cat]
+    order = {"musteri": 0, "ornek": 1, "oneri": 2}
+    us = sorted(us, key=lambda u: order[u.tur])                  # sıralama kararlı: aynı türde liste sırası
+    return [(f"M{i:02d}", u) for i, u in enumerate(us, 1)]
+
+
+def uri(path, maxw=None, fmt="JPEG", crop=None):
+    im = Image.open(path)
+    if crop:
+        im = im.crop(crop)
+    if maxw and im.width > maxw:
+        im = im.resize((maxw, round(im.height * maxw / im.width)), Image.LANCZOS)
+    buf = io.BytesIO()
+    if fmt == "JPEG":
+        im.convert("RGB").save(buf, "JPEG", quality=86)
+    else:
+        im.save(buf, "PNG", optimize=True)
+    return f"data:image/{fmt.lower()};base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def foto(key, view="studyo", maxw=900):
+    return uri(os.path.join(FOTO, f"{key}_{view}.jpg"), maxw)
+
+
+def duz(key, maxw=900):
+    return uri(os.path.join(U.SRC, f"{key}_duz.png"), maxw, "PNG")
+
+
+def logo(theme, w, h, kind="yatay"):
+    return BM.fitted(LOGO, kind, theme, w, h)
+
+
+def caption(u):
+    who = u.musteri if u.tur != "ornek" else f"{u.musteri} (örnek)"
+    return f"{u.sektor} · {u.ad}", who
+
+
+CSS = f"""
+body{{color:{INK}}}
+.k{{font-size:13px;font-weight:700;letter-spacing:.22em;color:{ORANGE}}}
+.chip{{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;font-weight:700}}
+.code{{font-family:Unbounded;font-weight:700}}
+"""
+
+
+# ---------------------------------------------------------------- Shopier (1200 × 1200)
+
+def sq(P, body, path, css=""):
+    tmp = path[:-4] + ".png"
+    P.png(body, 1200, 1200, tmp, css=CSS + css)
+    Image.open(tmp).convert("RGB").save(path, "JPEG", quality=90)
+    os.remove(tmp)
+
+
+def shopier(P, cat):
+    K = U.KATEGORI[cat]
+    ms = models(cat)
+    out = os.path.join(OUT, "shopier", cat)
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    n = 1
+
+    def name(s):
+        nonlocal n
+        p = os.path.join(out, f"{n:02d}_{s}.jpg")
+        n += 1
+        return p
+
+    # kapak
+    sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:#000">
+      <img src="{uri(os.path.join(FOTO, f'kapak_{cat}.jpg'), 1200)}" style="width:1200px;height:1200px;display:block">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.55) 0,rgba(18,19,22,0) 22%,
+        rgba(18,19,22,0) 56%,rgba(18,19,22,.92) 100%)"></div>
+      <div style="position:absolute;left:64px;top:56px">{logo("koyu", 330, 66)}</div>
+      <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{PAPER}">
+        <p class="k">{K['olcu'].upper()} · {len(ms)} MODEL</p>
+        <h1 class="u" style="margin-top:14px;font-size:76px;line-height:1.02;letter-spacing:-.02em">{K['ad']}</h1>
+        <p style="margin-top:18px;font-size:30px;line-height:1.35;color:rgba(244,241,234,.86)">{K['kisa']}
+          Tasarım size özel; QR'ı okutan müşteriniz sizin sayfanızı açar.</p></div></div>""", name("kapak"))
+
+    # modeller (3 × 3)
+    pages = [ms[i:i + 9] for i in range(0, len(ms), 9)]
+    for pi, chunk in enumerate(pages, 1):
+        cells = "".join(f"""<div style="position:relative;border-radius:18px;overflow:hidden;background:#eae5dc">
+          <img src="{foto(u.key, maxw=420)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+          <span class="chip code" style="position:absolute;left:12px;top:12px;background:{INK};color:{PAPER};
+            font-size:17px;padding:6px 11px">{c}</span>
+          <span style="position:absolute;left:12px;right:12px;bottom:10px;font-size:17px;font-weight:700;
+            color:{INK};text-shadow:0 0 6px #fff">{u.sektor}</span></div>""" for c, u in chunk)
+        sq(P, f"""<div style="width:1200px;height:1200px;background:{PAPER};padding:56px 60px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div><p class="k">{K['olcu'].upper()} · MODELLER{f' {pi}/{len(pages)}' if len(pages) > 1 else ''}</p>
+            <h2 class="u" style="margin-top:10px;font-size:42px">{chunk[0][0]}–{chunk[-1][0]}</h2></div>
+            {logo("acik", 250, 50)}</div>
+          <div style="margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px">{cells}</div>
+          <p style="position:absolute;left:60px;right:60px;bottom:40px;font-size:18px;line-height:1.4;color:#55575c">
+            Model kodunu sipariş notuna yazın. {NOT_ORNEK}</p></div>""", name("modeller" + (f"_{pi}" if len(pages) > 1
+                                                                                      else "")))
+
+    # ölçü ve özellikler
+    ex = ms[0][1].key if cat == "10x20" else "telefon"
+    w_mm, h_mm = (200, 100) if cat == "10x20" else (120, 90)
+    iw = 760 if cat == "10x20" else 600
+    feats = "".join(f'<li style="display:flex;gap:14px;align-items:flex-start"><b style="color:{ORANGE}">—</b>'
+                    f"<span>{f}</span></li>" for f in K["ozellik"])
+    sq(P, f"""<div style="width:1200px;height:1200px;background:{PAPER};padding:64px">
+      <p class="k">ÖLÇÜ VE ÖZELLİKLER</p>
+      <h2 class="u" style="margin-top:12px;font-size:56px">{K['olcu']}</h2>
+      <div style="margin-top:40px;display:flex;justify-content:center">
+        <div style="position:relative;width:{iw}px">
+          <img src="{duz(ex)}" style="width:{iw}px;display:block;filter:drop-shadow(0 18px 28px rgba(0,0,0,.18))">
+          <div style="position:absolute;left:0;right:0;top:-30px;border-top:2px solid {INK}"></div>
+          <span style="position:absolute;left:50%;top:-50px;transform:translate(-50%,-50%);background:{PAPER};
+            padding:0 12px;font-weight:700;font-size:24px">{w_mm} mm</span>
+          <div style="position:absolute;top:0;bottom:0;right:-30px;border-right:2px solid {INK}"></div>
+          <span style="position:absolute;right:-48px;top:50%;transform:translate(50%,-50%) rotate(90deg);
+            background:{PAPER};padding:0 12px;font-weight:700;font-size:24px">{h_mm} mm</span></div></div>
+      <ul style="margin-top:56px;list-style:none;display:grid;gap:14px;font-size:27px;line-height:1.35">{feats}</ul>
+      <div style="position:absolute;right:64px;bottom:56px">{logo("acik", 260, 52)}</div></div>""",
+       name("olcu_ozellik"))
+
+    # nasıl çalışır
+    steps = [("01", "Modeli seçin", f"Görsellerdeki kodla: {ms[0][0]}–{ms[-1][0]}. Beğendiğiniz bir düzen yoksa "
+                                       "sıfırdan çizeriz."),
+             ("02", "Bilgilerinizi gönderin", "Ad, logo, renkler, telefon, Instagram, konum, IBAN."),
+             ("03", "Onaylayın, basalım", "Tasarımı onayınıza sunarız; 3D basıp kargoya veririz.")]
+    rows = "".join(f"""<div style="display:flex;gap:28px;padding:26px 0;border-top:2px solid rgba(244,241,234,.14)">
+      <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a}</b><div><p style="font-size:34px;
+      font-weight:700">{b}</p><p style="margin-top:8px;font-size:24px;color:rgba(244,241,234,.72)">{c}</p></div>
+      </div>""" for a, b, c in steps)
+    links = "Ara · WhatsApp · Instagram · Konum · Google yorum · IBAN" if cat == "9x12" else \
+        "Telefon · WhatsApp · E-posta · Adres · Rehbere kaydet"
+    sq(P, f"""<div style="width:1200px;height:1200px;background:{INK};color:{PAPER};padding:64px;
+      background-image:{BM.stripes_bg(PAPER, .035, 30)}">
+      <p class="k">NASIL ÇALIŞIR</p>
+      <h2 class="u" style="margin-top:12px;font-size:50px;line-height:1.1">Okutan müşteriniz<br>sizin sayfanızı açar.</h2>
+      <p style="margin-top:22px;font-size:26px;color:rgba(244,241,234,.8)">{links}: hepsi tek QR'da.</p>
+      <div style="margin-top:34px">{rows}</div>
+      <img src="{foto('paloma' if cat == '10x20' else 'kuafor', 'masa', 1100)}" style="margin-top:18px;width:100%;
+        height:300px;object-fit:cover;border-radius:22px;display:block">
+      <div style="position:absolute;left:64px;bottom:50px">{logo("koyu", 300, 60)}</div>
+      <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{TEL}</p></div>""",
+       name("nasil_calisir"))
+
+    # her model
+    for c, u in ms:
+        t1, t2 = caption(u)
+        sq(P, f"""<div style="position:relative;width:1200px;height:1200px">
+          <img src="{foto(u.key, maxw=1200)}" style="width:1200px;height:1200px;display:block">
+          <div style="position:absolute;left:40px;bottom:40px;display:flex;align-items:center;gap:14px">
+            <span class="chip code" style="background:{INK};color:{PAPER};font-size:24px;padding:10px 16px">{c}</span>
+            <span class="chip" style="background:rgba(244,241,234,.92);color:{INK};font-size:22px;padding:10px 16px">
+              {t1}</span></div>
+          <div style="position:absolute;right:40px;top:36px;opacity:.9">{logo("acik", 200, 40)}</div></div>""",
+           os.path.join(out, f"{n:02d}_{c}_{u.key}.jpg"))
+        n += 1
+    return out
+
+
+# ---------------------------------------------------------------- katalog (A4)
+
+W, H = 794, 1123
+
+
+def page(body, dark=False, no=None):
+    bg = f"background:{INK};color:{PAPER}" if dark else f"background:{PAPER};color:{INK}"
+    foot = (f'<p style="position:absolute;left:48px;right:48px;bottom:26px;display:flex;justify-content:space-between;'
+            f'font-size:10px;letter-spacing:.2em;color:{GRAY}"><span>BOYDE LABS · ÜRÜN KATALOĞU</span>'
+            f'<span>{no:02d}</span></p>') if no else ""
+    return f'<div class="pg" style="{bg};padding:48px">{body}{foot}</div>'
+
+
+def card(c, u):
+    t1, t2 = caption(u)
+    badge = TUR[u.tur]
+    col = ORANGE if u.tur == "musteri" else GRAY
+    return f"""<div style="background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+      <img src="{foto(u.key, maxw=560)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+      <div style="padding:10px 12px 12px"><div style="display:flex;justify-content:space-between;align-items:center">
+        <b class="code" style="font-size:13px">{c}</b><span style="font-size:9.5px;font-weight:700;color:{col};
+        letter-spacing:.06em">{badge.upper()}</span></div>
+        <p style="margin-top:5px;font-size:13px;font-weight:700">{t1}</p>
+        <p style="margin-top:2px;font-size:11px;color:#55575c">{t2} · {u.renk}</p></div></div>"""
+
+
+def catalog(P):
+    pages, no = [], 1
+    cover9 = uri(os.path.join(FOTO, "kapak_9x12.jpg"), 1100)
+    pages.append(page(f"""<div style="position:absolute;inset:0;background:url({cover9}) center/cover"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.7) 0,rgba(18,19,22,0) 30%,
+        rgba(18,19,22,0) 52%,rgba(18,19,22,.95) 100%)"></div>
+      <div style="position:relative">{logo("koyu", 260, 52)}</div>
+      <div style="position:absolute;left:48px;right:48px;bottom:64px">
+        <p class="k">ÜRÜN KATALOĞU · 2026</p>
+        <h1 class="u" style="margin-top:12px;font-size:50px;line-height:1.04">QR'lı<br>isimlikler</h1>
+        <p style="margin-top:16px;font-size:16px;line-height:1.5;color:rgba(244,241,234,.85)">İşletmeler için
+          9 × 12 cm masa isimliği, yönetici ve personel için 10 × 20 cm kurumsal isimlik. Tasarımdan 3D baskıya,
+          kendi atölyemizde.</p></div>""", dark=True))
+    no += 1
+
+    cats = "".join(f"""<div style="background:#fff;border-radius:16px;overflow:hidden">
+      <img src="{foto(models(cat)[0][1].key if cat == '10x20' else 'kuafor', maxw=600)}"
+        style="width:100%;height:210px;object-fit:cover;display:block">
+      <div style="padding:14px 16px"><p class="k" style="font-size:10px">{U.KATEGORI[cat]['olcu'].upper()} ·
+        {len(models(cat))} MODEL</p><p class="u" style="margin-top:6px;font-size:17px">{U.KATEGORI[cat]['ad']}</p>
+        <p style="margin-top:6px;font-size:12px;line-height:1.45;color:#55575c">{U.KATEGORI[cat]['kisa']}</p></div>
+      </div>""" for cat in U.KATEGORI)
+    steps = "".join(f"""<div style="display:flex;gap:14px;padding:12px 0;border-top:1px solid #ddd6ca">
+      <b class="u" style="color:{ORANGE};font-size:18px;width:36px">{a}</b><div><p style="font-weight:700;
+      font-size:14px">{b}</p><p style="margin-top:3px;font-size:12px;color:#55575c">{c}</p></div></div>"""
+                    for a, b, c in [("01", "Modeli seçin", "Katalogdaki kodla (M01 …) ya da size özel yeni bir düzen."),
+                                    ("02", "Bilgilerinizi gönderin",
+                                     "Ad, logo, renkler, telefon, Instagram, konum, IBAN."),
+                                    ("03", "Onaylayın, basalım", "Tasarımı onayınıza sunarız; 3D basıp kargolarız.")])
+    pages.append(page(f"""<p class="k">NASIL ÇALIŞIR</p>
+      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Masanızda durur,<br>müşteriniz okutur.</h2>
+      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:#3b3d42;max-width:620px">İsimlikteki QR'ı
+        okutan müşteriniz size özel sayfayı açar: ara, WhatsApp, Instagram, konum, Google yorum, IBAN. Kurumsal
+        isimlikte QR dijital kartvizittir: telefon, e-posta, adres, rehbere kaydet. Bilgileriniz değişirse sayfayı
+        güncelleriz; isimlik aynı kalır.</p>
+      <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">{cats}</div>
+      <div style="margin-top:22px">{steps}</div>
+      <img src="{foto('kuyumcu', 'masa', 900)}" style="margin-top:14px;width:100%;height:190px;object-fit:cover;
+        border-radius:14px;display:block">
+      <p style="margin-top:12px;font-size:11px;color:{GRAY}">{NOT_ORNEK}</p>""", no=no))
+    no += 1
+
+    for cat in U.KATEGORI:
+        K, ms = U.KATEGORI[cat], models(cat)
+        feats = "".join(f'<li style="padding:7px 0;border-top:1px solid rgba(244,241,234,.14)">{f}</li>'
+                        for f in K["ozellik"])
+        hero = uri(os.path.join(FOTO, f"kapak_{cat}.jpg"), 900)
+        pages.append(page(f"""<p class="k">KATEGORİ · {K['olcu'].upper()}</p>
+          <h2 class="u" style="margin-top:10px;font-size:34px;line-height:1.1">{K['ad']}</h2>
+          <p style="margin-top:10px;font-size:14px;color:rgba(244,241,234,.78)">{K['kisa']} {len(ms)} model.</p>
+          <img src="{hero}" style="margin-top:22px;width:100%;height:520px;object-fit:cover;border-radius:16px;
+            display:block">
+          <ul style="margin-top:20px;list-style:none;font-size:13.5px;line-height:1.4">{feats}</ul>""",
+                          dark=True, no=no))
+        no += 1
+        for i in range(0, len(ms), 9):
+            chunk = ms[i:i + 9]
+            grid = "".join(card(c, u) for c, u in chunk)
+            pages.append(page(f"""<div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div><p class="k">{K['olcu'].upper()} · {K['ad'].upper()}</p><h2 class="u" style="margin-top:8px;
+              font-size:22px">{chunk[0][0]}–{chunk[-1][0]}</h2></div>{logo("acik", 150, 30)}</div>
+              <div style="margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">{grid}</div>""",
+                              no=no))
+            no += 1
+
+    refs = [u for u in U.URUNLER if u.tur == "musteri"]
+    ref_cells = "".join(f"""<div style="display:flex;gap:12px;align-items:center;background:#fff;border-radius:12px;
+      padding:8px"><img src="{foto(u.key, 'on', 240)}" style="width:76px;height:76px;object-fit:cover;
+      border-radius:8px"><div><p style="font-weight:700;font-size:13px">{u.musteri}</p><p style="font-size:11px;
+      color:#55575c">{u.sektor} · {U.KATEGORI[u.kat]['olcu']} · {u.ad}</p></div></div>""" for u in refs)
+    pages.append(page(f"""<p class="k">REFERANSLAR</p>
+      <h2 class="u" style="margin-top:10px;font-size:26px">Bastığımız isimlikler</h2>
+      <p style="margin-top:10px;font-size:13px;color:#3b3d42">Bu işletmeler isimliklerini kendi seçtikleri
+        tasarımla bastırdı. Katalogdaki görsellerde telefon numarası ve QR örnektir.</p>
+      <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px">{ref_cells}</div>
+      <div style="margin-top:34px;background:{INK};color:{PAPER};border-radius:18px;padding:30px 32px;
+        background-image:{BM.stripes_bg(PAPER, .035, 22)}">
+        <p class="k">SİPARİŞ</p>
+        <p class="u" style="margin-top:10px;font-size:24px;line-height:1.2">Shopier mağazamızdan<br>ya da telefonla.</p>
+        <p style="margin-top:14px;font-size:28px;font-weight:700">{TEL}</p>
+        <p style="margin-top:6px;font-size:13px;color:rgba(244,241,234,.75)">Model kodunu sipariş notuna yazın;
+          tasarımı onayınıza sunarız.</p>
+        <div style="margin-top:22px">{logo("koyu", 240, 48)}</div></div>""", no=no))
+
+    path = os.path.join(OUT, "katalog.pdf")
+    shots = P.pdf(pages, W, H, path, css=CSS)
+    cols = 4
+    tw, th = 397, 562
+    rows = (len(shots) + cols - 1) // cols
+    sheet = Image.new("RGB", (cols * tw + (cols + 1) * 16, rows * th + (rows + 1) * 16), SAND)
+    for k, s in enumerate(shots):
+        sheet.paste(s.resize((tw, th), Image.LANCZOS), (16 + (k % cols) * (tw + 16), 16 + (k // cols) * (th + 16)))
+    sheet.save(os.path.join(OUT, "katalog.png"), optimize=True)
+    return path, len(pages)
+
+
+def main():
+    with BM.painter() as P:
+        for cat in U.KATEGORI:
+            out = shopier(P, cat)
+            print(f"shopier/{cat}: {len(os.listdir(out))} görsel", flush=True)
+        path, n = catalog(P)
+        print(f"{os.path.relpath(path, U.A.ROOT)}: {n} sayfa", flush=True)
+
+
+if __name__ == "__main__":
+    main()
