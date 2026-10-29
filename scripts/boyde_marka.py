@@ -20,7 +20,7 @@ Yazı tipleri (OFL): Unbounded (logo, başlık), Space Grotesk (metin).
 
 Kullanım:
   python3 scripts/boyde_marka.py             # yalnız seçenek sayfaları
-  python3 scripts/boyde_marka.py --yon 3a    # seçenekler + 3a ile kit
+  python3 scripts/boyde_marka.py --yon 3b    # seçenekler + 3b ile kit (seçilen)
 """
 import base64
 import contextlib
@@ -384,6 +384,7 @@ def mark_n_katman():
     y = n["tip"] + g + h / 2
     layers = [(_bar(x0, 12 + 3.5, y, h), "accent")]
     layers += [(_bar(x0, x1, y + k * (h + g), h), "main") for k in (1, 2)]
+    mark_n_katman.rows = [(y + k * (h + g), h, "accent" if k == 0 else "main") for k in range(3)]
     return _parts(*_nozparts(n), *layers)
 
 
@@ -1429,14 +1430,17 @@ def icon_svg(key, color, width=1.6):
             f'stroke-linejoin="round">{ICONS[key][0]}</svg>')
 
 
-def product_photo():
-    """Ürün görseli (şablonlarda): Auto Tufan isimliğinin 3/4 görünüşü, büyük çizim (saydam; bir kez çizilip
-    kaynak/ klasöründe saklanır)."""
-    path = os.path.join(OUT, "kaynak", "urun_ornek.png")
+def product_photo(key="uzar"):
+    """Ürün görseli (gönderi, şablonlar): örnek modundaki isimliğin 3/4 görünüşü, saydam (QR okunmaz, telefon
+    BOYDE'nin; model boyde_urunler'in dışa aktardığı kaynak/<ürün>.npz). Bir kez çizilip kaynak/ klasöründe saklanır."""
+    path = os.path.join(OUT, "kaynak", f"urun_{key}.png")
     if not os.path.exists(path):
-        import autotufan_isimlik as C
-        d = C.build(C.secilen)
-        im = C.render(C.mesh(d.shown), 1600, C.rotation(-28, -68), margin=0.02)
+        import json
+        from cift_tarafli_isimlik import render, rotation
+        z = np.load(os.path.join(OUT, "urunler", "kaynak", f"{key}.npz"))
+        meta = json.loads(str(z["meta"]))
+        meshes = [(z[f"v{i}"].astype(float), z[f"f{i}"], tuple(m["renk"])) for i, m in enumerate(meta)]
+        im = render(meshes, 1600, rotation(-28, -68), margin=0.02)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         im.crop(im.getbbox()).save(path, optimize=True)
     buf = io.BytesIO()
@@ -1446,9 +1450,24 @@ def product_photo():
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
-def wide_graphic(sim_k, aspect, W=1920, H=1080, nozul=False):
+def wide_graphic(sim_k, aspect, W=1920, H=1080, nozul=False, rows=None, y0=0.0, mh=1.0):
     """Metinsiz geniş görsel: işaretin katmanları sola doğru uzar (yazıcının çizdiği çizgiler gibi), en üstteki
-    turuncu. Nozulda: nozul sağda, altında basılan katmanlar; en üstteki turuncu, nozulun altında biter."""
+    turuncu. Nozulda: nozul sağda, altında basılan katmanlar; en üstteki turuncu, nozulun altında biter.
+    rows: işaretin kendi katmanları varsa [(orta y, kalınlık, rol)] (işaret koordinatında; y0, mh: işaretin üst
+    kenarı ve boyu): katmanlar işaretten sola doğru uzar, başka çizgi eklenmez."""
+    if rows:
+        ih = 640
+        iw = ih * aspect
+        left, top = W - 300 - iw, (H - ih) / 2
+        k = ih / mh
+        bars = "".join(
+            f'<i style="position:absolute;left:-40px;width:{left + 40 + h * k:.0f}px;'
+            f'top:{top + (yc - y0 - h / 2) * k:.1f}px;height:{h * k:.1f}px;'
+            f'background:linear-gradient(90deg,transparent,rgba({_rgb(ORANGE if r == "accent" else PAPER)},'
+            f'1) 85%)"></i>' for yc, h, r in rows)
+        return (f'<div style="background:{INK};height:{H}px;position:relative;overflow:hidden">{bars}'
+                f'<div style="position:absolute;left:{left:.0f}px;top:{top:.0f}px">{inline(sim_k, height=f"{ih}px")}'
+                f'</div></div>')
     if nozul:
         ih = 560
         iw = ih * aspect
@@ -1504,7 +1523,10 @@ def kit(P, n):
       <p class="u" style="font-size:52px;font-weight:500;color:{PAPER}">{SLOGAN}</p></div>""",
           1600, 1200, os.path.join(sh, "hakkinda_kapak_4x3.png"))
     _, sw, shh = lockup(n, "simge", "koyu")
-    P.png(wide_graphic(sim_k, sw / shh, nozul=n in NOZUL), 1920, 1080, os.path.join(sh, "hakkinda_genis_16x9.png"))
+    mark = DIRS[n][2]
+    _, (_, my0, _, my1) = mark()
+    P.png(wide_graphic(sim_k, sw / shh, nozul=n in NOZUL, rows=getattr(mark, "rows", None), y0=my0, mh=my1 - my0),
+          1920, 1080, os.path.join(sh, "hakkinda_genis_16x9.png"))
 
     # ---- Instagram: profil ve öne çıkanlar
     P.png(f"""<div style="{dark};height:1080px;display:grid;place-items:center">{fitted(n, "simge", "koyu", 650, 520)}</div>""",

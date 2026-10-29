@@ -9,22 +9,24 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
 
 ## Logo
 
-**Seçilen: 3a · Nozul (Sade).** 3D yazıcının nozulu, ucunda turuncu damla; yazının altını aynı turuncu çizgi çizer.
+**Seçilen: 3b · Katman.** 3D yazıcının nozulu, katmanların üstünde; en üstteki katman turuncu, nozul onu hâlâ
+basıyor.
 
-- **Nozul:** altıgen somun (üç yüzü görünür) ve koni; köşeler yumuşak.
-- **Damla ve çizgi:** nozuldan çıkan turuncu filament yazının altını çizer.
-- **Yazı:** BOYDE kalın, LABS ince ve turuncu (Space Grotesk).
+- **Simge:** nozul (altıgen somun ve koni); altında üç katman, en üstteki turuncu ve nozulun altında bitiyor.
+- **Yazı:** iki kat. Üstte BOYDE; altında turuncu çizgi ve LABS (Space Grotesk).
 - **Söz:** "Katman katman, size özel."
+- **Hakkında görseli:** simgenin katmanları sola doğru uzar.
 
 **Seçim nasıl yapıldı:**
 
-- Önce birbirinden farklı 8 yön çizildi (`secenekler.png`): 1 Küp, 2 Şişe, 3 Nozul, 4 Etiket, 5 Rozet,
-  6 Katmanlı yazı, 7 QR, 8 b ve d.
-- 3 beğenildi, "daha estetik dursun" denildi. Alternatifleri `secenekler_nozul.png`'de: 3a Sade, 3b Katman,
-  3c İlk çizgi, 3d Tek çizgi, 3e Daire, 3f Kare, 3g Yazar, 3h Sıcak uç.
-- 3'ün kendisi istendi; 3a onun toparlanmış hâli.
-- Başka biri seçilirse bütün kit yeniden üretilir: `python3 scripts/boyde_marka.py --yon 3e`.
-- Önceki taslaklar (B'li ve bd'li logolar) git geçmişinde duruyor.
+- **İlk turlar:** önce 8 yön (`secenekler.png`), sonra 3 · Nozul'un 8 çeşidi (`secenekler_nozul.png`).
+- **Kısa süre 3a kullanıldı.** Sonra nozulsuz 20 yön çizildi:
+  - `secenekler_yeni.png`: 11–20;
+  - `secenekler_yeni_2.png`: 21–30;
+  - `secenekler_21_bd.png`: 21'in B&D çeşitleri.
+- **Karar:** 3b · Katman.
+- Başka biri seçilirse bütün kit yeniden üretilir: `python3 scripts/boyde_marka.py --yon <numara>`.
+  - Katalog ve Shopier görsellerinin logosu `scripts/boyde_katalog.py` → `LOGO`.
 
 **`logo/` klasörü:**
 
@@ -65,8 +67,8 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
 **Shopier ölçüleri:** Shopier'ın yardım sayfasından alındı: banner geniş ekran 1920 × 200, mobil 400 × 100; logo en
 az 200 × 200 ve kare. Banner kenarlardan kırpılabildiği için logo ve yazı ortada.
 
-**Ürün görseli:** gönderi 2'deki örnek, Auto Tufan isimliğinin çizimi (`kaynak/urun_ornek.png`). Kendi ürün
-fotoğraflarınızla değiştirilebilir.
+**Ürün görseli:** gönderi 2'deki örnek, Uzar isimliğinin örnek modundaki çizimi (`kaynak/urun_uzar.png`): QR okunmaz,
+telefon BOYDE'nin. Kendi ürün fotoğraflarınızla değiştirilebilir.
 
 ## Renkler
 
@@ -108,7 +110,7 @@ kabartmalı 3D baskı.
 
 ```bash
 python3 scripts/boyde_marka.py              # yalnız seçenek sayfaları
-python3 scripts/boyde_marka.py --yon 3a     # seçilen yönle bütün kit (~30 sn)
+python3 scripts/boyde_marka.py --yon 3b     # seçilen yönle bütün kit (~30 sn)
 ```
 
 Metinler (söz, fiyat, adımlar, bio) `scripts/boyde_marka.py` içinde. Değişince komut yeniden çalıştırılır.

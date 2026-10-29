@@ -27,7 +27,7 @@ import boyde_urunler as U  # noqa: E402
 INK, PAPER, ORANGE, SAND, GRAY, CHAR = BM.INK, BM.PAPER, BM.ORANGE, BM.SAND, BM.GRAY, BM.CHAR
 OUT = U.OUT
 FOTO = os.path.join(OUT, "fotograf")
-LOGO = "3a"
+LOGO = "3b"
 TEL = "0546 475 45 08"
 TUR = {"musteri": "Müşterimizin seçtiği", "oneri": "Müşterimize çizilen öneri", "ornek": "Örnek tasarım"}
 NOT_ORNEK = "Örneklerdeki işletme adları, telefon ve QR'lar örnektir; tasarım sizin bilgilerinizle hazırlanır."
