@@ -1,9 +1,9 @@
 # Shopier ürün metinleri
 
-İki ürün, her kategori bir ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`).
+Üç ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07).
 Açıklamalar düz metin; Shopier'in açıklama kutusuna olduğu gibi yapıştırılır.
 
-Sipariş akışı: müşteri katalogdan model seçmez. Siparişten sonra ona özel 10 tasarım hazırlanır, en beğendiği basılır
+Sipariş akışı (1 ve 2): müşteri katalogdan model seçmez. Siparişten sonra ona özel 10 tasarım hazırlanır, en beğendiği basılır
 ("10 adet örnek çalışma yapacağız; size özel 10 tasarım gönderiyoruz, en beğendiğinizi üretiyoruz"). Görsellerdeki
 M01 … M10 örnek çalışmalar; müşteri beğendiğinin kodunu yazarsa tasarımlar ona göre yönlendirilir.
 
@@ -118,5 +118,46 @@ NASIL ÇALIŞIR
 WhatsApp: 0546 475 45 08
 
 Görsellerdeki kurum ve kişi adları, telefon numaraları ve QR'lar örnektir.
+Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
+```
+
+## 3 · Türk bayraklı masa isimliği (çapraz blok)
+
+Fırat Tuygun'a yaptığımız bayraklı çapraz blok. Ürünün üzerinde "AD SOYAD" yazar; gerçek kişinin adı görsellerde yok.
+Tasarım sabit, yalnız ad soyad değişir: sipariş notundaki adla basılır, önce önizleme gönderilir.
+Görseller: `bayrakli/` (01 kapak … 07 nasıl sipariş verilir), `python3 scripts/bayrakli_isimlik_shopier.py`.
+
+**Ürün adı**
+
+```
+Türk Bayraklı Kişiye Özel Masa İsimliği · Ad Soyad Kabartma · Sehpalı · BOYDE LABS
+```
+
+**Açıklama**
+
+```
+TÜRK BAYRAKLI MASA İSİMLİĞİ · 240 × 56 mm
+Adınız soyadınızla, kendi atölyemizde 3D baskıyla üretiyoruz. Solda kabartma ay yıldızlı bayrak, sağda siyah zeminde büyük beyaz harflerle adınız soyadınız ve altında kırmızı çizgi. Makam masasına, ofise, bankoya; hediye için de güzel bir seçenek.
+
+ÖZELLİKLER
+• Blok: 240 × 56 × 32 mm, dolu ve sağlam
+• Ay yıldız ve ad soyad 2 mm kabartma
+• 3 renk: bayrak kırmızısı, siyah, beyaz
+• Siyah sehpa dahil (200 mm): blok 12° arkaya eğik durur, karşınızdakine bakar
+• Tutkal yok: blok sehpaya oturur, arkadaki duvara yaslanır
+• Ad soyad tek satırda, büyük harf. Uzun adlarda yazı sığacak kadar küçülür.
+
+FİYAT
+• 1 adet: … TL
+
+NASIL SİPARİŞ VERİLİR
+1. Sipariş verin: adedi seçin, ödemeyi Shopier'dan güvenle yapın.
+2. Adınızı yazın: ad soyadı sipariş notuna ya da WhatsApp'tan yazın.
+3. Önizlemeyi onaylayın: adınızla hazırladığımız görseli gönderiyoruz.
+4. Basıp gönderiyoruz: 3D basıp özenle paketleyip kargoya veriyoruz.
+
+WhatsApp: 0546 475 45 08
+
+Görsellerdeki "AD SOYAD" örnektir; isimlik sizin adınızla basılır.
 Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
 ```

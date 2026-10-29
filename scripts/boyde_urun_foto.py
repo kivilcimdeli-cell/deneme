@@ -227,8 +227,8 @@ def light_body(parts):
     return sum(body) / 3 > 150
 
 
-def render(key, views, samples, missing=False):
-    """missing: yalnız henüz çizilmemiş görünüşler."""
+def render(key, views, samples, missing=False, fill=1.0):
+    """missing: yalnız henüz çizilmemiş görünüşler. fill: ürünü kadrajda büyütür (uzun, alçak ürünler)."""
     if missing:
         views = [v for v in views if not os.path.exists(os.path.join(OUT, f"{key}_{v}.jpg"))]
         if not views:
@@ -252,7 +252,7 @@ def render(key, views, samples, missing=False):
             a, e = math.radians(az), math.radians(el)
             direction = np.array([math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)])
             cam["dir"] = direction.tolist()
-            frame(cam, box, SIZE[0] / SIZE[1], 0.78 if v == "on" else 0.72)
+            frame(cam, box, SIZE[0] / SIZE[1], (0.78 if v == "on" else 0.72) * fill)
             cam.data.dof.aperture_fstop = 5.6 if kind == "studyo" else 3.5
             lights(sc, centre, direction, kind)
             shoot(sc, os.path.join(OUT, f"{key}_{v}.jpg"), KOYU if light else BEYAZ)

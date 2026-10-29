@@ -49,7 +49,8 @@
 | `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG: 10 model (01_M01 … 10_M10), BOYDE çerçevesinde |
 | `cerceveli/<kategori>/` | her ürünün üç fotoğrafı (stüdyo, karşıdan, masa) BOYDE çerçevesinde: Instagram ve Shopier'e ek görsel |
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
-| `shopier/urun_metinleri.md` | Shopier ürün adları ve açıklamaları (iki ürün) |
+| `shopier/urun_metinleri.md` | Shopier ürün adları ve açıklamaları (üç ürün) |
+| `shopier/bayrakli/` | Türk bayraklı masa isimliği (Fırat Tuygun'a yaptığımız çapraz blok + sehpa), üzerinde "AD SOYAD": 01 kapak, 02–05 fotoğraflar BOYDE çerçevesinde (stüdyo, karşıdan, masa, yakın), 06 ölçü ve özellikler, 07 nasıl sipariş verilir (`scripts/bayrakli_isimlik_shopier.py`) |
 | `shopier/site_ornekleri/` | 5 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa; beş şablonun beşi, her görsel başka düzende: Çağrı İletişim · Şimşek, Anka Emlak · Lastik izi, Luna Güzellik · İkaz, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
 | `shopier/kartvizit_ornekleri/` | 10 × 20 için 5 dijital kartvizit görseli: beş şablonun beşi, kişilerin kartvizit sayfası, rehbere kaydedilince kişi kartı, hazır WhatsApp mesajı (Kerem Aksoy · Şimşek, Elif Demir · Lastik izi, Zeynep Arslan · İkaz, Mehmet Kaya · Kurumsal, Selin Koç · Sade; uydurma kişiler, e-postalar ornek.com) |
 | `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
@@ -94,4 +95,6 @@ python3 scripts/boyde_urun_foto.py    # fotoğraflar (Blender Cycles, ürün ba�
 python3 scripts/boyde_urun_foto.py --kapak --ornek 40
 python3 scripts/boyde_site_gorsel.py  # örnek site görselleri (~2 dk; isimlik fotoğrafları çizildikten sonra)
 python3 scripts/boyde_katalog.py      # katalog.pdf ve shopier/ (~1 dk)
+python3 scripts/bayrakli_isimlik_shopier.py && python3 scripts/bayrakli_isimlik_shopier.py --foto && \
+  python3 scripts/bayrakli_isimlik_shopier.py --shopier   # bayraklı isimlik (~5 dk)
 ```
