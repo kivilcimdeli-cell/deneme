@@ -46,7 +46,8 @@
 | `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG: 10 model (01_M01 … 10_M10), BOYDE çerçevesinde |
 | `cerceveli/<kategori>/` | her ürünün üç fotoğrafı (stüdyo, karşıdan, masa) BOYDE çerçevesinde: Instagram ve Shopier'e ek görsel |
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
-| `shopier/site_ornekleri/` | 3 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa: Çağrı İletişim · Şimşek, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
+| `shopier/urun_metinleri.md` | Shopier ürün adları ve açıklamaları (iki ürün) |
+| `shopier/site_ornekleri/` | 5 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa; beş şablonun beşi, her görsel başka düzende: Çağrı İletişim · Şimşek, Anka Emlak · Lastik izi, Luna Güzellik · İkaz, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
 | `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
 | `fotograf/<ürün>_studyo.jpg` | stüdyo fonunda (beyaz ya da INK), 3/4 |
 | `fotograf/<ürün>_on.jpg` | aynı fonda, karşıdan |

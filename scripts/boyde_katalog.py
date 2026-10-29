@@ -264,7 +264,7 @@ def card(c, u):
 
 
 def site_pages():
-    """Örnek siteler (scripts/boyde_site_gorsel.py'nin ekran görüntüleri): üç telefon yan yana."""
+    """Örnek siteler (scripts/boyde_site_gorsel.py'nin ekran görüntüleri): beş şablon, beş telefon (3 + 2)."""
     import json
     import boyde_site_gorsel as SG
     import sablonlar
@@ -275,7 +275,7 @@ def site_pages():
             return ""
         d = json.load(open(os.path.join(SG.OUT, key, "bilgiler.json"), encoding="utf-8"))
         cols.append(f"""<div style="display:flex;flex-direction:column;align-items:center;gap:12px">
-          {SG.phone(uri(shot, 600, "PNG"), 196, SG.bg_of(shot))}
+          {SG.phone(uri(shot, 500, "PNG"), 132, SG.bg_of(shot))}
           <p style="font-weight:700;font-size:14px">{d['isletme']}</p>
           <p style="margin-top:-8px;font-size:11.5px;color:rgba(244,241,234,.65)">Şablon: {sablonlar.get(n).AD}</p>
           </div>""")
@@ -284,7 +284,8 @@ def site_pages():
       <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:rgba(244,241,234,.78);max-width:620px">QR'ı
         okutan müşteriniz bu sayfayı açar: ara, WhatsApp, Instagram, Google yorum, konum, rehbere kaydet ve IBAN (tek
         dokunuşla kopyalanır). Beş şablondan biri, sizin renginiz ve logonuzla; uygulama gerekmez.</p>
-      <div style="margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">{''.join(cols)}</div>
+      <div style="margin-top:26px;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 40px">{''.join(cols)}
+      </div>
       <p style="margin-top:22px;font-size:11px;color:{GRAY}">Örnek işletmeler; telefon BOYDE LABS'in, IBAN ve QR
         örnektir.</p>"""
 
