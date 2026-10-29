@@ -2,18 +2,19 @@
 
 Kullanıcı isteği: "iki üründe de B07'yi beğendik, fakat Shopier linkimize açılsın QR kodu ve üstündeki yazıları buna
 göre konfigüre et ve X2D Bambu Lab baskı dosyalarını ver"; "telefon numaralarını sil, olmasın".
-Tasarımlar scripts/boyde_kendi.py'de (b9_shopier, p_shopier); QR https://www.shopier.com/boyde (3. sürüm, 34 mm).
+Tasarımlar scripts/boyde_kendi.py'de (b9_shopier, p_shopier); QR https://www.shopier.com/boyde (3. sürüm, hata
+düzeltme Q; 9 × 12'de 34 mm, 10 × 20'de 38 mm: beyaz zeminde siyah kareler baskıda yayılır).
 
-9 × 12 (B07 · QR solda) – lastikçilerin basılan isimlikleriyle aynı yapı ve ayarlar (scripts/uzar_isimlik_baski.py):
+9 × 12 (B07; QR sağda, yazılar solda) – lastikçilerin basılan isimlikleriyle aynı yapı ve ayarlar (scripts/uzar_isimlik_baski.py):
   * Tablada iki takım (panel + sehpa). Panel 120 × 90 mm, siyah gövde 1 cm, köşeler R8, pahlı; yüzü yukarı, destek yok.
   * Kabartma 2 mm: işaret, BOYDE, adımlar ve TARA beyaz; işaretin üst katmanı, LABS ve çizgisi, 3. adım ve TARA
     turuncu. Kabartma yazılarda harf içi ve ara ≥ 0,7 mm (işaretin somun yarıkları 0,6 mm: süs, kaynaşsa da görünmez).
   * QR ve shopier.com/boyde yüzeyle aynı hizada beyaz dolgu (üst 4 katman).
   * Nozullar: siyah ve turuncu ana nozulda (turuncu yalnız kabartmada, siyah bitince bir kez geçer), beyaz yardımcıda.
 10 × 20 (B07 · Hizmetler) – Paloma'nın basılan isimliğiyle aynı yapı (scripts/paloma_isimlik_baski.py):
-  * Tek takım. Panel 200 × 100 mm, siyah gövde 5 mm; yazılar, işaret ve QR yüzeyle aynı hizada renkli dolgu (üst 4
-    katman): beyaz ve turuncu. Sehpa siyah, 170 × 40 mm.
-  * Nozullar: siyah ana nozulda; beyaz ve turuncu yardımcı nozulda (yalnız üst 4 katman).
+  * Tek takım. Panel 200 × 100 mm, beyaz gövde 5 mm ("büyük olanın tabanı beyaz olsun"); yazılar, işaret ve QR
+    kareleri yüzeyle aynı hizada renkli dolgu (üst 4 katman): siyah ve turuncu. Sehpa beyaz, 170 × 40 mm.
+  * Nozullar: beyaz ana nozulda; siyah ve turuncu yardımcı nozulda (yalnız üst 4 katman).
 İkisinde de: Bambu standart 0,20 mm (Standard @BBL X2D), ütüleme kapalı, destek kapalı, Textured PEI, Generic PLA.
 AMS: 1 siyah · 2 beyaz · 3 turuncu (Bambu PLA Basic Orange ya da benzeri).
 
@@ -35,7 +36,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-QR_SIDE = 34.0
+QR_SIDE = {"9x12": 34.0, "10x20": 38.0}                 # tasarımdaki QR karosu (boyde_kendi)
 
 
 def setup():
@@ -88,9 +89,14 @@ def slice_check(plate, path, filaments, move, raised_z, flat_z, out_json):
                 items_r.append((f"{k} (noktalar)", move(A.union(*dots)), raised[id(cs)]))
         elif id(cs) in inlay:
             items_f.append((k, move(cs), inlay[id(cs)]))
-    named = {id(cs) for cs in d.lines.values()}
-    qr = [(cs, col) for cs, col in d.inlay if id(cs) not in named and col == A.WHITE]
-    items_f.append(("QR (beyaz karo)", move(A.union(*[cs for cs, _ in qr])), A.WHITE))
+    named = {id(cs) for cs in d.lines.values()}               # adsız dolgu: QR (koyu gövdede beyaz karo, açıkta kareler)
+    qr = [(cs, col) for cs, col in d.inlay if id(cs) not in named]
+    qr_col = qr[0][1]
+    qr_cs = A.union(*[cs for cs, _ in qr])
+    singles = [p for p in qr_cs.decompose() if p.area() < 2.5]        # tek başına kareler: noktalar gibi ölçülür
+    items_f.append((f"QR ({A.COLOUR_NAMES[qr_col]})", move(qr_cs - A.union(*singles) if singles else qr_cs), qr_col))
+    if singles:
+        items_f.append(("QR tek kareler (noktalar)", move(A.union(*singles)), qr_col))
     tools = {c: i for i, c in enumerate(filaments)}
     with tempfile.TemporaryDirectory() as tmp:
         gcode = os.path.join(tmp, "baski.gcode")
@@ -101,8 +107,8 @@ def slice_check(plate, path, filaments, move, raised_z, flat_z, out_json):
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump({"kaynak": "PrusaSlicer, Bambu standart 0,20 mm eşdeğeri, kule ve renk değişimi hariç",
                    "g": g, "toplam_g": m["toplam_g"], "sure": m["sure"]}, f, ensure_ascii=False)
-    # kenar: kabartmanın ilk katmanında dış şerit; yüzey: üst katman dolu mu. Noktalar (≈ 1,2 mm): çizginin kenar payı
-    # alanın büyük bir kısmı, kaplama oranca düşük çıkar; basılıyor mu diye bakılır (≥ %70).
+    # kenar: kabartmanın ilk katmanında dış şerit; yüzey: üst katman dolu mu. Noktalar ve QR'ın tek kareleri (≈ 1,2 mm):
+    # çizginin kenar payı alanın büyük bir kısmı, kaplama oranca düşük çıkar; basılıyor mu diye bakılır (≥ %70).
     ok = all(per >= (0.7 if k.endswith("(noktalar)") else 0.8) if kind == "kenar" else
              per >= 0.7 if k.endswith("(noktalar)") else
              cov >= 0.85 and per >= 0.85 and (k[:2] != "QR" or lost <= 0.2)
@@ -150,7 +156,7 @@ def make_9x12():
         def __init__(self):
             self.design = K.b9_shopier()
             self.panel = S.solids(self.design)
-            self.module = Q.module_for(K.wa_qr(K.SHOPIER), QR_SIDE)
+            self.module = Q.module_for(K.shopier_qr(), QR_SIDE["9x12"])
             self.stand, self.mount = B.stand()
             self.nozzle_map = {A.BLACK: 1, S.ORANGE: 1, A.WHITE: 2}
             self.filament_profiles = {c: A.GENERIC_PLA for c in (A.BLACK, A.WHITE, S.ORANGE)}
@@ -207,9 +213,9 @@ def make_10x20():
             self.design = K.p_shopier()
             self.panel = S.solids_20(self.design)
             self.body = self.design.sc["body"]
-            self.module = Q.module_for(K.wa_qr(K.SHOPIER), QR_SIDE)
+            self.module = Q.module_for(K.shopier_qr(), QR_SIDE["10x20"])
             self.stand, self.mount = B.stand(length=PB.STAND_LEN)
-            self.nozzle_map = {A.BLACK: 1, A.WHITE: 2, S.ORANGE: 2}
+            self.nozzle_map = {self.body: 1, S.ORANGE: 2, A.BLACK if self.body == A.WHITE else A.WHITE: 2}
             self.filament_profiles = {c: A.GENERIC_PLA for c in (A.BLACK, A.WHITE, S.ORANGE)}
             self.object_settings = {"enable_support": "0", "ironing_type": "no ironing"}
             self.tower_xy = B.TOWER_XY
@@ -227,12 +233,14 @@ def make_10x20():
     g, sure, rows, ok = slice_check(plate, path, filaments, lambda cs: cs.translate((dx, dy)), [], round(B.T, 2),
                                     os.path.join(out_dir, "olcum_10x20.json"))
     print_rows(g, sure, rows, ok)
-    info = ["Tek takım (panel + sehpa) · panel 200 × 100 mm, siyah gövde 5 mm · yazılar, işaret ve QR yüzeyle aynı "
-            "hizada (üst 0,8 mm) beyaz ve turuncu",
-            f"AMS: 1 siyah · 2 beyaz · 3 turuncu   ·   siyah ana nozulda (gövde, sehpa); beyaz ve turuncu yardımcı "
-            f"nozulda (yalnız üst 4 katman) · sehpa {PB.STAND_LEN:.0f} × 40 mm",
+    body = A.COLOUR_NAMES[plate.body]
+    ink = "siyah" if plate.body == A.WHITE else "beyaz"
+    info = [f"Tek takım (panel + sehpa) · panel 200 × 100 mm, {body} gövde 5 mm · yazılar, işaret ve QR yüzeyle aynı "
+            f"hizada (üst 0,8 mm) {ink} ve turuncu",
+            f"AMS: 1 siyah · 2 beyaz · 3 turuncu   ·   {body} ana nozulda (gövde, sehpa); {ink} ve turuncu yardımcı "
+            f"nozulda (yalnız üst 4 katman) · sehpa {body}, {PB.STAND_LEN:.0f} × 40 mm",
             "Bambu standart 0,20 mm · ütüleme kapalı · destek yok · Textured PEI · panel yüzü yukarı, sehpa önünde",
-            f"Filament ~{sum(g.values()):.0f} g (siyah {g.get('siyah', 0):.0f}, beyaz {g.get('beyaz', 0):.1f}, turuncu "
+            f"Filament ~{sum(g.values()):.0f} g (siyah {g.get('siyah', 0):.1f}, beyaz {g.get('beyaz', 0):.1f}, turuncu "
             f"{g.get('turuncu', 0):.1f}) + kule · PrusaSlicer ~{sure} · QR Shopier'i açar"
             f"{' (benzetimde de)' if qr[1] else ', benzetimde OKUNMADI'} · dilimleyicide "
             f"{'bütün yazılar basılıyor' if ok else 'SORUN'} · yerleşim {'tamam' if ok_place else 'SORUN'}"]

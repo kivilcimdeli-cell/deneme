@@ -45,11 +45,17 @@ PHONE = S.PHONE
 t, bar = S.t, S.bar
 
 
-def wa_qr(url=WA):
+def wa_qr(url=WA, error="m"):
     """Çalışan QR: WhatsApp'ımız (2. sürüm, 25 × 25; 34 mm'lik karoda kare 1,17 mm) ya da Shopier (3. sürüm)."""
     import segno
     make = getattr(segno, "make_gercek", segno.make)
-    return Q.Entry("sayfa", "TARA", url, "TARA", qr=make(url, error="m", micro=False))
+    return Q.Entry("sayfa", "TARA", url, "TARA", qr=make(url, error=error, micro=False))
+
+
+def shopier_qr():
+    """Seçilen B07'lerin QR'ı: Shopier mağazamız; hata düzeltme Q (yine 3. sürüm, kare 1,03 mm). Beyaz zeminde siyah
+    kareler baskıda yayılır: M düzeyi baskı hatası benzetiminde okunmadı."""
+    return wa_qr(SHOPIER, "q")
 
 
 def _mark_pairs(_cache=[]):
@@ -423,33 +429,34 @@ def p_kartvizit():
 # ---------------------------------------------------------------- seçilenler: iki ölçüde B07, Shopier
 
 def b9_shopier():
-    """9 × 12 B07 (QR solda), seçilen: QR Shopier mağazamızı açar, telefon yok ("telefon numaralarını sil"); adımlar
-    sipariş akışına göre, altta mağaza adresi."""
+    """9 × 12 B07, seçilen: QR Shopier mağazamızı açar, telefon yok ("telefon numaralarını sil"); adımlar sipariş
+    akışına göre, altta mağaza adresi. QR sağda, yazılar solda ("QR ile yazıların yerini değiştir, QR sağda")."""
     d = S.Design("b9_shopier", DARK)
     d.url = SHOPIER
-    tile = d.qr(wa_qr(SHOPIER), -35.0, 52.0, 34.0)
-    d.add("TARA", t("outfit", "TARA", 4.6, -35.0, tile.bounds()[1] - 5.8, "c", 1.8, 34.0), ORANGE)
-    cx = 22.0                                            # kabartma yazılar baskıda: harf içi ve ara ≥ 0,7 mm
+    tile = d.qr(shopier_qr(), 35.0, 52.0, 34.0)
+    d.add("TARA", t("outfit", "TARA", 4.6, 35.0, tile.bounds()[1] - 5.8, "c", 1.8, 34.0), ORANGE)
+    cx = -22.0                                           # kabartma yazılar baskıda: harf içi ve ara ≥ 0,7 mm
     put_logo(d, d.add, 20.0, cx, 85.0, WHITE, "tc")
     put_word(d, d.add, 8.0, cx, 56.0, WHITE, "c", 0.35)
     for k, s in enumerate(("TARA", "SİPARİŞ VER", "TASARIM SEÇ")):     # orta nokta yok (kabartmada çok küçük)
-        d.add(f"adım {k}", lifted("outfit", f"{k + 1}  {s}", 4.5, -9.0, 37.0 - k * 7.0, "l", 0.8, 63.0),
+        d.add(f"adım {k}", lifted("outfit", f"{k + 1}  {s}", 4.5, X0, 37.0 - k * 7.0, "l", 0.8, 63.0),
               ORANGE if k == 2 else WHITE)
     d.flat("mağaza", t("sg7", "shopier.com/boyde", 4.6, cx, 15.5, "c", 0.15, 63.0), WHITE)  # küçük harf: dolgu
     return d
 
 
 def p_shopier():
-    """10 × 20 B07 (Hizmetler), seçilen: QR Shopier mağazamızı açar, telefon yok; solda altta mağaza adresi."""
-    d = S.Design("p_shopier", DARK)
+    """10 × 20 B07 (Hizmetler), seçilen: QR Shopier mağazamızı açar, telefon yok; solda altta mağaza adresi.
+    Zemin beyaz ("büyük olanın tabanı beyaz olsun"): yazı, işaret ve QR kareleri siyah, sehpa beyaz."""
+    d = S.Design("p_shopier", LIGHT)
     d.url = SHOPIER
-    lockup(d, d.flat, 22.0, -86.0, 80.0, WHITE)
+    lockup(d, d.flat, 22.0, -86.0, 80.0, BLACK)
     for k, s in enumerate(("QR'lı masa isimliği", "Kurumsal isimlik ve kartvizit", "Size özel 3D baskı")):
         y = 53.0 - k * 11.0
         d.flat(f"no {k}", t("sg7", f"0{k + 1}", 5.0, -86.0, y, "l", 0.2), ORANGE)
-        d.flat(f"hizmet {k}", t("mont6", s, 5.0, -72.0, y, "l", 0.1, 112.0), WHITE)      # küçülmesin: i noktaları
+        d.flat(f"hizmet {k}", t("mont6", s, 5.0, -72.0, y, "l", 0.1, 112.0), BLACK)      # küçülmesin: i noktaları
     d.flat("mağaza", t("sg7", "shopier.com/boyde", 5.0, -86.0, 18.0, "l", 0.1, 90.0), ORANGE)
-    tile = d.qr(wa_qr(SHOPIER), 66.0, 58.0, 34.0)
+    tile = d.qr(shopier_qr(), 66.0, 60.0, 38.0)          # beyaz zeminde siyah kareler: 38 mm (benzetimde okunur)
     d.flat("TARA", t("mont6", "TARA", 4.4, 66.0, tile.bounds()[1] - 5.6, "c", 1.8, 40.0), ORANGE)
     return d
 
