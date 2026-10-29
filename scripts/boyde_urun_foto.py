@@ -5,12 +5,14 @@ sehpa) restoran_masalik_foto.py'nin malzemeleriyle çizilir: mat PLA, panel yüz
 basılır), sehpada 0,2 mm katman izi, kenarlarda yumuşak ışık.
 
 Görünüşler (kare, 1200 × 1200; Shopier için yeterli, bir ürün ~4 dk):
-  studyo  beyaz stüdyo fonu (kıvrık fon), 3/4 sağdan
+  studyo  stüdyo fonu (kıvrık fon, hafif parlak), 3/4 sağdan
   on      aynı fon, karşıdan: yazılar okunur
-  masa    beyaz masa (az parlak, yansıma verir), 3/4 soldan, arkası bulanık
+  masa    parlak masa (isimlik yansır), 3/4 soldan, arkası bulanık
 Kapak (--kapak): her kategoriden birkaç isimlik yan yana (kategori kapağı, katalog).
 Zemin (kullanıcı: "kahverengi arka planları sil, hepsini beyaz yap"; "ürün beyazsa logomuzdaki renk"): koyu
 isimlikler beyaz fonda ve beyaz masada, beyaz isimlikler logodaki siyahta (INK). Çizimden sonra seviye ayarı (level).
+Beyaz fonda ("kontrast yok gibi, siyahlardaki gibi derinlik"): siyahlar derin (AgX Punchy), fon ortada beyaz,
+köşelere doğru yumuşakça kararır; masa ve fon parlak, isimliğin yansıması düşer.
 
 Çıktı : boyde_labs/urunler/fotograf/<ürün>_<görünüş>.jpg, kapak_<kategori>.jpg
 
@@ -39,9 +41,10 @@ MM = R.MM
 SIZE = (1200, 1200)
 FON = (246, 246, 244)                                    # beyaz fon ("kahverengi arka planları sil, hepsini beyaz yap")
 MASA = (244, 244, 242)                                   # beyaz masa (eskiden ahşap)
-GLOW = {"studyo": 1.2, "masa": 0.7, "duvar": 1.2}       # beyaz yüzeylerin hafif ışıması: gölgede griye dönmesin
-BEYAZ = (248, 248, 247)                                  # beyaz fonun son hâli (level)
 KOYU = (18, 19, 22)                                      # beyaz isimliklerin fonu: logodaki siyah (INK #121316)
+BEYAZ = (244, 244, 243)                                  # beyaz fonun ortası (level)
+VINYET = 0.14                                            # beyaz fonda köşelerin kararması: ışık ortada toplanır, derinlik
+BAKIS = "AgX - Punchy"                                   # beyaz fondaki koyu isimlikler: siyahı derin ("kontrast yok gibi")
 VIEWS = {"studyo": ("studyo", 30.0, 12.0), "on": ("studyo", 0.0, 7.0), "masa": ("masa", -28.0, 11.0)}
 KAPAK = {"9x12": [["telefon", "kuafor", "kuyumcu"], ["uzar", "emlak"]],
          "10x20": [["avukat", "paloma"], ["musavir"]]}
@@ -73,33 +76,29 @@ def add(name, V, F, m, shift=(0.0, 0.0, 0.0)):
     return ob
 
 
-def white(name, rgb, rough, glow):
+def surface(name, rgb, rough):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     bs = m.node_tree.nodes["Principled BSDF"]
     bs.inputs["Base Color"].default_value = R.srgb(rgb)
     bs.inputs["Roughness"].default_value = rough
-    bs.inputs["Emission Color"].default_value = R.srgb(rgb)
-    bs.inputs["Emission Strength"].default_value = glow
     return m
 
 
-def scene(kind, samples, size, glow=1.0, dark=False):
-    """studyo: beyaz kıvrık fon (sonsuz fon); masa: restoran_masalik_foto'nun masası ve duvarları, beyaz (az parlak
-    masa, mat duvar). dark: aynı sahne logodaki siyahla (beyaz isimlikler; masa parlak, yansıma verir)."""
+def scene(kind, samples, size, dark=False):
+    """studyo: beyaz kıvrık fon (sonsuz fon, hafif parlak); masa: restoran_masalik_foto'nun masası ve duvarları, beyaz
+    (masa parlak: isimlik yansır, mat duvar). dark: aynı sahne logodaki siyahla (beyaz isimlikler)."""
     R.SIZE = size
     _MATS.clear()
     sc = R.setup_scene(samples)
     R._MATS.clear()
     fon, masa = (KOYU, KOYU) if dark else (FON, MASA)
-    if dark:
-        glow = 0.0
     bg = sc.world.node_tree.nodes["Background"]
     bg.inputs["Color"].default_value = R.srgb(fon)
     if kind == "masa":
         ob = bpy.data.objects["masa"]
-        ob.data.materials[0] = white("masa_beyaz", masa, 0.22 if dark else 0.32, GLOW["masa"] * glow)
-        wm = white("duvar_beyaz", fon, 0.9, GLOW["duvar"] * glow)
+        ob.data.materials[0] = surface("masa", masa, 0.22 if dark else 0.12)
+        wm = surface("duvar", fon, 0.9)
         for name in ("duvar0", "duvar1"):
             bpy.data.objects[name].data.materials[0] = wm
     if kind == "studyo":
@@ -117,7 +116,7 @@ def scene(kind, samples, size, glow=1.0, dark=False):
         for p in me.polygons:
             p.use_smooth = True
         ob = bpy.data.objects.new("fon", me)
-        ob.data.materials.append(white("fon", fon, 0.6 if dark else 0.9, GLOW["studyo"] * glow))
+        ob.data.materials.append(surface("fon", fon, 0.6 if dark else 0.3))
         sc.collection.objects.link(ob)
         bg.inputs["Strength"].default_value = 0.35
     return sc
@@ -192,7 +191,7 @@ def camera(sc, lens=85):
 def level(src, dst, target=BEYAZ):
     """Seviye ayarı: kenarlardaki fon (üst, sol, sağ şerit) tam `target` rengine çekilir. Beyaz fonda siyah noktası,
     koyu fonda beyaz noktası yerinde kalır (koyu ya da açık gövde neredeyse değişmez). Cycles'ta beyaz fon AgX'le
-    açık griye düşer; fotoğrafçının "beyaz noktası"."""
+    açık griye düşer; fotoğrafçının "beyaz noktası". Beyaz fonda ardından köşeler VINYET oranında kararır."""
     from PIL import Image
     im = np.asarray(Image.open(src).convert("RGB")).astype(float)
     edge = np.concatenate([im[:12].reshape(-1, 3), im[:, :12].reshape(-1, 3), im[:, -12:].reshape(-1, 3)])
@@ -200,6 +199,12 @@ def level(src, dst, target=BEYAZ):
     t = np.asarray(target, float)
     if t.mean() > 128:
         im = im * (t / bg)
+        if VINYET:                                       # ortası açık, köşelere doğru yumuşakça kararır (derinlik)
+            h, w = im.shape[:2]
+            y, x = np.mgrid[0:h, 0:w]
+            r = np.hypot((x - w / 2) / (w / 2), (y - h * 0.52) / (h / 2)) / math.sqrt(2)
+            u = np.clip((r - 0.3) / 0.7, 0, 1)
+            im = im * (1 - VINYET * u * u * (3 - 2 * u))[..., None]
     else:
         im = 255 - (255 - im) * (255 - t) / (255 - bg)
     out = np.clip(im + 0.5, 0, 255).astype(np.uint8)
@@ -237,6 +242,8 @@ def render(key, views, samples, missing=False):
     for kind, vs in by_kind.items():
         sc = scene(kind, samples, SIZE, dark=light)
         sc.view_settings.exposure = (0.15 if kind == "masa" else -0.15) if light else -0.3
+        if not light:
+            sc.view_settings.look = BAKIS
         box = place(parts)
         cam = camera(sc)
         centre = box.mean(0)
@@ -255,8 +262,10 @@ def cover(cat, samples, size=(1600, 1600)):
     """Kategori kapağı: arka sırada üç, ön sırada iki isimlik. Masa beyaz; isimliklerin çoğu beyazsa koyu."""
     rows = [[load(k) for k in keys] for keys in KAPAK[cat]]
     dark = 2 * sum(light_body(p) for row in rows for p in row) > sum(map(len, rows))
-    sc = scene("masa", samples, size, 0.8, dark)
+    sc = scene("masa", samples, size, dark)
     sc.view_settings.exposure = -0.5 if dark else -0.45
+    if not dark:
+        sc.view_settings.look = BAKIS
     corners = []
     for r, loaded in enumerate(rows):
         widths = [max(V[:, 0].max() for _, V, _ in p) - min(V[:, 0].min() for _, V, _ in p) for p in loaded]
@@ -276,7 +285,7 @@ def cover(cat, samples, size=(1600, 1600)):
     frame(cam, box, size[0] / size[1], 0.86)
     cam.data.dof.aperture_fstop = 6.3
     lights(sc, box.mean(0), direction, "masa", 1.8)
-    shoot(sc, os.path.join(OUT, f"kapak_{cat}.jpg"), KOYU if dark else (246, 246, 245))
+    shoot(sc, os.path.join(OUT, f"kapak_{cat}.jpg"), KOYU if dark else BEYAZ)
 
 
 def main():
