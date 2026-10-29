@@ -46,6 +46,27 @@
 | B09 | Resepsiyon | beyaz; ortada işaret ve yazı, "Hoş geldiniz" |
 | B10 | Kartvizit | siyah; atölye, telefon ve WhatsApp; QR turuncu çerçeveli |
 
+## Seçilen: iki ölçüde B07 (Shopier)
+
+"İki üründe de B07'yi beğendik; Shopier linkimize açılsın"; "telefon numaralarını sil".
+
+- **QR:** `https://www.shopier.com/boyde` (34 mm, kare 1,03 mm). Üstten görünüşte ve baskı hatası benzetiminde okunur.
+- **Telefon numarası yok.** Yazılar sipariş akışına göre:
+  - 9 × 12: QR'ın altında TARA; sağda işaret, BOYDE LABS, "1 TARA · 2 SİPARİŞ VER · 3 TASARIM SEÇ", shopier.com/boyde.
+  - 10 × 20: işaret ve yazı, 01 · 02 · 03 hizmetler, shopier.com/boyde; QR'ın altında TARA.
+- **Baskı dosyaları** (`baski/`, `scripts/boyde_isimlik_baski.py`), Bambu Lab X2D:
+
+| Dosya | Ne | AMS | Filament · süre (PrusaSlicer eşdeğeri) |
+| --- | --- | --- | --- |
+| `boyde_isimlik_9x12_b07_x2d.3mf` | iki takım; siyah gövde 1 cm, kabartma 2 mm, QR ve adres dolgu | 1 siyah · 2 beyaz · 3 turuncu | ~117 g · ~3 sa 23 dk |
+| `boyde_isimlik_10x20_b07_x2d.3mf` | tek takım; siyah gövde 5 mm, yazılar yüzeyle aynı hizada | 1 siyah · 2 beyaz · 3 turuncu | ~82 g · ~2 sa 26 dk |
+
+- **Ayarlar:** Bambu standart 0,20 mm, ütüleme ve destek kapalı, Textured PEI, Generic PLA.
+  - 9 × 12: siyah ve turuncu ana nozulda, beyaz yardımcıda.
+  - 10 × 20: siyah ana nozulda; beyaz ve turuncu yardımcıda.
+- **Denetim:** her üretimde dilimlenir. Her yazı, nokta ve QR kendi renginde basılıyor mu bakılır; önizleme `onizleme_*.png`, ölçüm `olcum_*.json`.
+- **9 × 12 kabartma:** harf içi ve ara ≥ 0,7 mm. İ noktaları yukarı alındı; adımlarda orta nokta yok.
+
 ## Dosyalar
 
 | Dosya | Ne |

@@ -34,6 +34,7 @@ OUT = os.path.join(A.ROOT, "boyde_labs", "kendi")
 SRC = os.path.join(OUT, "kaynak")
 FOTO = os.path.join(OUT, "fotograf")
 WA = "https://wa.me/905464754508"
+SHOPIER = "https://www.shopier.com/boyde"                # seçilen B07'ler: QR mağazamızı açar
 BLACK, WHITE, ORANGE = S.BLACK, S.WHITE, S.ORANGE
 GRAY = 27
 U.RGB[GRAY] = (139, 142, 148)                            # GRAY #8B8E94
@@ -44,11 +45,11 @@ PHONE = S.PHONE
 t, bar = S.t, S.bar
 
 
-def wa_qr():
-    """Çalışan QR: WhatsApp'ımız (2. sürüm, 25 × 25; 34 mm'lik karoda kare 1,17 mm)."""
+def wa_qr(url=WA):
+    """Çalışan QR: WhatsApp'ımız (2. sürüm, 25 × 25; 34 mm'lik karoda kare 1,17 mm) ya da Shopier (3. sürüm)."""
     import segno
     make = getattr(segno, "make_gercek", segno.make)
-    return Q.Entry("whatsapp", "WHATSAPP", WA, "WHATSAPP", qr=make(WA, error="m", micro=False))
+    return Q.Entry("sayfa", "TARA", url, "TARA", qr=make(url, error="m", micro=False))
 
 
 def _mark_pairs(_cache=[]):
@@ -86,16 +87,31 @@ def mark(h, x, y, anchor="tl", nozzle=False):
     return out, w
 
 
-def word(cap, x, y, align="l"):
+def word(cap, x, y, align="l", tr=0.0):
     """İki katlı yazı: BOYDE (y büyük harflerin ortası), altında sağa yaslı LABS ve solunda turuncu çizgi.
     Döner (BOYDE, LABS ve çizgi, sınır)."""
-    b = t("sg7", "BOYDE", cap, x, y, align, 0.0)
+    b = t("sg7", "BOYDE", cap, x, y, align, tr)
     bx0, by0, bx1, _ = b.bounds()
     c2 = cap * 0.5
     y2 = by0 - cap * 0.26 - c2 / 2
     labs = t("sg6", "LABS", c2, bx1, y2, "r", c2 * 0.3)
     rule = bar(bx0, labs.bounds()[0] - c2 * 0.55, y2, max(1.2, c2 * 0.34))
     return b, labs + rule, (bx0, y2 - c2 / 2, bx1, by0 + cap)
+
+
+def lifted(k, s, cap, x, y, align="l", tr=0.0, max_w=None, lift=0.5, grow=0.08):
+    """Kabartma baskı için yazı: İ / Ö noktaları küçültülmez; yukarı kaldırılır ve biraz büyür (harfle arası ≥ 0,7 mm;
+    küçülen nokta dilimleyicide basılmıyor). y büyük harflerin ortası."""
+    f = S.font(k)
+    if max_w:
+        cap = f.fit_cap(s, cap, max_w, tr)
+    out = []
+    for p in f.text(s, cap, x, y, align=align, tracking=tr).decompose():
+        b = p.bounds()
+        box = (b[2] - b[0]) * (b[3] - b[1])
+        dot = p.area() < 2.5 and box > 0 and p.area() / box > 0.6 and b[1] > y
+        out.append(p.offset(grow, S.J).translate((0.0, lift)) if dot else p)
+    return A.union(*out)
 
 
 def put_logo(d, add, h, x, y, main, anchor="tl"):
@@ -105,8 +121,8 @@ def put_logo(d, add, h, x, y, main, anchor="tl"):
     return w
 
 
-def put_word(d, add, cap, x, y, main, align="l"):
-    b, rest, box = word(cap, x, y, align)
+def put_word(d, add, cap, x, y, main, align="l", tr=0.0):
+    b, rest, box = word(cap, x, y, align, tr)
     add("BOYDE", b, main)
     add("LABS", rest, ORANGE)
     return box
@@ -404,16 +420,52 @@ def p_kartvizit():
     return d
 
 
+# ---------------------------------------------------------------- seçilenler: iki ölçüde B07, Shopier
+
+def b9_shopier():
+    """9 × 12 B07 (QR solda), seçilen: QR Shopier mağazamızı açar, telefon yok ("telefon numaralarını sil"); adımlar
+    sipariş akışına göre, altta mağaza adresi."""
+    d = S.Design("b9_shopier", DARK)
+    d.url = SHOPIER
+    tile = d.qr(wa_qr(SHOPIER), -35.0, 52.0, 34.0)
+    d.add("TARA", t("outfit", "TARA", 4.6, -35.0, tile.bounds()[1] - 5.8, "c", 1.8, 34.0), ORANGE)
+    cx = 22.0                                            # kabartma yazılar baskıda: harf içi ve ara ≥ 0,7 mm
+    put_logo(d, d.add, 20.0, cx, 85.0, WHITE, "tc")
+    put_word(d, d.add, 8.0, cx, 56.0, WHITE, "c", 0.35)
+    for k, s in enumerate(("TARA", "SİPARİŞ VER", "TASARIM SEÇ")):     # orta nokta yok (kabartmada çok küçük)
+        d.add(f"adım {k}", lifted("outfit", f"{k + 1}  {s}", 4.5, -9.0, 37.0 - k * 7.0, "l", 0.8, 63.0),
+              ORANGE if k == 2 else WHITE)
+    d.flat("mağaza", t("sg7", "shopier.com/boyde", 4.6, cx, 15.5, "c", 0.15, 63.0), WHITE)  # küçük harf: dolgu
+    return d
+
+
+def p_shopier():
+    """10 × 20 B07 (Hizmetler), seçilen: QR Shopier mağazamızı açar, telefon yok; solda altta mağaza adresi."""
+    d = S.Design("p_shopier", DARK)
+    d.url = SHOPIER
+    lockup(d, d.flat, 22.0, -86.0, 80.0, WHITE)
+    for k, s in enumerate(("QR'lı masa isimliği", "Kurumsal isimlik ve kartvizit", "Size özel 3D baskı")):
+        y = 53.0 - k * 11.0
+        d.flat(f"no {k}", t("sg7", f"0{k + 1}", 5.0, -86.0, y, "l", 0.2), ORANGE)
+        d.flat(f"hizmet {k}", t("mont6", s, 5.0, -72.0, y, "l", 0.1, 112.0), WHITE)      # küçülmesin: i noktaları
+    d.flat("mağaza", t("sg7", "shopier.com/boyde", 5.0, -86.0, 18.0, "l", 0.1, 90.0), ORANGE)
+    tile = d.qr(wa_qr(SHOPIER), 66.0, 58.0, 34.0)
+    d.flat("TARA", t("mont6", "TARA", 4.4, 66.0, tile.bounds()[1] - 5.6, "c", 1.8, 40.0), ORANGE)
+    return d
+
+
 S9 = {f.__name__: f for f in (b9_klasik, b9_katman, b9_beyaz, b9_simge, b9_nozul, b9_slogan, b9_ortali, b9_bant,
-                               b9_cerceve, b9_gri)}
+                               b9_cerceve, b9_gri, b9_shopier)}
 S20 = {f.__name__: f for f in (p_kurumsal, p_siyah, p_bant, p_blok, p_buyuk, p_slogan, p_liste, p_cizgi,
-                                p_resepsiyon, p_kartvizit)}
+                                p_resepsiyon, p_kartvizit, p_shopier)}
 AD = {"b9_klasik": "Klasik", "b9_katman": "Katman şeritleri", "b9_beyaz": "Beyaz", "b9_simge": "Büyük işaret",
       "b9_nozul": "Nozul", "b9_slogan": "Slogan", "b9_ortali": "QR solda", "b9_bant": "Turuncu bant",
       "b9_cerceve": "Çerçeve", "b9_gri": "Gri katman",
       "p_kurumsal": "Kurumsal", "p_siyah": "Siyah", "p_bant": "Alt bant", "p_blok": "Turuncu blok",
       "p_buyuk": "Büyük yazı", "p_slogan": "Slogan", "p_liste": "Hizmetler", "p_cizgi": "Uzayan katmanlar",
-      "p_resepsiyon": "Resepsiyon", "p_kartvizit": "Kartvizit"}
+      "p_resepsiyon": "Resepsiyon", "p_kartvizit": "Kartvizit",
+      "b9_shopier": "B07 · Shopier", "p_shopier": "B07 · Shopier"}
+SECILEN = {"9x12": "b9_shopier", "10x20": "p_shopier"}  # "iki üründe de B07'yi beğendik; Shopier linkimize açılsın"
 
 
 def build(key):
@@ -438,7 +490,8 @@ def export(key):
     p = build(key)
     top = U.top_view(p.panel)
     reads = U.qr_reads(top)
-    assert reads and set(reads) == {WA}, f"{key}: QR okunmadı ya da yanlış: {reads!r}"
+    url = getattr(p.design, "url", WA)
+    assert reads and set(reads) == {url}, f"{key}: QR okunmadı ya da yanlış: {reads!r}"
     z0, y0 = p.mount
     parts = B.assembled(p.panel, z0, y0) + [("Sehpa", p.stand, p.stand_col)]
     arrays = {}
@@ -464,8 +517,9 @@ def presentation():
     """Sunum: her ölçü için kare görsel (10 model fotoğrafı, numaralı) ve iki sayfalık PDF."""
     import boyde_katalog as K
     import boyde_marka as BM
-    cats = (("9x12", "9 × 12 cm", "QR'lı masa isimliği", list(S9)), ("10x20", "10 × 20 cm", "Kurumsal isimlik",
-                                                                          list(S20)))
+    own = lambda keys: [k for k in keys if k not in SECILEN.values()]       # noqa: E731  (sunumda 10 model)
+    cats = (("9x12", "9 × 12 cm", "QR'lı masa isimliği", own(S9)), ("10x20", "10 × 20 cm", "Kurumsal isimlik",
+                                                                         own(S20)))
     pages = []
     with BM.painter() as P:
         for cat, olcu, ad, keys in cats:
@@ -510,7 +564,7 @@ def main():
         return
     with mp.get_context("spawn").Pool(4, maxtasksperchild=1) as pool:
         for key, rep in pool.imap_unordered(export, keys):
-            print(f"{key:14s} QR → WhatsApp ✓", flush=True)
+            print(f"{key:14s} QR okundu ✓", flush=True)
             if "--rapor" in args:
                 print("   " + " | ".join(rep), flush=True)
 
