@@ -9,13 +9,18 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
 
 ## Logo
 
-- **Seçilen: 1 · Katman.** B harfi yatay katmanlardan oluşuyor; 3D baskıda parça katman katman yükselir.
+İşaret **b ve d** harflerinden (BoyDe), geometrik. Renk paleti aynı kaldı.
+
+- **Seçilen: 1 · Katman.** b ve d yatay katmanlardan oluşuyor; 3D baskıda parça katman katman yükselir.
   - En üst katman turuncu: o an basılan katman.
   - Yazı: BOYDE kalın, LABS ince ve turuncu.
   - Söz: **"Katman katman, size özel."**
-- **Öteki yönler** (`secenekler.png`): 2 Piksel (B, QR karelerinden), 3 Damla (b ve turuncu filament damlası),
-  4 Nokta (boyde.labs).
-  - Başka biri seçilirse bütün kit ona göre yeniden üretilir: `python3 scripts/boyde_marka.py --yon 3`.
+- **Öteki yönler** (`secenekler.png`):
+  - 2 İki ton: b mürekkep, d turuncu, kaseler iç içe;
+  - 3 Ayna: b ve d aynalı, kaseler ortada değer, değdikleri yerde turuncu nokta;
+  - 4 Tek çizgi: ince b ve d, b mürekkep, d turuncu.
+- Başka biri seçilirse bütün kit ona göre yeniden üretilir: `python3 scripts/boyde_marka.py --yon 3`.
+- İlk taslaktaki B'li logolar git geçmişinde duruyor.
 
 **`logo/` klasörü:**
 

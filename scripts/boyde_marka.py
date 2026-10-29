@@ -3,12 +3,13 @@
 Ürün: QR'lı masa isimliği ve işletmeye özel dijital kartvizit sitesi; hepsi 3D baskı, kendi atölyesinde. Marka bir
 3D baskı atölyesi ("Labs"); logo ürünün kendisinden çıkar.
 
-Logo yönleri (secenekler.png):
-  1 Katman   B harfi yatay katmanlardan: 3D baskıda parça katman katman yükselir. En üst katman turuncu: o an basılan
-             katman. Yazı: BOYDE kalın, LABS ince turuncu (Unbounded).
-  2 Piksel   B, QR karelerinden (yuvarlak köşeli modüller); bir kare turuncu. Yazı: BOYDE LABS (Space Grotesk).
-  3 Damla    küçük b; karnında turuncu damla (nozuldan çıkan filament). Yazı: boyde labs (Unbounded).
-  4 Nokta    yalnız yazı: boyde.labs, nokta turuncu; simge "b." (Space Grotesk).
+Logo yönleri (secenekler.png): işaret b ve d harflerinden (BoyDe), geometrik; yazı hepsinde BOYDE kalın, LABS ince
+turuncu (Unbounded). İlk taslaktaki B'li yönler yerine, istek: "b ve d harflerini kullanarak; renk paleti kalsın".
+  1 Katman     b ve d yatay katmanlardan: 3D baskıda parça katman katman yükselir; en üst katman turuncu, o an
+               basılan katman
+  2 İki ton    b mürekkep, d turuncu; kaseler iç içe, d önde (çevresinde ince boşluk)
+  3 Ayna       b ve d aynalı, kaseleri ortada değer; değdikleri yerde turuncu nokta (nozulun ucu)
+  4 Tek çizgi  ince tek çizgi b ve d; b mürekkep, d turuncu
 
 Seçilen yönle kit (varsayılan 1):
   logo/       yatay, dikey, simge; açık zemin, koyu zemin, tek renk siyah / beyaz; SVG (yazılar çizgi) ve saydam PNG
@@ -40,9 +41,9 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from PIL import Image
-from shapely.geometry import LineString, Polygon, box
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.polygon import orient
-from shapely.ops import polygonize, polylabel, unary_union
+from shapely.ops import polygonize, unary_union
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
@@ -197,87 +198,83 @@ def xh(fn, size):
 # Her işaret ve yazı: [(svg yolu, rol)], sınır kutusu (x0, y0, x1, y1). Roller: main (mürekkep / kâğıt), accent
 # (turuncu), sub (yazının ikinci kelimesi).
 
-LAYERS, GAP = 9, 0.24
+LAYERS, GAP = 10, 0.24          # katmanlar: 10'luk bölüntüde kaselerin üstü (x yüksekliği) tam bir katman sınırında
+R, S = 30.0, 16.0               # geometrik b ve d: kase yarıçapı ve çizgi kalınlığı (yükseklik 100)
+
+
+def _ring(cx, cy, r, t):
+    return Point(cx, cy).buffer(r, 256).difference(Point(cx, cy).buffer(r - t, 256))
+
+
+def _b(x, r=R, s=S):
+    """Geometrik b: solda gövde (yükseklik 100), sağda yuvarlak kase; x sol kenar."""
+    return box(x, 0, x + s, 100).union(_ring(x + r, 100 - r, r, s))
+
+
+def _d(x, r=R, s=S):
+    """Geometrik d: solda kase, sağda gövde; x kasenin sol kenarı."""
+    return box(x + 2 * r - s, 0, x + 2 * r, 100).union(_ring(x + r, 100 - r, r, s))
+
+
+def _layers(g, accent=(0,)):
+    """Şekil yatay katmanlara bölünür (3D baskı katmanları); accent'teki katmanlar turuncu."""
+    x0, y0, x1, y1 = g.bounds
+    bh = (y1 - y0) / LAYERS
+    return [(geom_path(g.intersection(box(x0 - 5, y0 + k * bh, x1 + 5, y0 + k * bh + bh * (1 - GAP)))),
+             "accent" if k in accent else "main") for k in range(LAYERS)]
 
 
 def mark_katman():
-    g, _ = text_geom("B", "Unbounded_800ExtraBold.ttf", 140, 0, 0)
-    x0, y0, x1, y1 = g.bounds
-    H = y1 - y0
-    bh = H / LAYERS
-    parts = []
-    for k in range(LAYERS):
-        piece = g.intersection(box(x0 - 5, y0 + k * bh, x1 + 5, y0 + k * bh + bh * (1 - GAP)))
-        parts.append((geom_path(piece), "accent" if k == 0 else "main"))
-    return parts, (x0, y0, x1, y1)
+    g = _b(0).union(_d(2 * R + 10))
+    return _layers(g), g.bounds
 
 
-B_BITMAP = ["XXXX.", "X...X", "X...X", "XXXX.", "X...X", "X...X", "XXXX."]
+def mark_ikiton():
+    b, d = _b(0), _d(44)
+    return [(geom_path(b.difference(d.buffer(4.5))), "main"), (geom_path(d), "accent")], b.union(d).bounds
 
 
-def mark_piksel():
-    m, parts = 20.0, []
-    for r, row in enumerate(B_BITMAP):
-        for c, v in enumerate(row):
-            if v == "X":
-                s, o, q = m * .9, m * .05, 4.0
-                d = (f"M{c * m + o + q:.1f} {r * m + o:.1f}h{s - 2 * q:.1f}a{q} {q} 0 0 1 {q} {q}v{s - 2 * q:.1f}"
-                     f"a{q} {q} 0 0 1 {-q} {q}h{-(s - 2 * q):.1f}a{q} {q} 0 0 1 {-q} {-q}v{-(s - 2 * q):.1f}"
-                     f"a{q} {q} 0 0 1 {q} {-q}z")
-                parts.append((d, "accent" if (r, c) == (0, 3) else "main"))
-    return parts, (0, 0, 5 * m, 7 * m)
+def mark_ayna():
+    b, d = _b(0), _d(2 * R)
+    dot = Point(2 * R, 100 - R).buffer(7, 64)
+    return [(geom_path(b.union(d).difference(dot.buffer(3))), "main"), (geom_path(dot), "accent")], b.union(d).bounds
 
 
-def mark_damla():
-    g, _ = text_geom("b", "Unbounded_700Bold.ttf", 140, 0, 0)
-    holes = [Polygon(i) for p in getattr(g, "geoms", [g]) for i in p.interiors]
-    hole = max(holes, key=lambda h: h.area)
-    c = polylabel(hole, 0.5)
-    r = hole.exterior.distance(c) * .62
-    dot = f"M{c.x - r:.2f} {c.y:.2f}a{r:.2f} {r:.2f} 0 1 0 {2 * r:.2f} 0a{r:.2f} {r:.2f} 0 1 0 {-2 * r:.2f} 0z"
-    return [(geom_path(g), "main"), (dot, "accent")], g.bounds
+def mark_tekcizgi():
+    b, d = _b(0, R, 9), _d(2 * R + 10, R, 9)
+    return [(geom_path(b), "main"), (geom_path(d), "accent")], b.union(d).bounds
 
 
-def mark_nokta():
-    d1, w = text_path("b", "SpaceGrotesk_700Bold.ttf", 150, 0, 0)
-    d2, w2 = text_path(".", "SpaceGrotesk_700Bold.ttf", 150, w - 4, 0)
-    g, _ = text_geom("b.", "SpaceGrotesk_700Bold.ttf", 150, 0, 0)
-    return [(d1, "main"), (d2, "accent")], g.bounds
-
-
-def word_katman(size):
+def word_main(size):
+    """BOYDE kalın, LABS ince (Unbounded); LABS turuncu."""
     d1, w1 = text_path("BOYDE", "Unbounded_700Bold.ttf", size)
     d2, w2 = text_path("LABS", "Unbounded_300Light.ttf", size, w1 + size * .32, track=.06)
     return [(d1, "main"), (d2, "sub")], (0, -cap("Unbounded_700Bold.ttf", size), w1 + size * .32 + w2, 0)
 
 
-def word_piksel(size):
-    d1, w1 = text_path("BOYDE", "SpaceGrotesk_700Bold.ttf", size, track=.02)
-    d2, w2 = text_path("LABS", "SpaceGrotesk_400Regular.ttf", size, w1 + size * .28, track=.08)
-    return [(d1, "main"), (d2, "sub")], (0, -cap("SpaceGrotesk_700Bold.ttf", size), w1 + size * .28 + w2, 0)
-
-
-def word_damla(size):
-    d1, w1 = text_path("boyde", "Unbounded_600SemiBold.ttf", size)
-    d2, w2 = text_path("labs", "Unbounded_600SemiBold.ttf", size, w1 + size * .3)
-    g, _ = text_geom("boydelabs", "Unbounded_600SemiBold.ttf", size)
-    return [(d1, "main"), (d2, "sub")], (0, g.bounds[1], w1 + size * .3 + w2, g.bounds[3])
-
-
-def word_nokta(size):
-    d1, w1 = text_path("boyde", "SpaceGrotesk_700Bold.ttf", size, track=-.01)
-    d2, w2 = text_path(".", "SpaceGrotesk_700Bold.ttf", size, w1)
-    d3, w3 = text_path("labs", "SpaceGrotesk_700Bold.ttf", size, w1 + w2, track=-.01)
-    g, _ = text_geom("boyde.labs", "SpaceGrotesk_700Bold.ttf", size, track=-.01)
-    return [(d1, "main"), (d2, "accent"), (d3, "main")], (0, g.bounds[1], w1 + w2 + w3, g.bounds[3])
-
-
+# yön: (ad, kısa anlatım, işaret, yazı, kılavuzdaki hikâye maddeleri, katmanlı mı)
 YONLER = {
-    1: ("Katman", "B harfi yatay katmanlardan: 3D baskıda parça katman katman yükselir; en üst katman turuncu, o an "
-                  "basılan katman.", mark_katman, word_katman),
-    2: ("Piksel", "B, QR karelerinden: ürünün kendisi (QR'lı isimlik); bir kare turuncu.", mark_piksel, word_piksel),
-    3: ("Damla", "Küçük b, karnında turuncu damla: nozuldan çıkan sıcak filament.", mark_damla, word_damla),
-    4: ("Nokta", "Yalnız yazı, sade: boyde.labs; nokta turuncu. Simge: b.", mark_nokta, word_nokta),
+    1: ("Katman", "b ve d (BoyDe) yatay katmanlardan: 3D baskıda parça katman katman yükselir; en üst katman "
+                  "turuncu, o an basılan katman.", mark_katman, word_main,
+        [("Harfler", "b ve d: BoyDe'nin iki harfi, birbirine bakan kaseler; geometrik, sade."),
+         ("Katmanlar", f"3D yazıcı parçayı alttan üste ince katmanlarla kurar; işaret {LAYERS} katmandan."),
+         ("Turuncu katman", "en üstteki, o an basılan katman: işin sıcak, yeni ve size özel olduğunu söyler."),
+         ("Yazı", "BOYDE kalın, LABS ince ve turuncu: atölye (laboratuvar) yanı.")], True),
+    2: ("İki ton", "b mürekkep, d turuncu; kaseler iç içe geçer: iki harf, tek işaret.", mark_ikiton, word_main,
+        [("Harfler", "b ve d: BoyDe'nin iki harfi, iç içe; d önde."),
+         ("İki ton", "b mürekkep (atölye), d turuncu (sıcak filament); birbirini tamamlar."),
+         ("Aralık", "d'nin çevresinde ince bir boşluk: harfler karışmaz, küçük boyda da okunur."),
+         ("Yazı", "BOYDE kalın, LABS ince ve turuncu.")], False),
+    3: ("Ayna", "b ve d aynalı, kaseleri ortada değer; değdikleri yerde turuncu nokta: nozulun ucu.", mark_ayna,
+        word_main, [("Harfler", "b ve d birbirinin aynası: BoyDe, iki yandan ortaya bakar."),
+                    ("Turuncu nokta", "kaselerin değdiği yerde: nozulun ucu, işin başladığı nokta."),
+                    ("Simetri", "dengeli, akılda kalan bir işaret; profil fotoğrafında ve küçük boyda güçlü."),
+                    ("Yazı", "BOYDE kalın, LABS ince ve turuncu.")], False),
+    4: ("Tek çizgi", "ince tek çizgi b ve d: b mürekkep, d turuncu; nozulun çektiği tek hat gibi.", mark_tekcizgi,
+        word_main, [("Harfler", "b ve d, ince tek çizgiyle: sade ve modern."),
+                    ("Tek hat", "3D yazıcının nozulu da parçayı tek bir sıcak çizgiyle çizer."),
+                    ("İki ton", "b mürekkep, d turuncu."),
+                    ("Yazı", "BOYDE kalın, LABS ince ve turuncu.")], False),
 }
 
 THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE},
@@ -294,7 +291,7 @@ def _g(parts, theme, dx=0.0, dy=0.0, s=1.0):
 
 def lockup(n, kind, theme, pad=0.0):
     """Logo (SVG metni, en, boy). kind: yatay, dikey, simge, yazi."""
-    _, _, mark, word = YONLER[n]
+    _, _, mark, word, *_ = YONLER[n]
     mp, (mx0, my0, mx1, my1) = mark()
     mw, mh = mx1 - mx0, my1 - my0
     H = 100.0                                       # simge boyu
@@ -434,7 +431,7 @@ def options_sheet(P, path):
     .ring{{padding:4px;border-radius:50%;background:linear-gradient(45deg,#f9a53b,#e1306c,#833ab4)}}
     .pp{{display:grid;place-items:center;width:112px;height:112px;border-radius:50%;background:{INK};border:4px solid #EFEBE3}}
     """
-    body = (f'<div class="top"><h1>BOYDE LABS · logo yönleri</h1><p>Dört yön; birini seçin, bütün kit (logo dosyaları, '
+    body = (f'<div class="top"><h1>BOYDE LABS · b + d logo yönleri</h1><p>Dört yön, hepsi b ve d harflerinden; birini seçin, bütün kit (logo dosyaları, '
             f'Shopier, Instagram, kılavuz) ona göre üretilir. Kit şimdi 1 · Katman ile hazır.</p></div>{"".join(rows)}')
     return P.png(body, 1880, 1300, path, css=css)
 
@@ -509,7 +506,7 @@ def product_photo():
 
 
 def wide_graphic(sim_k, aspect, W=1920, H=1080):
-    """Metinsiz geniş görsel: B'nin katmanları sola doğru uzar (yazıcının çizdiği çizgiler gibi), en üstteki
+    """Metinsiz geniş görsel: işaretin katmanları sola doğru uzar (yazıcının çizdiği çizgiler gibi), en üstteki
     turuncu."""
     ih = 700
     iw = ih * aspect
@@ -633,7 +630,7 @@ def kit(P, n):
 # ---------------------------------------------------------------- kılavuz
 
 def guide(P, n):
-    name, desc, *_ = YONLER[n]
+    name, desc, _, _, story, _ = YONLER[n]
     yat_a, yat_k = lockup(n, "yatay", "acik")[0], lockup(n, "yatay", "koyu")[0]
     dik_a = lockup(n, "dikey", "acik")[0]
     sim_a, sim_k = lockup(n, "simge", "acik")[0], lockup(n, "simge", "koyu")[0]
@@ -666,9 +663,7 @@ def guide(P, n):
       <div class="grid" style="grid-template-columns:1.1fr 1fr">
         <div class="box" style="height:430px;background:{INK}">{inline(sim_k, height="300px")}<small>simge</small></div>
         <div style="display:flex;flex-direction:column;justify-content:center;gap:26px;font-size:20px;line-height:1.5">
-          <p><b>Katmanlar:</b> 3D yazıcı parçayı alttan üste, ince katmanlarla kurar. B harfi {LAYERS} katmandan.</p>
-          <p><b>Turuncu katman:</b> en üstteki, o an basılan katman: işin sıcak, yeni ve size özel olduğunu söyler.</p>
-          <p><b>Yazı:</b> BOYDE kalın, LABS ince ve turuncu: atölye (laboratuvar) yanı.</p>
+          {"".join(f"<p><b>{k}:</b> {v}</p>" for k, v in story)}
           <p><b>Söz:</b> “{SLOGAN}”</p></div></div>{no(1)}</div>""")
     pages.append(f"""<div class="pg"><p class="k">02 · LOGO KULLANIMLARI</p><h2>Yatay, dikey, simge</h2>
       <p class="lead">Önce yatay logo; dar ve kare alanlarda dikey; profil fotoğrafı, uygulama simgesi ve küçük
