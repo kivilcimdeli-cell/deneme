@@ -189,7 +189,7 @@ def saturate(path, k=DOYGUNLUK):
     Image.merge("HSV", [Image.fromarray(x.astype(np.uint8)) for x in (h, s, v)]).convert("RGB").save(path, quality=92)
 
 
-def model_shots(key, samples):
+def model_shots(key, samples, views=("iki", "halka")):
     meta, parts = load(key)
     dark = light_body(parts)
     w = max(np.ptp(V[:, 0]) for V, _, _, _ in parts)
@@ -197,11 +197,25 @@ def model_shots(key, samples):
     big = max(w, h)
     # masada: önde ön yüz, arkada ters çevrilmiş (arka yüz)
     sc = studio(dark, samples, F.SIZE)
-    wide = w > 1.4 * h
-    dx, dy = (big * 0.08, big * 0.36) if wide else (big * 0.36, big * 0.12)
-    pts = np.vstack([put(parts, flat(meta, -8, -dx, -dy), "on"),
-                     put(parts, flat(meta, 10, dx, dy, flip=True), "arka")])
-    shoot(sc, pts, 14, 50, 0.74, 4.5, os.path.join(T.FOTO, f"{key}_iki.jpg"), dark)
+    axis, side = (1, 0) if w > 1.4 * h else (0, 1)          # uzunsa üst üste, değilse yan yana dizilir
+    shift = np.zeros(2)
+    shift[side] = big * 0.1
+    Mf, Mb = flat(meta, -8, 0, 0), flat(meta, 10, 0, 0, flip=True)
+    allv = np.vstack([V for V, _, _, _ in parts])
+    lo_f, hi_f = (lambda q: (q.min(), q.max()))((allv @ Mf[:2, :3].T + Mf[:2, 3])[:, axis])
+    lo_b, hi_b = (lambda q: (q.min(), q.max()))((allv @ Mb[:2, :3].T + Mb[:2, 3])[:, axis])
+    move = hi_f - lo_b + 7.0                                 # aralarında 7 mm boşluk
+    Mb[axis, 3] += move
+    Mb[side, 3] += shift[side]
+    Mf[side, 3] -= shift[side]
+    centre = (lo_f + hi_b + move) / 2
+    Mf[axis, 3] -= centre
+    Mb[axis, 3] -= centre
+    pts = np.vstack([put(parts, Mf, "on"), put(parts, Mb, "arka")])
+    if "iki" in views:
+        shoot(sc, pts, 14, 50, 0.74, 4.5, os.path.join(T.FOTO, f"{key}_iki.jpg"), dark)
+    if "halka" not in views:
+        return
     # halkalarda asılı: solda ön yüz, sağda arka yüz
     sc = studio(dark, samples, F.SIZE)
     hx, hy = meta["delik"]
@@ -258,7 +272,8 @@ def lineup(samples, size=(1800, 1000)):
 
 
 def main(args):
-    """args: model anahtarları, kapak, dizi (boşsa hepsi); --ornek N (örnek sayısı), --deneme (küçük çizim)."""
+    """args: model anahtarları, kapak, dizi (boşsa hepsi); --ornek N (örnek sayısı), --deneme (küçük çizim),
+    --yalniz iki|halka (modellerde yalnız o görünüş)."""
     samples = 32
     if "--ornek" in args:
         samples = int(args[args.index("--ornek") + 1])
@@ -266,11 +281,14 @@ def main(args):
     if small:
         F.SIZE = (500, 500)
     os.makedirs(T.FOTO, exist_ok=True)
+    views = ("iki", "halka")
+    if "--yalniz" in args:
+        views = (args.pop(args.index("--yalniz") + 1),)
     keys = [a for a in args if not a.startswith("-") and not a.isdigit()]
     every = not keys
     for key in T.KEYS:
         if every or key in keys:
-            model_shots(key, samples)
+            model_shots(key, samples, views)
     if every or "kapak" in keys:
         cover(samples, (600, 600) if small else (1600, 1600))
     if every or "dizi" in keys:

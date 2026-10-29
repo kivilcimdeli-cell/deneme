@@ -63,6 +63,21 @@ def model_block(k):
       <p style="margin-top:8px;font-size:12px;line-height:1.5;color:#3b3d42">{k.desc}</p>"""
 
 
+def scale(models, px_mm=2.4):
+    """Beş biçim gerçek oranlarıyla (ön yüz), altlarında kod ve ölçü."""
+    cells = []
+    for k in models:
+        w, h = k.size()
+        img = K.uri(os.path.join(T.SRC, f"{k.key}_on.png"), 600, "PNG")
+        cells.append(f"""<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <img src="{img}" style="width:{w * px_mm:.0f}px;height:{h * px_mm:.0f}px;display:block;
+            filter:drop-shadow(0 6px 10px rgba(0,0,0,.18))">
+          <p style="font-size:11px;font-weight:700;color:#55575c">{k.kod} · {w:.0f} × {h:.0f} mm</p></div>""")
+    return f"""<div style="margin-top:26px"><p class="k">BİÇİMLER · GERÇEK ORANLARIYLA</p>
+      <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:flex-end">{''.join(cells)}
+      </div></div>"""
+
+
 def catalog(P):
     pages, no = [], 1
     models = [fn() for fn in T.MODELS]
@@ -91,7 +106,7 @@ def catalog(P):
                     for a, b, c in ADIM)
     pages.append(page(f"""<p class="k">ARKALI ÖNLÜ</p>
       <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Önde kabartma,<br>arkada düz yazı.</h2>
-      <img src="{foto('dizi', 1100)}" style="margin-top:20px;width:100%;height:300px;object-fit:cover;
+      <img src="{foto('dizi', 1100)}" style="margin-top:20px;width:100%;height:390px;object-fit:cover;
         border-radius:14px;display:block">
       <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:0 28px">
         <div>{feats}</div><div>{steps}</div></div>
@@ -106,7 +121,7 @@ def catalog(P):
               <p class="u" style="font-size:22px;line-height:1.2">Sizin logonuz,<br>sizin renkleriniz.</p>
               <p style="margin-top:10px;font-size:13px;line-height:1.55;max-width:560px">Beş biçimden birini seçin ya
                 da ölçüyü söyleyin; ön yüze logonuzu kabartma, arka yüze telefonunuzu, adresinizi ya da sloganınızı
-                düz yazı olarak basalım.</p></div>"""
+                düz yazı olarak basalım.</p></div>{scale(models)}"""
         pages.append(page(f"""<div style="display:flex;justify-content:space-between;align-items:flex-end">
           <div><p class="k">MODELLER</p><h2 class="u" style="margin-top:8px;font-size:22px">{chunk[0].kod}{'–' +
           chunk[-1].kod if len(chunk) > 1 else ''}</h2></div>{K.logo("acik", 150, 30)}</div>
@@ -115,13 +130,16 @@ def catalog(P):
 
     pages.append(page(f"""<div style="position:absolute;inset:0;background-image:{BM.stripes_bg(PAPER, .035, 22)}"></div>
       <div style="position:relative">{K.logo("koyu", 260, 52)}</div>
-      <div style="position:absolute;left:48px;right:48px;top:250px">
+      <div style="position:absolute;left:48px;right:48px;top:170px">
         <p class="k">TEKLİF</p>
         <h2 class="u" style="margin-top:12px;font-size:38px;line-height:1.1">Adet arttıkça<br>birim fiyat düşer.</h2>
         <p style="margin-top:18px;font-size:15px;line-height:1.6;color:rgba(244,241,234,.8);max-width:560px">
           Logonuzu, adedi ve arka yüz yazısını gönderin; size özel teklif ve tasarım önizlemesiyle dönelim.</p>
-        <img src="{foto('k01_klasik_halka', 900)}" style="margin-top:28px;width:100%;height:330px;object-fit:cover;
-          border-radius:16px;display:block">
+        <div style="margin-top:28px;display:flex;gap:14px">
+          <img src="{foto('k02_dikey_halka', 700)}" style="flex:1;min-width:0;aspect-ratio:1;object-fit:cover;
+            border-radius:16px;display:block">
+          <img src="{foto('k03_kare_iki', 700)}" style="flex:1;min-width:0;aspect-ratio:1;object-fit:cover;
+            border-radius:16px;display:block"></div>
         <div style="margin-top:28px;display:flex;justify-content:space-between;align-items:flex-end">
           <div><p class="k">WHATSAPP</p><p style="margin-top:6px;font-size:28px;font-weight:700">{K.TEL}</p></div>
           <div style="text-align:right"><p class="k">MAĞAZA</p><p style="margin-top:6px;font-size:20px;
