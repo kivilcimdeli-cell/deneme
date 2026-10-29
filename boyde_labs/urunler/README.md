@@ -48,11 +48,16 @@
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
 | `shopier/site_ornekleri/` | 3 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa: Çağrı İletişim · Şimşek, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
 | `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
-| `fotograf/<ürün>_studyo.jpg` | stüdyo fonunda, 3/4 |
-| `fotograf/<ürün>_on.jpg` | stüdyo fonunda, karşıdan |
-| `fotograf/<ürün>_masa.jpg` | ahşap masada |
-| `fotograf/kapak_<kategori>.jpg` | kategori kapakları |
+| `fotograf/<ürün>_studyo.jpg` | beyaz stüdyo fonunda, 3/4 |
+| `fotograf/<ürün>_on.jpg` | beyaz fonda, karşıdan |
+| `fotograf/<ürün>_masa.jpg` | beyaz masada (az parlak, yansımalı) |
+| `fotograf/kapak_<kategori>.jpg` | kategori kapakları (beyaz masada) |
 | `kaynak/<ürün>_duz.png` | düz görünüş (saydam) |
+
+**Zeminler beyaz** ("kahverengi arka planları sil, hepsini beyaz yap"): ahşap masa ve bej fon kaldırıldı.
+
+- Fon ve masa beyaz; çizimden sonra seviye ayarıyla fon ~248'e çekilir.
+- Beyaz gövdeli isimliklerde fon biraz daha az ışır, gövde fondan açık kalır; kenarlar seçilir.
 
 **BOYDE çerçevesi:** ürünlerin bizim olduğu anlaşılsın diye ("BOYDE ürünü olarak pazarlamamız gerekiyor").
 

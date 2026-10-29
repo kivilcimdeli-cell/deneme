@@ -125,7 +125,7 @@ def visual(P, i, key, T, isim, shots, site):
           sayfayı açar. Her şey tek dokunuşla:</p>
         <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px">{chips}</div></div>
       <div style="position:absolute;left:64px;bottom:150px;width:430px;border-radius:24px;overflow:hidden;
-        background:#ece7df;box-shadow:0 20px 40px rgba(18,19,22,.12)">
+        background:#fff;box-shadow:0 20px 40px rgba(18,19,22,.12)">
         <img src="{img}" style="width:430px;height:300px;object-fit:cover;display:block"></div>
       <p style="position:absolute;left:64px;bottom:108px;font-size:19px;color:#55575c">İsimlik ve sitesi birlikte
         hazırlanır.</p>

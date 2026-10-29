@@ -5,10 +5,11 @@ sehpa) restoran_masalik_foto.py'nin malzemeleriyle çizilir: mat PLA, panel yüz
 basılır), sehpada 0,2 mm katman izi, kenarlarda yumuşak ışık.
 
 Görünüşler (kare, 1200 × 1200; Shopier için yeterli, bir ürün ~4 dk):
-  studyo  açık stüdyo fonu (kâğıt rengi, kıvrık fon), 3/4 sağdan
+  studyo  beyaz stüdyo fonu (kıvrık fon), 3/4 sağdan
   on      aynı fon, karşıdan: yazılar okunur
-  masa    ahşap masa, 3/4 soldan, arkası bulanık
-Kapak (--kapak): her kategoriden birkaç isimlik yan yana, ahşap masada (kategori kapağı, katalog).
+  masa    beyaz masa (az parlak, yansıma verir), 3/4 soldan, arkası bulanık
+Kapak (--kapak): her kategoriden birkaç isimlik yan yana, beyaz masada (kategori kapağı, katalog).
+Zeminler beyaz (kullanıcı: "kahverengi arka planları sil, hepsini beyaz yap"); çizimden sonra seviye ayarı (whiten).
 
 Çıktı : boyde_labs/urunler/fotograf/<ürün>_<görünüş>.jpg, kapak_<kategori>.jpg
 
@@ -35,7 +36,10 @@ SRC = os.path.join(ROOT, "boyde_labs", "urunler", "kaynak")
 OUT = os.path.join(ROOT, "boyde_labs", "urunler", "fotograf")
 MM = R.MM
 SIZE = (1200, 1200)
-FON = (236, 231, 222)                                    # stüdyo fonu: BOYDE kâğıt rengine yakın
+FON = (246, 246, 244)                                    # beyaz fon ("kahverengi arka planları sil, hepsini beyaz yap")
+MASA = (244, 244, 242)                                   # beyaz masa (eskiden ahşap)
+GLOW = {"studyo": 1.2, "masa": 0.7, "duvar": 1.2}       # beyaz yüzeylerin hafif ışıması: gölgede griye dönmesin
+BEYAZ = 248                                              # fonun son hâli (whiten)
 VIEWS = {"studyo": ("studyo", 30.0, 12.0), "on": ("studyo", 0.0, 7.0), "masa": ("masa", -28.0, 11.0)}
 KAPAK = {"9x12": [["telefon", "kuafor", "kuyumcu"], ["uzar", "emlak"]],
          "10x20": [["avukat", "paloma"], ["musavir"]]}
@@ -67,12 +71,32 @@ def add(name, V, F, m, shift=(0.0, 0.0, 0.0)):
     return ob
 
 
-def scene(kind, samples, size):
-    """studyo: kıvrık fon (sonsuz fon); masa: restoran_masalik_foto'nun ahşap masası ve duvarları."""
+def white(name, rgb, rough, glow):
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    bs = m.node_tree.nodes["Principled BSDF"]
+    bs.inputs["Base Color"].default_value = R.srgb(rgb)
+    bs.inputs["Roughness"].default_value = rough
+    bs.inputs["Emission Color"].default_value = R.srgb(rgb)
+    bs.inputs["Emission Strength"].default_value = glow
+    return m
+
+
+def scene(kind, samples, size, glow=1.0):
+    """studyo: beyaz kıvrık fon (sonsuz fon); masa: restoran_masalik_foto'nun masası ve duvarları, beyaz (az parlak
+    masa, mat duvar)."""
     R.SIZE = size
     _MATS.clear()
     sc = R.setup_scene(samples)
     R._MATS.clear()
+    bg = sc.world.node_tree.nodes["Background"]
+    bg.inputs["Color"].default_value = R.srgb(FON)
+    if kind == "masa":
+        ob = bpy.data.objects["masa"]
+        ob.data.materials[0] = white("masa_beyaz", MASA, 0.32, GLOW["masa"] * glow)
+        wm = white("duvar_beyaz", FON, 0.9, GLOW["duvar"] * glow)
+        for name in ("duvar0", "duvar1"):
+            bpy.data.objects[name].data.materials[0] = wm
     if kind == "studyo":
         for name in ("masa", "duvar0", "duvar1"):
             bpy.data.objects.remove(bpy.data.objects[name])
@@ -88,15 +112,9 @@ def scene(kind, samples, size):
         for p in me.polygons:
             p.use_smooth = True
         ob = bpy.data.objects.new("fon", me)
-        m = bpy.data.materials.new("fon")
-        m.use_nodes = True
-        bs = m.node_tree.nodes["Principled BSDF"]
-        bs.inputs["Base Color"].default_value = R.srgb(FON)
-        bs.inputs["Roughness"].default_value = 0.9
-        ob.data.materials.append(m)
+        ob.data.materials.append(white("fon", FON, 0.9, GLOW["studyo"] * glow))
         sc.collection.objects.link(ob)
-        sc.world.node_tree.nodes["Background"].inputs["Color"].default_value = R.srgb(FON)
-        sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.35
+        bg.inputs["Strength"].default_value = 0.35
     return sc
 
 
@@ -166,6 +184,27 @@ def camera(sc, lens=85):
     return cam
 
 
+def whiten(src, dst, target=BEYAZ):
+    """Seviye ayarı: kenarlardaki fon (üst, sol, sağ şerit) `target` beyazına çekilir; koyular neredeyse değişmez.
+    Cycles'ta beyaz fon AgX'le açık griye düşer; fotoğrafçının "beyaz noktası"."""
+    from PIL import Image
+    im = np.asarray(Image.open(src).convert("RGB")).astype(float)
+    edge = np.concatenate([im[:12].reshape(-1, 3), im[:, :12].reshape(-1, 3), im[:, -12:].reshape(-1, 3)])
+    bg = np.median(edge, 0)
+    out = np.clip(im * (target / bg) + 0.5, 0, 255).astype(np.uint8)
+    Image.fromarray(out).save(dst, quality=92)
+    os.remove(src)
+
+
+def shoot(sc, path, target=BEYAZ):
+    sc.render.image_settings.file_format = "PNG"
+    sc.render.filepath = path[:-4] + "_ham.png"
+    t = time.time()
+    bpy.ops.render.render(write_still=True)
+    whiten(sc.render.filepath, path, target)
+    print(f"{os.path.basename(path)[:-4]}: {time.time() - t:.0f} sn", flush=True)
+
+
 def light_body(parts):
     """Gövdesi açık renkli mi (pozlama: beyaz yüz soluklaşmasın)."""
     body = parts[0][0]["renk"]
@@ -183,11 +222,10 @@ def render(key, views, samples, missing=False):
     by_kind = {}
     for v in views:
         by_kind.setdefault(VIEWS[v][0], []).append(v)
-    for kind, vs in by_kind.items():
-        sc = scene(kind, samples, SIZE)
-        sc.view_settings.exposure = -0.7 if light_body(parts) else -0.3
-        sc.render.image_settings.file_format = "JPEG"
-        sc.render.image_settings.quality = 90
+    light = light_body(parts)
+    for kind, vs in by_kind.items():                     # açık gövde: fon az ışır, gövde fondan açık kalır (kenarı seçilir)
+        sc = scene(kind, samples, SIZE, 0.5 if light else 1.0)
+        sc.view_settings.exposure = -0.55 if light else -0.3
         box = place(parts)
         cam = camera(sc)
         centre = box.mean(0)
@@ -199,18 +237,13 @@ def render(key, views, samples, missing=False):
             frame(cam, box, SIZE[0] / SIZE[1], 0.78 if v == "on" else 0.72)
             cam.data.dof.aperture_fstop = 5.6 if kind == "studyo" else 3.5
             lights(sc, centre, direction, kind)
-            sc.render.filepath = os.path.join(OUT, f"{key}_{v}.jpg")
-            t = time.time()
-            bpy.ops.render.render(write_still=True)
-            print(f"{key}_{v}: {time.time() - t:.0f} sn", flush=True)
+            shoot(sc, os.path.join(OUT, f"{key}_{v}.jpg"), 242 if light else BEYAZ)
 
 
 def cover(cat, samples, size=(1600, 1600)):
-    """Kategori kapağı: arka sırada üç, ön sırada iki isimlik (ahşap masa)."""
-    sc = scene("masa", samples, size)
+    """Kategori kapağı: arka sırada üç, ön sırada iki isimlik (beyaz masa)."""
+    sc = scene("masa", samples, size, 0.8)
     sc.view_settings.exposure = -0.45
-    sc.render.image_settings.file_format = "JPEG"
-    sc.render.image_settings.quality = 90
     rows = KAPAK[cat]
     corners = []
     for r, keys in enumerate(rows):
@@ -232,10 +265,7 @@ def cover(cat, samples, size=(1600, 1600)):
     frame(cam, box, size[0] / size[1], 0.86)
     cam.data.dof.aperture_fstop = 6.3
     lights(sc, box.mean(0), direction, "masa", 1.8)
-    sc.render.filepath = os.path.join(OUT, f"kapak_{cat}.jpg")
-    t = time.time()
-    bpy.ops.render.render(write_still=True)
-    print(f"kapak_{cat}: {time.time() - t:.0f} sn", flush=True)
+    shoot(sc, os.path.join(OUT, f"kapak_{cat}.jpg"), 246)
 
 
 def main():
