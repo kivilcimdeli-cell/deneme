@@ -216,9 +216,9 @@ def cover(cat, samples, size=(1600, 1600)):
     for r, keys in enumerate(rows):
         loaded = [load(k) for k in keys]
         widths = [max(V[:, 0].max() for _, V, _ in p) - min(V[:, 0].min() for _, V, _ in p) for p in loaded]
-        gap = 22.0
+        gap = 22.0 if cat == "9x12" else 50.0
         x = -(sum(widths) + gap * (len(widths) - 1)) / 2
-        y = 0.0 if r == 0 else -95.0 if cat == "9x12" else -110.0
+        y = 0.0 if r == 0 else -125.0 if cat == "9x12" else -150.0          # sıralar arası: arkadakiler görünsün
         for p, w in zip(loaded, widths):
             x0 = min(V[:, 0].min() for _, V, _ in p)
             yc = np.mean([V[:, 1].mean() for _, V, _ in p])
@@ -226,7 +226,7 @@ def cover(cat, samples, size=(1600, 1600)):
             x += w + gap
     box = np.vstack(corners)
     cam = camera(sc, 70)
-    a, e = math.radians(-14.0), math.radians(17.0)
+    a, e = math.radians(-10.0), math.radians(25.0)
     direction = np.array([math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)])
     cam["dir"] = direction.tolist()
     frame(cam, box, size[0] / size[1], 0.86)

@@ -114,7 +114,7 @@ def shopier(P, cat):
 
     # modeller: 4 × 3 ızgara, 10 model ve iki kutu
     cells = "".join(f"""<div style="position:relative;border-radius:16px;overflow:hidden;background:#eae5dc">
-      <img src="{foto(u.key, maxw=420)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+      <img src="{foto(u.key, maxw=420)}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">
       <span class="chip code" style="position:absolute;left:10px;top:10px;background:{INK};color:{PAPER};
         font-size:15px;padding:5px 10px">{c}</span>
       <span style="position:absolute;left:10px;right:10px;bottom:8px;font-size:15px;font-weight:700;
