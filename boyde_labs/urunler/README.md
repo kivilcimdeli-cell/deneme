@@ -48,16 +48,18 @@
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
 | `shopier/site_ornekleri/` | 3 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa: Çağrı İletişim · Şimşek, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
 | `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
-| `fotograf/<ürün>_studyo.jpg` | beyaz stüdyo fonunda, 3/4 |
-| `fotograf/<ürün>_on.jpg` | beyaz fonda, karşıdan |
-| `fotograf/<ürün>_masa.jpg` | beyaz masada (az parlak, yansımalı) |
-| `fotograf/kapak_<kategori>.jpg` | kategori kapakları (beyaz masada) |
+| `fotograf/<ürün>_studyo.jpg` | stüdyo fonunda (beyaz ya da INK), 3/4 |
+| `fotograf/<ürün>_on.jpg` | aynı fonda, karşıdan |
+| `fotograf/<ürün>_masa.jpg` | beyaz ya da siyah masada (yansımalı) |
+| `fotograf/kapak_<kategori>.jpg` | kategori kapakları |
 | `kaynak/<ürün>_duz.png` | düz görünüş (saydam) |
 
-**Zeminler beyaz** ("kahverengi arka planları sil, hepsini beyaz yap"): ahşap masa ve bej fon kaldırıldı.
+**Zeminler** ("kahverengi arka planları sil, hepsini beyaz yap"; "ürün beyazsa logomuzdaki renk"): ahşap masa ve bej
+fon kaldırıldı.
 
-- Fon ve masa beyaz; çizimden sonra seviye ayarıyla fon ~248'e çekilir.
-- Beyaz gövdeli isimliklerde fon biraz daha az ışır, gövde fondan açık kalır; kenarlar seçilir.
+- **Koyu isimlikler:** beyaz fon ve beyaz masa; çizimden sonra seviye ayarıyla fon ~248'e çekilir.
+- **Beyaz isimlikler:** logodaki siyah (INK #121316), masa parlak siyah; fon kenarlarda tam INK.
+- **Kapaklar:** isimliklerin çoğu hangi renkse ona göre (9 × 12 beyaz, 10 × 20 koyu).
 
 **BOYDE çerçevesi:** ürünlerin bizim olduğu anlaşılsın diye ("BOYDE ürünü olarak pazarlamamız gerekiyor").
 

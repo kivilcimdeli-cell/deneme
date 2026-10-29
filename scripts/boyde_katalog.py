@@ -175,7 +175,7 @@ def shopier(P, cat):
       <h2 class="u" style="margin-top:12px;font-size:50px;line-height:1.1">Okutan müşteriniz<br>sizin sayfanızı açar.</h2>
       <p style="margin-top:22px;font-size:26px;color:rgba(244,241,234,.8)">{links}: hepsi tek QR'da.</p>
       <div style="margin-top:34px">{rows}</div>
-      <img src="{foto('paloma' if cat == '10x20' else 'kuafor', 'masa', 1100)}" style="margin-top:18px;width:100%;
+      <img src="{foto('musavir' if cat == '10x20' else 'telefon', 'masa', 1100)}" style="margin-top:18px;width:100%;
         height:300px;object-fit:cover;border-radius:22px;display:block">
       <div style="position:absolute;left:64px;bottom:50px">{logo("koyu", 300, 60)}</div>
       <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{TEL}</p></div>""",
@@ -195,7 +195,8 @@ def framed(P, cat, c, u, view, path):
     who = f"{u.musteri} için ürettik" if u.tur != "ornek" else "Örnek tasarım · sizin bilgilerinizle"
     sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};
       background-image:{BM.stripes_bg(PAPER, .045, 26)}">
-      <div style="position:absolute;left:36px;top:36px;width:1128px;height:944px;border-radius:30px;overflow:hidden">
+      <div style="position:absolute;left:36px;top:36px;width:1128px;height:944px;border-radius:30px;overflow:hidden;
+        box-shadow:0 0 0 2px rgba(244,241,234,.16)">
         <img src="{foto(u.key, view, 1200)}" style="width:100%;height:100%;object-fit:cover;display:block">
         <div style="position:absolute;left:22px;top:22px;display:flex;align-items:center;gap:12px;padding:10px 18px 10px
           12px;border-radius:99px;background:rgba(18,19,22,.86);color:{PAPER}">
@@ -336,7 +337,7 @@ def catalog(P):
           <h2 class="u" style="margin-top:10px;font-size:34px;line-height:1.1">{K['ad']}</h2>
           <p style="margin-top:10px;font-size:14px;color:rgba(244,241,234,.78)">{K['kisa']} {len(ms)} model.</p>
           <img src="{hero}" style="margin-top:22px;width:100%;height:520px;object-fit:cover;border-radius:16px;
-            display:block">
+            display:block;box-shadow:0 0 0 1.5px rgba(244,241,234,.16)">
           <ul style="margin-top:20px;list-style:none;font-size:13.5px;line-height:1.4">{feats}</ul>""",
                           dark=True, no=no))
         no += 1
