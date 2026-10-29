@@ -41,6 +41,7 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from PIL import Image
+from shapely import affinity
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.polygon import orient
 from shapely.ops import polygonize, unary_union
@@ -198,89 +199,277 @@ def xh(fn, size):
 # Her işaret ve yazı: [(svg yolu, rol)], sınır kutusu (x0, y0, x1, y1). Roller: main (mürekkep / kâğıt), accent
 # (turuncu), sub (yazının ikinci kelimesi).
 
-LAYERS, GAP = 10, 0.24          # katmanlar: 10'luk bölüntüde kaselerin üstü (x yüksekliği) tam bir katman sınırında
-R, S = 30.0, 16.0               # geometrik b ve d: kase yarıçapı ve çizgi kalınlığı (yükseklik 100)
+LAYERS, GAP = 7, 0.24          # katmanlı yazı: harfler yatay katmanlara bölünür
 
 
-def _ring(cx, cy, r, t):
-    return Point(cx, cy).buffer(r, 256).difference(Point(cx, cy).buffer(r - t, 256))
-
-
-def _b(x, r=R, s=S):
-    """Geometrik b: solda gövde (yükseklik 100), sağda yuvarlak kase; x sol kenar."""
-    return box(x, 0, x + s, 100).union(_ring(x + r, 100 - r, r, s))
-
-
-def _d(x, r=R, s=S):
-    """Geometrik d: solda kase, sağda gövde; x kasenin sol kenarı."""
-    return box(x + 2 * r - s, 0, x + 2 * r, 100).union(_ring(x + r, 100 - r, r, s))
-
-
-def _layers(g, accent=(0,)):
+def _layers(g, accent=(0,), layers=LAYERS, gap=GAP):
     """Şekil yatay katmanlara bölünür (3D baskı katmanları); accent'teki katmanlar turuncu."""
     x0, y0, x1, y1 = g.bounds
-    bh = (y1 - y0) / LAYERS
-    return [(geom_path(g.intersection(box(x0 - 5, y0 + k * bh, x1 + 5, y0 + k * bh + bh * (1 - GAP)))),
-             "accent" if k in accent else "main") for k in range(LAYERS)]
+    bh = (y1 - y0) / layers
+    return [(geom_path(g.intersection(box(x0 - 5, y0 + k * bh, x1 + 5, y0 + k * bh + bh * (1 - gap)))),
+             "accent" if k in accent else "main") for k in range(layers)]
 
 
-def mark_katman():
-    g = _b(0).union(_d(2 * R + 10))
+def _bounds(*geoms):
+    return unary_union(list(geoms)).bounds
+
+
+def _word(t1, f1, t2, f2, size, gap=.3, track1=0.0, track2=.06, case_box=None):
+    """İki kelimelik yazı: birinci main, ikinci sub (turuncu). Döner (parçalar, sınır)."""
+    d1, w1 = text_path(t1, f1, size, track=track1)
+    d2, w2 = text_path(t2, f2, size, w1 + size * gap, track=track2)
+    g, _ = text_geom(t1 + t2, f1, size)
+    y0 = -cap(f1, size) if case_box == "cap" else g.bounds[1]
+    y1 = 0 if case_box == "cap" else g.bounds[3]
+    return [(d1, "main"), (d2, "sub")], (0, y0, w1 + size * gap + w2, y1)
+
+
+# 1 · Küp: izometrik küp; üst yüz turuncu (o an basılan katman), yan yüzler katman katman
+def _iso(a=50.0):
+    c, h = a * 0.8660254, a / 2
+    top = [(0, -a), (c, -h), (0, 0), (-c, -h)]
+    left = [(-c, -h), (0, 0), (0, a), (-c, h)]
+    right = [(0, 0), (c, -h), (c, h), (0, a)]
+    return top, left, right
+
+
+def _kup_geoms():
+    """Küpün parçaları: [(şekil, rol)]: üst yüz turuncu, yan yüzler dörder katman."""
+    top, left, right = _iso()
+    gap = 2.2
+    out = [(Polygon(top).buffer(-gap / 2, join_style=2), "accent")]
+    for face, role in ((left, "main"), (right, "mid")):
+        p0, p1, p2, p3 = (np.array(v, float) for v in face)       # üst kenar p0-p1, alt kenar p3-p2
+        n = 4
+        for k in range(n):
+            t0, t1 = k / n, (k + 1) / n - 0.07
+            band = [p0 + (p3 - p0) * t0, p1 + (p2 - p1) * t0, p1 + (p2 - p1) * t1, p0 + (p3 - p0) * t1]
+            out.append((Polygon(band).buffer(-gap / 2, join_style=2), role))
+    return out
+
+
+def mark_kup():
+    parts = _kup_geoms()
+    return [(geom_path(g), r) for g, r in parts], _bounds(*[g for g, _ in parts])
+
+
+def word_kup(size):
+    return _word("BOYDE", "Sora-ExtraBold.ttf", "LABS", "Sora-Regular.ttf", size, .3, -.01, .08, "cap")
+
+
+# 2 · Şişe: laboratuvar şişesi (Labs); içinde turuncu katmanlar (basılan parça)
+def mark_sise():
+    neck_w, body_w, neck_h, body_h, t = 30.0, 96.0, 34.0, 66.0, 9.0
+    outer = Polygon([(-neck_w / 2, 0), (neck_w / 2, 0), (neck_w / 2, neck_h), (body_w / 2, neck_h + body_h),
+                     (-body_w / 2, neck_h + body_h), (-neck_w / 2, neck_h)]).buffer(4, join_style=1).buffer(-4)
+    inner = outer.buffer(-t, join_style=2)
+    rim = box(-neck_w / 2 - 7, -6, neck_w / 2 + 7, 3).buffer(2.5).buffer(-2.5 + 2.5)
+    glass = outer.difference(inner).union(rim)
+    liquid = inner.buffer(-4.5)
+    y0, y1 = neck_h + 10, liquid.bounds[3]
+    bands, n = [], 3
+    bh = (y1 - y0) / n
+    for k in range(n):
+        piece = liquid.intersection(box(-60, y0 + k * bh + 1.6, 60, y0 + (k + 1) * bh - 1.6))
+        bands.append((geom_path(piece), "accent"))
+    return [(geom_path(glass), "main")] + bands, _bounds(glass)
+
+
+def word_sise(size):
+    return _word("boyde", "Unbounded_600SemiBold.ttf", "labs", "Unbounded_600SemiBold.ttf", size, .28, 0, 0)
+
+
+# 3 · Nozul: 3D yazıcının nozulu, ucunda turuncu damla; yazının altını turuncu çizgi çizer
+def mark_nozul():
+    nut = Polygon([(-26, 0), (26, 0), (26, 20), (-26, 20)]).buffer(3, join_style=1)
+    body = Polygon([(-15, 20), (15, 20), (15, 34), (-15, 34)])
+    cone = Polygon([(-15, 34), (15, 34), (5, 58), (-5, 58)])
+    tip = body.union(cone).union(nut)
+    slots = unary_union([box(x - 1.6, 5, x + 1.6, 15) for x in (-13, 0, 13)])
+    noz = tip.difference(slots)
+    drop = Point(0, 74).buffer(9, 64).union(Polygon([(-6.5, 68), (6.5, 68), (0, 58)]))
+    return [(geom_path(noz), "main"), (geom_path(drop), "accent")], _bounds(noz, drop)
+
+
+def word_nozul(size):
+    parts, (x0, y0, x1, y1) = _word("BOYDE", "SpaceGrotesk_700Bold.ttf", "LABS", "SpaceGrotesk_400Regular.ttf",
+                                    size, .26, .02, .1, "cap")
+    line = box(0, size * .2, x1, size * .28)
+    return parts + [(geom_path(line), "accent")], (x0, y0, x1, size * .28)
+
+
+# 4 · Etiket: boyde yazısı, labs turuncu bir etiketin içinde (harfler oyuk)
+def _pill(text, fn, size, x):
+    g, w = text_geom(text, fn, size, 0, 0)
+    gx0, gy0, gx1, gy1 = g.bounds
+    ph, pw = size * .95, (gx1 - gx0) + size * .7
+    r = ph / 2
+    pill = box(r, -r, pw - r, r).union(Point(r, 0).buffer(r, 64)).union(Point(pw - r, 0).buffer(r, 64))
+    tg = affinity.translate(g, (pw - (gx1 - gx0)) / 2 - gx0, -(gy0 + gy1) / 2)
+    out = affinity.translate(pill.difference(tg), x, 0)
+    return out, pw, ph
+
+
+def mark_etiket():
+    g, _ = text_geom("b", "Unbounded_700Bold.ttf", 100, 0, 0)
+    gx0, gy0, gx1, gy1 = g.bounds
+    side = 120.0
+    sq = box(0, 0, side, side).buffer(-22).buffer(22)
+    tg = affinity.translate(g, (side - (gx1 - gx0)) / 2 - gx0, (side - (gy1 - gy0)) / 2 - gy0)
+    return [(geom_path(sq.difference(tg)), "accent")], (0, 0, side, side)
+
+
+def word_etiket(size):
+    d1, w1 = text_path("boyde", "Unbounded_700Bold.ttf", size)
+    g1, _ = text_geom("boyde", "Unbounded_700Bold.ttf", size)
+    pill, pw, ph = _pill("labs", "Unbounded_500Medium.ttf", size * .72, w1 + size * .2)
+    xh_ = xh("Unbounded_700Bold.ttf", size)
+    pill = affinity.translate(pill, 0, -xh_ / 2)
+    return [(d1, "main"), (geom_path(pill), "accent")], _bounds(g1, pill)
+
+
+# 5 · Rozet: yuvarlak mühür; çevresinde BOYDE LABS · 3D BASKI ATÖLYESİ, ortada küp
+def _arc_text(text, fn, size, R, top=True, track=.12):
+    tt, _ = _font(fn)
+    gs = tt.getGlyphSet()
+    glyphs, w, s = _shaped(text, fn, size, track)
+    adv = []
+    for i, (name, gx, _) in enumerate(glyphs):
+        nxt = glyphs[i + 1][1] if i + 1 < len(glyphs) else w
+        adv.append(nxt - gx)
+    span = w / R
+    pen = SVGPathPen(gs)
+    geoms = []
+    for (name, gx, gy), a in zip(glyphs, adv):
+        mid = gx + a / 2
+        if top:
+            th = -span / 2 + mid / R
+            px, py, rot = R * np.sin(th), -R * np.cos(th), th
+        else:                                       # alt yay: soldan sağa, harfler dik (üstleri merkeze)
+            th = -span / 2 + mid / R
+            rr = R + cap(fn, size)
+            px, py, rot = rr * np.sin(th), rr * np.cos(th), -th
+        m = a / 2                                   # glif ortası taban çizgisinde, yay üstündeki noktaya
+        mat = (s * np.cos(rot), s * np.sin(rot), s * np.sin(rot), -s * np.cos(rot),
+               px - m * np.cos(rot), py - m * np.sin(rot))
+        gs[name].draw(TransformPen(pen, mat))
+        fp = _Flat(gs)
+        gs[name].draw(TransformPen(fp, mat))
+        geoms.append(_nonzero(fp.rings))
+    return pen.getCommands(), unary_union(geoms)
+
+
+def mark_rozet():
+    R = 100.0
+    ring = Point(0, 0).buffer(R, 256).difference(Point(0, 0).buffer(R - 5, 256))
+    inner = Point(0, 0).buffer(R - 44, 256).difference(Point(0, 0).buffer(R - 47, 256))
+    d1, g1 = _arc_text("BOYDE LABS", "SpaceGrotesk_700Bold.ttf", 19, R - 32, True, .16)
+    d2, g2 = _arc_text("3D BASKI ATÖLYESİ", "SpaceGrotesk_500Medium.ttf", 13, R - 36, False, .14)
+    dots = unary_union([Point(sx * (R - 25), 3).buffer(3.4, 32) for sx in (-1, 1)])
+    cube = [(affinity.translate(affinity.scale(g, .62, .62, origin=(0, 0)), 0, 0), r) for g, r in _kup_geoms()]
+    return ([(geom_path(ring.union(inner)), "main"), (d1, "main"), (d2, "main"), (geom_path(dots), "accent")]
+            + [(geom_path(g), r) for g, r in cube], (-R, -R, R, R))
+
+
+def word_rozet(size):
+    return _word("BOYDE", "SpaceGrotesk_700Bold.ttf", "LABS", "SpaceGrotesk_400Regular.ttf", size, .26, .02, .1, "cap")
+
+
+# 6 · Katmanlı yazı: BOYDE harfleri katman katman, en üst katman turuncu; simgesi aynı kesimle B
+def mark_katmanli():
+    g, _ = text_geom("B", "Unbounded_800ExtraBold.ttf", 140, 0, 0)
     return _layers(g), g.bounds
 
 
-def mark_ikiton():
-    b, d = _b(0), _d(44)
-    return [(geom_path(b.difference(d.buffer(4.5))), "main"), (geom_path(d), "accent")], b.union(d).bounds
+def word_katmanli(size):
+    g, w = text_geom("BOYDE", "Unbounded_800ExtraBold.ttf", size, track=-.01)
+    parts = _layers(g)
+    x0, y0, x1, y1 = g.bounds
+    _, w2 = text_path("LABS", "Unbounded_300Light.ttf", size * .42, track=.5)
+    d2, _ = text_path("LABS", "Unbounded_300Light.ttf", size * .42, x1 - w2, y1 + size * .52, track=.5)
+    return parts + [(d2, "sub")], (x0, y0, x1, y1 + size * .52)
 
 
-def mark_ayna():
-    b, d = _b(0), _d(2 * R)
-    dot = Point(2 * R, 100 - R).buffer(7, 64)
-    return [(geom_path(b.union(d).difference(dot.buffer(3))), "main"), (geom_path(dot), "accent")], b.union(d).bounds
+# 7 · QR: üç QR köşe işareti ve turuncu bir kare: ürünün kendisi
+def mark_qr():
+    m = 10.0
+    def finder(x, y):
+        o = box(x, y, x + 7 * m, y + 7 * m).buffer(-3).buffer(3)
+        i = box(x + m, y + m, x + 6 * m, y + 6 * m)
+        c = box(x + 2 * m, y + 2 * m, x + 5 * m, y + 5 * m).buffer(-2).buffer(2)
+        return o.difference(i).union(c)
+    g = 8 * m
+    f = unary_union([finder(0, 0), finder(g, 0), finder(0, g)])
+    sq = box(g + 1.2 * m, g + 1.2 * m, g + 5.8 * m, g + 5.8 * m).buffer(-6).buffer(6)
+    return [(geom_path(f), "main"), (geom_path(sq), "accent")], (0, 0, g + 7 * m, g + 7 * m)
 
 
-def mark_tekcizgi():
-    b, d = _b(0, R, 9), _d(2 * R + 10, R, 9)
-    return [(geom_path(b), "main"), (geom_path(d), "accent")], b.union(d).bounds
+def word_qr(size):
+    return _word("BOYDE", "Manrope-ExtraBold.ttf", "LABS", "Manrope-Medium.ttf", size, .28, .01, .1, "cap")
 
 
-def word_main(size):
-    """BOYDE kalın, LABS ince (Unbounded); LABS turuncu."""
-    d1, w1 = text_path("BOYDE", "Unbounded_700Bold.ttf", size)
-    d2, w2 = text_path("LABS", "Unbounded_300Light.ttf", size, w1 + size * .32, track=.06)
-    return [(d1, "main"), (d2, "sub")], (0, -cap("Unbounded_700Bold.ttf", size), w1 + size * .32 + w2, 0)
+# 8 · b ve d: yazıda boyde'nin b ve d harfleri turuncu; simge bd
+def mark_bd():
+    fn = "SpaceGrotesk_700Bold.ttf"
+    d1, w1 = text_path("b", fn, 140, 0, 0)
+    d2, _ = text_path("d", fn, 140, w1 - 6, 0)
+    gb, _ = text_geom("b", fn, 140, 0, 0)
+    gd, _ = text_geom("d", fn, 140, w1 - 6, 0)
+    return [(d1, "main"), (d2, "accent")], _bounds(gb, gd)
 
 
-# yön: (ad, kısa anlatım, işaret, yazı, kılavuzdaki hikâye maddeleri, katmanlı mı)
+def word_bd(size):
+    fn = "SpaceGrotesk_700Bold.ttf"
+    parts, x = [], 0.0
+    for ch, role in (("b", "accent"), ("oy", "main"), ("d", "accent"), ("e", "main")):
+        d, w = text_path(ch, fn, size, x, track=-.02)
+        parts.append((d, role))
+        x += w - size * .02
+    d, w = text_path("labs", "SpaceGrotesk_400Regular.ttf", size, x + size * .26)
+    parts.append((d, "main"))
+    g, _ = text_geom("boydelabs", fn, size)
+    return parts, (0, g.bounds[1], x + size * .26 + w, g.bounds[3])
+
+
+# yön: (ad, kısa anlatım, işaret, yazı, kılavuzdaki hikâye maddeleri, katmanlı mı, yalnız yazı mı)
 YONLER = {
-    1: ("Katman", "b ve d (BoyDe) yatay katmanlardan: 3D baskıda parça katman katman yükselir; en üst katman "
-                  "turuncu, o an basılan katman.", mark_katman, word_main,
-        [("Harfler", "b ve d: BoyDe'nin iki harfi, birbirine bakan kaseler; geometrik, sade."),
-         ("Katmanlar", f"3D yazıcı parçayı alttan üste ince katmanlarla kurar; işaret {LAYERS} katmandan."),
-         ("Turuncu katman", "en üstteki, o an basılan katman: işin sıcak, yeni ve size özel olduğunu söyler."),
-         ("Yazı", "BOYDE kalın, LABS ince ve turuncu: atölye (laboratuvar) yanı.")], True),
-    2: ("İki ton", "b mürekkep, d turuncu; kaseler iç içe geçer: iki harf, tek işaret.", mark_ikiton, word_main,
-        [("Harfler", "b ve d: BoyDe'nin iki harfi, iç içe; d önde."),
-         ("İki ton", "b mürekkep (atölye), d turuncu (sıcak filament); birbirini tamamlar."),
-         ("Aralık", "d'nin çevresinde ince bir boşluk: harfler karışmaz, küçük boyda da okunur."),
-         ("Yazı", "BOYDE kalın, LABS ince ve turuncu.")], False),
-    3: ("Ayna", "b ve d aynalı, kaseleri ortada değer; değdikleri yerde turuncu nokta: nozulun ucu.", mark_ayna,
-        word_main, [("Harfler", "b ve d birbirinin aynası: BoyDe, iki yandan ortaya bakar."),
-                    ("Turuncu nokta", "kaselerin değdiği yerde: nozulun ucu, işin başladığı nokta."),
-                    ("Simetri", "dengeli, akılda kalan bir işaret; profil fotoğrafında ve küçük boyda güçlü."),
-                    ("Yazı", "BOYDE kalın, LABS ince ve turuncu.")], False),
-    4: ("Tek çizgi", "ince tek çizgi b ve d: b mürekkep, d turuncu; nozulun çektiği tek hat gibi.", mark_tekcizgi,
-        word_main, [("Harfler", "b ve d, ince tek çizgiyle: sade ve modern."),
-                    ("Tek hat", "3D yazıcının nozulu da parçayı tek bir sıcak çizgiyle çizer."),
-                    ("İki ton", "b mürekkep, d turuncu."),
-                    ("Yazı", "BOYDE kalın, LABS ince ve turuncu.")], False),
+    1: ("Küp", "İzometrik küp: 3D'nin en bilinen işareti. Yan yüzler katman katman, üst yüz turuncu: o an basılan "
+               "katman.", mark_kup, word_kup,
+        [("Küp", "3D'nin en bilinen işareti: üç yüz, üç boyut."), ("Katmanlar", "yan yüzler ince katmanlardan: "
+         "3D yazıcı parçayı alttan üste böyle kurar."), ("Turuncu üst yüz", "o an basılan katman: sıcak, yeni, size "
+         "özel."), ("Yazı", "BOYDE kalın, LABS ince ve turuncu (Sora).")], False, False),
+    2: ("Şişe", "Laboratuvar şişesi (Labs), içi turuncu katmanlarla dolu: deneyen, üreten atölye.", mark_sise,
+        word_sise, [("Şişe", "Labs: deneyen, yeni şeyler üreten bir atölye."), ("Katmanlar", "şişenin içi turuncu "
+                    "katmanlar: basılan parça."), ("Yazı", "boyde labs, küçük harf; labs turuncu (Unbounded).")],
+        False, False),
+    3: ("Nozul", "3D yazıcının nozulu ve ucunda turuncu damla; yazının altını aynı turuncu çizgi çizer.",
+        mark_nozul, word_nozul, [("Nozul", "3D yazıcının sıcak ucu: her şey buradan çıkar."),
+                                 ("Damla ve çizgi", "nozuldan çıkan turuncu filament yazının altını çizer."),
+                                 ("Yazı", "BOYDE LABS (Space Grotesk).")], False, False),
+    4: ("Etiket", "boyde yazısı ve turuncu bir etiketin içinde labs; simge turuncu karede b. Modern, sade.",
+        mark_etiket, word_etiket, [("Yazı", "boyde, küçük harf ve kalın (Unbounded)."), ("Etiket", "labs turuncu "
+                                   "bir etiketin içinde: ürün etiketleri gibi."), ("Simge", "turuncu karede b.")],
+        False, False),
+    5: ("Rozet", "Yuvarlak mühür: çevresinde BOYDE LABS ve 3D BASKI ATÖLYESİ, ortada küp. Paket ve etiket için.",
+        mark_rozet, word_rozet, [("Rozet", "atölye mührü: kutulara, etiketlere, isimliklerin arkasına."),
+                                 ("Küp", "ortada 3D'nin işareti, üst yüzü turuncu."),
+                                 ("Yazı", "BOYDE LABS · 3D BASKI ATÖLYESİ (Space Grotesk).")], False, False),
+    6: ("Katmanlı yazı", "BOYDE harfleri katman katman basılmış gibi, en üst katman turuncu; simge aynı kesimle B.",
+        mark_katmanli, word_katmanli, [("Yazı", "BOYDE harfleri yatay katmanlardan: 3D baskı gibi."),
+                                       ("Turuncu katman", "en üstteki, o an basılan katman."),
+                                       ("Simge", "aynı kesimle B.")], True, True),
+    7: ("QR", "Üç QR köşe işareti ve turuncu bir kare: ürünün (QR'lı isimlik) kendisi.", mark_qr, word_qr,
+        [("QR", "isimliklerimizin kalbi: üç köşe işareti."), ("Turuncu kare", "dördüncü köşe: size özel olan."),
+         ("Yazı", "BOYDE kalın, LABS ince ve turuncu (Manrope).")], False, False),
+    8: ("b ve d", "boyde yazısında b ve d turuncu; simge bd. İsmin iki harfi öne çıkar.", mark_bd, word_bd,
+        [("Harfler", "boyde'nin b ve d'si turuncu: ismin iki ucu."), ("Simge", "bd: b mürekkep, d turuncu."),
+         ("Yazı", "boyde labs, küçük harf (Space Grotesk).")], False, False),
 }
 
-THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE},
-          "koyu": {"main": PAPER, "sub": ORANGE, "accent": ORANGE},
-          "siyah": {"main": "#000", "sub": "#000", "accent": "#000"},
-          "beyaz": {"main": "#fff", "sub": "#fff", "accent": "#fff"}}
+THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
+          "koyu": {"main": PAPER, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
+          "siyah": {"main": "#000", "sub": "#000", "accent": "#000", "mid": "#000"},
+          "beyaz": {"main": "#fff", "sub": "#fff", "accent": "#fff", "mid": "#fff"}}
 
 
 def _g(parts, theme, dx=0.0, dy=0.0, s=1.0):
@@ -291,7 +480,9 @@ def _g(parts, theme, dx=0.0, dy=0.0, s=1.0):
 
 def lockup(n, kind, theme, pad=0.0):
     """Logo (SVG metni, en, boy). kind: yatay, dikey, simge, yazi."""
-    _, _, mark, word, *_ = YONLER[n]
+    _, _, mark, word, _, _, only_word = YONLER[n]
+    if only_word and kind in ("yatay", "dikey"):
+        kind = "yazi"
     mp, (mx0, my0, mx1, my1) = mark()
     mw, mh = mx1 - mx0, my1 - my0
     H = 100.0                                       # simge boyu
@@ -323,6 +514,13 @@ def lockup(n, kind, theme, pad=0.0):
     p = pad * Ht
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{-p:.2f} {-p:.2f} {W + 2 * p:.2f} {Ht + 2 * p:.2f}" '
             f'width="{W + 2 * p:.1f}" height="{Ht + 2 * p:.1f}">{inner}</svg>'), W + 2 * p, Ht + 2 * p
+
+
+def fitted(n, kind, theme, maxw, maxh):
+    """Logo, verilen kutuya sığacak boyda (sayfa içi SVG)."""
+    svg, w, h = lockup(n, kind, theme)
+    k = min(maxw / w, maxh / h)
+    return inline(svg, height=f"{h * k:.1f}px")
 
 
 def inline(svg, height=None, width=None, cls=""):
@@ -361,11 +559,16 @@ class Painter:
         self.fonts = font_css()
 
     def png(self, body, w, h, path, transparent=False, css="", scale=1):
-        pg = self.b.new_page(viewport={"width": w, "height": h}, device_scale_factor=scale)
+        """h=None: yükseklik içeriğe göre."""
+        pg = self.b.new_page(viewport={"width": w, "height": h or 800}, device_scale_factor=scale)
+        size = f"width:{w}px;height:{h}px" if h else f"width:{w}px"
         pg.set_content(f"<!doctype html><meta charset=utf-8><style>{self.fonts}{BASE_CSS}{css}</style>"
-                       f'<body style="width:{w}px;height:{h}px;overflow:hidden">{body}</body>')
+                       f'<body style="{size};overflow:hidden">{body}</body>')
         pg.evaluate("document.fonts.ready")
         pg.wait_for_timeout(150)
+        if not h:
+            h = pg.evaluate("Math.ceil(document.body.getBoundingClientRect().height)")
+            pg.set_viewport_size({"width": w, "height": h})
         pg.screenshot(path=path, omit_background=transparent, clip={"x": 0, "y": 0, "width": w, "height": h})
         pg.close()
         return path
@@ -403,37 +606,42 @@ def painter():
 
 # ---------------------------------------------------------------- seçenekler
 
-def options_sheet(P, path):
-    rows = []
+def options_sheet(P, path, recommended=None):
+    cards = []
     for n, (name, desc, *_) in YONLER.items():
-        icon_k = inline(lockup(n, "simge", "koyu")[0], height="96px")
-        icon_a = inline(lockup(n, "simge", "acik")[0], height="96px")
-        yat_a = inline(lockup(n, "yatay", "acik")[0], height="74px")
-        yat_k = inline(lockup(n, "yatay", "koyu")[0], height="74px")
-        prof = inline(lockup(n, "simge", "koyu")[0], height="62px")
-        rows.append(f"""<div class="row"><div class="lab"><b class="u">{n}</b><h2 class="u">{name}</h2><p>{desc}</p>
-          {'<em>önerilen</em>' if n == 1 else ''}</div>
-          <div class="tile dark">{icon_k}</div><div class="tile light">{icon_a}</div>
-          <div class="wide light">{yat_a}</div><div class="wide dark">{yat_k}</div>
-          <div class="ig"><span class="ring"><span class="pp">{prof}</span></span><small>profil</small></div></div>""")
+        icon_k = fitted(n, "simge", "koyu", 112, 104)
+        yat_a = fitted(n, "yatay", "acik", 520, 76)
+        yat_k = fitted(n, "yatay", "koyu", 640, 64)
+        prof = fitted(n, "simge", "koyu", 74, 62)
+        tag = '<em>önerilen</em>' if n == recommended else ''
+        cards.append(f"""<div class="card"><div class="lab"><b class="u">{n}</b><div><h2 class="u">{name}{tag}</h2>
+          <p>{desc}</p></div></div>
+          <div class="r1"><div class="tile dark">{icon_k}</div><div class="wide light">{yat_a}</div>
+          <div class="ig"><span class="ring"><span class="pp">{prof}</span></span><small>profil</small></div></div>
+          <div class="wide dark low">{yat_k}</div></div>""")
     css = f"""
-    body{{background:{SAND};color:{INK};padding:60px}}
+    body{{background:{SAND};color:{INK};padding:56px 60px}}
     h1{{font:700 40px Unbounded;letter-spacing:-.01em}} .top p{{margin-top:10px;font-size:20px;color:#55575c}}
-    .row{{display:grid;grid-template-columns:330px 170px 170px 1fr 1fr 150px;gap:18px;align-items:center;margin-top:28px;
-      padding:22px;border-radius:24px;background:#EFEBE3}}
-    .lab b{{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:{INK};color:{PAPER};
-      font-size:18px}} .lab h2{{margin-top:12px;font-size:26px}} .lab p{{margin-top:6px;font-size:16px;line-height:1.4;color:#55575c}}
-    .lab em{{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:99px;background:{ORANGE};color:#fff;
-      font-style:normal;font-weight:700;font-size:14px}}
-    .tile,.wide{{height:170px;border-radius:20px;display:grid;place-items:center}}
-    .dark{{background:{INK}}} .light{{background:{PAPER}}} .wide{{padding:0 26px}} .wide svg{{max-width:100%}}
+    .grid{{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px}}
+    .card{{padding:22px;border-radius:26px;background:#EFEBE3;display:flex;flex-direction:column;gap:16px}}
+    .lab{{display:flex;gap:14px;align-items:flex-start;min-height:74px}}
+    .lab b{{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:{INK};
+      color:{PAPER};font-size:18px}} .lab h2{{font-size:24px;display:flex;align-items:center;gap:10px}}
+    .lab p{{margin-top:6px;font-size:16px;line-height:1.4;color:#55575c}}
+    .lab em{{padding:3px 11px;border-radius:99px;background:{ORANGE};color:#fff;font:700 13px "Space Grotesk";
+      font-style:normal}}
+    .r1{{display:grid;grid-template-columns:160px 1fr 130px;gap:14px;align-items:center}}
+    .tile,.wide{{height:160px;border-radius:20px;display:grid;place-items:center}}
+    .dark{{background:{INK}}} .light{{background:{PAPER}}} .wide{{padding:0 24px}} .wide svg{{max-width:100%}}
+    .low{{height:120px}}
     .ig{{display:flex;flex-direction:column;align-items:center;gap:8px}} .ig small{{font-size:14px;color:#55575c}}
     .ring{{padding:4px;border-radius:50%;background:linear-gradient(45deg,#f9a53b,#e1306c,#833ab4)}}
     .pp{{display:grid;place-items:center;width:112px;height:112px;border-radius:50%;background:{INK};border:4px solid #EFEBE3}}
     """
-    body = (f'<div class="top"><h1>BOYDE LABS · b + d logo yönleri</h1><p>Dört yön, hepsi b ve d harflerinden; birini seçin, bütün kit (logo dosyaları, '
-            f'Shopier, Instagram, kılavuz) ona göre üretilir. Kit şimdi 1 · Katman ile hazır.</p></div>{"".join(rows)}')
-    return P.png(body, 1880, 1300, path, css=css)
+    body = (f'<div class="top"><h1>BOYDE LABS · logo yönleri</h1><p>Birbirinden farklı {len(YONLER)} yön, renkler '
+            f'aynı. Birini seçin; bütün kit (logo dosyaları, Shopier, Instagram, kılavuz) ona göre üretilir.</p></div>'
+            f'<div class="grid">{"".join(cards)}</div>')
+    return P.png(body, 1880, None, path, css=css)
 
 
 # ---------------------------------------------------------------- kit
@@ -523,8 +731,6 @@ def wide_graphic(sim_k, aspect, W=1920, H=1080):
 
 
 def kit(P, n):
-    yat_k = lockup(n, "yatay", "koyu")[0]
-    dik_k = lockup(n, "dikey", "koyu")[0]
     sim_k = lockup(n, "simge", "koyu")[0]
     made = {"logo": logo_files(P, n, os.path.join(OUT, "logo"))}
     sh = os.path.join(OUT, "shopier")
@@ -537,24 +743,24 @@ def kit(P, n):
     # ---- Shopier
     P.png(f"""<div style="{dark};height:200px;display:flex;align-items:center;justify-content:center;gap:44px;
       background-image:{stripes_bg(PAPER, .05, 20)};background-size:100% 20px">
-      {inline(yat_k, height="74px")}<i style="width:2px;height:64px;background:rgba(244,241,234,.25)"></i>
+      {fitted(n, "yatay", "koyu", 888, 74)}<i style="width:2px;height:64px;background:rgba(244,241,234,.25)"></i>
       <div><p class="u" style="font-size:26px;font-weight:500;color:{PAPER}">{SLOGAN}</p>
       <p style="margin-top:8px;font-size:17px;letter-spacing:.14em;color:{ORANGE};font-weight:700">QR'LI İSİMLİK · DİJİTAL
       KARTVİZİT · 3D BASKI</p></div></div>""", 1920, 200, os.path.join(sh, "banner_1920x200.png"))
     for sc, fn in ((1, "banner_mobil_400x100.png"), (2, "banner_mobil_800x200.png")):
-        P.png(f"""<div style="{dark};height:100px;display:grid;place-items:center">{inline(yat_k, height="44px")}</div>""",
+        P.png(f"""<div style="{dark};height:100px;display:grid;place-items:center">{fitted(n, "yatay", "koyu", 528, 44)}</div>""",
               400, 100, os.path.join(sh, fn), scale=sc)
-    P.png(f"""<div style="{dark};height:800px;display:grid;place-items:center">{inline(sim_k, height="400px")}</div>""",
+    P.png(f"""<div style="{dark};height:800px;display:grid;place-items:center">{fitted(n, "simge", "koyu", 500, 400)}</div>""",
           800, 800, os.path.join(sh, "logo_kare_800.png"))
     P.png(f"""<div style="{dark};height:1200px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:70px;background-image:{stripes_bg(PAPER, .04, 30)}">{inline(dik_k, height="430px")}
+      gap:70px;background-image:{stripes_bg(PAPER, .04, 30)}">{fitted(n, "dikey", "koyu", 1290, 430)}
       <p class="u" style="font-size:52px;font-weight:500;color:{PAPER}">{SLOGAN}</p></div>""",
           1600, 1200, os.path.join(sh, "hakkinda_kapak_4x3.png"))
     _, sw, shh = lockup(n, "simge", "koyu")
     P.png(wide_graphic(sim_k, sw / shh), 1920, 1080, os.path.join(sh, "hakkinda_genis_16x9.png"))
 
     # ---- Instagram: profil ve öne çıkanlar
-    P.png(f"""<div style="{dark};height:1080px;display:grid;place-items:center">{inline(sim_k, height="520px")}</div>""",
+    P.png(f"""<div style="{dark};height:1080px;display:grid;place-items:center">{fitted(n, "simge", "koyu", 650, 520)}</div>""",
           1080, 1080, os.path.join(ig, "profil_1080.png"))
     for key, (_, label) in ICONS.items():
         P.png(f"""<div style="{dark};height:1920px;display:grid;place-items:center">
@@ -563,11 +769,11 @@ def kit(P, n):
           </div></div>""", 1080, 1920, os.path.join(hl, f"{key}.png"))
 
     # ---- Instagram: gönderiler (1080 × 1350)
-    head = f'<div style="position:absolute;left:80px;top:76px">{inline(yat_k, height="58px")}</div>'
+    head = f'<div style="position:absolute;left:80px;top:76px">{fitted(n, "yatay", "koyu", 696, 58)}</div>'
     stripe = (f'<div style="position:absolute;left:0;right:0;bottom:0;height:300px;background-image:'
               f'{stripes_bg(PAPER, .06, 26)};-webkit-mask-image:linear-gradient(transparent,#000)"></div>')
     P.png(f"""<div style="{dark};height:1350px;position:relative;overflow:hidden">{stripe}{head}
-      <div style="position:absolute;right:-190px;bottom:-330px;opacity:.1">{inline(sim_k, height="700px")}</div>
+      <div style="position:absolute;right:-190px;bottom:-330px;opacity:.1">{fitted(n, "simge", "koyu", 875, 700)}</div>
       <div style="position:absolute;left:80px;top:330px;right:80px">
         <p style="font-size:26px;font-weight:700;letter-spacing:.2em;color:{ORANGE}">MERHABA, BİZ BOYDE LABS</p>
         <h1 class="u" style="margin-top:34px;font-size:104px;line-height:1.02;font-weight:700;letter-spacing:-.02em">
@@ -613,7 +819,7 @@ def kit(P, n):
 
     # ---- Instagram: hikâye
     P.png(f"""<div style="{dark};height:1920px;position:relative;overflow:hidden;background-image:{stripes_bg(PAPER, .05, 30)}">
-      <div style="position:absolute;left:0;right:0;top:170px;display:grid;place-items:center">{inline(yat_k, height="70px")}</div>
+      <div style="position:absolute;left:0;right:0;top:170px;display:grid;place-items:center">{fitted(n, "yatay", "koyu", 840, 70)}</div>
       <div style="position:absolute;left:90px;right:90px;top:560px">
         <p style="font-size:30px;font-weight:700;letter-spacing:.22em;color:{ORANGE}">DUYURU</p>
         <h1 class="u" style="margin-top:30px;font-size:128px;line-height:1;font-weight:700;letter-spacing:-.02em">
@@ -630,10 +836,7 @@ def kit(P, n):
 # ---------------------------------------------------------------- kılavuz
 
 def guide(P, n):
-    name, desc, _, _, story, _ = YONLER[n]
-    yat_a, yat_k = lockup(n, "yatay", "acik")[0], lockup(n, "yatay", "koyu")[0]
-    dik_a = lockup(n, "dikey", "acik")[0]
-    sim_a, sim_k = lockup(n, "simge", "acik")[0], lockup(n, "simge", "koyu")[0]
+    name, desc, _, _, story, *_ = YONLER[n]
     W, H = 1600, 900
     css = f"""
     .pg{{background:{PAPER};color:{INK};padding:80px 96px}}
@@ -652,16 +855,16 @@ def guide(P, n):
     no = lambda k: f'<p class="no">BOYDE LABS · MARKA KILAVUZU · {k:02d}</p>'  # noqa: E731
     pages = []
     pages.append(f"""<div class="pg dark" style="padding:0;background-image:{stripes_bg(PAPER, .05, 30)}">
-      <div style="position:absolute;left:96px;top:96px">{inline(yat_k, height="70px")}</div>
+      <div style="position:absolute;left:96px;top:96px">{fitted(n, "yatay", "koyu", 840, 70)}</div>
       <div style="position:absolute;left:96px;bottom:110px"><p class="k">MARKA KILAVUZU · 2026</p>
       <h1 class="u" style="margin-top:20px;font-size:92px;line-height:1.02;font-weight:700;letter-spacing:-.02em">
       Katman<br>katman,<br><span style="color:{ORANGE}">size özel.</span></h1></div>
-      <div style="position:absolute;right:-90px;top:150px">{inline(sim_k, height="600px")}</div></div>""")
+      <div style="position:absolute;right:-90px;top:150px">{fitted(n, "simge", "koyu", 750, 600)}</div></div>""")
     pages.append(f"""<div class="pg"><p class="k">01 · HİKÂYE VE LOGO</p><h2>Ürünün kendisinden bir logo</h2>
       <p class="lead">BOYDE LABS bir 3D baskı atölyesi: QR'lı akıllı isimlikleri ve işletmelere özel dijital kartvizit
       sitelerini tasarlayıp kendi yazıcılarında basıyor. Logo ({name}): {desc}</p>
       <div class="grid" style="grid-template-columns:1.1fr 1fr">
-        <div class="box" style="height:430px;background:{INK}">{inline(sim_k, height="300px")}<small>simge</small></div>
+        <div class="box" style="height:430px;background:{INK}">{fitted(n, "simge", "koyu", 375, 300)}<small>simge</small></div>
         <div style="display:flex;flex-direction:column;justify-content:center;gap:26px;font-size:20px;line-height:1.5">
           {"".join(f"<p><b>{k}:</b> {v}</p>" for k, v in story)}
           <p><b>Söz:</b> “{SLOGAN}”</p></div></div>{no(1)}</div>""")
@@ -669,11 +872,11 @@ def guide(P, n):
       <p class="lead">Önce yatay logo; dar ve kare alanlarda dikey; profil fotoğrafı, uygulama simgesi ve küçük
       boyutlarda yalnız simge. Açık zeminde mürekkep, koyu zeminde kâğıt rengi.</p>
       <div class="grid" style="grid-template-columns:1.6fr 1fr 1fr;grid-template-rows:200px 200px">
-        <div class="box" style="background:#fff">{inline(yat_a, height="78px")}<small>yatay · açık</small></div>
-        <div class="box" style="background:#fff;grid-row:span 2">{inline(dik_a, height="210px")}<small>dikey</small></div>
-        <div class="box" style="background:#fff">{inline(sim_a, height="110px")}<small>simge</small></div>
-        <div class="box" style="background:{INK}">{inline(yat_k, height="78px")}<small>yatay · koyu</small></div>
-        <div class="box" style="background:{INK}">{inline(sim_k, height="110px")}<small>simge · koyu</small></div>
+        <div class="box" style="background:#fff">{fitted(n, "yatay", "acik", 936, 78)}<small>yatay · açık</small></div>
+        <div class="box" style="background:#fff;grid-row:span 2">{fitted(n, "dikey", "acik", 630, 210)}<small>dikey</small></div>
+        <div class="box" style="background:#fff">{fitted(n, "simge", "acik", 138, 110)}<small>simge</small></div>
+        <div class="box" style="background:{INK}">{fitted(n, "yatay", "koyu", 936, 78)}<small>yatay · koyu</small></div>
+        <div class="box" style="background:{INK}">{fitted(n, "simge", "koyu", 138, 110)}<small>simge · koyu</small></div>
       </div>
       <p style="margin-top:26px;font-size:17px;color:#55575c">Boşluk: logonun çevresinde en az simgenin yarısı kadar boş alan
       bırakın. En küçük boy: yatay logo 120 px (baskıda 25 mm), simge 24 px (5 mm).</p>{no(2)}</div>""")
@@ -720,14 +923,14 @@ def guide(P, n):
       <p class="lead">Logo dosyalarını olduğu gibi kullanın (logo/ klasörü): SVG baskı ve büyük işler için, PNG
       sosyal medya için.</p>
       <div class="grid" style="grid-template-columns:repeat(4,1fr);grid-template-rows:230px">
-        {''.join(f'<div class="box" style="background:#fff;overflow:hidden"><div style="{st}">{inline(yat_a, height="40px")}</div>'
+        {''.join(f'<div class="box" style="background:#fff;overflow:hidden"><div style="{st}">{fitted(n, "yatay", "acik", 480, 40)}</div>'
                  f'<small style="color:#c0392b">✕ {t}</small></div>' for st, t in (
                      ("transform:scaleX(1.5)", "esnetmeyin"), ("filter:hue-rotate(160deg)", "rengini değiştirmeyin"),
                      ("filter:drop-shadow(6px 6px 0 #888)", "gölge, efekt eklemeyin"),
                      ("transform:rotate(-12deg)", "döndürmeyin")))}</div>
       <div class="grid" style="grid-template-columns:1fr 1fr;grid-template-rows:200px;margin-top:22px">
-        <div class="box" style="background:{INK}">{inline(yat_k, height="70px")}<small style="color:#2e9b57">✓ koyu zeminde kâğıt rengi</small></div>
-        <div class="box" style="background:{SAND}">{inline(yat_a, height="70px")}<small style="color:#2e9b57">✓ açık zeminde mürekkep</small></div>
+        <div class="box" style="background:{INK}">{fitted(n, "yatay", "koyu", 840, 70)}<small style="color:#2e9b57">✓ koyu zeminde kâğıt rengi</small></div>
+        <div class="box" style="background:{SAND}">{fitted(n, "yatay", "acik", 840, 70)}<small style="color:#2e9b57">✓ açık zeminde mürekkep</small></div>
       </div>{no(6)}</div>""")
     pages.append(f"""<div class="pg dark"><p class="k">07 · SES VE METİNLER</p><h2>Samimi, kısa, net</h2>
       <p class="lead">Esnafla konuşur gibi: kısa cümleler, “siz” dili, abartı yok. Fiyat ve süre açık yazılır.</p>
@@ -753,13 +956,15 @@ def guide(P, n):
 
 
 def main():
-    n = int(sys.argv[sys.argv.index("--yon") + 1]) if "--yon" in sys.argv else 1
-    for d in ("logo", "shopier", "instagram"):
-        shutil.rmtree(os.path.join(OUT, d), ignore_errors=True)
+    n = int(sys.argv[sys.argv.index("--yon") + 1]) if "--yon" in sys.argv else 0
     os.makedirs(OUT, exist_ok=True)
     with painter() as P:
-        options_sheet(P, os.path.join(OUT, "secenekler.png"))
+        options_sheet(P, os.path.join(OUT, "secenekler.png"), n or None)
         print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT))
+        if not n:
+            return
+        for d in ("logo", "shopier", "instagram"):
+            shutil.rmtree(os.path.join(OUT, d), ignore_errors=True)
         kit(P, n)
         guide(P, n)
     print(f"kit ({n} · {YONLER[n][0]}):", os.path.relpath(OUT, A.ROOT))
