@@ -61,6 +61,12 @@ def foto(key, view="studyo", maxw=900):
     return uri(os.path.join(FOTO, f"{key}_{view}.jpg"), maxw)
 
 
+def light(path):
+    """Fotoğrafın fonu açık mı (koyu isimlikler beyaz fonda, beyazlar logodaki siyahta): üst şeridin parlaklığı."""
+    im = Image.open(path).convert("L")
+    return sum(im.crop((0, 0, im.width, im.height // 10)).getdata()) / (im.width * (im.height // 10)) > 128
+
+
 def duz(key, maxw=900):
     return uri(os.path.join(U.SRC, f"{key}_duz.png"), maxw, "PNG")
 
@@ -102,25 +108,27 @@ def shopier(P, cat):
     def name(s):
         return os.path.join(ek, f"{s}.jpg")
 
-    # kapak
+    # kapak: beyaz fonda koyu yazı, koyu fonda açık yazı (fonu karartan gölge yalnız koyuda)
+    kapak = os.path.join(FOTO, f"kapak_{cat}.jpg")
+    acik = light(kapak)
+    shade = "" if acik else """<div style="position:absolute;inset:0;background:linear-gradient(180deg,
+      rgba(18,19,22,.55) 0,rgba(18,19,22,0) 22%,rgba(18,19,22,0) 56%,rgba(18,19,22,.92) 100%)"></div>"""
     sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:#000">
-      <img src="{uri(os.path.join(FOTO, f'kapak_{cat}.jpg'), 1200)}" style="width:1200px;height:1200px;display:block">
-      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.55) 0,rgba(18,19,22,0) 22%,
-        rgba(18,19,22,0) 56%,rgba(18,19,22,.92) 100%)"></div>
-      <div style="position:absolute;left:64px;top:56px">{logo("koyu", 330, 66)}</div>
-      <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{PAPER}">
+      <img src="{uri(kapak, 1200)}" style="width:1200px;height:1200px;display:block">{shade}
+      <div style="position:absolute;left:64px;top:56px">{logo("acik" if acik else "koyu", 330, 66)}</div>
+      <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK if acik else PAPER}">
         <p class="k">{K['olcu'].upper()} · {len(ms)} MODEL</p>
         <h1 class="u" style="margin-top:14px;font-size:76px;line-height:1.02;letter-spacing:-.02em">{K['ad']}</h1>
-        <p style="margin-top:18px;font-size:30px;line-height:1.35;color:rgba(244,241,234,.86)">{K['kisa']}
-          Tasarım size özel; QR'ı okutan müşteriniz sizin sayfanızı açar.</p></div></div>""", name("kapak"))
+        <p style="margin-top:18px;font-size:30px;line-height:1.35;color:{'#3b3d42' if acik else 'rgba(244,241,234,.86)'}">
+          {K['kisa']} Tasarım size özel; QR'ı okutan müşteriniz sizin sayfanızı açar.</p></div></div>""", name("kapak"))
 
     # modeller: 4 × 3 ızgara, 10 model ve iki kutu
     cells = "".join(f"""<div style="position:relative;border-radius:16px;overflow:hidden;background:#fff">
       <img src="{foto(u.key, maxw=420)}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">
       <span class="chip code" style="position:absolute;left:10px;top:10px;background:{INK};color:{PAPER};
         font-size:15px;padding:5px 10px">{c}</span>
-      <span style="position:absolute;left:10px;right:10px;bottom:8px;font-size:15px;font-weight:700;
-        color:{INK};text-shadow:0 0 6px #fff">{u.sektor}</span></div>""" for c, u in ms)
+      <span class="chip" style="position:absolute;left:10px;bottom:10px;max-width:calc(100% - 20px);font-size:14px;
+        padding:4px 10px;background:rgba(244,241,234,.92);color:{INK}">{u.sektor}</span></div>""" for c, u in ms)
     cells += f"""<div style="border-radius:16px;background:{ORANGE};color:#fff;padding:18px;display:flex;
       flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:20px;line-height:1.15">Size
       özel</p><p style="margin-top:6px;font-size:15px;line-height:1.35">Adınız, logonuz, renkleriniz. Yeni düzen de
@@ -283,17 +291,25 @@ def site_pages():
 
 def catalog(P):
     pages, no = [], 1
-    cover9 = uri(os.path.join(FOTO, "kapak_9x12.jpg"), 1100)
-    pages.append(page(f"""<div style="position:absolute;inset:0;background:url({cover9}) center/cover"></div>
-      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.7) 0,rgba(18,19,22,0) 30%,
-        rgba(18,19,22,0) 52%,rgba(18,19,22,.95) 100%)"></div>
-      <div style="position:relative">{logo("koyu", 260, 52)}</div>
+    kapak = os.path.join(FOTO, "kapak_9x12.jpg")
+    cover9 = uri(kapak, 1100)
+    if light(kapak):                                     # beyaz fon: fotoğraf sayfa genişliğinde, kenarı fona karışır
+        r, g, b = Image.open(kapak).convert("RGB").getpixel((8, 8))
+        art = f"""<div style="position:absolute;inset:0;background:rgb({r},{g},{b})"><img src="{cover9}"
+          style="position:absolute;left:0;top:50%;width:100%;transform:translateY(-52%);
+          -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 80%,transparent 100%)"></div>"""
+    else:
+        art = f"""<div style="position:absolute;inset:0;background:url({cover9}) center/cover"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.7) 0,
+          rgba(18,19,22,0) 30%,rgba(18,19,22,0) 52%,rgba(18,19,22,.95) 100%)"></div>"""
+    pages.append(page(f"""{art}
+      <div style="position:relative">{logo("acik" if light(kapak) else "koyu", 260, 52)}</div>
       <div style="position:absolute;left:48px;right:48px;bottom:64px">
         <p class="k">ÜRÜN KATALOĞU · 2026</p>
         <h1 class="u" style="margin-top:12px;font-size:50px;line-height:1.04">QR'lı<br>isimlikler</h1>
-        <p style="margin-top:16px;font-size:16px;line-height:1.5;color:rgba(244,241,234,.85)">İşletmeler için
+        <p style="margin-top:16px;font-size:16px;line-height:1.5;opacity:.85">İşletmeler için
           9 × 12 cm masa isimliği, yönetici ve personel için 10 × 20 cm kurumsal isimlik. Tasarımdan 3D baskıya,
-          kendi atölyemizde.</p></div>""", dark=True))
+          kendi atölyemizde.</p></div>""", dark=not light(kapak)))
     no += 1
 
     cats = "".join(f"""<div style="background:#fff;border-radius:16px;overflow:hidden">
