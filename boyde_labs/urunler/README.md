@@ -78,7 +78,8 @@ modern" isteğiyle sade:
 - Her kategori bir ürün; 10 model görseli sırasıyla yüklenir.
 - Görsel sınırı izin verirse `ek/kapak.jpg` ilk görsel olur.
 - `ek/modeller.jpg` 10 modeli bir arada gösterir.
-- Müşteri model kodunu (M01 …) sipariş notuna yazar.
+- Müşteri model seçmez: siparişten sonra ona özel 10 tasarım hazırlanır, en beğendiği basılır ("10 adet örnek
+  çalışma yapacağız"). M01 … M10 örnek çalışmalar; beğendiğinin kodunu not olarak yazabilir.
 
 ## Yeniden üretmek
 

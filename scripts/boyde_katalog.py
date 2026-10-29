@@ -32,6 +32,11 @@ FOTO = os.path.join(OUT, "fotograf")
 LOGO = "3b"
 TEL = "0546 475 45 08"
 TUR = {"musteri": "Müşterimizin seçtiği", "oneri": "Müşterimize çizilen öneri", "ornek": "Örnek tasarım"}
+# sipariş akışı: "10 adet örnek çalışma yapacağız; size özel 10 tasarım gönderiyoruz, en beğendiğinizi üretiyoruz"
+SIPARIS = [("01", "Sipariş verin", "Shopier'dan adet seçin, ödemeyi güvenle yapın."),
+           ("02", "Bilgilerinizi gönderin", "Ad, logo, renkler, telefon, Instagram, konum, IBAN."),
+           ("03", "Size özel 10 tasarım", "Bilgilerinizle 10 farklı tasarım hazırlayıp gönderiyoruz."),
+           ("04", "En beğendiğinizi basalım", "Seçtiğiniz tasarımı 3D basıp kargoya veriyoruz.")]
 NOT_ORNEK = "Örneklerdeki işletme adları, telefon ve QR'lar örnektir; tasarım sizin bilgilerinizle hazırlanır."
 
 
@@ -117,10 +122,11 @@ def shopier(P, cat):
       <img src="{uri(kapak, 1200)}" style="width:1200px;height:1200px;display:block">{shade}
       <div style="position:absolute;left:64px;top:56px">{logo("acik" if acik else "koyu", 330, 66)}</div>
       <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK if acik else PAPER}">
-        <p class="k">{K['olcu'].upper()} · {len(ms)} MODEL</p>
+        <p class="k">{K['olcu'].upper()} · SİZE ÖZEL 10 TASARIM</p>
         <h1 class="u" style="margin-top:14px;font-size:76px;line-height:1.02;letter-spacing:-.02em">{K['ad']}</h1>
         <p style="margin-top:18px;font-size:30px;line-height:1.35;color:{'#3b3d42' if acik else 'rgba(244,241,234,.86)'}">
-          {K['kisa']} Tasarım size özel; QR'ı okutan müşteriniz sizin sayfanızı açar.</p></div></div>""", name("kapak"))
+          {K['kisa']} Size özel 10 tasarım hazırlıyoruz, en beğendiğinizi basıyoruz.</p></div></div>""",
+       name("kapak"))
 
     # modeller: 4 × 3 ızgara, 10 model ve iki kutu
     cells = "".join(f"""<div style="position:relative;border-radius:16px;overflow:hidden;background:#fff">
@@ -131,18 +137,19 @@ def shopier(P, cat):
         padding:4px 10px;background:rgba(244,241,234,.92);color:{INK}">{u.sektor}</span></div>""" for c, u in ms)
     cells += f"""<div style="border-radius:16px;background:{ORANGE};color:#fff;padding:18px;display:flex;
       flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:20px;line-height:1.15">Size
-      özel</p><p style="margin-top:6px;font-size:15px;line-height:1.35">Adınız, logonuz, renkleriniz. Yeni düzen de
-      çizeriz.</p></div>
+      özel 10 tasarım</p><p style="margin-top:6px;font-size:15px;line-height:1.35">Sizin adınız, logonuz ve
+      renklerinizle. En beğendiğinizi basıyoruz.</p></div>
       <div style="border-radius:16px;background:{INK};color:{PAPER};padding:18px;display:flex;flex-direction:column;
       justify-content:space-between">{logo("koyu", 200, 40)}<p style="font-size:19px;font-weight:700">{TEL}</p></div>"""
     sq(P, f"""<div style="width:1200px;height:1200px;background:{PAPER};padding:56px 60px">
       <div style="display:flex;justify-content:space-between;align-items:flex-end">
         <div><p class="k">{K['olcu'].upper()} · {K['ad'].upper()}</p>
-        <h2 class="u" style="margin-top:10px;font-size:42px">{len(ms)} model</h2></div>
+        <h2 class="u" style="margin-top:10px;font-size:42px">Örnek çalışmalar</h2></div>
         {logo("acik", 250, 50)}</div>
       <div style="margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">{cells}</div>
       <p style="position:absolute;left:60px;right:60px;bottom:48px;font-size:19px;line-height:1.45;color:#55575c">
-        Model kodunu sipariş notuna yazın. {NOT_ORNEK}</p></div>""", name("modeller"))
+        Siparişten sonra size özel 10 tasarım hazırlıyoruz; en beğendiğinizi basıyoruz. {NOT_ORNEK}</p></div>""",
+       name("modeller"))
 
     # ölçü ve özellikler
     ex = ms[0][1].key if cat == "10x20" else "telefon"
@@ -167,11 +174,8 @@ def shopier(P, cat):
        name("olcu_ozellik"))
 
     # nasıl çalışır
-    steps = [("01", "Modeli seçin", f"Görsellerdeki kodla: {ms[0][0]}–{ms[-1][0]}. Beğendiğiniz bir düzen yoksa "
-                                       "sıfırdan çizeriz."),
-             ("02", "Bilgilerinizi gönderin", "Ad, logo, renkler, telefon, Instagram, konum, IBAN."),
-             ("03", "Onaylayın, basalım", "Tasarımı onayınıza sunarız; 3D basıp kargoya veririz.")]
-    rows = "".join(f"""<div style="display:flex;gap:28px;padding:26px 0;border-top:2px solid rgba(244,241,234,.14)">
+    steps = SIPARIS
+    rows = "".join(f"""<div style="display:flex;gap:28px;padding:20px 0;border-top:2px solid rgba(244,241,234,.14)">
       <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a}</b><div><p style="font-size:34px;
       font-weight:700">{b}</p><p style="margin-top:8px;font-size:24px;color:rgba(244,241,234,.72)">{c}</p></div>
       </div>""" for a, b, c in steps)
@@ -184,7 +188,7 @@ def shopier(P, cat):
       <p style="margin-top:22px;font-size:26px;color:rgba(244,241,234,.8)">{links}: hepsi tek QR'da.</p>
       <div style="margin-top:34px">{rows}</div>
       <img src="{foto('musavir' if cat == '10x20' else 'telefon', 'masa', 1100)}" style="margin-top:18px;width:100%;
-        height:300px;object-fit:cover;border-radius:22px;display:block">
+        height:170px;object-fit:cover;border-radius:22px;display:block">
       <div style="position:absolute;left:64px;bottom:50px">{logo("koyu", 300, 60)}</div>
       <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{TEL}</p></div>""",
        name("nasil_calisir"))
@@ -319,16 +323,13 @@ def catalog(P):
       <img src="{foto(models(cat)[0][1].key if cat == '10x20' else 'kuafor', maxw=600)}"
         style="width:100%;height:210px;object-fit:cover;display:block">
       <div style="padding:14px 16px"><p class="k" style="font-size:10px">{U.KATEGORI[cat]['olcu'].upper()} ·
-        {len(models(cat))} MODEL</p><p class="u" style="margin-top:6px;font-size:17px">{U.KATEGORI[cat]['ad']}</p>
+        SİZE ÖZEL 10 TASARIM</p><p class="u" style="margin-top:6px;font-size:17px">{U.KATEGORI[cat]['ad']}</p>
         <p style="margin-top:6px;font-size:12px;line-height:1.45;color:#55575c">{U.KATEGORI[cat]['kisa']}</p></div>
       </div>""" for cat in U.KATEGORI)
     steps = "".join(f"""<div style="display:flex;gap:14px;padding:12px 0;border-top:1px solid #ddd6ca">
       <b class="u" style="color:{ORANGE};font-size:18px;width:36px">{a}</b><div><p style="font-weight:700;
       font-size:14px">{b}</p><p style="margin-top:3px;font-size:12px;color:#55575c">{c}</p></div></div>"""
-                    for a, b, c in [("01", "Modeli seçin", "Katalogdaki kodla (M01 …) ya da size özel yeni bir düzen."),
-                                    ("02", "Bilgilerinizi gönderin",
-                                     "Ad, logo, renkler, telefon, Instagram, konum, IBAN."),
-                                    ("03", "Onaylayın, basalım", "Tasarımı onayınıza sunarız; 3D basıp kargolarız.")])
+                    for a, b, c in SIPARIS)
     pages.append(page(f"""<p class="k">NASIL ÇALIŞIR</p>
       <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Masanızda durur,<br>müşteriniz okutur.</h2>
       <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:#3b3d42;max-width:620px">İsimlikteki QR'ı
@@ -354,7 +355,7 @@ def catalog(P):
         hero = uri(os.path.join(FOTO, f"kapak_{cat}.jpg"), 900)
         pages.append(page(f"""<p class="k">KATEGORİ · {K['olcu'].upper()}</p>
           <h2 class="u" style="margin-top:10px;font-size:34px;line-height:1.1">{K['ad']}</h2>
-          <p style="margin-top:10px;font-size:14px;color:rgba(244,241,234,.78)">{K['kisa']} {len(ms)} model.</p>
+          <p style="margin-top:10px;font-size:14px;color:rgba(244,241,234,.78)">{K['kisa']} Size özel 10 tasarım; en beğendiğinizi basıyoruz.</p>
           <img src="{hero}" style="margin-top:22px;width:100%;height:520px;object-fit:cover;border-radius:16px;
             display:block;box-shadow:0 0 0 1.5px rgba(244,241,234,.16)">
           <ul style="margin-top:20px;list-style:none;font-size:13.5px;line-height:1.4">{feats}</ul>""",
@@ -365,9 +366,9 @@ def catalog(P):
             grid = "".join(card(c, u) for c, u in chunk)
             if len(chunk) == 10:                                 # 3 × 4 ızgaranın son iki yeri
                 grid += f"""<div style="border-radius:14px;background:{ORANGE};color:#fff;padding:14px;display:flex;
-                  flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:15px">Size özel</p>
-                  <p style="margin-top:5px;font-size:11.5px;line-height:1.4">Adınız, logonuz, renkleriniz.
-                  Beğendiğiniz düzen yoksa sıfırdan çizeriz.</p></div>
+                  flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:15px">Size özel 10
+                  tasarım</p><p style="margin-top:5px;font-size:11.5px;line-height:1.4">Sizin bilgilerinizle; en
+                  beğendiğinizi basıyoruz.</p></div>
                   <div style="border-radius:14px;background:{INK};color:{PAPER};padding:14px;display:flex;
                   flex-direction:column;justify-content:space-between">{logo("koyu", 150, 30)}<p style="font-size:14px;
                   font-weight:700">{TEL}</p></div>"""
@@ -393,8 +394,8 @@ def catalog(P):
         <p class="k">SİPARİŞ</p>
         <p class="u" style="margin-top:10px;font-size:24px;line-height:1.2">Shopier mağazamızdan<br>ya da telefonla.</p>
         <p style="margin-top:14px;font-size:28px;font-weight:700">{TEL}</p>
-        <p style="margin-top:6px;font-size:13px;color:rgba(244,241,234,.75)">Model kodunu sipariş notuna yazın;
-          tasarımı onayınıza sunarız.</p>
+        <p style="margin-top:6px;font-size:13px;color:rgba(244,241,234,.75)">Siparişten sonra size özel 10 tasarım
+          gönderiyoruz; en beğendiğinizi basıyoruz.</p>
         <div style="margin-top:22px">{logo("koyu", 240, 48)}</div></div>""", no=no))
 
     path = os.path.join(OUT, "katalog.pdf")

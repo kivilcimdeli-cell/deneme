@@ -1575,7 +1575,7 @@ def kit(P, n):
 
     steps = [("Shopier'dan sipariş verin", "Adet seçin, ödemeyi güvenle Shopier'dan yapın."),
              ("Bilgilerinizi gönderin", "Logo, telefon, Instagram, konum ve IBAN: hepsi tek QR'a."),
-             ("Onaylayın, basalım", "Tasarımı onayınıza sunarız; 3D basıp kargoya veririz.")]
+             ("Size özel 10 tasarım", "10 tasarım gönderiyoruz; en beğendiğinizi 3D basıp kargoya veriyoruz.")]
     st = "".join(f"""<div style="display:grid;grid-template-columns:120px 1fr;gap:28px;padding:36px 0;
       border-top:2px solid rgba(244,241,234,.12)"><p class="u" style="font-size:64px;font-weight:700;color:{ORANGE};
       line-height:1">{k:02d}</p><div><h3 style="font-size:40px;font-weight:700">{t}</h3><p style="margin-top:10px;
