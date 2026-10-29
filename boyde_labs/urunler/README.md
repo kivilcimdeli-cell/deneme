@@ -64,12 +64,13 @@ fon kaldırıldı.
 - **Beyaz isimlikler:** logodaki siyah (INK #121316), masa parlak siyah; fon kenarlarda tam INK.
 - **Kapaklar:** isimliklerin çoğu hangi renkse ona göre (9 × 12 beyaz, 10 × 20 koyu).
 
-**BOYDE çerçevesi:** ürünlerin bizim olduğu anlaşılsın diye ("BOYDE ürünü olarak pazarlamamız gerekiyor").
+**BOYDE çerçevesi:** ürünlerin bizim olduğu anlaşılsın diye ("BOYDE ürünü olarak pazarlamamız gerekiyor"); "daha
+modern" isteğiyle sade:
 
-- Kenarlık koyu, üzerinde katman çizgileri.
-- Fotoğrafın köşesinde "BOYDE LABS ürünü" etiketi.
-- Altta bant: logo, model kodu, ad, ölçü, "tasarım ve 3D baskı: BOYDE LABS".
-- Müşteri ürünlerinde bant "… için ürettik" der.
+- Fotoğraf tam kadraj; sol üstte BOYDE LABS logosu, sağ üstte ölçü.
+- Altta buzlu cam şerit: turuncu model kodu (M01 …), ad, kategori, kimin için, "tasarım ve 3D baskı BOYDE".
+- Renkler fotoğrafın fonuna göre: beyaz fonda koyu yazı, siyah fonda açık.
+- Müşteri ürünlerinde şerit "… için ürettik" der.
 
 **Shopier'e yükleme:**
 

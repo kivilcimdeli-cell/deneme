@@ -196,33 +196,33 @@ def shopier(P, cat):
 
 
 def framed(P, cat, c, u, view, path):
-    """BOYDE çerçevesi (1200 × 1200): katman çizgili koyu kenarlık, köşede "BOYDE LABS ürünü" etiketi, altta bant:
-    logo, model kodu, ad, ölçü ve "tasarım ve 3D baskı BOYDE LABS"."""
+    """BOYDE çerçevesi (1200 × 1200; "daha modern"): fotoğraf tam kadraj; sol üstte logo, sağ üstte ölçü; altta buzlu
+    cam şerit: turuncu model kodu, ad, kategori ve kimin için, "tasarım ve 3D baskı BOYDE". Renkler fotoğrafın fonuna
+    göre: beyaz fonda koyu yazı, siyah fonda açık."""
     K = U.KATEGORI[cat]
     t1, _ = caption(u)
     who = f"{u.musteri} için ürettik" if u.tur != "ornek" else "Örnek tasarım · sizin bilgilerinizle"
-    sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};
-      background-image:{BM.stripes_bg(PAPER, .045, 26)}">
-      <div style="position:absolute;left:36px;top:36px;width:1128px;height:944px;border-radius:30px;overflow:hidden;
-        box-shadow:0 0 0 2px rgba(244,241,234,.16)">
-        <img src="{foto(u.key, view, 1200)}" style="width:100%;height:100%;object-fit:cover;display:block">
-        <div style="position:absolute;left:22px;top:22px;display:flex;align-items:center;gap:12px;padding:10px 18px 10px
-          12px;border-radius:99px;background:rgba(18,19,22,.86);color:{PAPER}">
-          {logo("koyu", 40, 30, "simge")}<span style="font-size:19px;font-weight:700;letter-spacing:.08em">BOYDE LABS
-          ÜRÜNÜ</span></div></div>
-      <i style="position:absolute;left:36px;top:996px;width:260px;height:6px;border-radius:3px;background:{ORANGE}"></i>
-      <div style="position:absolute;left:36px;right:36px;top:1024px;bottom:36px;display:flex;align-items:center;
-        gap:30px;color:{PAPER}">
-        {logo("koyu", 230, 92)}
-        <i style="width:2px;height:96px;background:rgba(244,241,234,.18)"></i>
+    acik = light(os.path.join(FOTO, f"{u.key}_{view}.jpg"))
+    fg, sub = (INK, "#55575c") if acik else (PAPER, "rgba(244,241,234,.7)")
+    glass, edge = ("rgba(255,255,255,.62)", "rgba(18,19,22,.08)") if acik else \
+        ("rgba(18,19,22,.55)", "rgba(244,241,234,.12)")
+    sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden">
+      <img src="{foto(u.key, view, 1200)}" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+      <div style="position:absolute;left:44px;top:40px">{logo("acik" if acik else "koyu", 260, 58)}</div>
+      <span style="position:absolute;right:44px;top:44px;font-size:15px;font-weight:700;letter-spacing:.2em;
+        color:{fg};opacity:.75">{K['olcu'].upper()}</span>
+      <div style="position:absolute;left:28px;right:28px;bottom:28px;display:flex;align-items:center;gap:22px;
+        padding:18px 26px 18px 18px;border-radius:26px;background:{glass};backdrop-filter:blur(22px) saturate(1.3);
+        box-shadow:inset 0 0 0 1.5px {edge};color:{fg}">
+        <span class="code" style="flex:none;display:grid;place-items:center;width:84px;height:84px;border-radius:18px;
+          background:{ORANGE};color:#fff;font-size:26px">{c}</span>
         <div style="flex:1;min-width:0">
-          <p class="u" style="font-size:30px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            {t1}</p>
-          <p style="margin-top:8px;font-size:19px;color:rgba(244,241,234,.72)">{K['olcu']} · {K['ad']} · {who}</p>
-          <p style="margin-top:4px;font-size:17px;color:{ORANGE};font-weight:700;letter-spacing:.06em">TASARIM VE 3D
-            BASKI: BOYDE LABS</p></div>
-        <span class="code" style="flex:none;display:grid;place-items:center;width:118px;height:118px;border-radius:22px;
-          background:{ORANGE};color:#fff;font-size:36px">{c}</span></div></div>""", path)
+          <p class="u" style="font-size:27px;line-height:1.15;white-space:nowrap;overflow:hidden;
+            text-overflow:ellipsis">{t1}</p>
+          <p style="margin-top:7px;font-size:18px;color:{sub};white-space:nowrap;overflow:hidden;
+            text-overflow:ellipsis">{K['ad']} · {who}</p></div>
+        <p style="flex:none;text-align:right;font-size:14px;font-weight:700;letter-spacing:.14em;line-height:1.5;
+          color:{sub}">TASARIM VE<br>3D BASKI <b style="color:{ORANGE}">BOYDE</b></p></div></div>""", path)
 
 
 def framed_all(P):
