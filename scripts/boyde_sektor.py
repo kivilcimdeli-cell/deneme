@@ -22,6 +22,9 @@ hariç tut (onlara ayrı işlerimiz var); telefoncu ve başka aklına ne geliyor
   psikolog   Selin Koç          beyaz · siyah · mor       konuşma balonu, QR çerçeveli
   diyetisyen Ece Şahin          beyaz · siyah · yeşil     yaprak, solda ince yeşil çizgi
   danisman   Can Öztürk         beyaz · mavi · turuncu    üstte Anka Emlak bandı (9 × 12'deki emlakla aynı marka)
+  otel       Burak Yıldız       beyaz · siyah · altın     beş yıldız, Lina Otel ön büro; altın çerçeveli QR
+  vet        Ozan Tekin         siyah · beyaz · turuncu   pati, Pati Veteriner Kliniği
+Paloma (gerçek otel) katalogda yok: "Paloma Hotels özel ve gerçek bir yer, onun yerine farklı bir kart".
 Katalogda her ölçüden 10 model (kullanıcı: "10 küçük, 10 büyük"); berber, optik, veteriner ve spor 9 × 12'de yedek.
 
 Basılabilirlik (0,4 nozul): kabartmada çizgi ≥ 1,2 mm, harf içi ≥ 0,6 mm; dolguda çizgi ≥ 0,5 mm; öğeler arası
@@ -239,6 +242,14 @@ def ic_star(cx, cy, r):
     k = 0.22
     return A.polygon([(0, r), (r * k, r * k), (r, 0), (r * k, -r * k), (0, -r), (-r * k, -r * k), (-r, 0),
                       (-r * k, r * k)]).translate((cx, cy))
+
+
+def ic_star5(cx, cy, r):
+    """Beş köşeli yıldız (otel)."""
+    import math
+    return A.polygon([(cx + (r if k % 2 == 0 else r * 0.45) * math.cos(math.pi / 2 + k * math.pi / 5),
+                       cy + (r if k % 2 == 0 else r * 0.45) * math.sin(math.pi / 2 + k * math.pi / 5))
+                      for k in range(10)])
 
 
 def ic_bubble(cx, cy, w):
@@ -562,6 +573,35 @@ def p_danisman():
     return d
 
 
+def p_otel():
+    d = Design("otel", LIGHT)
+    q = qr_entry("linaotel")
+    for k in range(5):
+        d.flat(None, ic_star5(-82.0 + k * 8.2, 87.0, 3.4), GOLD)
+    d.flat("ad", t("lora", "Burak Yıldız", 14.0, -86.0, 70.0, "l", 0.1, 110.0), BLACK)
+    d.flat("unvan", t("mont6", "Ön Büro Müdürü", 6.0, -86.0, 53.0, "l", 0.3, 110.0), GOLD)
+    d.flat(None, bar(-86.0, -56.0, 44.0, 1.4), GOLD)
+    d.flat("otel", t("mont", "LİNA OTEL", 5.0, -86.0, 33.0, "l", 2.4, 110.0), BLACK)
+    d.flat("telefon", t("mont6", PHONE, 5.2, -86.0, 21.0, "l", 0.4, 110.0), BLACK)
+    tile = d.qr(q, 66.0, 60.0, 34.0, frame=GOLD, flat=True)
+    d.flat("KARTVİZİT", t("mont6", "KARTVİZİT", 3.8, 66.0, tile.bounds()[1] - 8.0, "c", 1.8), GOLD)
+    return d
+
+
+def p_vet():
+    d = Design("vet", DARK)
+    q = qr_entry("pativeteriner")
+    d.flat("simge", ic_paw(-76.0, 76.0, 19.0), ORANGE)
+    x = -60.0
+    d.flat("ad", t("mont6", "Ozan Tekin", 13.5, x, 80.0, "l", 0.0, 86.0), WHITE)
+    d.flat("unvan", t("mont6", "Veteriner Hekim", 6.4, x, 63.0, "l", 0.3, 86.0), ORANGE)
+    d.flat("klinik", t("mont6", "PATİ VETERİNER KLİNİĞİ", 4.6, -88.0, 39.0, "l", 1.2, 120.0), WHITE)
+    d.flat("telefon", t("mont6", PHONE, 6.0, -88.0, 25.0, "l", 0.4, 120.0), WHITE)
+    tile = d.qr(q, 66.0, 60.0, 34.0)
+    d.flat("RANDEVU", t("mont6", "RANDEVU", 3.8, 66.0, tile.bounds()[1] - 5.2, "c", 1.8), ORANGE)
+    return d
+
+
 def solids_20(d):
     """Paloma'nın isimliğiyle aynı (paloma_isimlik.solids): gövde ve yüzeyle aynı hizada dolgular."""
     import uzar_isimlik as I
@@ -585,7 +625,7 @@ def solids_20(d):
 S9X12 = {"telefon": s_telefon, "berber": s_berber, "kuafor": s_kuafor, "guzellik": s_guzellik, "emlak": s_emlak, "kuyumcu": s_kuyumcu,
          "optik": s_optik, "veteriner": s_veteriner, "spor": s_spor}
 S10X20 = {"avukat": p_avukat, "dis": p_dis, "musavir": p_musavir, "mimar": p_mimar, "mudur": p_mudur,
-          "psikolog": p_psikolog, "diyetisyen": p_diyetisyen, "danisman": p_danisman}
+          "psikolog": p_psikolog, "diyetisyen": p_diyetisyen, "danisman": p_danisman, "otel": p_otel, "vet": p_vet}
 
 
 def build(key):

@@ -47,7 +47,7 @@ VINYET = 0.14                                            # beyaz fonda köşeler
 BAKIS = "AgX - Punchy"                                   # beyaz fondaki koyu isimlikler: siyahı derin ("kontrast yok gibi")
 VIEWS = {"studyo": ("studyo", 30.0, 12.0), "on": ("studyo", 0.0, 7.0), "masa": ("masa", -28.0, 11.0)}
 KAPAK = {"9x12": [["telefon", "kuafor", "kuyumcu"], ["uzar", "emlak"]],
-         "10x20": [["avukat", "paloma"], ["musavir"]]}
+         "10x20": [["avukat", "psikolog"], ["musavir"]]}
 
 
 def load(key):

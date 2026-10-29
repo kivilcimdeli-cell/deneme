@@ -143,11 +143,6 @@ URUNLER = [
     Urun("kuyumcu", "9x12", "Pırlanta", "Sera Kuyumculuk", "ornek",
          "Altın pırlanta, klasik harfli SERA, iki yanı çizgili KUYUMCULUK; altta telefon ve QR.",
          "siyah · beyaz · altın", "Kuyumcu"),
-    Urun("paloma", "10x20", "Mavi kart", "Paloma Grida", "musteri",
-         "Solda ad soyad ve görev; sağda kurum renginde kart: logo, QR ve KARTVİZİT.", "beyaz · siyah · mavi",
-         "Otel"),
-    Urun("paloma_kabartma", "10x20", "Mavi kart, kabartmalı", "Paloma Grida", "oneri",
-         "Ad soyad, görev ve logo 2 mm kabartma; elle dokununca hissedilir.", "beyaz · siyah · mavi", "Otel"),
     Urun("avukat", "10x20", "Terazi", "Kaya Hukuk Bürosu", "ornek",
          "Altın terazi, klasik harfli ad soyad; unvan, büro ve telefon; lacivert kareli QR.",
          "beyaz · lacivert · altın", "Avukat"),
@@ -172,7 +167,13 @@ URUNLER = [
     Urun("danisman", "10x20", "Üst bant", "Anka Emlak", "ornek",
          "Üstte mavi bantta oyma ev ve ANKA EMLAK; ad soyad, unvan, telefon; mavi kareli ilan QR'ı.",
          "beyaz · mavi · turuncu", "Emlak danışmanı"),
-]
+    Urun("otel", "10x20", "Beş yıldız", "Lina Otel", "ornek",
+         "Altın beş yıldız, klasik harfli ad soyad; unvan, otel ve telefon; altın çerçeveli kartvizit QR'ı.",
+         "beyaz · siyah · altın", "Otel"),
+    Urun("vet", "10x20", "Pati", "Pati Veteriner Kliniği", "ornek",
+         "Turuncu pati, ad soyad ve unvan; klinik ve telefon; beyaz karoda randevu QR'ı.",
+         "siyah · beyaz · turuncu", "Veteriner"),
+]                                                       # Paloma (gerçek otel) katalogdan çıktı
 BY_KEY = {u.key: u for u in URUNLER}
 
 

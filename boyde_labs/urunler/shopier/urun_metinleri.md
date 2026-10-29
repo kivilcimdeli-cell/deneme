@@ -93,16 +93,16 @@ Masanıza gelen kişi QR'ı telefonuyla okutur, dijital kartvizitiniz açılır:
 • Kartvizit sayfanız isimlikle birlikte hazırlanır. Bilgileriniz değişirse sayfayı güncelleriz, isimlik aynı kalır.
 
 ÖRNEK ÇALIŞMALARIMIZ (görsellerde)
-M01 Otel · Mavi kart
-M02 Avukat · Terazi
-M03 Diş hekimi · Turkuaz blok
-M04 Mali müşavir · Monogram
-M05 Mimar · Basamak
-M06 Şirket yöneticisi · Alt bant
-M07 Psikolog · Konuşma balonu
-M08 Diyetisyen · Yaprak
-M09 Emlak danışmanı · Üst bant
-M10 Otel · Mavi kart, kabartmalı
+M01 Avukat · Terazi
+M02 Diş hekimi · Turkuaz blok
+M03 Mali müşavir · Monogram
+M04 Mimar · Basamak
+M05 Şirket yöneticisi · Alt bant
+M06 Psikolog · Konuşma balonu
+M07 Diyetisyen · Yaprak
+M08 Emlak danışmanı · Üst bant
+M09 Otel · Beş yıldız
+M10 Veteriner · Pati
 Görseller fikir versin diye; sizin isimliğiniz sıfırdan, size özel çizilir. Beğendiğiniz bir örnek varsa kodunu sipariş notuna yazın, tasarımları ona göre hazırlayalım.
 
 FİYAT

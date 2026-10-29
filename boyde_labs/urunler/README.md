@@ -21,8 +21,7 @@
 
 **10 × 20 cm**
 
-- **Müşterinin bastırdığı:** Paloma Grida; ayrıca aynı isimliğin kabartmalı sürümü.
-- **Örnekler:**
+- Hepsi örnek (uydurma kişi ve kurumlar):
   - avukat;
   - diş hekimi;
   - mali müşavir;
@@ -30,13 +29,17 @@
   - şirket yöneticisi;
   - psikolog;
   - diyetisyen;
-  - emlak danışmanı.
+  - emlak danışmanı;
+  - otel ön büro (Lina Otel);
+  - veteriner (Pati Veteriner Kliniği).
+- Paloma Grida'nın isimliği katalogda ve görsellerde yok: "Paloma Hotels özel ve gerçek bir yer, onun yerine farklı bir
+  kart koyar mısın".
 
 **Örnek modu** (`scripts/boyde_urunler.py`):
 
 - **QR'lar çalışmaz:** bulucu kareler ve zamanlama desenleri gerçek QR'daki gibi. Geri kalan kareler (biçim bilgisi dahil) rastgele: QR gibi görünür ama okunmaz. Her ürünün üstten görünüşünde iki okuyucuyla (zxing, OpenCV) denenir; okunursa üretim durur.
 - **Telefonlar:** hepsinde 0546 475 45 08.
-- **Kişi adları:** Paloma isimliğinde gerçek kişinin adı yerine "Ayşe Yılmaz · Ön Büro Müdürü". Sektör örneklerindeki ad ve işletmeler uydurma.
+- **Kişi adları:** sektör örneklerindeki ad ve işletmeler uydurma.
 
 ## Dosyalar
 
