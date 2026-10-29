@@ -294,8 +294,10 @@ def catalog(P):
     kapak = os.path.join(FOTO, "kapak_9x12.jpg")
     cover9 = uri(kapak, 1100)
     if light(kapak):                                     # beyaz fon: fotoğraf sayfa genişliğinde, kenarı fona karışır
-        r, g, b = Image.open(kapak).convert("RGB").getpixel((8, 8))
-        art = f"""<div style="position:absolute;inset:0;background:rgb({r},{g},{b})"><img src="{cover9}"
+        im = Image.open(kapak).convert("RGB")                # fotoğrafın ışık havuzu sayfaya yayılır: ortası açık
+        mid, edge = im.getpixel((im.width // 2, 24)), im.getpixel((8, 8))
+        art = f"""<div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 62% at 50% 47%,
+          rgb{mid} 0,rgb{mid} 45%,rgb{edge} 100%)"><img src="{cover9}"
           style="position:absolute;left:0;top:50%;width:100%;transform:translateY(-52%);
           -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 80%,transparent 100%)"></div>"""
     else:

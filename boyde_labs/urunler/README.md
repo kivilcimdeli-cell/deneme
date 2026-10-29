@@ -57,7 +57,10 @@
 **Zeminler** ("kahverengi arka planları sil, hepsini beyaz yap"; "ürün beyazsa logomuzdaki renk"): ahşap masa ve bej
 fon kaldırıldı.
 
-- **Koyu isimlikler:** beyaz fon ve beyaz masa; çizimden sonra seviye ayarıyla fon ~248'e çekilir.
+- **Koyu isimlikler:** beyaz fon ve beyaz masa. "Kontrast yok gibi, siyahlardaki gibi derinlik" üzerine:
+  - siyahlar derin (AgX Punchy);
+  - fon ve masa parlak, isimliğin yansıması düşer;
+  - fon ortada beyaz (~244), köşelere doğru yumuşakça kararır.
 - **Beyaz isimlikler:** logodaki siyah (INK #121316), masa parlak siyah; fon kenarlarda tam INK.
 - **Kapaklar:** isimliklerin çoğu hangi renkse ona göre (9 × 12 beyaz, 10 × 20 koyu).
 
