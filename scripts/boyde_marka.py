@@ -482,6 +482,208 @@ def word_n_sicak(size):
     return _word("BOYDE", "Jost-Bold.ttf", "LABS", "Jost-SemiBold.ttf", size, .3, .06, .14, "cap")
 
 
+# 11–20 · Yeni yönler (nozul yok; "logo ve marka kimliğini tekrar değiştirmek istiyoruz, 10 görsel daha")
+
+def mark_plaka():
+    """İsimliğin kendisi: panel (üstünde iki yazı satırı oyuk, sağda turuncu QR karesi) ve altında sehpa."""
+    plate = _soft(box(-22, -31, 22, 0), 4.5)
+    lines = unary_union([_bar(-17.5, -1.5, -22.0, 3.6), _bar(-17.5, -7.0, -13.0, 3.6)])
+    qr = _soft(box(3.5, -26, 17.5, -12), 1.6)
+    stand = _soft(box(-16, 2.5, 16, 8.5), 2.0)
+    return _parts((plate - lines.buffer(0.01) - qr.buffer(1.6), "main"), (qr, "accent"), (stand, "main"))
+
+
+def word_plaka(size):
+    return _word("BOYDE", "Manrope-ExtraBold.ttf", "LABS", "Manrope-Medium.ttf", size, .28, .01, .1, "cap")
+
+
+def mark_tarama():
+    """Telefon kamerasının tarama çerçevesi: dört köşe, ortada turuncu kare (okutulan şey)."""
+    h, L, w = 20.0, 12.0, 4.4
+    corners = [LineString([(sx * h, sy * (h - L)), (sx * h, sy * h), (sx * (h - L), sy * h)]).buffer(w / 2, 32)
+               for sx in (-1, 1) for sy in (-1, 1)]
+    return _parts((unary_union(corners), "main"), (_soft(box(-7, -7, 7, 7), 2.0), "accent"))
+
+
+def word_tarama(size):
+    return _word("boyde", "SpaceGrotesk_700Bold.ttf", "labs", "SpaceGrotesk_400Regular.ttf", size, .22, -.01, 0)
+
+
+def mark_dokunus():
+    """Tek dokunuş: turuncu nokta ve ondan yayılan üç dalga."""
+    cx, cy = -14.0, 14.0
+    arcs = [LineString([(cx + r * np.sin(t), cy - r * np.cos(t)) for t in np.linspace(0.08, np.pi / 2 - 0.08, 40)])
+            .buffer(2.3, 32) for r in (15.0, 24.0, 33.0)]
+    return _parts((unary_union(arcs), "main"), (Point(cx, cy).buffer(6.2, 64), "accent"))
+
+
+def word_dokunus(size):
+    return _word("boyde", "Outfit-SemiBold.ttf", "labs", "Outfit-SemiBold.ttf", size, .26, -.01, -.01)
+
+
+def mark_nokta():
+    """Uygulama simgesi gibi: koyu karede turuncu daire (yazıdaki o)."""
+    sq = _soft(box(-21, -21, 21, 21), 10.0)
+    dot = Point(0, 0).buffer(10.5, 96)
+    return _parts((sq - dot.buffer(0.01), "main"), (dot, "accent"))
+
+
+def word_nokta(size):
+    """boyde: o turuncu bir daire; yanında labs gri."""
+    fn = "Sora-ExtraBold.ttf"
+    xh_ = xh(fn, size)
+    d1, w1 = text_path("b", fn, size)
+    r = xh_ * 0.56
+    gap = size * 0.03
+    cx = w1 + gap + r
+    d3, w3 = text_path("yde", fn, size, cx + r + gap)
+    dot = Point(cx, -xh_ / 2).buffer(r, 96)
+    x4 = cx + r + gap + w3 + size * .28
+    d4, w4 = text_path("labs", "Sora-Regular.ttf", size, x4, track=.01)
+    g, _ = text_geom("byde", fn, size)
+    return [(d1, "main"), (geom_path(dot), "accent"), (d3, "main"), (d4, "mid")], (0, g.bounds[1], x4 + w4, g.bounds[3])
+
+
+PIX = {"B": ["1111.", "1...1", "1...1", "1111.", "1...1", "1...1", "1111."],
+       "O": [".111.", "1...1", "1...1", "1...1", "1...1", "1...1", ".111."],
+       "Y": ["1...1", "1...1", ".1.1.", "..1..", "..1..", "..1..", "..1.."],
+       "D": ["111..", "1..1.", "1...1", "1...1", "1...1", "1..1.", "111.."],
+       "E": ["11111", "1....", "1....", "1111.", "1....", "1....", "11111"],
+       "L": ["1....", "1....", "1....", "1....", "1....", "1....", "11111"],
+       "A": [".111.", "1...1", "1...1", "11111", "1...1", "1...1", "1...1"],
+       "S": [".1111", "1....", "1....", ".111.", "....1", "....1", "1111."]}
+
+
+def _pixels(text, p, x=0.0):
+    """Piksel harfler (5 × 7, kare p, aralık bir kare): döner (şekil, sağ kenar)."""
+    sq = []
+    for ch in text:
+        for r, row in enumerate(PIX[ch]):
+            for c, v in enumerate(row):
+                if v == "1":
+                    sq.append(box(x + c * p, -(7 - r) * p, x + (c + 1) * p, -(6 - r) * p).buffer(p * .02,
+                                                                                                    join_style=2))
+        x += 6 * p
+    return unary_union(sq).buffer(-p * .06, join_style=2), x - p          # bitişik pikseller kaynaşır
+
+
+def mark_piksel():
+    """Üç basamak piksel (voksel): en üstteki turuncu."""
+    p = 13.0
+    cells = [(0, 2), (1, 2), (2, 2), (1, 1), (2, 1)]
+    sq = lambda c, r: _soft(box(c * p + 1, r * p + 1, (c + 1) * p - 1, (r + 1) * p - 1), 2.2)  # noqa: E731
+    return _parts((unary_union([sq(c, r) for c, r in cells]), "main"), (sq(2, 0), "accent"))
+
+
+def word_piksel(size):
+    g1, x1 = _pixels("BOYDE", size / 7)
+    g2, x2 = _pixels("LABS", size / 7, x1 + size * .6)
+    return [(geom_path(g1), "main"), (geom_path(g2), "sub")], (0, -size, x2, 0)
+
+
+def mark_serif():
+    """B ve turuncu nokta (Fraunces)."""
+    g, w = text_geom("B", "Fraunces-Black.ttf", 100)
+    dot = Point(w + 9, -9).buffer(9, 64)
+    return _parts((g, "main"), (dot, "accent"))
+
+
+def word_serif(size):
+    """Boyde (Fraunces), yanında küçük LABS: x yüksekliğinin ortasında."""
+    f1, f2 = "Fraunces-Black.ttf", "SpaceGrotesk_700Bold.ttf"
+    d1, w1 = text_path("Boyde", f1, size)
+    s2 = size * .3
+    y2 = -xh(f1, size) / 2 + cap(f2, s2) / 2
+    d2, w2 = text_path("LABS", f2, s2, w1 + size * .2, y2, .3)
+    g, _ = text_geom("Boyde", f1, size)
+    return [(d1, "main"), (d2, "sub")], (0, g.bounds[1], w1 + size * .2 + w2, g.bounds[3])
+
+
+def mark_imza():
+    """Turuncu dairede imza B'si (oyuk)."""
+    g, w = text_geom("B", "Norican-Regular.ttf", 74)
+    gx0, gy0, gx1, gy1 = g.bounds
+    g = affinity.translate(g, -(gx0 + gx1) / 2, -(gy0 + gy1) / 2 + 1)
+    disc = Point(0, 0).buffer(36, 128)
+    return _parts((disc - g.buffer(0.01), "accent"))
+
+
+def word_imza(size):
+    """Boyde el yazısı (Norican); altında, sağa yaslı, aralıklı turuncu LABS."""
+    f1, f2 = "Norican-Regular.ttf", "SpaceGrotesk_700Bold.ttf"
+    s1 = size * 1.25
+    d1, w1 = text_path("Boyde", f1, s1)
+    g1, _ = text_geom("Boyde", f1, s1)
+    s2 = size * .36
+    gl, _ = text_geom("LABS", f2, s2, 0, 0, .42)
+    y2 = g1.bounds[3] + s2 * .25 + cap(f2, s2)
+    x2 = g1.bounds[2] - gl.bounds[2]
+    d2, _ = text_path("LABS", f2, s2, x2, y2, .42)
+    return [(d1, "main"), (d2, "sub")], (g1.bounds[0], g1.bounds[1], g1.bounds[2], y2)
+
+
+word_imza.ratio = .62
+
+
+def _brackets(x0, x1, y0, y1, t, arm):
+    left = LineString([(x0 + arm, y0), (x0, y0), (x0, y1), (x0 + arm, y1)]).buffer(t / 2, 8, join_style=2, cap_style=2)
+    right = LineString([(x1 - arm, y0), (x1, y0), (x1, y1), (x1 - arm, y1)]).buffer(t / 2, 8, join_style=2,
+                                                                                    cap_style=2)
+    return unary_union([left, right])
+
+
+def mark_parantez():
+    """[ ■ ]: köşeli parantez içinde turuncu kare."""
+    return _parts((_brackets(-24, 24, -24, 24, 5.0, 11.0), "main"), (_soft(box(-8, -8, 8, 8), 1.6), "accent"))
+
+
+def word_parantez(size):
+    """[boyde] labs: parantezler turuncu."""
+    fn = "Unbounded_500Medium.ttf"
+    pad = size * .2
+    d1, w1 = text_path("boyde", fn, size, pad + size * .12)
+    g, _ = text_geom("boyde", fn, size, pad + size * .12)
+    gx0, gy0, gx1, gy1 = g.bounds
+    t = size * .11
+    br = _brackets(t / 2, gx1 + pad, gy0 - size * .1, gy1 + size * .1, t, size * .24)
+    x2 = gx1 + pad + t + size * .3
+    d2, w2 = text_path("labs", "Unbounded_300Light.ttf", size, x2)
+    return [(geom_path(br), "accent"), (d1, "main"), (d2, "mid")], (0, gy0 - size * .1 - t / 2, x2 + w2,
+                                                                      gy1 + size * .1 + t / 2)
+
+
+def mark_tente():
+    """Dükkân tentesi: üstte çubuk, aşağı doğru açılan beş şerit (koyu ve turuncu sırayla), uçları dalgalı."""
+    n, top_w, bot_w, y0, y1 = 5, 40.0, 50.0, -18.0, 2.0
+    bar = _soft(box(-top_w / 2 - 3, -25, top_w / 2 + 3, -19.6), 2.0)
+    main, acc = [], []
+    for k in range(n):
+        xt0, xt1 = -top_w / 2 + k * top_w / n, -top_w / 2 + (k + 1) * top_w / n
+        xb0, xb1 = -bot_w / 2 + k * bot_w / n, -bot_w / 2 + (k + 1) * bot_w / n
+        stripe = Polygon([(xt0, y0), (xt1, y0), (xb1, y1), (xb0, y1)]).union(
+            Point((xb0 + xb1) / 2, y1).buffer((xb1 - xb0) / 2, 48))
+        (acc if k % 2 else main).append(stripe.buffer(-0.45, join_style=2))
+    return _parts((bar, "main"), (unary_union(main), "main"), (unary_union(acc), "accent"))
+
+
+def word_tente(size):
+    return _word("BOYDE", "Jost-Bold.ttf", "LABS", "Jost-Bold.ttf", size, .3, .1, .1, "cap")
+
+
+def mark_yorunge():
+    """Halka ve üzerinde turuncu uydu."""
+    R, w = 21.0, 4.6
+    ring = Point(0, 0).buffer(R + w / 2, 128).difference(Point(0, 0).buffer(R - w / 2, 128))
+    a = np.radians(-40)
+    sat = Point(R * np.cos(a), R * np.sin(a)).buffer(6.4, 64)
+    core = Point(0, 0).buffer(5.0, 64)
+    return _parts((ring - sat.buffer(2.6), "main"), (core, "main"), (sat, "accent"))
+
+
+def word_yorunge(size):
+    return _word("BOYDE", "Unbounded_300Light.ttf", "LABS", "Unbounded_300Light.ttf", size, .32, .16, .16, "cap")
+
+
 # 4 · Etiket: boyde yazısı, labs turuncu bir etiketin içinde (harfler oyuk)
 def _pill(text, fn, size, x):
     g, w = text_geom(text, fn, size, 0, 0)
@@ -687,7 +889,50 @@ NOZUL = {
                                         ("Sıcak uç", "nozulun ucu turuncu: ısınmış, basmaya hazır."),
                                         ("Yazı", "BOYDE kalın, LABS turuncu, aralıklı (Jost).")], False, False),
 }
-DIRS = {**YONLER, **NOZUL}
+# Yeni yönler (nozuldan vazgeçildi: "logo ve marka kimliğini tekrar değiştirmek istiyoruz, 10 adet daha görsel")
+YENI = {
+    11: ("İsimlik", "Ürünün kendisi: panel, üstünde iki yazı satırı ve turuncu QR karesi, altında sehpa. Yazı Manrope.",
+         mark_plaka, word_plaka, [("İsimlik", "sattığımız şeyin kendisi: panel ve sehpa."),
+                                  ("Turuncu kare", "QR: okutulan, size özel olan."),
+                                  ("Yazı", "BOYDE kalın, LABS ince ve turuncu (Manrope).")], False, False),
+    12: ("Tarama", "Telefon kamerasının tarama çerçevesi, ortada turuncu kare: okut, ulaş. Yazı küçük harf.",
+         mark_tarama, word_tarama, [("Çerçeve", "telefon kamerasının tarama köşeleri."),
+                                    ("Turuncu kare", "okutulan isimlik."),
+                                    ("Yazı", "boyde labs, küçük harf (Space Grotesk).")], False, False),
+    13: ("Dokunuş", "Turuncu nokta ve yayılan dalgalar: tek dokunuşla ara, yaz, bul. Yumuşak, küçük harf yazı.",
+         mark_dokunus, word_dokunus, [("Nokta", "tek dokunuş."), ("Dalgalar", "dokununca açılan sayfa: ara, "
+                                      "WhatsApp, konum."), ("Yazı", "boyde labs, küçük harf (Outfit).")],
+         False, False),
+    14: ("Turuncu o", "Yazıdaki o turuncu bir daire; simge koyu karede aynı daire. Sade, akılda kalır.",
+         mark_nokta, word_nokta, [("Turuncu o", "boyde'nin o'su: markanın noktası."),
+                                  ("Simge", "uygulama simgesi gibi: koyu karede turuncu daire."),
+                                  ("Yazı", "boyde kalın, labs gri (Sora).")], False, False),
+    15: ("Piksel", "Harfler kare piksellerden: 3D yazıcı da parçayı küçük birimlerle kurar. Simge üç basamak.",
+         mark_piksel, word_piksel, [("Piksel", "harfler kare birimlerden: üretim, teknoloji."),
+                                    ("Basamaklar", "üst üste kurulan parça; en üstteki turuncu."),
+                                    ("Yazı", "BOYDE ve turuncu LABS, piksel harf.")], False, False),
+    16: ("Serif", "Boyde klasik harflerle, yanında küçük turuncu LABS; simge B ve turuncu nokta. Butik, kaliteli.",
+         mark_serif, word_serif, [("Yazı", "Boyde klasik, kalın harflerle (Fraunces): özenli işçilik."),
+                                  ("LABS", "küçük, aralıklı, turuncu."), ("Simge", "B ve turuncu nokta.")],
+         False, True),
+    17: ("İmza", "Boyde el yazısı gibi, altında aralıklı turuncu LABS; simge turuncu dairede imza B'si. Kişisel.",
+         mark_imza, word_imza, [("İmza", "Boyde el yazısıyla: kişiye özel iş."),
+                                ("LABS", "küçük, aralıklı, turuncu."), ("Simge", "turuncu dairede imza B'si.")],
+         False, True),
+    18: ("Parantez", "Köşeli parantez içinde boyde: isimliğin çerçevesi gibi. Simge parantez içinde turuncu kare.",
+         mark_parantez, word_parantez, [("Parantez", "çerçeve: isimlik, tabela, ekran."),
+                                        ("Turuncu", "parantezler ve içindeki kare."),
+                                        ("Yazı", "boyde ve ince labs (Unbounded).")], False, False),
+    19: ("Tente", "Dükkân tentesi: esnafın simgesi. Koyu ve turuncu şeritler; yazı geniş aralıklı Jost.",
+         mark_tente, word_tente, [("Tente", "dükkânın simgesi: esnafla çalışıyoruz."),
+                                  ("Şeritler", "koyu ve turuncu, sırayla."),
+                                  ("Yazı", "BOYDE LABS, geniş aralıklı (Jost).")], False, False),
+    20: ("Yörünge", "Halka ve üzerinde turuncu uydu: Labs, merak, teknoloji. İnce, ferah yazı.",
+         mark_yorunge, word_yorunge, [("Halka", "merkezde işletmeniz."), ("Uydu", "turuncu: etrafında dönen "
+                                      "müşteri."), ("Yazı", "BOYDE LABS, ince ve aralıklı (Unbounded).")],
+         False, False),
+}
+DIRS = {**YONLER, **NOZUL, **YENI}
 
 THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
           "koyu": {"main": PAPER, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
@@ -1208,7 +1453,11 @@ def main():
         options_sheet(P, os.path.join(OUT, "secenekler_nozul.png"), n or None, NOZUL, "nozul alternatifleri",
                       "3 · Nozul fikri, daha oturmuş biçimlerle. Renkler aynı. Birini seçin; bütün kit ona göre "
                       "üretilir.")
-        print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT), "ve secenekler_nozul.png")
+        options_sheet(P, os.path.join(OUT, "secenekler_yeni.png"), n or None, YENI, "yeni logo yönleri",
+                      "Nozul yok: birbirinden farklı 10 yeni yön (11–20), renkler aynı. Birini seçin; bütün kit "
+                      "(logo dosyaları, Shopier, Instagram, kılavuz, katalog) ona göre üretilir.")
+        print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT),
+              "secenekler_nozul.png, secenekler_yeni.png")
         if not n:
             return
         for d in ("logo", "shopier", "instagram"):
