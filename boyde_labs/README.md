@@ -1,6 +1,6 @@
 # BOYDE LABS · marka kimliği
 
-![Logo yönleri](secenekler.png)
+![Nozul alternatifleri](secenekler_nozul.png)
 
 ![Kılavuz](kilavuz.png)
 
@@ -9,18 +9,21 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
 
 ## Logo
 
-- **Yönler** (`secenekler.png`): birbirinden farklı 8 yön, renk paleti aynı.
-  - 1 Küp, 2 Şişe, 3 Nozul, 4 Etiket, 5 Rozet, 6 Katmanlı yazı, 7 QR, 8 b ve d.
-- **3 · Nozul beğenildi**; daha estetik alternatifleri `secenekler_nozul.png`:
-  - 3a Sade: 3'ün toparlanmış hâli; nozul, damla, yazının altında turuncu çizgi;
-  - 3b Katman: nozul turuncu katmanı basıyor; yazı iki kat;
-  - 3c İlk çizgi: nozul ve bastığı ilk çizgi, yazı Sora;
-  - 3d Tek çizgi: tek kalınlıkta çizgi nozul, küçük harf yazı;
-  - 3e Daire, 3f Kare: nozul koyu dairede ya da turuncu karede boşluk olarak;
-  - 3g Yazar: nozul yazının sonunda, altındaki çizgiyi o çizmiş gibi;
-  - 3h Sıcak uç: iki tonlu dişli nozul, ucu turuncu.
-- **Seçim bekleniyor.** Seçilince bütün kit ona göre üretilir: `python3 scripts/boyde_marka.py --yon 3a`.
-  - Aşağıdaki klasörler o zamana kadar ilk taslağın (b ve d, Katman) dosyalarını tutuyor.
+**Seçilen: 3a · Nozul (Sade).** 3D yazıcının nozulu, ucunda turuncu damla; yazının altını aynı turuncu çizgi çizer.
+
+- **Nozul:** altıgen somun (üç yüzü görünür) ve koni; köşeler yumuşak.
+- **Damla ve çizgi:** nozuldan çıkan turuncu filament yazının altını çizer.
+- **Yazı:** BOYDE kalın, LABS ince ve turuncu (Space Grotesk).
+- **Söz:** "Katman katman, size özel."
+
+**Seçim nasıl yapıldı:**
+
+- Önce birbirinden farklı 8 yön çizildi (`secenekler.png`): 1 Küp, 2 Şişe, 3 Nozul, 4 Etiket, 5 Rozet,
+  6 Katmanlı yazı, 7 QR, 8 b ve d.
+- 3 beğenildi, "daha estetik dursun" denildi. Alternatifleri `secenekler_nozul.png`'de: 3a Sade, 3b Katman,
+  3c İlk çizgi, 3d Tek çizgi, 3e Daire, 3f Kare, 3g Yazar, 3h Sıcak uç.
+- 3'ün kendisi istendi; 3a onun toparlanmış hâli.
+- Başka biri seçilirse bütün kit yeniden üretilir: `python3 scripts/boyde_marka.py --yon 3e`.
 - Önceki taslaklar (B'li ve bd'li logolar) git geçmişinde duruyor.
 
 **`logo/` klasörü:**
@@ -69,8 +72,8 @@ fotoğraflarınızla değiştirilebilir.
 
 ## Yazı tipleri
 
-- **Unbounded:** logo ve başlıklar; Light 300, Medium 500, Bold 700.
-- **Space Grotesk:** metin; Regular 400, Medium 500, Bold 700.
+- **Unbounded:** başlıklar; Light 300, Medium 500, Bold 700.
+- **Space Grotesk:** logo yazısı ve metin; Regular 400, Medium 500, Bold 700.
 
 İkisi de ücretsiz (SIL Open Font License), Türkçe harflerin hepsi var, Google Fonts'ta bulunur.
 
@@ -97,7 +100,7 @@ kabartmalı 3D baskı.
 
 ```bash
 python3 scripts/boyde_marka.py              # yalnız seçenek sayfaları
-python3 scripts/boyde_marka.py --yon 3a     # seçilen yönle bütün kit (~1 dk)
+python3 scripts/boyde_marka.py --yon 3a     # seçilen yönle bütün kit (~30 sn)
 ```
 
 Metinler (söz, fiyat, adımlar, bio) `scripts/boyde_marka.py` içinde. Değişince komut yeniden çalıştırılır.

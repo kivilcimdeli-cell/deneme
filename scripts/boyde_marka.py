@@ -939,9 +939,23 @@ def product_photo():
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
-def wide_graphic(sim_k, aspect, W=1920, H=1080):
+def wide_graphic(sim_k, aspect, W=1920, H=1080, nozul=False):
     """Metinsiz geniş görsel: işaretin katmanları sola doğru uzar (yazıcının çizdiği çizgiler gibi), en üstteki
-    turuncu."""
+    turuncu. Nozulda: nozul sağda, altında basılan katmanlar; en üstteki turuncu, nozulun altında biter."""
+    if nozul:
+        ih = 560
+        iw = ih * aspect
+        left, top = W - 330 - iw, 110
+        cx = left + iw / 2
+        bt, bh = top + ih + 34, 40
+        bars = "".join(
+            f'<i style="position:absolute;left:-40px;width:{cx + (24 if k == 0 else 260) + 40:.0f}px;'
+            f'top:{bt + k * (bh + 16)}px;height:{bh}px;border-radius:{bh / 2}px;'
+            f'background:linear-gradient(90deg,transparent,rgba({_rgb(ORANGE if k == 0 else PAPER)},'
+            f'{1 if k == 0 else .2 - k * .03:.2f}) 70%)"></i>' for k in range(4))
+        return (f'<div style="background:{INK};height:{H}px;position:relative;overflow:hidden">{bars}'
+                f'<div style="position:absolute;left:{left:.0f}px;top:{top}px">{inline(sim_k, height=f"{ih}px")}</div>'
+                f'</div>')
     ih = 700
     iw = ih * aspect
     top, left = (H - ih) / 2, W - 250 - iw
@@ -983,7 +997,7 @@ def kit(P, n):
       <p class="u" style="font-size:52px;font-weight:500;color:{PAPER}">{SLOGAN}</p></div>""",
           1600, 1200, os.path.join(sh, "hakkinda_kapak_4x3.png"))
     _, sw, shh = lockup(n, "simge", "koyu")
-    P.png(wide_graphic(sim_k, sw / shh), 1920, 1080, os.path.join(sh, "hakkinda_genis_16x9.png"))
+    P.png(wide_graphic(sim_k, sw / shh, nozul=n in NOZUL), 1920, 1080, os.path.join(sh, "hakkinda_genis_16x9.png"))
 
     # ---- Instagram: profil ve öne çıkanlar
     P.png(f"""<div style="{dark};height:1080px;display:grid;place-items:center">{fitted(n, "simge", "koyu", 650, 520)}</div>""",
@@ -1062,7 +1076,7 @@ def kit(P, n):
 # ---------------------------------------------------------------- kılavuz
 
 def guide(P, n):
-    name, desc, _, _, story, *_ = DIRS[n]
+    story = DIRS[n][4]
     W, H = 1600, 900
     css = f"""
     .pg{{background:{PAPER};color:{INK};padding:80px 96px}}
@@ -1088,7 +1102,7 @@ def guide(P, n):
       <div style="position:absolute;right:-90px;top:150px">{fitted(n, "simge", "koyu", 750, 600)}</div></div>""")
     pages.append(f"""<div class="pg"><p class="k">01 · HİKÂYE VE LOGO</p><h2>Ürünün kendisinden bir logo</h2>
       <p class="lead">BOYDE LABS bir 3D baskı atölyesi: QR'lı akıllı isimlikleri ve işletmelere özel dijital kartvizit
-      sitelerini tasarlayıp kendi yazıcılarında basıyor. Logo ({name}): {desc}</p>
+      sitelerini tasarlayıp kendi yazıcılarında basıyor. Logo da bu işten çıkıyor; her parçası bir şey anlatıyor.</p>
       <div class="grid" style="grid-template-columns:1.1fr 1fr">
         <div class="box" style="height:430px;background:{INK}">{fitted(n, "simge", "koyu", 375, 300)}<small>simge</small></div>
         <div style="display:flex;flex-direction:column;justify-content:center;gap:26px;font-size:20px;line-height:1.5">
@@ -1117,17 +1131,21 @@ def guide(P, n):
       <div class="grid" style="grid-template-columns:repeat(5,1fr)">{''.join(
         f'<div class="sw" style="background:{bg};color:{fg};{"box-shadow:inset 0 0 0 2px #ddd8cd" if bg == PAPER else ""}">'
         f'<b>{nm}</b><span>{tx}</span></div>' for nm, bg, fg, tx in sw)}</div>{no(3)}</div>""")
+    yazi = dict(story).get("Yazı", "")
+    logo_font = yazi[yazi.rfind("(") + 1:yazi.rfind(")")] if "(" in yazi else "Unbounded"
+    other = "" if logo_font in ("Unbounded", "Space Grotesk") else f" Logo yazısı {logo_font}; o da ücretsiz."
     pages.append(f"""<div class="pg"><p class="k">04 · YAZI TİPLERİ</p><h2>Unbounded ve Space Grotesk</h2>
-      <p class="lead">İkisi de ücretsiz (SIL Open Font License) ve Türkçe harflerin hepsi var; Google Fonts'ta bulunur.</p>
+      <p class="lead">İkisi de ücretsiz (SIL Open Font License) ve Türkçe harflerin hepsi var; Google Fonts'ta bulunur.
+      {other}</p>
       <div class="grid" style="grid-template-columns:1fr 1fr">
         <div class="box" style="background:#fff;place-items:start;padding:36px;height:440px;align-content:start">
-          <p class="k" style="color:{GRAY}">BAŞLIK · LOGO</p><p class="u" style="margin-top:14px;font-size:68px;font-weight:700;
+          <p class="k" style="color:{GRAY}">BAŞLIK{" · LOGO" if logo_font == "Unbounded" else ""}</p><p class="u" style="margin-top:14px;font-size:68px;font-weight:700;
           line-height:1">Unbounded</p><p class="u" style="margin-top:22px;font-size:30px;font-weight:500;line-height:1.3">
           Katman katman,<br>size özel.</p><p class="u" style="margin-top:22px;font-size:20px;font-weight:300">
           ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ 0123456789</p><p style="margin-top:16px;font-size:16px;color:{GRAY}">Light 300 ·
           Medium 500 · Bold 700</p></div>
         <div class="box" style="background:#fff;place-items:start;padding:36px;height:440px;align-content:start">
-          <p class="k" style="color:{GRAY}">METİN</p><p style="margin-top:14px;font-size:68px;font-weight:700;line-height:1">
+          <p class="k" style="color:{GRAY}">{"LOGO · " if logo_font == "Space Grotesk" else ""}METİN</p><p style="margin-top:14px;font-size:68px;font-weight:700;line-height:1">
           Space Grotesk</p><p style="margin-top:22px;font-size:24px;line-height:1.5">QR'lı akıllı isimlik: arama, WhatsApp,
           konum ve IBAN tek kodda. İşletmenize özel site dahil.</p><p style="margin-top:18px;font-size:20px">
           abcçdefgğhıijklmnoöprsştuüvyz 0123456789</p><p style="margin-top:16px;font-size:16px;color:{GRAY}">
