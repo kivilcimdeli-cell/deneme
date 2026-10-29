@@ -288,6 +288,17 @@ def body(site, ctx):
     who = f'\n    <div class="who"><small>ALICI</small><b>{e(site.alici)}</b></div>' if site.alici else ""
     note = '\n  <p class="note">Örnek IBAN: gerçek bilgiler eklenecek.</p>' if site.iban_ornek else ""
     right = f"@{site.instagram}" if site.instagram and not site.etiket else tr_title(site.etiket)
+    # kartvizitte (10 × 20 kurumsal isimlik) IBAN yok: ödeme bölümü de yok
+    pay = f"""<section aria-labelledby="odeme">
+  <h2 class="sec" id="odeme">ÖDEME BİLGİLERİ</h2>
+  <div class="card" data-in>
+    <div class="top"><span class="bank">{e(site.banka or "Banka hesabı")}</span><span class="kind">IBAN</span></div>
+    <div class="iban">{e(site.iban_txt)}</div>{who}
+  </div>
+  <div class="acts{'' if ctx.kk else ' one'}">
+    <button class="btn copy" type="button" data-copy="{e(site.iban)}" data-done="Kopyalandı">{svg("copy")}<span>{"Kopyala" if ctx.kk else "IBAN'ı kopyala"}</span></button>{kk_btn}
+  </div>{kk_box}{note}
+</section>""" if site.iban else ""
     return f"""<div class="wrap">
 <header class="hero bleed">
   <div class="band" aria-hidden="true"><i></i></div>
@@ -302,16 +313,7 @@ def body(site, ctx):
 <nav class="tiles" aria-label="Bağlantılar">
   {tiles}
 </nav>
-<section aria-labelledby="odeme">
-  <h2 class="sec" id="odeme">ÖDEME BİLGİLERİ</h2>
-  <div class="card" data-in>
-    <div class="top"><span class="bank">{e(site.banka or "Banka hesabı")}</span><span class="kind">IBAN</span></div>
-    <div class="iban">{e(site.iban_txt)}</div>{who}
-  </div>
-  <div class="acts{'' if ctx.kk else ' one'}">
-    <button class="btn copy" type="button" data-copy="{e(site.iban)}" data-done="Kopyalandı">{svg("copy")}<span>{"Kopyala" if ctx.kk else "IBAN'ı kopyala"}</span></button>{kk_btn}
-  </div>{kk_box}{note}
-</section>
+{pay}
 <a class="btn ghost save" href="{ctx.vcf}" download="{e(site.isletme)}.vcf">{svg("person")}Rehbere kaydet</a>
 </main>
 <footer>

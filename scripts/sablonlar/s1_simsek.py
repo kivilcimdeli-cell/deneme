@@ -219,6 +219,13 @@ def body(site, ctx):
     <p>Karekodu kaydedin; banka uygulamanızda <b>Karekod ile Öde</b> → <b>Galeriden seç</b>.</p>{save}
   </div>"""
     note = '\n  <p class="note">Örnek IBAN: gerçek bilgiler eklenecek.</p>' if site.iban_ornek else ""
+    # kartvizitte (10 × 20 kurumsal isimlik) IBAN yok: ödeme bölümü de yok
+    pay = f"""<section class="pay reveal" aria-labelledby="odeme">
+  <h2 id="odeme">{svg("bank")}ÖDEME BİLGİLERİ</h2>
+  {f'<dl class="rows">{who}</dl>' if who else ''}
+  <div class="iban" aria-label="IBAN">{e(site.iban_txt)}</div>
+  <button class="copy" type="button" data-copy="{e(site.iban)}" data-done="Kopyalandı">{svg("copy")}<span>IBAN'ı Kopyala</span></button>{kk}{note}
+</section>""" if site.iban else ""
     return f"""<div class="wrap">
 <header class="hero"><i></i>
   <h1 class="logo" aria-label="{e(site.isletme)}"><span class="nm">{_name(site)}</span>{mark_svg(site)}</h1>
@@ -230,12 +237,7 @@ def body(site, ctx):
 <nav class="list">
   {"".join(rows)}
 </nav>
-<section class="pay reveal" aria-labelledby="odeme">
-  <h2 id="odeme">{svg("bank")}ÖDEME BİLGİLERİ</h2>
-  {f'<dl class="rows">{who}</dl>' if who else ''}
-  <div class="iban" aria-label="IBAN">{e(site.iban_txt)}</div>
-  <button class="copy" type="button" data-copy="{e(site.iban)}" data-done="Kopyalandı">{svg("copy")}<span>IBAN'ı Kopyala</span></button>{kk}{note}
-</section>
+{pay}
 <a class="ghost reveal" href="{ctx.vcf}" download="{e(site.isletme)}.vcf">{svg("person")}Rehbere Kaydet</a>
 <footer class="reveal">{e(" ".join(site.lines))}{mark_svg(site)}{e(site.hizmet)}{" · " + e(site.sehir) if site.sehir else ""}</footer>
 </div>"""

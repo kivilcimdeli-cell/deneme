@@ -25,6 +25,8 @@ Bilgiler işletme klasöründeki `bilgiler.json`dan okunur:
   iban_karekod, sayfa_url; isteğe bağlı: marka (büyük yazılan ad), hizmet (OTO LASTİK, HASAR ONARIM …), etiket
   (üstteki küçük yazı), aciklama, sehir, konum, renk (vurgu rengi), isaret (logo işareti SVG'si, klasöre göre),
   karekod_hata (bankanın karekodundaki hata düzeltme: m/q/h), iban_ornek (gerçek IBAN gelene kadar), sablon.
+  Dijital kartvizit (10 × 20 kurumsal isimlik): isletme yerine kişinin adı, hizmet görevi, kurum (vCard ORG),
+  eposta (E-posta bağlantısı); iban verilmezse ödeme bölümü çıkmaz.
 
 Çıktı (işletme klasöründe): site/, <ad>_site.zip (Cloudflare'e yüklenir), sayfa_onizleme.png, sayfa_tur.gif,
         sayfa_deneme.html (denemelik tek dosya)
@@ -103,6 +105,8 @@ class Site:
     isaret_cizgi: list = field(default_factory=list)   # fırça darbeleri [(kalınlık, [(x, y) …])]: logo yazılır gibi
     sablon: int = 0
     extra: dict = field(default_factory=dict)
+    eposta: str = ""  # dijital kartvizit (10 × 20 kurumsal isimlik): e-posta bağlantısı
+    kurum: str = ""   # kartvizit: kişinin çalıştığı kurum (vCard ORG); doluysa sayfa kişinin kartvizitidir
 
     @property
     def phone(self):
@@ -128,6 +132,8 @@ class Site:
 
     def links(self, rehber=True, vcf_href=None):
         L = [Link("whatsapp", self.wa, "whatsapp", "WhatsApp", "Mesaj gönderin", "WhatsApp")]
+        if self.eposta:
+            L.append(Link("eposta", f"mailto:{self.eposta}", "mail", "E-posta", self.eposta, "E-posta"))
         if self.instagram:
             L.append(Link("instagram", f"https://www.instagram.com/{self.instagram}/", "instagram", "Instagram",
                           "@" + self.instagram, "Instagram"))
@@ -139,8 +145,9 @@ class Site:
         if self.web:
             L.append(Link("web", self.web, "globe", "Web sitesi", self.web_txt, "Web sitesi"))
         if rehber:
-            L.append(Link("rehber", vcf_href or self.vcf, "person", "Rehbere kaydet", "Numarayı ekleyin",
-                          "Rehbere ekle", f"{self.isletme}.vcf"))
+            L.append(Link("rehber", vcf_href or self.vcf, "person", "Rehbere kaydet",
+                          "Kartviziti ekleyin" if self.kurum else "Numarayı ekleyin", "Rehbere ekle",
+                          f"{self.isletme}.vcf"))
         return L
 
 
@@ -169,15 +176,15 @@ def load(folder, overrides=None):
     wa_no = Q.phone_e164(d.get("whatsapp") or d["telefon"])
     import urllib.parse
     msg = d.get("whatsapp_mesaj", "")
-    raw = re.sub(r"\s", "", d["iban"]).upper()
+    raw = re.sub(r"\s", "", d.get("iban", "")).upper()   # kartvizitte IBAN yok: ödeme bölümü çıkmaz
     ornek = bool(d.get("iban_ornek"))
-    iban = raw if ornek else Q.iban_normalize(raw)
+    iban = raw if ornek or not raw else Q.iban_normalize(raw)
     karekod = d.get("iban_karekod", "").strip()
     if karekod:
         k = Q.karekod_check(karekod, None if ornek else iban)
         if not d.get("iban_alici") and k["alici"]:
             d["iban_alici"] = k["alici"]
-    elif ornek:
+    elif ornek and iban:
         karekod = iban                                   # örnek: karekod yalnız IBAN'ı taşır
     isaret, box = "", ""
     if d.get("isaret"):
@@ -201,7 +208,8 @@ def load(folder, overrides=None):
                 banka=d.get("banka", ""), karekod=karekod, karekod_hata=d.get("karekod_hata", "m"),
                 sayfa=Q.https_url(d["sayfa_url"]) if d.get("sayfa_url") else "", isaret=isaret, isaret_box=box,
                 isaret_cizgi=cizgi, sablon=int(d.get("sablon", 0)),
-                extra={k: v for k, v in d.items() if k.startswith("sablon_")})
+                extra={k: v for k, v in d.items() if k.startswith("sablon_")},
+                eposta=d.get("eposta", ""), kurum=d.get("kurum", ""))
 
 
 # ---------------------------------------------------------------- sıra
@@ -362,8 +370,14 @@ def karekod_png(site, out):
 
 
 def vcard(site, out):
-    lines = ["BEGIN:VCARD", "VERSION:3.0", f"N:;{site.isletme};;;", f"FN:{site.isletme}", f"ORG:{site.isletme}",
-             f"TEL;TYPE=CELL,VOICE:+{site.tel}"]
+    if site.kurum:                                       # kişinin kartviziti: soyadı, adı; kurum ayrı
+        first, _, last = site.isletme.rpartition(" ")
+        name = [f"N:{last};{first};;;", f"FN:{site.isletme}", f"ORG:{site.kurum}"]
+    else:
+        name = [f"N:;{site.isletme};;;", f"FN:{site.isletme}", f"ORG:{site.isletme}"]
+    lines = ["BEGIN:VCARD", "VERSION:3.0", *name, f"TEL;TYPE=CELL,VOICE:+{site.tel}"]
+    if site.eposta:
+        lines.append(f"EMAIL;TYPE=WORK:{site.eposta}")
     if site.hizmet:
         lines.append(f"TITLE:{tr_title(site.hizmet)}")
     if site.sehir:
@@ -372,7 +386,7 @@ def vcard(site, out):
     lines += [f"URL:{u}" for u in (site.web, site.sayfa) if u]
     if site.instagram:
         lines.append(f"X-SOCIALPROFILE;TYPE=instagram:https://www.instagram.com/{site.instagram}/")
-    if not site.iban_ornek:
+    if site.iban and not site.iban_ornek:
         who = ", ".join(x for x in (tr_title(site.alici), site.banka) if x).replace(",", "\\,")
         lines.append(f"NOTE:IBAN {site.iban_txt}" + (f" ({who})" if who else ""))
     lines.append("END:VCARD")

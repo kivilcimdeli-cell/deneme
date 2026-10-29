@@ -48,6 +48,7 @@
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
 | `shopier/urun_metinleri.md` | Shopier ürün adları ve açıklamaları (iki ürün) |
 | `shopier/site_ornekleri/` | 5 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa; beş şablonun beşi, her görsel başka düzende: Çağrı İletişim · Şimşek, Anka Emlak · Lastik izi, Luna Güzellik · İkaz, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
+| `shopier/kartvizit_ornekleri/` | 10 × 20 için 5 dijital kartvizit görseli: beş şablonun beşi, kişilerin kartvizit sayfası, rehbere kaydedilince kişi kartı, hazır WhatsApp mesajı (Kerem Aksoy · Şimşek, Elif Demir · Lastik izi, Zeynep Arslan · İkaz, Mehmet Kaya · Kurumsal, Selin Koç · Sade; uydurma kişiler, e-postalar ornek.com) |
 | `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
 | `fotograf/<ürün>_studyo.jpg` | stüdyo fonunda (beyaz ya da INK), 3/4 |
 | `fotograf/<ürün>_on.jpg` | aynı fonda, karşıdan |

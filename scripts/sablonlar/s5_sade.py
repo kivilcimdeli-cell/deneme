@@ -233,6 +233,15 @@ def body(site, ctx):
   </div>"""
     note = '\n  <p class="note">Örnek IBAN: gerçek bilgiler eklenecek.</p>' if site.iban_ornek else ""
     right = f"@{site.instagram}" if site.instagram else e(site.etiket)
+    # kartvizitte (10 × 20 kurumsal isimlik) IBAN yok: ödeme bölümü de yok
+    pay = f"""<h2 class="sec">ÖDEME BİLGİLERİ</h2>
+<section class="pay" data-in aria-label="Ödeme bilgileri">
+  {f'<dl class="rows">{who}</dl>' if who else ''}
+  <div class="ibanbox"><span>IBAN</span><output class="iban">{e(site.iban_txt)}</output></div>
+  <div class="acts{'' if ctx.kk else ' one'}">
+    <button class="btn copy" type="button" data-copy="{e(site.iban)}" data-done="Kopyalandı">{svg("copy")}<span>{"Kopyala" if ctx.kk else "IBAN'ı kopyala"}</span></button>{kk_btn}
+  </div>{kk_box}{note}
+</section>""" if site.iban else ""
     return f"""<div class="wrap">
 <header class="hero">
   <p class="eyebrow">{e(site.etiket)}</p>{logo}
@@ -247,14 +256,7 @@ def body(site, ctx):
 <nav class="list" aria-label="Bağlantılar">
   {rows}
 </nav>
-<h2 class="sec">ÖDEME BİLGİLERİ</h2>
-<section class="pay" data-in aria-label="Ödeme bilgileri">
-  {f'<dl class="rows">{who}</dl>' if who else ''}
-  <div class="ibanbox"><span>IBAN</span><output class="iban">{e(site.iban_txt)}</output></div>
-  <div class="acts{'' if ctx.kk else ' one'}">
-    <button class="btn copy" type="button" data-copy="{e(site.iban)}" data-done="Kopyalandı">{svg("copy")}<span>{"Kopyala" if ctx.kk else "IBAN'ı kopyala"}</span></button>{kk_btn}
-  </div>{kk_box}{note}
-</section>
+{pay}
 </main>
 <footer>
   <b>{e(" ".join(site.lines))}</b><span>{right}</span>

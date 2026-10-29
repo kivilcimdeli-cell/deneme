@@ -32,6 +32,13 @@
   - IBAN, tek dokunuşla kopyalanır;
   - banka karekodu: kaydedilip banka uygulamasında galeriden okutulur.
 
+**Dijital kartvizit (10 × 20 kurumsal isimlik):** aynı beş şablon bir kişinin kartviziti olarak da çalışır.
+
+- `bilgiler.json`da `isletme` yerine kişinin adı, `hizmet` görevi, `etiket` kurum; ek alanlar `kurum` ve `eposta`.
+- Bağlantılara E-posta eklenir; Rehbere kaydet kişiyi adı, görevi, kurumu ve e-postasıyla ekler.
+- `iban` verilmezse ödeme bölümü çıkmaz.
+- Örnekler: `boyde_labs/urunler/shopier/kartvizit_ornekleri/` (`scripts/boyde_site_gorsel.py 10x20`).
+
 **Ortak davranış:**
 
 - **Renk:** vurgu rengi işletmeye göre (`renk`); üstündeki yazı rengi kendiliğinden seçilir (açık renkte koyu yazı).

@@ -267,13 +267,24 @@ def card(c, u):
           text-overflow:ellipsis">{t2} · {u.renk}</p></div></div>"""
 
 
-def site_pages():
-    """Örnek siteler (scripts/boyde_site_gorsel.py'nin ekran görüntüleri): beş şablon, beş telefon (3 + 2)."""
+SITE_YAZI = {
+    "9x12": ("İSİMLİKLE GELEN SİTE", "Her isimliğe<br>işletmenize özel sayfa.",
+             "QR'ı okutan müşteriniz bu sayfayı açar: ara, WhatsApp, Instagram, Google yorum, konum, rehbere kaydet ve "
+             "IBAN (tek dokunuşla kopyalanır)."),
+    "10x20": ("KURUMSAL İSİMLİKLE GELEN KARTVİZİT", "Her isimliğe<br>dijital kartvizit.",
+              "QR'ı okutan kişi kartvizit sayfanızı açar: ara, WhatsApp, e-posta, konum ve rehbere kaydet (adınız, "
+              "göreviniz, kurumunuz tek dokunuşla telefonuna eklenir)."),
+}
+
+
+def site_pages(cat="9x12"):
+    """Örnek siteler (scripts/boyde_site_gorsel.py'nin ekran görüntüleri): beş şablon, beş telefon (3 + 2);
+    10 × 20'de kişilerin dijital kartvizitleri."""
     import json
     import boyde_site_gorsel as SG
     import sablonlar
     cols = []
-    for key, n, _, _, _ in SG.ORNEKLER:
+    for key, n, _, _, _ in SG.SETS[cat]["ornekler"]:
         shot = os.path.join(SG.OUT, key, "ekran_ust.png")
         if not os.path.exists(shot):
             return ""
@@ -283,15 +294,14 @@ def site_pages():
           <p style="font-weight:700;font-size:14px">{d['isletme']}</p>
           <p style="margin-top:-8px;font-size:11.5px;color:rgba(244,241,234,.65)">Şablon: {sablonlar.get(n).AD}</p>
           </div>""")
-    return f"""<p class="k">İSİMLİKLE GELEN SİTE</p>
-      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Her isimliğe<br>işletmenize özel sayfa.</h2>
-      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:rgba(244,241,234,.78);max-width:620px">QR'ı
-        okutan müşteriniz bu sayfayı açar: ara, WhatsApp, Instagram, Google yorum, konum, rehbere kaydet ve IBAN (tek
-        dokunuşla kopyalanır). Beş şablondan biri, sizin renginiz ve logonuzla; uygulama gerekmez.</p>
+    k, h, txt = SITE_YAZI[cat]
+    return f"""<p class="k">{k}</p>
+      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">{h}</h2>
+      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:rgba(244,241,234,.78);max-width:620px">{txt}
+        Beş şablondan biri, sizin renginiz ve logonuzla; uygulama gerekmez.</p>
       <div style="margin-top:26px;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 40px">{''.join(cols)}
       </div>
-      <p style="margin-top:22px;font-size:11px;color:{GRAY}">Örnek işletmeler; telefon BOYDE LABS'in, IBAN ve QR
-        örnektir.</p>"""
+      <p style="margin-top:22px;font-size:11px;color:{GRAY}">{SG.SETS[cat]['not']}</p>"""
 
 
 def catalog(P):
@@ -377,6 +387,10 @@ def catalog(P):
               font-size:22px">{chunk[0][0]}–{chunk[-1][0]}</h2></div>{logo("acik", 150, 30)}</div>
               <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">{grid}</div>""",
                               no=no))
+            no += 1
+        kv = site_pages(cat) if cat != "9x12" else ""      # 10 × 20: kişilerin dijital kartvizitleri
+        if kv:
+            pages.append(page(kv, dark=True, no=no))
             no += 1
 
     refs = [u for u in U.URUNLER if u.tur == "musteri"]
