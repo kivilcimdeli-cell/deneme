@@ -45,6 +45,8 @@
 | `katalog.pdf` | A4 katalog: kapak, nasıl çalışır, iki kategori (giriş ve modeller), referanslar ve sipariş |
 | `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG: 10 model (01_M01 … 10_M10) |
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
+| `shopier/site_ornekleri/` | 3 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa: Çağrı İletişim · Şimşek, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
+| `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
 | `fotograf/<ürün>_studyo.jpg` | stüdyo fonunda, 3/4 |
 | `fotograf/<ürün>_on.jpg` | stüdyo fonunda, karşıdan |
 | `fotograf/<ürün>_masa.jpg` | ahşap masada |
@@ -65,5 +67,6 @@ python3 scripts/boyde_urunler.py      # modelleri kurar, QR denetler, kaynak/ (~
 pip install bpy==4.2.0
 python3 scripts/boyde_urun_foto.py    # fotoğraflar (Blender Cycles, ürün başına ~4 dk)
 python3 scripts/boyde_urun_foto.py --kapak --ornek 40
+python3 scripts/boyde_site_gorsel.py  # örnek site görselleri (~2 dk; isimlik fotoğrafları çizildikten sonra)
 python3 scripts/boyde_katalog.py      # katalog.pdf ve shopier/ (~1 dk)
 ```
