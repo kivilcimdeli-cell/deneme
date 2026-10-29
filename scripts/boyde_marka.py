@@ -902,15 +902,64 @@ def mark_golge():
     return _parts((_extrude(face, 7.5).difference(face), "accent"), (face, "main"))
 
 
-def word_golge(size):
+def _word3d(text, size, labs=True):
+    """Kalın yazı, turuncu derinlikle; labs: yanında küçük düz LABS (Archivo Black)."""
     fn = "ArchivoBlack-Regular.ttf"
-    g, w = text_geom("BOYDE", fn, size, 0, 0, .02)
-    d1, _ = text_path("BOYDE", fn, size, 0, 0, .02)
+    g, w = text_geom(text, fn, size, 0, 0, .02)
+    d1, _ = text_path(text, fn, size, 0, 0, .02)
     depth = _extrude(g, size * .07).difference(g)
-    s2 = size * .56
-    x2 = w + size * .07 + size * .24
-    d2, w2 = text_path("LABS", fn, s2, x2, 0, .06)
-    return [(geom_path(depth), "accent"), (d1, "main"), (d2, "main")], (0, -cap(fn, size), x2 + w2, size * .07)
+    parts, x1 = [(geom_path(depth), "accent"), (d1, "main")], w + size * .07
+    if labs:
+        s2 = size * .56
+        x2 = x1 + size * .24
+        d2, w2 = text_path("LABS", fn, s2, x2, 0, .06)
+        parts.append((d2, "main"))
+        x1 = x2 + w2
+    return parts, (0, -cap(fn, size), x1, size * .07)
+
+
+def word_golge(size):
+    return _word3d("BOYDE", size)
+
+
+# 21a–21d · 3D gölge, simge B&D ("21'in logosunu B&D yapar mısın")
+BD_FONT = "ArchivoBlack-Regular.ttf"
+
+
+def _bd(size=100.0):
+    """B, & ve D ayrı ayrı (çizimde aralıkları korunur)."""
+    full, w = text_geom("B&D", BD_FONT, size, 0, 0, .02)
+    gb, _ = text_geom("B", BD_FONT, size, 0, 0, .02)
+    gba, _ = text_geom("B&", BD_FONT, size, 0, 0, .02)
+    return gb, gba.difference(gb), full.difference(gba), full
+
+
+def mark_bd3d():
+    """B&D, turuncu derinlikle."""
+    *_, g = _bd()
+    return _parts((_extrude(g, 7.0).difference(g), "accent"), (g, "main"))
+
+
+def mark_bd3d_amp():
+    """B ve D turuncu derinlikle, & düz turuncu."""
+    b, amp, d, _ = _bd()
+    bd = unary_union([b, d])
+    return _parts((_extrude(bd, 7.0).difference(bd).difference(amp.buffer(1.2)), "accent"), (bd, "main"),
+                  (amp, "accent"))
+
+
+def mark_bd3d_kare():
+    """Derinlikli koyu kart, içinde oyuk B&D."""
+    *_, g = _bd()
+    gx0, gy0, gx1, gy1 = g.bounds
+    k = 70.0 / (gx1 - gx0)                                     # harfler kartın %76'sı
+    g = affinity.scale(affinity.translate(g, -(gx0 + gx1) / 2, -(gy0 + gy1) / 2), k, k, origin=(0, 0))
+    card = _soft(box(-46, -28, 46, 28), 8.0)
+    return _parts((_extrude(card, 7.5).difference(card), "accent"), (card.difference(g.buffer(0.01)), "main"))
+
+
+def word_bd3d_labs(size):
+    return _word3d("B&D", size)
 
 
 def mark_imlec():
@@ -1127,7 +1176,25 @@ YENI2 = {
          mark_kose, word_kose, [("Kare", "isimlik, kart, etiket."), ("Kıvrık köşe", "turuncu: size özel."),
                                 ("Yazı", "BOYDE LABS, dar (Barlow Condensed).")], False, False),
 }
-DIRS = {**YONLER, **NOZUL, **YENI, **YENI2}
+# 21'in B&D çeşitleri
+B_D = {
+    "21a": ("B&D simge", "Simge B&D, turuncu derinlikle; yazı BOYDE LABS aynı stilde.", mark_bd3d, word_golge,
+            [("B&D", "simge: B ve D, aralarında &; turuncu derinlikle yükselir (3D baskı)."),
+             ("Yazı", "BOYDE kalın, turuncu derinlikli; yanında LABS (Archivo Black)."),
+             ("Renk", "derinlik turuncu, harfler koyu.")], False, False),
+    "21b": ("B&D LABS", "Yazının kendisi B&D LABS: B&D turuncu derinlikle, yanında LABS. Kısa ve akılda kalır.",
+            mark_bd3d, word_bd3d_labs, [("B&D", "markanın kısa adı, turuncu derinlikle."),
+                                        ("LABS", "yanında düz, koyu."), ("Simge", "B&D tek başına.")],
+            False, True),
+    "21c": ("Turuncu &", "B ve D turuncu derinlikle, & düz turuncu: iki harfi turuncu bağ birleştirir.",
+            mark_bd3d_amp, word_golge, [("B ve D", "koyu, turuncu derinlikle."), ("&", "düz turuncu: bağ."),
+                                        ("Yazı", "BOYDE LABS, turuncu derinlikli.")], False, False),
+    "21d": ("Kart", "Derinlikli koyu kart, içinde oyuk B&D: isimlik gibi masada duran bir blok.",
+            mark_bd3d_kare, word_golge, [("Kart", "turuncu derinlikli koyu blok: isimlik gibi."),
+                                         ("B&D", "kartta oyuk."), ("Yazı", "BOYDE LABS, turuncu derinlikli.")],
+            False, False),
+}
+DIRS = {**YONLER, **NOZUL, **YENI, **YENI2, **B_D}
 
 THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
           "koyu": {"main": PAPER, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
@@ -1651,11 +1718,14 @@ def main():
         options_sheet(P, os.path.join(OUT, "secenekler_yeni.png"), n or None, YENI, "yeni logo yönleri",
                       "Nozul yok: birbirinden farklı 10 yeni yön (11–20), renkler aynı. Birini seçin; bütün kit "
                       "(logo dosyaları, Shopier, Instagram, kılavuz, katalog) ona göre üretilir.")
+        options_sheet(P, os.path.join(OUT, "secenekler_21_bd.png"), n or None, B_D, "21 · B&D",
+                      "21'in 3D gölge stili, simgede B&D: dört çeşit. Renkler aynı. Birini seçin; bütün kit ona göre "
+                      "üretilir.")
         options_sheet(P, os.path.join(OUT, "secenekler_yeni_2.png"), n or None, YENI2, "yeni logo yönleri 2",
                       "İkinci tur: 10 yön daha (21–30), öncekilerin hiçbiri değil; renkler aynı. Birini seçin; bütün "
                       "kit ona göre üretilir.")
         print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT),
-              "secenekler_nozul.png, secenekler_yeni.png, secenekler_yeni_2.png")
+              "secenekler_nozul.png, secenekler_yeni.png, secenekler_yeni_2.png, secenekler_21_bd.png")
         if not n:
             return
         for d in ("logo", "shopier", "instagram"):
