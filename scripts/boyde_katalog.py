@@ -4,7 +4,9 @@ Girdi : scripts/boyde_urunler.py (ürünler, kategoriler), boyde_labs/urunler/fo
         boyde_labs/urunler/kaynak/<ürün>_duz.png (düz görünüş). Marka: scripts/boyde_marka.py (logo 3a, renkler,
         yazı tipleri).
 Çıktı : boyde_labs/urunler/katalog.pdf (A4), katalog.png (sayfaların önizlemesi)
-        boyde_labs/urunler/shopier/<kategori>/ (1200 × 1200 JPG): 10 model, yükleme sırasıyla 01_M01_… 10_M10_…
+        boyde_labs/urunler/shopier/<kategori>/ (1200 × 1200 JPG): 10 model, yükleme sırasıyla 01_M01_… 10_M10_…,
+          BOYDE çerçevesinde ("BOYDE ürünü olarak pazarlamamız gerekiyor; çerçeve ekler misin")
+        boyde_labs/urunler/cerceveli/<kategori>/: her ürünün üç fotoğrafı (stüdyo, karşıdan, masa) çerçevede
           ("10 adet küçük, 10 adet büyük boy"); ek/: kapak, modeller (hepsi bir arada), olcu_ozellik, nasil_calisir
 
 Model kodları kategoride sırayla: önce müşterilerin bastırdıkları, sonra farklı sektörlere örnekler, en son
@@ -179,18 +181,50 @@ def shopier(P, cat):
       <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{TEL}</p></div>""",
        name("nasil_calisir"))
 
-    # her model
+    # her model: BOYDE çerçevesinde
     for c, u in ms:
-        t1, t2 = caption(u)
-        sq(P, f"""<div style="position:relative;width:1200px;height:1200px">
-          <img src="{foto(u.key, maxw=1200)}" style="width:1200px;height:1200px;display:block">
-          <div style="position:absolute;left:40px;bottom:40px;display:flex;align-items:center;gap:14px">
-            <span class="chip code" style="background:{INK};color:{PAPER};font-size:24px;padding:10px 16px">{c}</span>
-            <span class="chip" style="background:rgba(244,241,234,.92);color:{INK};font-size:22px;padding:10px 16px">
-              {t1}</span></div>
-          <div style="position:absolute;right:40px;top:36px;opacity:.9">{logo("acik", 200, 40)}</div></div>""",
-           os.path.join(out, f"{int(c[1:]):02d}_{c}_{u.key}.jpg"))
+        framed(P, cat, c, u, "studyo", os.path.join(out, f"{int(c[1:]):02d}_{c}_{u.key}.jpg"))
     return out
+
+
+def framed(P, cat, c, u, view, path):
+    """BOYDE çerçevesi (1200 × 1200): katman çizgili koyu kenarlık, köşede "BOYDE LABS ürünü" etiketi, altta bant:
+    logo, model kodu, ad, ölçü ve "tasarım ve 3D baskı BOYDE LABS"."""
+    K = U.KATEGORI[cat]
+    t1, _ = caption(u)
+    who = f"{u.musteri} için ürettik" if u.tur != "ornek" else "Örnek tasarım · sizin bilgilerinizle"
+    sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};
+      background-image:{BM.stripes_bg(PAPER, .045, 26)}">
+      <div style="position:absolute;left:36px;top:36px;width:1128px;height:944px;border-radius:30px;overflow:hidden">
+        <img src="{foto(u.key, view, 1200)}" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div style="position:absolute;left:22px;top:22px;display:flex;align-items:center;gap:12px;padding:10px 18px 10px
+          12px;border-radius:99px;background:rgba(18,19,22,.86);color:{PAPER}">
+          {logo("koyu", 40, 30, "simge")}<span style="font-size:19px;font-weight:700;letter-spacing:.08em">BOYDE LABS
+          ÜRÜNÜ</span></div></div>
+      <i style="position:absolute;left:36px;top:996px;width:260px;height:6px;border-radius:3px;background:{ORANGE}"></i>
+      <div style="position:absolute;left:36px;right:36px;top:1024px;bottom:36px;display:flex;align-items:center;
+        gap:30px;color:{PAPER}">
+        {logo("koyu", 230, 92)}
+        <i style="width:2px;height:96px;background:rgba(244,241,234,.18)"></i>
+        <div style="flex:1;min-width:0">
+          <p class="u" style="font-size:30px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {t1}</p>
+          <p style="margin-top:8px;font-size:19px;color:rgba(244,241,234,.72)">{K['olcu']} · {K['ad']} · {who}</p>
+          <p style="margin-top:4px;font-size:17px;color:{ORANGE};font-weight:700;letter-spacing:.06em">TASARIM VE 3D
+            BASKI: BOYDE LABS</p></div>
+        <span class="code" style="flex:none;display:grid;place-items:center;width:118px;height:118px;border-radius:22px;
+          background:{ORANGE};color:#fff;font-size:36px">{c}</span></div></div>""", path)
+
+
+def framed_all(P):
+    """Her ürünün üç fotoğrafı (stüdyo, karşıdan, masa) BOYDE çerçevesinde: cerceveli/<kategori>/."""
+    for cat in U.KATEGORI:
+        out = os.path.join(OUT, "cerceveli", cat)
+        shutil.rmtree(out, ignore_errors=True)
+        os.makedirs(out)
+        for c, u in models(cat):
+            for view in ("studyo", "on", "masa"):
+                framed(P, cat, c, u, view, os.path.join(out, f"{c}_{u.key}_{view}.jpg"))
 
 
 # ---------------------------------------------------------------- katalog (A4)
@@ -361,6 +395,8 @@ def main():
             out = shopier(P, cat)
             n = len([f for f in os.listdir(out) if f.endswith(".jpg")])
             print(f"shopier/{cat}: {n} model görseli, ek/ {len(os.listdir(os.path.join(out, 'ek')))}", flush=True)
+        framed_all(P)
+        print("cerceveli/: her ürünün üç fotoğrafı çerçevede", flush=True)
         path, n = catalog(P)
         print(f"{os.path.relpath(path, U.A.ROOT)}: {n} sayfa", flush=True)
 

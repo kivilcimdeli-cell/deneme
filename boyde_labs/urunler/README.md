@@ -43,7 +43,8 @@
 | Dosya | Ne |
 | --- | --- |
 | `katalog.pdf` | A4 katalog: kapak, nasıl çalışır, iki kategori (giriş ve modeller), referanslar ve sipariş |
-| `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG: 10 model (01_M01 … 10_M10) |
+| `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG: 10 model (01_M01 … 10_M10), BOYDE çerçevesinde |
+| `cerceveli/<kategori>/` | her ürünün üç fotoğrafı (stüdyo, karşıdan, masa) BOYDE çerçevesinde: Instagram ve Shopier'e ek görsel |
 | `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
 | `shopier/site_ornekleri/` | 3 örnek site görseli (1200 × 1200), isimliğin QR'ının açtığı sayfa: Çağrı İletişim · Şimşek, Sera Kuyumculuk · Kurumsal, Mira Kuaför · Sade (`scripts/boyde_site_gorsel.py`) |
 | `siteler/<işletme>/` | örnek sitelerin bilgileri, logo işareti ve ekran görüntüleri (uydurma işletmeler; şablon sırasına yazılmaz) |
@@ -52,6 +53,13 @@
 | `fotograf/<ürün>_masa.jpg` | ahşap masada |
 | `fotograf/kapak_<kategori>.jpg` | kategori kapakları |
 | `kaynak/<ürün>_duz.png` | düz görünüş (saydam) |
+
+**BOYDE çerçevesi:** ürünlerin bizim olduğu anlaşılsın diye ("BOYDE ürünü olarak pazarlamamız gerekiyor").
+
+- Kenarlık koyu, üzerinde katman çizgileri.
+- Fotoğrafın köşesinde "BOYDE LABS ürünü" etiketi.
+- Altta bant: logo, model kodu, ad, ölçü, "tasarım ve 3D baskı: BOYDE LABS".
+- Müşteri ürünlerinde bant "… için ürettik" der.
 
 **Shopier'e yükleme:**
 
