@@ -9,18 +9,19 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
 
 ## Logo
 
-İşaret **b ve d** harflerinden (BoyDe), geometrik. Renk paleti aynı kaldı.
-
-- **Seçilen: 1 · Katman.** b ve d yatay katmanlardan oluşuyor; 3D baskıda parça katman katman yükselir.
-  - En üst katman turuncu: o an basılan katman.
-  - Yazı: BOYDE kalın, LABS ince ve turuncu.
-  - Söz: **"Katman katman, size özel."**
-- **Öteki yönler** (`secenekler.png`):
-  - 2 İki ton: b mürekkep, d turuncu, kaseler iç içe;
-  - 3 Ayna: b ve d aynalı, kaseler ortada değer, değdikleri yerde turuncu nokta;
-  - 4 Tek çizgi: ince b ve d, b mürekkep, d turuncu.
-- Başka biri seçilirse bütün kit ona göre yeniden üretilir: `python3 scripts/boyde_marka.py --yon 3`.
-- İlk taslaktaki B'li logolar git geçmişinde duruyor.
+- **Yönler** (`secenekler.png`): birbirinden farklı 8 yön, renk paleti aynı.
+  - 1 Küp, 2 Şişe, 3 Nozul, 4 Etiket, 5 Rozet, 6 Katmanlı yazı, 7 QR, 8 b ve d.
+- **3 · Nozul beğenildi**; daha estetik alternatifleri `secenekler_nozul.png`:
+  - 3a Sade: 3'ün toparlanmış hâli; nozul, damla, yazının altında turuncu çizgi;
+  - 3b Katman: nozul turuncu katmanı basıyor; yazı iki kat;
+  - 3c İlk çizgi: nozul ve bastığı ilk çizgi, yazı Sora;
+  - 3d Tek çizgi: tek kalınlıkta çizgi nozul, küçük harf yazı;
+  - 3e Daire, 3f Kare: nozul koyu dairede ya da turuncu karede boşluk olarak;
+  - 3g Yazar: nozul yazının sonunda, altındaki çizgiyi o çizmiş gibi;
+  - 3h Sıcak uç: iki tonlu dişli nozul, ucu turuncu.
+- **Seçim bekleniyor.** Seçilince bütün kit ona göre üretilir: `python3 scripts/boyde_marka.py --yon 3a`.
+  - Aşağıdaki klasörler o zamana kadar ilk taslağın (b ve d, Katman) dosyalarını tutuyor.
+- Önceki taslaklar (B'li ve bd'li logolar) git geçmişinde duruyor.
 
 **`logo/` klasörü:**
 
@@ -95,8 +96,8 @@ kabartmalı 3D baskı.
 ## Yeniden üretmek
 
 ```bash
-python3 scripts/boyde_marka.py            # seçenekler + 1. yönle kit (~1 dk)
-python3 scripts/boyde_marka.py --yon 2    # başka bir yönle
+python3 scripts/boyde_marka.py              # yalnız seçenek sayfaları
+python3 scripts/boyde_marka.py --yon 3a     # seçilen yönle bütün kit (~1 dk)
 ```
 
 Metinler (söz, fiyat, adımlar, bio) `scripts/boyde_marka.py` içinde. Değişince komut yeniden çalıştırılır.

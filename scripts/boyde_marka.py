@@ -3,15 +3,11 @@
 Ürün: QR'lı masa isimliği ve işletmeye özel dijital kartvizit sitesi; hepsi 3D baskı, kendi atölyesinde. Marka bir
 3D baskı atölyesi ("Labs"); logo ürünün kendisinden çıkar.
 
-Logo yönleri (secenekler.png): işaret b ve d harflerinden (BoyDe), geometrik; yazı hepsinde BOYDE kalın, LABS ince
-turuncu (Unbounded). İlk taslaktaki B'li yönler yerine, istek: "b ve d harflerini kullanarak; renk paleti kalsın".
-  1 Katman     b ve d yatay katmanlardan: 3D baskıda parça katman katman yükselir; en üst katman turuncu, o an
-               basılan katman
-  2 İki ton    b mürekkep, d turuncu; kaseler iç içe, d önde (çevresinde ince boşluk)
-  3 Ayna       b ve d aynalı, kaseleri ortada değer; değdikleri yerde turuncu nokta (nozulun ucu)
-  4 Tek çizgi  ince tek çizgi b ve d; b mürekkep, d turuncu
+Logo yönleri (secenekler.png), birbirinden farklı 8 yön, renkler aynı: 1 Küp, 2 Şişe, 3 Nozul, 4 Etiket, 5 Rozet,
+6 Katmanlı yazı, 7 QR, 8 b ve d. 3 beğenildi ("logo daha estetik dursun"); alternatifleri secenekler_nozul.png:
+  3a Sade, 3b Katman, 3c İlk çizgi, 3d Tek çizgi, 3e Daire, 3f Kare, 3g Yazar, 3h Sıcak uç.
 
-Seçilen yönle kit (varsayılan 1):
+Seçilen yönle kit (--yon 3a gibi):
   logo/       yatay, dikey, simge; açık zemin, koyu zemin, tek renk siyah / beyaz; SVG (yazılar çizgi) ve saydam PNG
   shopier/    banner 1920 × 200 ve mobil 400 × 100 (Shopier'ın önerdiği ölçüler; önemli öğeler ortada), kare logo
               800 × 800 (en az 200 × 200, kare), Hakkında kapağı 4:3, geniş görsel 16:9 (metinsiz)
@@ -23,8 +19,8 @@ Renkler: mürekkep #121316, kâğıt #F4F1EA, Boyde turuncusu #FF5A1F, kum #E6E0
 Yazı tipleri (OFL): Unbounded (logo, başlık), Space Grotesk (metin).
 
 Kullanım:
-  python3 scripts/boyde_marka.py            # seçenekler + 1. yönle kit
-  python3 scripts/boyde_marka.py --yon 3    # 3. yönle kit
+  python3 scripts/boyde_marka.py             # yalnız seçenek sayfaları
+  python3 scripts/boyde_marka.py --yon 3a    # seçenekler + 3a ile kit
 """
 import base64
 import contextlib
@@ -298,6 +294,194 @@ def word_nozul(size):
     return parts + [(geom_path(line), "accent")], (x0, y0, x1, size * .28)
 
 
+# 3a–3h · Nozul alternatifleri: aynı fikir, daha oturmuş biçimler. Nozul yandan: altıgen somun (üç yüz görünür:
+# ortadaki geniş, yanlar yarım), altında koni, sivri uç; isteğe bağlı üstte diş çizgileri.
+def _bar(x0, x1, y, h):
+    """Yuvarlak uçlu çubuk (ortası y)."""
+    return LineString([(x0 + h / 2, y), (x1 - h / 2, y)]).buffer(h / 2, 48)
+
+
+def _soft(g, r):
+    """Dış köşeleri yuvarlatır."""
+    return g.buffer(-r, join_style=2).buffer(r, 32)
+
+
+def _drop(cx, cy, r, k=2.2):
+    """Damla: yuvarlak alt, sivri üst (ucu cy - k·r)."""
+    return Point(cx, cy).buffer(r, 96).union(Point(cx, cy - k * r)).convex_hull
+
+
+def _nozul(w=56.0, nut=20.0, cone=30.0, tip=8.0, gap=3.0, faces=True, thread=0, r=3.0, x=0.0, y=0.0):
+    """Nozulun parçaları: dişler, somunun yüzleri, koni; uç y'si. Somunun üstü y."""
+    out = {"thread": [], "nut": [], "cone": None}
+    top = y
+    if thread:
+        th, tg = nut * .2, nut * .14
+        for k in range(thread):
+            out["thread"].append(_bar(x - w * .3, x + w * .3, top + th / 2, th))
+            top += th + tg
+    body = _soft(box(x - w / 2, top, x + w / 2, top + nut), r)
+    if faces:
+        cuts = unary_union([box(x + sx * w / 4 - gap * .4, top - 1, x + sx * w / 4 + gap * .4, top + nut + 1)
+                            for sx in (-1, 1)])
+        body = body.difference(cuts)
+        out["nut"] = sorted(getattr(body, "geoms", [body]), key=lambda g: g.bounds[0])
+    else:
+        out["nut"] = [body]
+    c0 = top + nut + gap
+    cw = w * .64
+    straight = cone * .22
+    out["cone"] = _soft(Polygon([(x - cw / 2, c0), (x + cw / 2, c0), (x + cw / 2, c0 + straight),
+                                 (x + tip / 2, c0 + cone), (x - tip / 2, c0 + cone), (x - cw / 2, c0 + straight)]),
+                        min(r, tip * .3))
+    out["tip"] = c0 + cone
+    out["all"] = unary_union(out["thread"] + out["nut"] + [out["cone"]])
+    return out
+
+
+def _parts(*pairs):
+    """[(şekil, rol)] → işaret (parçalar, sınır)."""
+    pairs = [(g, r) for g, r in pairs if not g.is_empty]
+    return [(geom_path(g), r) for g, r in pairs], _bounds(*[g for g, _ in pairs])
+
+
+def _stack(t1, f1, t2, f2, size, k2=.5, lead=.24, track2=.16):
+    """İki satır: üstte t1; altta sağa yaslı t2 (turuncu), solunda t1'in başına kadar turuncu çizgi (basılan
+    katman)."""
+    g1, _ = text_geom(t1, f1, size)
+    d1, _ = text_path(t1, f1, size)
+    s2 = size * k2
+    c2 = cap(f2, s2)
+    y2 = size * lead + c2
+    g2, _ = text_geom(t2, f2, s2, 0, y2, track2)
+    dx = g1.bounds[2] - g2.bounds[2]
+    d2, _ = text_path(t2, f2, s2, dx, y2, track2)
+    lh = c2 * .34
+    rule = _bar(g1.bounds[0], g2.bounds[0] + dx - s2 * .45, y2 - c2 / 2, lh)
+    return [(d1, "main"), (d2, "sub"), (geom_path(rule), "accent")], (g1.bounds[0], -cap(f1, size), g1.bounds[2], y2)
+
+
+def _nozparts(n, role="main"):
+    return [(p, role) for p in n["thread"] + n["nut"]] + [(n["cone"], role)]
+
+
+def mark_n_sade():
+    n = _nozul(w=52, nut=19, cone=31, tip=8)
+    drop = _drop(0, n["tip"] + 22.5, 8.8, 2.05)
+    return _parts(*_nozparts(n), (drop, "accent"))
+
+
+def word_n_sade(size):
+    return word_nozul(size)
+
+
+word_n_sade.ratio = .56
+
+
+def mark_n_katman():
+    n = _nozul(w=46, nut=17, cone=26, tip=7, x=12)
+    h, g, x0, x1 = 9.0, 3.6, -42.0, 42.0
+    y = n["tip"] + g + h / 2
+    layers = [(_bar(x0, 12 + 3.5, y, h), "accent")]
+    layers += [(_bar(x0, x1, y + k * (h + g), h), "main") for k in (1, 2)]
+    return _parts(*_nozparts(n), *layers)
+
+
+def word_n_katman(size):
+    return _stack("BOYDE", "SpaceGrotesk_700Bold.ttf", "LABS", "SpaceGrotesk_500Medium.ttf", size)
+
+
+word_n_katman.ratio = .66
+
+
+def mark_n_ilk():
+    n = _nozul(w=52, nut=19, cone=31, tip=8)
+    line = _bar(-30, 30, n["tip"] + 10, 7.5)
+    return _parts(*_nozparts(n), (line, "accent"))
+
+
+def word_n_ilk(size):
+    return _word("BOYDE", "Sora-ExtraBold.ttf", "LABS", "Sora-Regular.ttf", size, .3, -.01, .08, "cap")
+
+
+def mark_n_cizgi():
+    sw = 4.6
+    w, nut, cone = 52.0, 19.0, 31.0
+    hull = _nozul(w=w, nut=nut, cone=cone, tip=9, gap=0, faces=False, r=4)
+    outline = hull["all"].exterior.buffer(sw / 2, 32)
+    seps = unary_union([LineString([(x, 0), (x, nut)]).buffer(sw / 2, 32) for x in (-w / 4, w / 4)]
+                       + [LineString([(-w / 2, nut), (w / 2, nut)]).buffer(sw / 2, 32)])
+    ink = outline.union(seps.intersection(hull["all"].buffer(sw / 2)))
+    drop = _drop(0, hull["tip"] + 22, 8.5, 2.05)
+    return _parts((ink, "main"), (drop, "accent"))
+
+
+def word_n_cizgi(size):
+    return _word("boyde", "Outfit-SemiBold.ttf", "labs", "Outfit-SemiBold.ttf", size, .26, -.01, -.01)
+
+
+def mark_n_daire():
+    R = 50.0
+    n = _nozul(w=48, nut=16, cone=26, tip=7.5, gap=2.8, y=-35)
+    disc = Point(0, 0).buffer(R, 256).difference(n["all"])
+    line = _bar(-24, 24, n["tip"] + 10, 7)
+    return _parts((disc, "main"), (line, "accent"))
+
+
+def word_n_daire(size):
+    return _word("BOYDE", "Manrope-ExtraBold.ttf", "LABS", "Manrope-Medium.ttf", size, .28, .01, .1, "cap")
+
+
+def mark_n_kare():
+    S, rr = 100.0, 24.0
+    tile = box(-S / 2, -S / 2, S / 2, S / 2).buffer(-rr).buffer(rr, 64)
+    n = _nozul(w=50, nut=17, cone=27, tip=8, gap=3, y=-34)
+    line = _bar(-25, 25, n["tip"] + 10, 7.5)
+    return _parts((tile.difference(n["all"]).difference(line), "accent"))
+
+
+def word_n_kare(size):
+    return _word("boyde", "Unbounded_600SemiBold.ttf", "labs", "Unbounded_600SemiBold.ttf", size, .28, 0, 0)
+
+
+def mark_n_yazar():
+    n = _nozul(w=40, nut=15, cone=24, tip=7, gap=2.6)
+    line = _bar(-58, 3.5, n["tip"] + 7, 6)
+    return _parts(*_nozparts(n), (line, "accent"))
+
+
+def word_n_yazar(size):
+    """Yazının altını nozul çizer: çizgi soldan gelir, nozul sağ ucunda."""
+    f1, f2 = "SpaceGrotesk_700Bold.ttf", "SpaceGrotesk_400Regular.ttf"
+    parts, (x0, y0, x1, _) = _word("BOYDE", f1, "LABS", f2, size, .26, .02, .1, "cap")
+    ly, lh = size * .2, size * .075
+    ch = cap(f1, size)
+    # nozul: üstü büyük harf boyunda, ucu çizginin hemen üstünde
+    k = (ch + ly - lh / 2 - size * .04) / 41.6
+    nx = x1 + size * .3 + 20 * k
+    n = _nozul(w=40 * k, nut=15 * k, cone=24 * k, tip=7 * k, gap=2.6 * k, r=3 * k, x=nx, y=-ch)
+    line = _bar(0, nx + 3.5 * k, ly, lh)
+    noz = unary_union(n["nut"] + [n["cone"]])
+    return parts + [(geom_path(noz), "main"), (geom_path(line), "accent")], (x0, y0, nx + 20 * k, ly + lh / 2)
+
+
+def mark_n_sicak():
+    n = _nozul(w=50, nut=18, cone=34, tip=8, thread=2)
+    cone = n["cone"]
+    cx0, cy0, cx1, cy1 = cone.bounds
+    hot_y = cy1 - (cy1 - cy0) * .42
+    upper = cone.intersection(box(cx0 - 1, cy0 - 1, cx1 + 1, hot_y - 1.5))
+    hot = cone.intersection(box(cx0 - 1, hot_y + 1.5, cx1 + 1, cy1 + 1))
+    left, right = (upper.intersection(box(cx0 - 1, cy0 - 1, 0, cy1)), upper.intersection(box(0, cy0 - 1, cx1 + 1, cy1)))
+    nl, nm, nr = n["nut"]
+    return _parts(*[(p, "main") for p in n["thread"]], (nl, "main"), (nm, "main"), (nr, "mid"),
+                  (left, "main"), (right, "mid"), (hot, "accent"))
+
+
+def word_n_sicak(size):
+    return _word("BOYDE", "Jost-Bold.ttf", "LABS", "Jost-SemiBold.ttf", size, .3, .06, .14, "cap")
+
+
 # 4 · Etiket: boyde yazısı, labs turuncu bir etiketin içinde (harfler oyuk)
 def _pill(text, fn, size, x):
     g, w = text_geom(text, fn, size, 0, 0)
@@ -466,6 +650,45 @@ YONLER = {
          ("Yazı", "boyde labs, küçük harf (Space Grotesk).")], False, False),
 }
 
+# Nozul alternatifleri (3. yön beğenildi; "logo daha estetik dursun")
+NOZUL = {
+    "3a": ("Sade", "3'ün kendisi, toparlanmış: altıgen somun, koni, ucunda damla; yazının altında turuncu çizgi.",
+           mark_n_sade, word_n_sade, [("Nozul", "3D yazıcının sıcak ucu: altıgen somun ve koni."),
+                                      ("Damla ve çizgi", "nozuldan çıkan turuncu filament yazının altını çizer."),
+                                      ("Yazı", "BOYDE kalın, LABS ince ve turuncu (Space Grotesk).")], False, False),
+    "3b": ("Katman", "Nozul katmanların üstünde; en üst katman turuncu, nozul onu hâlâ basıyor. Yazı da iki kat.",
+           mark_n_katman, word_n_katman, [("Nozul", "3D yazıcının ucu, katmanın üstünde."),
+                                          ("Katmanlar", "parça katman katman yükselir; en üstteki turuncu: o an "
+                                           "basılan katman."),
+                                          ("Yazı", "iki kat: BOYDE, altında turuncu çizgi ve LABS (Space Grotesk).")],
+           False, False),
+    "3c": ("İlk çizgi", "Nozul ve altında bastığı ilk turuncu çizgi. Yazı Sora: yuvarlak, dengeli.",
+           mark_n_ilk, word_n_ilk, [("Nozul", "3D yazıcının sıcak ucu: altıgen somun ve koni."),
+                                    ("Turuncu çizgi", "nozulun bastığı ilk çizgi: her parça böyle başlar."),
+                                    ("Yazı", "BOYDE kalın, LABS ince ve turuncu (Sora).")], False, False),
+    "3d": ("Tek çizgi", "Tek kalınlıkta çizgiyle nozul ve turuncu damla; hafif, zarif. Yazı küçük harf, yumuşak.",
+           mark_n_cizgi, word_n_cizgi, [("Nozul", "tek kalınlıkta çizgiyle: hafif ve zarif."),
+                                        ("Damla", "ucundan çıkan turuncu filament."),
+                                        ("Yazı", "boyde labs, küçük harf (Outfit).")], False, False),
+    "3e": ("Daire", "Koyu dairenin içinde boşluk olarak nozul, altında turuncu çizgi. Profil fotoğrafına hazır.",
+           mark_n_daire, word_n_daire, [("Daire", "koyu daire; nozul içinde boşluk olarak."),
+                                        ("Turuncu çizgi", "nozulun bastığı çizgi."),
+                                        ("Yazı", "BOYDE kalın, LABS ince ve turuncu (Manrope).")], False, False),
+    "3f": ("Kare", "Turuncu yuvarlak kare, nozul ve çizgi içinde boşluk. Uygulama simgesi gibi, uzaktan seçilir.",
+           mark_n_kare, word_n_kare, [("Kare", "turuncu yuvarlak kare: uygulama simgesi gibi."),
+                                      ("Nozul", "karenin içinde boşluk olarak; altında bastığı çizgi."),
+                                      ("Yazı", "boyde labs, küçük harf; labs turuncu (Unbounded).")], False, False),
+    "3g": ("Yazar", "Nozul yazının sonunda; altındaki turuncu çizgiyi o çizmiş gibi. 3'ün çizgisinin hikâyeli hâli.",
+           mark_n_yazar, word_n_yazar, [("Nozul", "yazının sonunda duran 3D yazıcı ucu."),
+                                        ("Çizgi", "yazının altındaki turuncu çizgiyi nozul basmış."),
+                                        ("Yazı", "BOYDE LABS (Space Grotesk).")], False, True),
+    "3h": ("Sıcak uç", "Dişli nozul iki tonlu (ışık sağdan), ucu turuncu: ısınmış, basmaya hazır. Yazı Jost.",
+           mark_n_sicak, word_n_sicak, [("Nozul", "dişleri ve somunuyla; sağ yüzler gri, ışık alıyor."),
+                                        ("Sıcak uç", "nozulun ucu turuncu: ısınmış, basmaya hazır."),
+                                        ("Yazı", "BOYDE kalın, LABS turuncu, aralıklı (Jost).")], False, False),
+}
+DIRS = {**YONLER, **NOZUL}
+
 THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
           "koyu": {"main": PAPER, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
           "siyah": {"main": "#000", "sub": "#000", "accent": "#000", "mid": "#000"},
@@ -480,7 +703,7 @@ def _g(parts, theme, dx=0.0, dy=0.0, s=1.0):
 
 def lockup(n, kind, theme, pad=0.0):
     """Logo (SVG metni, en, boy). kind: yatay, dikey, simge, yazi."""
-    _, _, mark, word, _, _, only_word = YONLER[n]
+    _, _, mark, word, _, _, only_word = DIRS[n]
     if only_word and kind in ("yatay", "dikey"):
         kind = "yazi"
     mp, (mx0, my0, mx1, my1) = mark()
@@ -498,13 +721,13 @@ def lockup(n, kind, theme, pad=0.0):
             W, Ht = (wx1 - wx0), (wy1 - wy0)
             inner = _g(wp, theme, -wx0, -wy0)
         elif kind == "yatay":
-            ws = (H * .46) / (wy1 - wy0)                # yazının boyu simgenin %46'sı, ortalı
+            ws = (H * getattr(word, "ratio", .46)) / (wy1 - wy0)   # yazının boyu simgenin %46'sı, ortalı
             gap = H * .3
             W, Ht = mw * ms + gap + (wx1 - wx0) * ws, H
             inner = (_g(mp, theme, -mx0 * ms, -my0 * ms, ms)
                      + _g(wp, theme, mw * ms + gap - wx0 * ws, (H - (wy1 - wy0) * ws) / 2 - wy0 * ws, ws))
         else:                                           # dikey: simge üstte, yazı altta ortalı
-            ws = (H * .26) / (wy1 - wy0)
+            ws = (H * .26 * getattr(word, "ratio", .46) / .46) / (wy1 - wy0)
             ww = (wx1 - wx0) * ws
             W = max(mw * ms, ww)
             gap = H * .26
@@ -606,9 +829,12 @@ def painter():
 
 # ---------------------------------------------------------------- seçenekler
 
-def options_sheet(P, path, recommended=None):
+def options_sheet(P, path, recommended=None, dirs=None, title="logo yönleri", sub=None):
+    dirs = dirs or YONLER
+    sub = sub or (f"Birbirinden farklı {len(dirs)} yön, renkler aynı. Birini seçin; bütün kit (logo dosyaları, "
+                  "Shopier, Instagram, kılavuz) ona göre üretilir.")
     cards = []
-    for n, (name, desc, *_) in YONLER.items():
+    for n, (name, desc, *_) in dirs.items():
         icon_k = fitted(n, "simge", "koyu", 112, 104)
         yat_a = fitted(n, "yatay", "acik", 520, 76)
         yat_k = fitted(n, "yatay", "koyu", 640, 64)
@@ -625,7 +851,8 @@ def options_sheet(P, path, recommended=None):
     .grid{{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px}}
     .card{{padding:22px;border-radius:26px;background:#EFEBE3;display:flex;flex-direction:column;gap:16px}}
     .lab{{display:flex;gap:14px;align-items:flex-start;min-height:74px}}
-    .lab b{{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:{INK};
+    .lab b{{flex:none;display:grid;place-items:center;min-width:40px;height:40px;padding:0 9px;border-radius:20px;
+      background:{INK};
       color:{PAPER};font-size:18px}} .lab h2{{font-size:24px;display:flex;align-items:center;gap:10px}}
     .lab p{{margin-top:6px;font-size:16px;line-height:1.4;color:#55575c}}
     .lab em{{padding:3px 11px;border-radius:99px;background:{ORANGE};color:#fff;font:700 13px "Space Grotesk";
@@ -638,8 +865,7 @@ def options_sheet(P, path, recommended=None):
     .ring{{padding:4px;border-radius:50%;background:linear-gradient(45deg,#f9a53b,#e1306c,#833ab4)}}
     .pp{{display:grid;place-items:center;width:112px;height:112px;border-radius:50%;background:{INK};border:4px solid #EFEBE3}}
     """
-    body = (f'<div class="top"><h1>BOYDE LABS · logo yönleri</h1><p>Birbirinden farklı {len(YONLER)} yön, renkler '
-            f'aynı. Birini seçin; bütün kit (logo dosyaları, Shopier, Instagram, kılavuz) ona göre üretilir.</p></div>'
+    body = (f'<div class="top"><h1>BOYDE LABS · {title}</h1><p>{sub}</p></div>'
             f'<div class="grid">{"".join(cards)}</div>')
     return P.png(body, 1880, None, path, css=css)
 
@@ -836,7 +1062,7 @@ def kit(P, n):
 # ---------------------------------------------------------------- kılavuz
 
 def guide(P, n):
-    name, desc, _, _, story, *_ = YONLER[n]
+    name, desc, _, _, story, *_ = DIRS[n]
     W, H = 1600, 900
     css = f"""
     .pg{{background:{PAPER};color:{INK};padding:80px 96px}}
@@ -956,18 +1182,22 @@ def guide(P, n):
 
 
 def main():
-    n = int(sys.argv[sys.argv.index("--yon") + 1]) if "--yon" in sys.argv else 0
+    n = sys.argv[sys.argv.index("--yon") + 1] if "--yon" in sys.argv else 0
+    n = int(n) if str(n).isdigit() else n
     os.makedirs(OUT, exist_ok=True)
     with painter() as P:
         options_sheet(P, os.path.join(OUT, "secenekler.png"), n or None)
-        print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT))
+        options_sheet(P, os.path.join(OUT, "secenekler_nozul.png"), n or None, NOZUL, "nozul alternatifleri",
+                      "3 · Nozul fikri, daha oturmuş biçimlerle. Renkler aynı. Birini seçin; bütün kit ona göre "
+                      "üretilir.")
+        print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT), "ve secenekler_nozul.png")
         if not n:
             return
         for d in ("logo", "shopier", "instagram"):
             shutil.rmtree(os.path.join(OUT, d), ignore_errors=True)
         kit(P, n)
         guide(P, n)
-    print(f"kit ({n} · {YONLER[n][0]}):", os.path.relpath(OUT, A.ROOT))
+    print(f"kit ({n} · {DIRS[n][0]}):", os.path.relpath(OUT, A.ROOT))
 
 
 if __name__ == "__main__":
