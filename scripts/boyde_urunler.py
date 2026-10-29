@@ -8,9 +8,10 @@ Kategoriler (kullanıcı isteği: "9 × 12 ve 10 × 20 olarak 2 ürün kategoris
 
 Ürünler (URUNLER, tur):
   musteri  müşterilerin seçip bastırdığı isimlikler (Uzar, İnce, Çalık, Soylu, Auto Tufan, Paloma Grida)
-  oneri    o müşterilere çizilen önerilerden beğenilenler (en çok 10)
+  oneri    o müşterilere çizilen önerilerden beğenilen (Paloma'nın kabartmalı sürümü)
   ornek    başka sektörlere örnek isimlikler, uydurma işletmeler (scripts/boyde_sektor.py): "sadece lastikçi
            olmasın; sanayici, galerici, restoran hariç; telefoncu ve başka ne geliyorsa", "kuaförlere de"
+Her kategoride 10 model ("10 adet küçük, 10 adet büyük boy").
 
 Örnek modu (bu modül ürün betiklerinden ÖNCE yüklenir):
   * QR'lar çalışmaz: segno'nun ürettiği her QR'da bulucu kareler, zamanlama ve hizalama desenleri kalır, geri kalan
@@ -127,19 +128,9 @@ URUNLER = [
     Urun("tufan", "9x12", "Klasik logo", "Auto Tufan", "musteri",
          "Altın fırça T logosu, Auto Tufan ve HASAR ONARIM; altta telefon ve QR.", "siyah · beyaz · altın",
          "Kaporta ve boya"),
-    Urun("ince_plaka", "9x12", "Plaka", "İnce Oto Lastik", "oneri",
-         "Araç plakası gibi: siyah çerçeve, kırmızı şerit; beyaz gövde.", "beyaz · siyah · kırmızı", "Lastikçi"),
-    Urun("calik_ikaz", "9x12", "İkaz şeridi", "Çalık Oto Lastik", "oneri",
-         "Üstte ve altta sarı-siyah ikaz şeridi; geniş, sağlam yazılar.", "siyah · beyaz · sarı", "Lastikçi"),
-    Urun("tufan_cerceve", "9x12", "Altın çerçeve", "Auto Tufan", "oneri",
-         "İnce altın çerçeve, üst kenarında fırça T; ortalı yazılar, sağda QR.", "siyah · beyaz · altın",
-         "Kaporta ve boya"),
     Urun("telefon", "9x12", "Akıllı telefon", "Çağrı İletişim", "ornek",
          "Turkuaz telefon simgesi ve ÇAĞRI; hizmetler, HEMEN ARA ve telefon; sağda QR.",
          "siyah · beyaz · turkuaz", "Telefoncu"),
-    Urun("berber", "9x12", "Berber direği", "Makas Berber", "ornek",
-         "Solda kırmızı-mavi berber direği; iri MAKAS, BERBER, randevu telefonu ve QR.",
-         "siyah · beyaz · kırmızı · mavi", "Berber"),
     Urun("kuafor", "9x12", "Makas", "Mira Kuaför", "ornek",
          "Mor makas ve Mira; KUAFÖR, hizmetler, randevu telefonu; mor çerçeveli QR.", "beyaz · siyah · mor",
          "Kuaför"),
@@ -152,20 +143,9 @@ URUNLER = [
     Urun("kuyumcu", "9x12", "Pırlanta", "Sera Kuyumculuk", "ornek",
          "Altın pırlanta, klasik harfli SERA, iki yanı çizgili KUYUMCULUK; altta telefon ve QR.",
          "siyah · beyaz · altın", "Kuyumcu"),
-    Urun("optik", "9x12", "Gözlük", "Net Optik", "ornek",
-         "Turkuaz gözlük ve iri NET; OPTİK, hizmetler, telefon; turkuaz çerçeveli QR.",
-         "beyaz · siyah · turkuaz", "Optik"),
-    Urun("veteriner", "9x12", "Yeşil blok", "Pati Veteriner", "ornek",
-         "Solda yeşil blok, içinde oyma pati ve PATİ VETERİNER KLİNİĞİ; sağda randevu QR'ı ve telefon.",
-         "beyaz · siyah · yeşil", "Veteriner"),
-    Urun("spor", "9x12", "Dambıl", "Forma Spor", "ornek",
-         "Turuncu dambıl, eğik iri FORMA; SPOR SALONU, branşlar, telefon ve QR.", "siyah · beyaz · turuncu",
-         "Spor salonu"),
     Urun("paloma", "10x20", "Mavi kart", "Paloma Grida", "musteri",
          "Solda ad soyad ve görev; sağda kurum renginde kart: logo, QR ve KARTVİZİT.", "beyaz · siyah · mavi",
          "Otel"),
-    Urun("paloma_siyah", "10x20", "Mavi kart, siyah", "Paloma Grida", "oneri",
-         "Aynı düzen siyah gövdede: beyaz yazı, mavi kart.", "siyah · beyaz · mavi", "Otel"),
     Urun("paloma_kabartma", "10x20", "Mavi kart, kabartmalı", "Paloma Grida", "oneri",
          "Ad soyad, görev ve logo 2 mm kabartma; elle dokununca hissedilir.", "beyaz · siyah · mavi", "Otel"),
     Urun("avukat", "10x20", "Terazi", "Kaya Hukuk Bürosu", "ornek",
@@ -180,6 +160,18 @@ URUNLER = [
     Urun("mimar", "10x20", "Basamak", "Aydın Mimarlık", "ornek",
          "Turuncu basamak işareti ve çizgi; geniş harfli ad soyad, unvan, büro; portfolyo QR'ı.",
          "beyaz · siyah · turuncu", "Mimar"),
+    Urun("mudur", "10x20", "Alt bant", "Nova Yazılım", "ornek",
+         "İri ad soyad ve turuncu unvan; altta siyah bantta oyma şirket adı ve telefon; kartvizit QR'ı.",
+         "beyaz · siyah · turuncu", "Şirket yöneticisi"),
+    Urun("psikolog", "10x20", "Konuşma balonu", "Koç Danışmanlık", "ornek",
+         "Mor konuşma balonu, klasik harfli ad soyad; unvan, büro, telefon; mor çerçeveli randevu QR'ı.",
+         "beyaz · siyah · mor", "Psikolog"),
+    Urun("diyetisyen", "10x20", "Yaprak", "Ece Şahin Beslenme", "ornek",
+         "Solda ince yeşil çizgi ve yaprak; ad soyad, unvan, telefon; yeşil kareli randevu QR'ı.",
+         "beyaz · siyah · yeşil", "Diyetisyen"),
+    Urun("danisman", "10x20", "Üst bant", "Anka Emlak", "ornek",
+         "Üstte mavi bantta oyma ev ve ANKA EMLAK; ad soyad, unvan, telefon; mavi kareli ilan QR'ı.",
+         "beyaz · mavi · turuncu", "Emlak danışmanı"),
 ]
 BY_KEY = {u.key: u for u in URUNLER}
 
@@ -202,26 +194,13 @@ def _plate(mod_name):
     return Parcalar(pl.panel, pl.stand, A.BLACK, pl.mount)
 
 
-def _design(mod_name, fn):
-    import importlib
-    import uzar_isimlik_baski as B
-    mod = importlib.import_module(mod_name)
-    d = getattr(mod, fn)()
-    stand, mount = B.stand()
-    return Parcalar(mod.solids(d), stand, A.BLACK, mount)
-
-
-def _paloma(sc_key, relief):
+def _paloma(relief):
+    """Paloma'nın basılan isimliği (200 × 100, beyaz), kişi adı örnek."""
     import paloma_isimlik as P
     P.FIRST, P.LAST, P.NAME, P.TITLE = ORNEK_AD, ORNEK_SOYAD, f"{ORNEK_AD} {ORNEK_SOYAD}", ORNEK_GOREV
     import paloma_isimlik_baski as PB                   # panel 200 × 100 × 5 (modül ölçüleri değişir)
-    import uzar_isimlik_baski as B
-    if sc_key == "beyaz":
-        pl = PB.Plate(relief)
-        return Parcalar(pl.panel, pl.stand, pl.body, pl.mount)
-    d = P.secilen_20(P.BLACK_SC)
-    stand, mount = B.stand(length=PB.STAND_LEN)
-    return Parcalar(P.solids(d), stand, A.BLACK, mount)
+    pl = PB.Plate(relief)
+    return Parcalar(pl.panel, pl.stand, pl.body, pl.mount)
 
 
 def _sektor(key):
@@ -235,12 +214,8 @@ BUILDERS = {
     "calik": lambda: _plate("calik_isimlik_baski"),
     "soylu": lambda: _plate("soylu_isimlik_baski"),
     "tufan": lambda: _plate("autotufan_isimlik_baski"),
-    "ince_plaka": lambda: _design("ince_isimlik", "d1_plaka"),
-    "calik_ikaz": lambda: _design("calik_isimlik", "c4_ikaz"),
-    "tufan_cerceve": lambda: _design("autotufan_isimlik", "d6_cerceve"),
-    "paloma": lambda: _paloma("beyaz", False),
-    "paloma_siyah": lambda: _paloma("siyah", False),
-    "paloma_kabartma": lambda: _paloma("beyaz", True),
+    "paloma": lambda: _paloma(False),
+    "paloma_kabartma": lambda: _paloma(True),
 }
 BUILDERS.update({u.key: (lambda k=u.key: _sektor(k)) for u in URUNLER if u.tur == "ornek"})
 

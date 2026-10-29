@@ -4,8 +4,8 @@ Girdi : scripts/boyde_urunler.py (ürünler, kategoriler), boyde_labs/urunler/fo
         boyde_labs/urunler/kaynak/<ürün>_duz.png (düz görünüş). Marka: scripts/boyde_marka.py (logo 3a, renkler,
         yazı tipleri).
 Çıktı : boyde_labs/urunler/katalog.pdf (A4), katalog.png (sayfaların önizlemesi)
-        boyde_labs/urunler/shopier/<kategori>/ (1200 × 1200 JPG, yükleme sırasıyla numaralı):
-          01_kapak, 02_modeller_1 (ve _2), sonra olcu_ozellik, nasil_calisir, sonra her model (M01_…)
+        boyde_labs/urunler/shopier/<kategori>/ (1200 × 1200 JPG): 10 model, yükleme sırasıyla 01_M01_… 10_M10_…
+          ("10 adet küçük, 10 adet büyük boy"); ek/: kapak, modeller (hepsi bir arada), olcu_ozellik, nasil_calisir
 
 Model kodları kategoride sırayla: önce müşterilerin bastırdıkları, sonra farklı sektörlere örnekler, en son
 önerilerden beğenilenler. Örneklerdeki işletme ve kişi adları, telefon ve QR'lar örnektir (QR'lar okunmaz).
@@ -93,15 +93,12 @@ def shopier(P, cat):
     K = U.KATEGORI[cat]
     ms = models(cat)
     out = os.path.join(OUT, "shopier", cat)
+    ek = os.path.join(out, "ek")
     shutil.rmtree(out, ignore_errors=True)
-    os.makedirs(out)
-    n = 1
+    os.makedirs(ek)
 
     def name(s):
-        nonlocal n
-        p = os.path.join(out, f"{n:02d}_{s}.jpg")
-        n += 1
-        return p
+        return os.path.join(ek, f"{s}.jpg")
 
     # kapak
     sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:#000">
@@ -115,24 +112,27 @@ def shopier(P, cat):
         <p style="margin-top:18px;font-size:30px;line-height:1.35;color:rgba(244,241,234,.86)">{K['kisa']}
           Tasarım size özel; QR'ı okutan müşteriniz sizin sayfanızı açar.</p></div></div>""", name("kapak"))
 
-    # modeller (3 × 3)
-    pages = [ms[i:i + 9] for i in range(0, len(ms), 9)]
-    for pi, chunk in enumerate(pages, 1):
-        cells = "".join(f"""<div style="position:relative;border-radius:18px;overflow:hidden;background:#eae5dc">
-          <img src="{foto(u.key, maxw=420)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
-          <span class="chip code" style="position:absolute;left:12px;top:12px;background:{INK};color:{PAPER};
-            font-size:17px;padding:6px 11px">{c}</span>
-          <span style="position:absolute;left:12px;right:12px;bottom:10px;font-size:17px;font-weight:700;
-            color:{INK};text-shadow:0 0 6px #fff">{u.sektor}</span></div>""" for c, u in chunk)
-        sq(P, f"""<div style="width:1200px;height:1200px;background:{PAPER};padding:56px 60px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-end">
-            <div><p class="k">{K['olcu'].upper()} · MODELLER{f' {pi}/{len(pages)}' if len(pages) > 1 else ''}</p>
-            <h2 class="u" style="margin-top:10px;font-size:42px">{chunk[0][0]}–{chunk[-1][0]}</h2></div>
-            {logo("acik", 250, 50)}</div>
-          <div style="margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px">{cells}</div>
-          <p style="position:absolute;left:60px;right:60px;bottom:40px;font-size:18px;line-height:1.4;color:#55575c">
-            Model kodunu sipariş notuna yazın. {NOT_ORNEK}</p></div>""", name("modeller" + (f"_{pi}" if len(pages) > 1
-                                                                                      else "")))
+    # modeller: 4 × 3 ızgara, 10 model ve iki kutu
+    cells = "".join(f"""<div style="position:relative;border-radius:16px;overflow:hidden;background:#eae5dc">
+      <img src="{foto(u.key, maxw=420)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+      <span class="chip code" style="position:absolute;left:10px;top:10px;background:{INK};color:{PAPER};
+        font-size:15px;padding:5px 10px">{c}</span>
+      <span style="position:absolute;left:10px;right:10px;bottom:8px;font-size:15px;font-weight:700;
+        color:{INK};text-shadow:0 0 6px #fff">{u.sektor}</span></div>""" for c, u in ms)
+    cells += f"""<div style="border-radius:16px;background:{ORANGE};color:#fff;padding:18px;display:flex;
+      flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:20px;line-height:1.15">Size
+      özel</p><p style="margin-top:6px;font-size:15px;line-height:1.35">Adınız, logonuz, renkleriniz. Yeni düzen de
+      çizeriz.</p></div>
+      <div style="border-radius:16px;background:{INK};color:{PAPER};padding:18px;display:flex;flex-direction:column;
+      justify-content:space-between">{logo("koyu", 200, 40)}<p style="font-size:19px;font-weight:700">{TEL}</p></div>"""
+    sq(P, f"""<div style="width:1200px;height:1200px;background:{PAPER};padding:56px 60px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div><p class="k">{K['olcu'].upper()} · {K['ad'].upper()}</p>
+        <h2 class="u" style="margin-top:10px;font-size:42px">{len(ms)} model</h2></div>
+        {logo("acik", 250, 50)}</div>
+      <div style="margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">{cells}</div>
+      <p style="position:absolute;left:60px;right:60px;bottom:48px;font-size:19px;line-height:1.45;color:#55575c">
+        Model kodunu sipariş notuna yazın. {NOT_ORNEK}</p></div>""", name("modeller"))
 
     # ölçü ve özellikler
     ex = ms[0][1].key if cat == "10x20" else "telefon"
@@ -189,8 +189,7 @@ def shopier(P, cat):
             <span class="chip" style="background:rgba(244,241,234,.92);color:{INK};font-size:22px;padding:10px 16px">
               {t1}</span></div>
           <div style="position:absolute;right:40px;top:36px;opacity:.9">{logo("acik", 200, 40)}</div></div>""",
-           os.path.join(out, f"{n:02d}_{c}_{u.key}.jpg"))
-        n += 1
+           os.path.join(out, f"{int(c[1:]):02d}_{c}_{u.key}.jpg"))
     return out
 
 
@@ -212,12 +211,13 @@ def card(c, u):
     badge = TUR[u.tur]
     col = ORANGE if u.tur == "musteri" else GRAY
     return f"""<div style="background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
-      <img src="{foto(u.key, maxw=560)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+      <img src="{foto(u.key, maxw=560)}" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block">
       <div style="padding:10px 12px 12px"><div style="display:flex;justify-content:space-between;align-items:center">
         <b class="code" style="font-size:13px">{c}</b><span style="font-size:9.5px;font-weight:700;color:{col};
         letter-spacing:.06em">{badge.upper()}</span></div>
         <p style="margin-top:5px;font-size:13px;font-weight:700">{t1}</p>
-        <p style="margin-top:2px;font-size:11px;color:#55575c">{t2} · {u.renk}</p></div></div>"""
+        <p style="margin-top:2px;font-size:11px;color:#55575c;white-space:nowrap;overflow:hidden;
+          text-overflow:ellipsis">{t2} · {u.renk}</p></div></div>"""
 
 
 def catalog(P):
@@ -275,13 +275,21 @@ def catalog(P):
           <ul style="margin-top:20px;list-style:none;font-size:13.5px;line-height:1.4">{feats}</ul>""",
                           dark=True, no=no))
         no += 1
-        for i in range(0, len(ms), 9):
-            chunk = ms[i:i + 9]
+        for i in range(0, len(ms), 10):
+            chunk = ms[i:i + 10]
             grid = "".join(card(c, u) for c, u in chunk)
+            if len(chunk) == 10:                                 # 3 × 4 ızgaranın son iki yeri
+                grid += f"""<div style="border-radius:14px;background:{ORANGE};color:#fff;padding:14px;display:flex;
+                  flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:15px">Size özel</p>
+                  <p style="margin-top:5px;font-size:11.5px;line-height:1.4">Adınız, logonuz, renkleriniz.
+                  Beğendiğiniz düzen yoksa sıfırdan çizeriz.</p></div>
+                  <div style="border-radius:14px;background:{INK};color:{PAPER};padding:14px;display:flex;
+                  flex-direction:column;justify-content:space-between">{logo("koyu", 150, 30)}<p style="font-size:14px;
+                  font-weight:700">{TEL}</p></div>"""
             pages.append(page(f"""<div style="display:flex;justify-content:space-between;align-items:flex-end">
               <div><p class="k">{K['olcu'].upper()} · {K['ad'].upper()}</p><h2 class="u" style="margin-top:8px;
               font-size:22px">{chunk[0][0]}–{chunk[-1][0]}</h2></div>{logo("acik", 150, 30)}</div>
-              <div style="margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">{grid}</div>""",
+              <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">{grid}</div>""",
                               no=no))
             no += 1
 
@@ -320,7 +328,8 @@ def main():
     with BM.painter() as P:
         for cat in U.KATEGORI:
             out = shopier(P, cat)
-            print(f"shopier/{cat}: {len(os.listdir(out))} görsel", flush=True)
+            n = len([f for f in os.listdir(out) if f.endswith(".jpg")])
+            print(f"shopier/{cat}: {n} model görseli, ek/ {len(os.listdir(os.path.join(out, 'ek')))}", flush=True)
         path, n = catalog(P)
         print(f"{os.path.relpath(path, U.A.ROOT)}: {n} sayfa", flush=True)
 

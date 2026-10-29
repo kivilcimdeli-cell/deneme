@@ -18,6 +18,11 @@ hariç tut (onlara ayrı işlerimiz var); telefoncu ve başka aklına ne geliyor
   dis        Zeynep Arslan      beyaz · siyah · turkuaz   sol blok, içinde diş
   musavir    Elif Demir         siyah · beyaz · yeşil     monogram
   mimar      Deniz Aydın        beyaz · siyah · turuncu   basamak işareti
+  mudur      Kerem Aksoy        beyaz · siyah · turuncu   altta siyah bant: NOVA YAZILIM ve telefon oyuk
+  psikolog   Selin Koç          beyaz · siyah · mor       konuşma balonu, QR çerçeveli
+  diyetisyen Ece Şahin          beyaz · siyah · yeşil     yaprak, solda ince yeşil çizgi
+  danisman   Can Öztürk         beyaz · mavi · turuncu    üstte Anka Emlak bandı (9 × 12'deki emlakla aynı marka)
+Katalogda her ölçüden 10 model (kullanıcı: "10 küçük, 10 büyük"); berber, optik, veteriner ve spor 9 × 12'de yedek.
 
 Basılabilirlik (0,4 nozul): kabartmada çizgi ≥ 1,2 mm, harf içi ≥ 0,6 mm; dolguda çizgi ≥ 0,5 mm; öğeler arası
 ≥ 2 mm. QR'lar boyde_urunler'in örnek modunda (okunmaz) ve 34 mm'den küçük değil (kare ≥ 0,9 mm).
@@ -89,8 +94,9 @@ class Design:
             self.lines[name] = cs
         return cs
 
-    def qr(self, entry, cx, cy, s, sq=None, frame=None):
-        """QR yüzeyle aynı hizada: açık gövdede koyu kareler (sq rengi), koyu gövdede beyaz karo. frame: çerçeve rengi."""
+    def qr(self, entry, cx, cy, s, sq=None, frame=None, flat=False):
+        """QR yüzeyle aynı hizada: açık gövdede koyu kareler (sq rengi), koyu gövdede beyaz karo. frame: çerçeve rengi
+        (flat: çerçeve de dolgu; 10 × 20)."""
         _, dark, _ = Q.shapes(entry, Q.module_for(entry, s), cx, cy)
         tile = A.rrect(s, s, 1.6, cx, cy)
         if self.sc["dark"]:
@@ -100,7 +106,7 @@ class Design:
         if frame:
             g, w = 1.8, 1.2
             ring = A.rrect(s + 2 * (g + w), s + 2 * (g + w), 2.8, cx, cy) - A.rrect(s + 2 * g, s + 2 * g, 2.0, cx, cy)
-            self.add(None, ring, frame)
+            (self.flat if flat else self.add)(None, ring, frame)
         self.lines["QR"] = tile
         return tile
 
@@ -226,6 +232,31 @@ def ic_tooth(cx, cy, s):
            (-3.0, -8.4), (-4.3, -7.6), (-5.3, -4.2), (-6.2, 0)]
     k = s / 17.0
     return A.polygon(A.smooth([(x * k + cx, y * k + cy) for x, y in pts], closed=True))
+
+
+def ic_star(cx, cy, r):
+    """Dört kollu parıltı (NOVA)."""
+    k = 0.22
+    return A.polygon([(0, r), (r * k, r * k), (r, 0), (r * k, -r * k), (0, -r), (-r * k, -r * k), (-r, 0),
+                      (-r * k, r * k)]).translate((cx, cy))
+
+
+def ic_bubble(cx, cy, w):
+    """Konuşma balonu: içinde üç nokta (oyuk)."""
+    h = w * 0.7
+    body = A.rrect(w, h, h * 0.42, cx, cy) + A.polygon([(cx - w * 0.28, cy - h * 0.3), (cx - w * 0.34, cy - h * 0.86),
+                                                       (cx - w * 0.04, cy - h * 0.4)])
+    dots = A.union(*[A.circle(w * 0.07, cx + k * w * 0.22, cy) for k in (-1, 0, 1)])
+    return body - dots
+
+
+def ic_leaf(cx, cy, s, angle=-35.0):
+    """Yaprak: iki yaydan mercek, ortasında damar (oyuk), sapı."""
+    r = s * 0.62
+    lens = A.circle(r, -s * 0.36, 0, 128) ^ A.circle(r, s * 0.36, 0, 128)
+    vein = A.stroke([(0, -s * 0.42), (0, s * 0.36)], 0.9)
+    stem = A.stroke([(0, -s * 0.4), (0, -s * 0.62)], 1.6)
+    return (lens - vein + stem).rotate(angle).translate((cx, cy))
 
 
 def ic_steps(cx, cy, s):
@@ -472,6 +503,65 @@ def p_mimar():
     return d
 
 
+def p_mudur():
+    d = Design("mudur", LIGHT)
+    q = qr_entry("novayazilim")
+    band = A.rrect(184.0, 21.0, 4.0, 0.0, 23.5)
+    brand = A.union(ic_star(-80.0, 23.5, 6.4), t("mont", "NOVA YAZILIM", 5.0, -70.0, 23.5, "l", 2.4, 90.0))
+    tel = t("mont6", PHONE, 5.0, 84.0, 23.5, "r", 0.5, 70.0)
+    d.lines.update({"marka": brand, "telefon": tel})
+    d.flat(None, band - brand.offset(0.0, J) - tel.offset(0.0, J), BLACK)
+    d.flat("ad", t("mont6", "Kerem Aksoy", 14.0, -86.0, 80.0, "l", 0.0, 110.0), BLACK)
+    d.flat("unvan", t("mont6", "Genel Müdür", 7.0, -86.0, 61.0, "l", 0.3, 110.0), ORANGE)
+    d.flat(None, bar(-86.0, -56.0, 49.0, 1.6), ORANGE)
+    tile = d.qr(q, 68.0, 65.0, 34.0)
+    d.flat("KARTVİZİT", t("mont6", "KARTVİZİT", 3.6, 68.0, tile.bounds()[1] - 5.2, "c", 1.6), ORANGE)
+    return d
+
+
+def p_psikolog():
+    d = Design("psikolog", LIGHT)
+    q = qr_entry("kocdanismanlik")
+    d.flat("simge", ic_bubble(-78.0, 81.0, 16.0), PURPLE)
+    d.flat("ad", t("lora", "Selin Koç", 15.0, -86.0, 60.0, "l", 0.1, 110.0), BLACK)
+    d.flat("unvan", t("mont6", "Uzman Klinik Psikolog", 6.0, -86.0, 43.0, "l", 0.2, 110.0), PURPLE)
+    d.flat("büro", t("mont6", "KOÇ PSİKOLOJİK DANIŞMANLIK", 4.2, -86.0, 32.0, "l", 1.2, 116.0), BLACK)
+    d.flat("telefon", t("mont6", PHONE, 5.2, -86.0, 20.5, "l", 0.4, 110.0), BLACK)
+    tile = d.qr(q, 66.0, 58.0, 36.0, frame=PURPLE, flat=True)
+    d.flat("RANDEVU", t("mont6", "RANDEVU", 4.2, 66.0, tile.bounds()[1] - 9.0, "c", 1.8), PURPLE)
+    return d
+
+
+def p_diyetisyen():
+    d = Design("diyetisyen", LIGHT)
+    q = qr_entry("ecesahin")
+    d.flat(None, A.rrect(3.0, 70.0, 1.5, -88.0, 54.0), GREEN)
+    d.flat("simge", ic_leaf(-72.0, 79.0, 15.0), GREEN)
+    d.flat("ad", t("mont6", "Dyt. Ece Şahin", 13.0, -80.0, 59.0, "l", 0.0, 108.0), BLACK)
+    d.flat("unvan", t("mont6", "Diyetisyen", 6.6, -80.0, 43.5, "l", 0.3, 108.0), GREEN)
+    d.flat("büro", t("mont6", "BESLENME VE DİYET DANIŞMANLIĞI", 4.0, -80.0, 32.5, "l", 0.8, 100.0), BLACK)
+    d.flat("telefon", t("mont6", PHONE, 5.2, -80.0, 21.5, "l", 0.4, 108.0), BLACK)
+    tile = d.qr(q, 66.0, 57.0, 38.0, sq=GREEN)
+    d.flat("RANDEVU", t("mont6", "RANDEVU", 4.2, 66.0, tile.bounds()[1] - 6.4, "c", 1.8), GREEN)
+    return d
+
+
+def p_danisman():
+    d = Design("danisman", LIGHT)
+    q = qr_entry("ankaemlak-can")
+    band = A.rrect(184.0, 22.0, 4.0, 0.0, 82.0)
+    cut = A.union(ic_house(-79.0, 81.4, 14.0), t("mont", "ANKA EMLAK", 7.4, -66.0, 82.0, "l", 0.8, 80.0),
+                  t("mont6", "SATILIK · KİRALIK", 4.0, 84.0, 82.0, "r", 1.4, 64.0))
+    d.lines["bant"] = cut
+    d.flat(None, band - cut.offset(0.0, J), BLUE)
+    d.flat("ad", t("mont", "Can Öztürk", 12.5, -86.0, 56.0, "l", 0.2, 110.0), BLACK)
+    d.flat("unvan", t("mont6", "Gayrimenkul Danışmanı", 6.0, -86.0, 41.0, "l", 0.3, 110.0), ORANGE)
+    d.flat("telefon", t("mont6", PHONE, 6.0, -86.0, 25.0, "l", 0.4, 110.0), BLACK)
+    tile = d.qr(q, 68.0, 45.0, 34.0, sq=BLUE)
+    d.flat("İLANLAR", t("mont6", "İLANLAR", 3.8, 68.0, tile.bounds()[1] - 5.0, "c", 1.8), ORANGE)
+    return d
+
+
 def solids_20(d):
     """Paloma'nın isimliğiyle aynı (paloma_isimlik.solids): gövde ve yüzeyle aynı hizada dolgular."""
     import uzar_isimlik as I
@@ -494,7 +584,8 @@ def solids_20(d):
 
 S9X12 = {"telefon": s_telefon, "berber": s_berber, "kuafor": s_kuafor, "guzellik": s_guzellik, "emlak": s_emlak, "kuyumcu": s_kuyumcu,
          "optik": s_optik, "veteriner": s_veteriner, "spor": s_spor}
-S10X20 = {"avukat": p_avukat, "dis": p_dis, "musavir": p_musavir, "mimar": p_mimar}
+S10X20 = {"avukat": p_avukat, "dis": p_dis, "musavir": p_musavir, "mimar": p_mimar, "mudur": p_mudur,
+          "psikolog": p_psikolog, "diyetisyen": p_diyetisyen, "danisman": p_danisman}
 
 
 def build(key):

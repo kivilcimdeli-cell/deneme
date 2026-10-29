@@ -2,42 +2,35 @@
 
 ![Katalog](katalog.png)
 
-İki ürün kategorisi:
+İki ürün kategorisi, her birinde 10 model ("10 adet küçük, 10 adet büyük boy"):
 
-| Kategori | Ölçü | Kimin için | Model |
+| Kategori | Ölçü | Kimin için | Modeller |
 | --- | --- | --- | --- |
-| QR'lı masa isimliği | 9 × 12 cm (120 × 90 mm) | işletmeler: masa, tezgâh, kasa | M01–M17 |
-| Kurumsal isimlik | 10 × 20 cm (200 × 100 mm) | yönetici ve personel: ad soyad, görev, logo | M01–M07 |
+| QR'lı masa isimliği | 9 × 12 cm (120 × 90 mm) | işletmeler: masa, tezgâh, kasa | M01–M10 |
+| Kurumsal isimlik | 10 × 20 cm (200 × 100 mm) | yönetici ve personel: ad soyad, görev, logo | M01–M10 |
 
 ## Modeller
 
-- **Müşterilerin bastırdıkları:**
-  - Uzar, İnce, Çalık, Soylu Oto Lastik;
-  - Auto Tufan;
-  - Paloma Grida.
-- **Önerilerden beğenilenler** (5):
-  - İnce · Plaka;
-  - Çalık · İkaz şeridi;
-  - Auto Tufan · Altın çerçeve;
-  - Paloma · siyah;
-  - Paloma · kabartmalı.
-- **Farklı sektörlere örnekler** (uydurma işletmeler, `scripts/boyde_sektor.py`):
-  - 9 × 12:
-    - telefoncu;
-    - berber;
-    - kuaför;
-    - güzellik salonu;
-    - emlak;
-    - kuyumcu;
-    - optik;
-    - veteriner;
-    - spor salonu.
-  - 10 × 20:
-    - avukat;
-    - diş hekimi;
-    - mali müşavir;
-    - mimar.
+**9 × 12 cm**
+
+- **Müşterilerin bastırdıkları:** Uzar, İnce, Çalık, Soylu Oto Lastik ve Auto Tufan.
+- **Farklı sektörlere örnekler:** telefoncu, kuaför, güzellik salonu, emlak, kuyumcu.
+  - İşletmeler uydurma (`scripts/boyde_sektor.py`).
   - Sanayi, galeri ve restoran bu katalogda yok; onların ayrı işleri var.
+  - Berber, optik, veteriner ve spor salonu tasarımları da betikte duruyor (yedek).
+
+**10 × 20 cm**
+
+- **Müşterinin bastırdığı:** Paloma Grida; ayrıca aynı isimliğin kabartmalı sürümü.
+- **Örnekler:**
+  - avukat;
+  - diş hekimi;
+  - mali müşavir;
+  - mimar;
+  - şirket yöneticisi;
+  - psikolog;
+  - diyetisyen;
+  - emlak danışmanı.
 
 **Örnek modu** (`scripts/boyde_urunler.py`):
 
@@ -50,22 +43,20 @@
 | Dosya | Ne |
 | --- | --- |
 | `katalog.pdf` | A4 katalog: kapak, nasıl çalışır, iki kategori (giriş ve modeller), referanslar ve sipariş |
-| `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG, yükleme sırasıyla numaralı |
+| `shopier/9x12/`, `shopier/10x20/` | Shopier ürün görselleri, 1200 × 1200 JPG: 10 model (01_M01 … 10_M10) |
+| `shopier/<kategori>/ek/` | isteğe bağlı: kapak, 10 model bir arada, ölçü ve özellikler, nasıl çalışır |
 | `fotograf/<ürün>_studyo.jpg` | stüdyo fonunda, 3/4 |
 | `fotograf/<ürün>_on.jpg` | stüdyo fonunda, karşıdan |
 | `fotograf/<ürün>_masa.jpg` | ahşap masada |
 | `fotograf/kapak_<kategori>.jpg` | kategori kapakları |
 | `kaynak/<ürün>_duz.png` | düz görünüş (saydam) |
 
-**Shopier'e yükleme:** her kategori bir ürün. Görseller şu sırayla:
+**Shopier'e yükleme:**
 
-1. Kapak.
-2. Model tabloları (kodlarıyla).
-3. Ölçü ve özellikler.
-4. Nasıl çalışır.
-5. Her model tek tek.
-
-Shopier'in ürün başına görsel sınırı yetmezse ilk dördü ve en sevilen modeller yüklenir; model tabloları hepsini gösterir. Müşteri model kodunu sipariş notuna yazar.
+- Her kategori bir ürün; 10 model görseli sırasıyla yüklenir.
+- Görsel sınırı izin verirse `ek/kapak.jpg` ilk görsel olur.
+- `ek/modeller.jpg` 10 modeli bir arada gösterir.
+- Müşteri model kodunu (M01 …) sipariş notuna yazar.
 
 ## Yeniden üretmek
 

@@ -39,7 +39,7 @@ atölyede. Marka bir 3D baskı atölyesi ("Labs").
 
 ## Ürün kataloğu ve Shopier ürün görselleri
 
-İki kategori: 9 × 12 cm QR'lı masa isimliği (17 model), 10 × 20 cm kurumsal isimlik (7 model).
+İki kategori, her birinde 10 model: 9 × 12 cm QR'lı masa isimliği ve 10 × 20 cm kurumsal isimlik.
 - Katalog: `urunler/katalog.pdf`.
 - Shopier ürün görselleri: `urunler/shopier/`.
 - Fotoğraflar: `urunler/fotograf/`.

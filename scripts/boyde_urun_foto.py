@@ -15,7 +15,7 @@ Kapak (--kapak): her kategoriden birkaç isimlik yan yana, ahşap masada (katego
 Kullanım:
   pip install bpy==4.2.0
   python3 scripts/boyde_urunler.py                       # önce modeller
-  python3 scripts/boyde_urun_foto.py [ürün ...] [--gorunus studyo,on,masa] [--ornek 32]
+  python3 scripts/boyde_urun_foto.py [ürün ...] [--gorunus studyo,on,masa] [--ornek 32] [--eksik]
   python3 scripts/boyde_urun_foto.py --kapak
 """
 import json
@@ -172,7 +172,12 @@ def light_body(parts):
     return sum(body) / 3 > 150
 
 
-def render(key, views, samples):
+def render(key, views, samples, missing=False):
+    """missing: yalnız henüz çizilmemiş görünüşler."""
+    if missing:
+        views = [v for v in views if not os.path.exists(os.path.join(OUT, f"{key}_{v}.jpg"))]
+        if not views:
+            return
     parts = load(key)
     os.makedirs(OUT, exist_ok=True)
     by_kind = {}
@@ -245,13 +250,15 @@ def main():
         k = args.index("--gorunus")
         views = args[k + 1].split(",")
         del args[k:k + 2]
+    missing = "--eksik" in args
+    args = [a for a in args if a != "--eksik"]
     if "--kapak" in args:
         for cat in KAPAK:
             cover(cat, samples)
         return
     keys = args or sorted(f[:-4] for f in os.listdir(SRC) if f.endswith(".npz"))
     for key in keys:
-        render(key, views, samples)
+        render(key, views, samples, missing)
 
 
 if __name__ == "__main__":
