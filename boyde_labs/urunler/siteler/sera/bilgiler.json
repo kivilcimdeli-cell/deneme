@@ -1,0 +1,18 @@
+{
+  "telefon": "0546 475 45 08",
+  "whatsapp_mesaj": "Merhaba, bilgi almak istiyorum.",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "banka": "Örnek Bankası",
+  "isletme": "Sera Kuyumculuk",
+  "marka": "SERA",
+  "hizmet": "KUYUMCULUK",
+  "etiket": "ALTIN · PIRLANTA · SAAT",
+  "aciklama": "Altın, pırlanta ve saat. Fiyat ve sipariş için tek dokunuşla yazın.",
+  "renk": "#D4A64E",
+  "instagram": "@serakuyumculuk",
+  "google": "https://www.google.com/search?q=Sera+Kuyumculuk",
+  "iban_alici": "SERA KUYUMCULUK",
+  "isaret": "logo/isaret.svg"
+}

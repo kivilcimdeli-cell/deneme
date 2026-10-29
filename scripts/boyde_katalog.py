@@ -220,6 +220,32 @@ def card(c, u):
           text-overflow:ellipsis">{t2} · {u.renk}</p></div></div>"""
 
 
+def site_pages():
+    """Örnek siteler (scripts/boyde_site_gorsel.py'nin ekran görüntüleri): üç telefon yan yana."""
+    import json
+    import boyde_site_gorsel as SG
+    import sablonlar
+    cols = []
+    for key, n, _, _, _ in SG.ORNEKLER:
+        shot = os.path.join(SG.OUT, key, "ekran_ust.png")
+        if not os.path.exists(shot):
+            return ""
+        d = json.load(open(os.path.join(SG.OUT, key, "bilgiler.json"), encoding="utf-8"))
+        cols.append(f"""<div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          {SG.phone(uri(shot, 600, "PNG"), 196, SG.bg_of(shot))}
+          <p style="font-weight:700;font-size:14px">{d['isletme']}</p>
+          <p style="margin-top:-8px;font-size:11.5px;color:rgba(244,241,234,.65)">Şablon: {sablonlar.get(n).AD}</p>
+          </div>""")
+    return f"""<p class="k">İSİMLİKLE GELEN SİTE</p>
+      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Her isimliğe<br>işletmenize özel sayfa.</h2>
+      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:rgba(244,241,234,.78);max-width:620px">QR'ı
+        okutan müşteriniz bu sayfayı açar: ara, WhatsApp, Instagram, Google yorum, konum, rehbere kaydet ve IBAN (tek
+        dokunuşla kopyalanır). Beş şablondan biri, sizin renginiz ve logonuzla; uygulama gerekmez.</p>
+      <div style="margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">{''.join(cols)}</div>
+      <p style="margin-top:22px;font-size:11px;color:{GRAY}">Örnek işletmeler; telefon BOYDE LABS'in, IBAN ve QR
+        örnektir.</p>"""
+
+
 def catalog(P):
     pages, no = [], 1
     cover9 = uri(os.path.join(FOTO, "kapak_9x12.jpg"), 1100)
@@ -261,6 +287,11 @@ def catalog(P):
         border-radius:14px;display:block">
       <p style="margin-top:12px;font-size:11px;color:{GRAY}">{NOT_ORNEK}</p>""", no=no))
     no += 1
+
+    sites = site_pages()
+    if sites:
+        pages.append(page(sites, dark=True, no=no))
+        no += 1
 
     for cat in U.KATEGORI:
         K, ms = U.KATEGORI[cat], models(cat)
