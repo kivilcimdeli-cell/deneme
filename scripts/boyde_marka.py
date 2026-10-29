@@ -889,6 +889,163 @@ NOZUL = {
                                         ("Sıcak uç", "nozulun ucu turuncu: ısınmış, basmaya hazır."),
                                         ("Yazı", "BOYDE kalın, LABS turuncu, aralıklı (Jost).")], False, False),
 }
+# 21–30 · Yeni yönler, ikinci tur ("bi 10 tane daha üret")
+
+def _extrude(g, d, n=24):
+    """Sağ alta doğru derinlik: şeklin d kadar kaydırılmış kopyalarının birleşimi (3D blok görünüşü)."""
+    return unary_union([affinity.translate(g, d * k / n, d * k / n) for k in range(1, n + 1)])
+
+
+def mark_golge():
+    """Turuncu derinlikli kare: 3D baskı."""
+    face = _soft(box(-20, -20, 16, 16), 3.0)
+    return _parts((_extrude(face, 7.5).difference(face), "accent"), (face, "main"))
+
+
+def word_golge(size):
+    fn = "ArchivoBlack-Regular.ttf"
+    g, w = text_geom("BOYDE", fn, size, 0, 0, .02)
+    d1, _ = text_path("BOYDE", fn, size, 0, 0, .02)
+    depth = _extrude(g, size * .07).difference(g)
+    s2 = size * .56
+    x2 = w + size * .07 + size * .24
+    d2, w2 = text_path("LABS", fn, s2, x2, 0, .06)
+    return [(geom_path(depth), "accent"), (d1, "main"), (d2, "main")], (0, -cap(fn, size), x2 + w2, size * .07)
+
+
+def mark_imlec():
+    """Komut satırı: koyu karede > ve turuncu imleç."""
+    sq = _soft(box(-22, -22, 22, 22), 9.0)
+    chev = LineString([(-12, -9), (-3, 0), (-12, 9)]).buffer(2.6, 16, join_style=2)
+    cur = box(1, 6, 14, 11)
+    return _parts((sq - chev.buffer(0.01) - cur.buffer(2.0), "main"), (cur, "accent"))
+
+
+def word_imlec(size):
+    fn1, fn2 = "Poppins-SemiBold.ttf", "Poppins-Regular.ttf"
+    d1, w1 = text_path("boyde", fn1, size)
+    x2 = w1 + size * .26
+    d2, w2 = text_path("labs", fn2, size, x2)
+    x3 = x2 + w2 + size * .08
+    cur = box(x3, -xh(fn1, size), x3 + size * .34, 0)
+    g, _ = text_geom("boydelabs", fn1, size)
+    return [(d1, "main"), (d2, "main"), (geom_path(cur), "accent")], (0, g.bounds[1], x3 + size * .34, g.bounds[3])
+
+
+def mark_bauhaus():
+    """Dört karede daire, çeyrek daire, üçgen, kare; daire turuncu."""
+    s, gap = 21.0, 2.4
+    tl = Point(-s / 2 - gap / 2, -s / 2 - gap / 2).buffer(s / 2, 96)
+    q0 = (gap / 2, -s - gap / 2)
+    tr = Point(q0[0], q0[1] + s).buffer(s, 128).intersection(box(q0[0], q0[1], q0[0] + s, q0[1] + s))
+    bl = Polygon([(-s - gap / 2, gap / 2 + s), (-gap / 2, gap / 2 + s), (-gap / 2, gap / 2)])
+    br = box(gap / 2, gap / 2, gap / 2 + s, gap / 2 + s)
+    return _parts((tl, "accent"), (unary_union([tr, bl, br]), "main"))
+
+
+def word_bauhaus(size):
+    return _word("BOYDE", "Lexend-ExtraBold.ttf", "LABS", "Lexend-ExtraBold.ttf", size, .3, 0, .04, "cap")
+
+
+def mark_blok():
+    """BO / YD / E ve turuncu kare: harfler ızgarada."""
+    fn, c = "ArchivoBlack-Regular.ttf", 20.0
+    cells = []
+    for i, ch in enumerate("BOYDE"):
+        col, row = i % 2, i // 2
+        g, _ = text_geom(ch, fn, 25.0)
+        gx0, gy0, gx1, gy1 = g.bounds
+        cells.append(affinity.translate(g, col * c + c / 2 - (gx0 + gx1) / 2, row * c + c / 2 - (gy0 + gy1) / 2))
+    sq = _soft(box(c + 3, 2 * c + 3, 2 * c - 3, 3 * c - 3), 1.5)
+    return _parts((unary_union(cells), "main"), (sq, "accent"))
+
+
+def word_blok(size):
+    return _word("BOYDE", "ArchivoBlack-Regular.ttf", "LABS", "ArchivoBlack-Regular.ttf", size, .3, .02, .04, "cap")
+
+
+def mark_ok():
+    """Turuncu dairede sağ üste ok (oyuk): aç, ulaş."""
+    disc = Point(0, 0).buffer(21, 128)
+    arrow = unary_union([LineString([(-7, 7), (7.5, -7.5)]).buffer(2.4, 16),
+                         LineString([(-3.5, -7.5), (7.5, -7.5), (7.5, 3.5)]).buffer(2.4, 16, join_style=2)])
+    return _parts((disc - arrow, "accent"))
+
+
+def word_ok(size):
+    return _word("boyde", "Figtree_800ExtraBold.ttf", "labs", "Figtree_800ExtraBold.ttf", size, .24, -.01, -.01)
+
+
+def mark_acik():
+    """Açık konumda düğme: koyu hap, sağda turuncu topuz."""
+    pill = _soft(box(-25, -13, 25, 13), 12.99)
+    knob = Point(12, 0).buffer(9.0, 96)
+    return _parts((pill - knob.buffer(2.2), "main"), (knob, "accent"))
+
+
+def word_acik(size):
+    return _word("BOYDE", "Poppins-Bold.ttf", "LABS", "Poppins-Bold.ttf", size, .3, .02, .06, "cap")
+
+
+def mark_baglanti():
+    """İç içe iki halka (bağlantı): biri koyu, biri turuncu; kesişimlerde biri üstten, biri alttan geçer."""
+    def link(dx):
+        out = _soft(box(-15, -8.5, 15, 8.5), 8.49)
+        ring = out.difference(out.buffer(-4.6))
+        return affinity.translate(affinity.rotate(ring, -40, origin=(0, 0)), dx * 0.77, -dx * 0.64)
+    r1, r2 = link(-8.5), link(8.5)
+    parts = list(getattr(r1.intersection(r2), "geoms", [r1.intersection(r2)]))
+    parts.sort(key=lambda g: g.centroid.y)
+    if len(parts) >= 2:
+        r2 = r2.difference(r1.buffer(1.4).intersection(parts[0].buffer(5)))
+        r1 = r1.difference(r2.buffer(1.4).intersection(parts[-1].buffer(5)))
+    return _parts((r1, "main"), (r2, "accent"))
+
+
+def word_baglanti(size):
+    return _word("BOYDE", "Syne-ExtraBold.ttf", "LABS", "Syne-ExtraBold.ttf", size, .3, .02, .04, "cap")
+
+
+def mark_konum():
+    """Konum iğnesi, ortasında turuncu nokta."""
+    head = Point(0, -6).buffer(16, 128)
+    pin = unary_union([head, Point(0, 22)]).convex_hull
+    pin = _soft(pin, 1.2).difference(Point(0, -6).buffer(8.0, 96))
+    return _parts((pin, "main"), (Point(0, -6).buffer(5.4, 96), "accent"))
+
+
+def word_konum(size):
+    return _word("BOYDE", "Righteous-Regular.ttf", "LABS", "Righteous-Regular.ttf", size, .3, .02, .04, "cap")
+
+
+def mark_ampul():
+    """Ampul: turuncu cam, koyu duy, üstte üç ışık çizgisi."""
+    glass = unary_union([Point(0, -4).buffer(13, 128), Polygon([(-7.5, 4), (7.5, 4), (5.5, 13), (-5.5, 13)])])
+    base = unary_union([_bar(-6, 6, 16.0, 3.0), _bar(-5, 5, 20.0, 3.0), _bar(-2.5, 2.5, 23.6, 2.6)])
+    rays = unary_union([LineString([(np.sin(a) * 17, -4 - np.cos(a) * 17), (np.sin(a) * 23, -4 - np.cos(a) * 23)])
+                        .buffer(1.6, 16) for a in np.radians([-48, 0, 48])])
+    return _parts((glass, "accent"), (unary_union([base, rays]), "main"))
+
+
+def word_ampul(size):
+    return _word("BOYDE", "BigShouldersDisplay-Black.ttf", "LABS", "BigShouldersDisplay-Black.ttf", size, .22, .03,
+                 .06, "cap")
+
+
+def mark_kose():
+    """Köşesi kıvrık kare: kıvrılan köşe turuncu."""
+    s, c = 21.0, 14.0
+    body = Polygon([(-s, -s), (s - c, -s), (s, -s + c), (s, s), (-s, s)])
+    fold = Polygon([(s - c, -s), (s - c, -s + c), (s, -s + c)])
+    body = _soft(body, 2.5).difference(fold.buffer(2.2, join_style=2))
+    return _parts((body, "main"), (_soft(fold, 0.8), "accent"))
+
+
+def word_kose(size):
+    return _word("BOYDE", "BarlowCondensed-Black.ttf", "LABS", "BarlowCondensed-Black.ttf", size, .26, .06, .1,
+                 "cap")
+
+
 # Yeni yönler (nozuldan vazgeçildi: "logo ve marka kimliğini tekrar değiştirmek istiyoruz, 10 adet daha görsel")
 YENI = {
     11: ("İsimlik", "Ürünün kendisi: panel, üstünde iki yazı satırı ve turuncu QR karesi, altında sehpa. Yazı Manrope.",
@@ -932,7 +1089,45 @@ YENI = {
                                       "müşteri."), ("Yazı", "BOYDE LABS, ince ve aralıklı (Unbounded).")],
          False, False),
 }
-DIRS = {**YONLER, **NOZUL, **YENI}
+# İkinci tur ("bi 10 tane daha üret")
+YENI2 = {
+    21: ("3D gölge", "Yazının turuncu derinliği: 3D baskı gibi yüzeyden yükselir. Simge derinlikli kare. Kalın, güçlü.",
+         mark_golge, word_golge, [("Derinlik", "harfler turuncu derinlikle yükselir: 3D baskı."),
+                                  ("Simge", "turuncu derinlikli kare."), ("Yazı", "BOYDE LABS (Archivo Black).")],
+         False, False),
+    22: ("İmleç", "Komut satırı: koyu karede > ve turuncu imleç; yazının sonunda yanıp sönen imleç. Dijital.",
+         mark_imlec, word_imlec, [("İmleç", "turuncu imleç: dijital, her an yazılmaya hazır."),
+                                  ("Simge", "koyu karede > ve imleç."), ("Yazı", "boyde labs, küçük harf (Poppins).")],
+         False, False),
+    23: ("Bauhaus", "Dört karede daire, çeyrek daire, üçgen ve kare; daire turuncu. Tasarım atölyesi havası.",
+         mark_bauhaus, word_bauhaus, [("Biçimler", "daire, çeyrek, üçgen, kare: tasarım atölyesi."),
+                                      ("Turuncu daire", "markanın noktası."), ("Yazı", "BOYDE LABS (Lexend).")],
+         False, False),
+    24: ("Blok", "Harfler ızgarada: BO / YD / E ve turuncu kare. Simgesi kendi adı; yazı kalın ve sıkı.",
+         mark_blok, word_blok, [("Izgara", "BOYDE beş karede, altıncı kare turuncu."),
+                                ("Simge", "adın kendisi: kare kare."), ("Yazı", "BOYDE LABS (Archivo Black).")],
+         False, False),
+    25: ("Ok", "Turuncu dairede sağ üste ok: okut, sayfan açılsın. Sade, küçük harf yazı.",
+         mark_ok, word_ok, [("Ok", "bağlantı açılır: okut ve ulaş."), ("Daire", "turuncu, oyuk ok."),
+                            ("Yazı", "boyde labs, küçük harf (Figtree).")], False, False),
+    26: ("Açık", "Açık konumda düğme: işletmeniz her an açık, bir dokunuşla ulaşılır.",
+         mark_acik, word_acik, [("Düğme", "açık konumda: işletmeniz her an ulaşılır."),
+                                ("Topuz", "turuncu: açık."), ("Yazı", "BOYDE LABS (Poppins).")], False, False),
+    27: ("Bağlantı", "İç içe iki halka: isimlik ile sayfa, işletme ile müşteri. Koyu ve turuncu.",
+         mark_baglanti, word_baglanti, [("Halkalar", "iç içe: isimlik ve sayfası, işletme ve müşterisi."),
+                                        ("Renkler", "biri koyu, biri turuncu."), ("Yazı", "BOYDE LABS (Syne).")],
+         False, False),
+    28: ("Konum", "Harita iğnesi, ortasında turuncu nokta: müşteriniz sizi bulsun. Yuvarlak hatlı yazı.",
+         mark_konum, word_konum, [("İğne", "haritada işletmeniz."), ("Turuncu nokta", "tam yeri."),
+                                  ("Yazı", "BOYDE LABS (Righteous).")], False, False),
+    29: ("Ampul", "Turuncu cam, koyu duy ve ışık çizgileri: Labs, fikir. Uzun, dar yazı.",
+         mark_ampul, word_ampul, [("Ampul", "fikir: Labs."), ("Turuncu cam", "yanan fikir."),
+                                  ("Yazı", "BOYDE LABS, uzun dar (Big Shoulders).")], False, False),
+    30: ("Köşe", "Köşesi kıvrık kare, kıvrılan köşe turuncu: etiket, kart, isimlik. Dar, sağlam yazı.",
+         mark_kose, word_kose, [("Kare", "isimlik, kart, etiket."), ("Kıvrık köşe", "turuncu: size özel."),
+                                ("Yazı", "BOYDE LABS, dar (Barlow Condensed).")], False, False),
+}
+DIRS = {**YONLER, **NOZUL, **YENI, **YENI2}
 
 THEMES = {"acik": {"main": INK, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
           "koyu": {"main": PAPER, "sub": ORANGE, "accent": ORANGE, "mid": GRAY},
@@ -1456,8 +1651,11 @@ def main():
         options_sheet(P, os.path.join(OUT, "secenekler_yeni.png"), n or None, YENI, "yeni logo yönleri",
                       "Nozul yok: birbirinden farklı 10 yeni yön (11–20), renkler aynı. Birini seçin; bütün kit "
                       "(logo dosyaları, Shopier, Instagram, kılavuz, katalog) ona göre üretilir.")
+        options_sheet(P, os.path.join(OUT, "secenekler_yeni_2.png"), n or None, YENI2, "yeni logo yönleri 2",
+                      "İkinci tur: 10 yön daha (21–30), öncekilerin hiçbiri değil; renkler aynı. Birini seçin; bütün "
+                      "kit ona göre üretilir.")
         print("seçenekler:", os.path.relpath(os.path.join(OUT, "secenekler.png"), A.ROOT),
-              "secenekler_nozul.png, secenekler_yeni.png")
+              "secenekler_nozul.png, secenekler_yeni.png, secenekler_yeni_2.png")
         if not n:
             return
         for d in ("logo", "shopier", "instagram"):
