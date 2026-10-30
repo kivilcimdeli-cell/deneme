@@ -164,9 +164,9 @@ def catalog(P):
 
 # ---------------------------------------------------------------- Shopier (1200 × 1200)
 
-def framed(P, photo, chip, t1, t2, path):
-    """BOYDE çerçevesi: fotoğraf tam kadraj; sol üstte logo; altta buzlu cam şerit (turuncu kod, başlık, alt satır,
-    "tasarım ve 3D baskı BOYDE"). Renkler fotoğrafın fonuna göre."""
+def framed(P, photo, chip, t1, t2, path, etiket="TOPTAN ANAHTARLIK"):
+    """BOYDE çerçevesi: fotoğraf tam kadraj; sol üstte logo, sağ üstte etiket; altta buzlu cam şerit (turuncu kod,
+    başlık, alt satır, "tasarım ve 3D baskı BOYDE"). Renkler fotoğrafın fonuna göre."""
     acik = K.light(os.path.join(T.FOTO, f"{photo}.jpg"))
     fg, sub = (INK, "#55575c") if acik else (PAPER, "rgba(244,241,234,.7)")
     glass, edge = ("rgba(255,255,255,.62)", "rgba(18,19,22,.08)") if acik else \
@@ -175,7 +175,7 @@ def framed(P, photo, chip, t1, t2, path):
       <img src="{foto(photo, 1200)}" style="position:absolute;inset:0;width:100%;height:100%;display:block">
       <div style="position:absolute;left:44px;top:40px">{K.logo("acik" if acik else "koyu", 260, 58)}</div>
       <span style="position:absolute;right:44px;top:44px;font-size:15px;font-weight:700;letter-spacing:.2em;
-        color:{fg};opacity:.75">TOPTAN ANAHTARLIK</span>
+        color:{fg};opacity:.75">{etiket}</span>
       <div style="position:absolute;left:28px;right:28px;bottom:28px;display:flex;align-items:center;gap:22px;
         padding:18px 26px 18px 18px;border-radius:26px;background:{glass};backdrop-filter:blur(22px) saturate(1.3);
         box-shadow:inset 0 0 0 1.5px {edge};color:{fg}">
