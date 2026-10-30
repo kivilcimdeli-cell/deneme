@@ -11,6 +11,7 @@
   POST /api/musteri/<k>/uret          {kod} → seçilen tasarımın dosyaları (iş kuyruğuna)
   POST /api/musteri/<k>/claude        {istek} → Claude'a özel istek (Claude Code kuruluysa)
   POST /api/musteri/<k>/klasor        müşteri klasörünü dosya gezgininde aç
+  POST /api/musteri/<k>/sil           müşteriyi sil (klasörü veri klasöründe silinenler/ altına taşınır, geri alınabilir)
   GET  /api/is/<no>, /api/isler       iş durumu
   GET  /api/ogrenme/<urun>            öğrenilen tercihler
   GET  /dosya/<k>/<yol>               müşteri klasöründeki bir dosya (katalog, 3MF, önizleme)
@@ -25,7 +26,7 @@ import sys
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import PORT, isler, kayit, ogrenme, urunler
+from . import PORT, VERI, isler, kayit, ogrenme, urunler
 
 ARAYUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "arayuz")
 mimetypes.add_type("model/3mf", ".3mf")
@@ -221,6 +222,15 @@ class Panel(BaseHTTPRequestHandler):
         if eylem == "klasor":
             _klasor_ac(kayit.klasor(k))
             return {"tamam": True}
+        if eylem == "sil":
+            if any(j["durum"] in ("bekliyor", "calisiyor") for j in isler.musteri_isleri(k)):
+                raise Hata(409, "İş sürerken silinemez")
+            hedef = os.path.join(VERI, "silinenler", k)
+            if os.path.exists(hedef):
+                hedef += "_" + kayit.simdi().replace(":", "")
+            os.makedirs(os.path.dirname(hedef), exist_ok=True)
+            os.replace(kayit.klasor(k), hedef)
+            return {"tamam": True, "yer": hedef}
         raise Hata(404, "Bilinmeyen eylem")
 
 

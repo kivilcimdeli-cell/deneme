@@ -194,20 +194,22 @@ def katalog(is_):
                        tohum=random.randrange(1 << 30), uygun=uygun,
                        agirlik=lambda imza: kal[(by[imza][2][0], by[imza][2][4])] ** 3)
     is_.ilerle(12, f"{len(adaylar)} aday sıralandı; tasarımlar kuruluyor ve denetleniyor")
-    kabul, denenen = [], 0
-    for imza in sira:
-        if len(kabul) >= KATALOG_ADET or denenen >= 30:
-            break
-        par = _parametre(by[imza][2])
-        if sum(1 for _, _, d in kabul if d.duzen == par["duzen"]) >= en_cok:
-            continue
-        denenen += 1
-        d = _kur(c, par)
-        sorun, _ = T.kontrol(d)
-        if sorun:
-            continue
-        kabul.append((imza, par, d))
-        is_.ilerle(12 + 38 * len(kabul) / KATALOG_ADET, f"{len(kabul)} tasarım hazır ({denenen} denendi)")
+    kabul, denenen, denendi = [], 0, set()
+    for sinir in (en_cok, en_cok + 1):                 # bir düzen hiç geçemezse eksik yer ikinci turda dolar
+        for imza in sira:
+            if len(kabul) >= KATALOG_ADET or denenen >= 36:
+                break
+            par = _parametre(by[imza][2])
+            if imza in denendi or sum(1 for _, _, d in kabul if d.duzen == par["duzen"]) >= sinir:
+                continue
+            denendi.add(imza)
+            denenen += 1
+            d = _kur(c, par)
+            sorun, _ = T.kontrol(d)
+            if sorun:
+                continue
+            kabul.append((imza, par, d))
+            is_.ilerle(12 + 38 * len(kabul) / KATALOG_ADET, f"{len(kabul)} tasarım hazır ({denenen} denendi)")
     if not kabul:
         raise SystemExit("Bu bilgilerle baskıya uygun tasarım çıkmadı (ad çok uzun olabilir): 'İsimlikte büyük "
                          "yazılacak ad' alanına kısa bir ad yazıp yeniden deneyin.")
@@ -359,6 +361,7 @@ def uret(is_, secilen):
     try:
         ws = site.yap(is_, sb, int(b.get("sablon") or 0))
         site_cikti = ws["ciktilar"]
+        uyar += ws["uyarilar"]
         uyar.append(f"Yayın: Cloudflare'de (hesap {site.HESAP}) '{ws['ad']}' adlı Worker'a zip'i yükleyin → {ws['url']} "
                     f"(QR bu adresi açar; şablon {ws['sablon']} · {ws['sablon_ad']})")
     except Exception as e:                           # noqa: BLE001 (site olmadan da 3MF teslim edilir)

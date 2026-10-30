@@ -63,7 +63,7 @@ def _koy(cs, y_ust):
     return cs.translate((0.0, y_ust - b[3])), y_ust - (b[3] - b[1])
 
 
-def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c"):
+def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c", ust=None):
     """Simge (w × h) kutuya, ortası (cx, cy); hiza "l": sol kenarı cx'te. oyma: tek parça şekil döner (bant ya da
     bloktan oyulur); değilse eklenir, sınırı döner. Simgeler istenen boyda yeniden çizilir (çizgiler incelmez);
     kutudan uzun kalırsa üstü UST'u geçmeyecek kadar aşağı iner."""
@@ -83,7 +83,7 @@ def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c"):
             d.lines["baş harfler"] = txt
     b = A.union(*[cs for cs, _ in parts]).bounds()
     dx = cx - b[0] if hiza == "l" else cx
-    dy = min(cy, UST - b[3])
+    dy = min(cy, (ust or UST) - b[3])
     parts = [(cs.translate((dx, dy)), r) for cs, r in parts]
     if "baş harfler" in d.lines and not oyma:
         d.lines["baş harfler"] = d.lines["baş harfler"].translate((dx, dy))
@@ -106,9 +106,9 @@ def simge_eni(c, w, h):
     return min(w, h)
 
 
-def ad_satirlari(marka, k, cap, max_w, tr=0.0, min_cap=None, iki=True):
+def ad_satirlari(marka, k, cap, max_w, tr=0.0, min_cap=None, iki=True, buyuk=None):
     """Adın satırları ve büyük harf boyu: tek satırda min_cap'in altına inen çok kelimeli ad iki satır."""
-    s = O.ad_metni(marka, k)
+    s = O.ad_metni(marka, k, buyuk)
     c1 = O.sigan(k, s, cap, max_w, tr)
     words = s.split()
     if c1 >= (min_cap or cap * 0.62) or len(words) < 2 or not iki:
@@ -127,7 +127,9 @@ def ad_yaz(d, c, p, k, x, y_ust, cap, max_w, align="l", tr=0.0, min_cap=None, ca
     """Ad: üstü (noktalar dahil) y_ust'te ya da ortası y_orta'da; bir ya da iki satır (iki satırda boy en çok cap2).
     Yazı tipinin harf içi daralmasın diye boy MIN_AD'ın altına inmez (taşarsa kontrol yakalar).
     Döner (şekil, alt kenarın y'si, boy)."""
-    lines, cc = ad_satirlari(c.marka, k, cap, max_w, tr, min_cap)
+    sik = getattr(c, "olcek", 1.0)                         # 10 × 20: yazılar sığmazsa ad küçülür
+    cap, cap2 = cap * sik, cap2 and cap2 * sik
+    lines, cc = ad_satirlari(c.marka, k, cap, max_w, tr, min_cap, buyuk=getattr(c, "buyuk", None))
     if len(lines) == 2:
         cc = min(cc, cap2 or cap * 0.72)
     d.ad_oran = min(1.0, cc * len(lines) / cap)              # adın düzendeki ideal boyuna oranı (kalite)
@@ -194,19 +196,23 @@ def telefon(d, c, p, x, y, cap=5.2, align="l", max_w=60.0, renk=None):
 
 
 def qr(d, c, p, cx, cy, s, cerceve=False, yazi=None, cap=4.4, tr=1.8):
-    """QR yüzeyle aynı hizada (siyah gövdede beyaz karo, beyaz gövdede siyah kareler); altında yazı (TARA)."""
+    """QR yüzeyle aynı hizada (siyah gövdede beyaz karo, beyaz gövdede siyah kareler); altında yazı (TARA). Yazının
+    üstü (İ'nin noktası dahil) karonun ya da çerçevenin 2,8 mm altında."""
     e = O.qr_girdi(c.url, p.koyu)
     tile = d.qr(e, cx, cy, s, sq=BLACK)
     d.qr_entry, d.qr_side = e, s
-    dy = 5.6
+    alt = tile.bounds()[1]
     if cerceve:
         g, w = 1.8, 1.2
         ring = A.rrect(s + 2 * (g + w), s + 2 * (g + w), 2.8, cx, cy) - A.rrect(s + 2 * g, s + 2 * g, 2.0, cx, cy)
         d.add("çerçeve", ring, p.vurgu)
-        dy = 8.6
+        alt = ring.bounds()[1]
     yazi = c.qr_yazi if yazi is None else yazi
     if yazi:
-        _tek(d, "alt yazı", O.tr_upper(yazi), cx, tile.bounds()[1] - dy, cap, "c", s + 2.0, tr, p.vurgu)
+        s_ = O.tr_upper(yazi)
+        cc, tt = O.sigdir(O.SATIR, s_, cap, s + 2.0, tr)
+        cs, _ = _koy(O.yazi(O.SATIR, s_, cc, cx, 0.0, "c", tt, s + 2.0, min_cap=O.MIN_BOY), alt - 2.8)
+        d.add("alt yazı", cs, p.vurgu)
     return tile
 
 

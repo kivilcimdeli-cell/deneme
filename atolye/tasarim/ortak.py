@@ -137,7 +137,7 @@ YAZI_AD = {"lexend": "Lexend", "outfit": "Outfit", "bebas": "Bebas Neue", "lora"
            "playfair": "Playfair", "oswald": "Oswald", "anton": "Anton", "russo": "Russo One",
            "archivo": "Archivo Black", "poppins": "Poppins", "poppins_i": "Poppins eğik", "michroma": "Michroma",
            "fraunces": "Fraunces", "unbounded": "Unbounded", "manrope": "Manrope", "teko": "Teko", "jost": "Jost",
-           "syne": "Syne", "sg7": "Space Grotesk"}
+           "syne": "Syne", "sg7": "Space Grotesk", "mont6": "Montserrat", "man6": "Manrope"}
 KUCUK_HARFLI = {"lora", "playfair", "fraunces"}       # adı büyük harfe çevrilmeyen (zarif) yazı tipleri
 SATIR = "outfit"                                       # küçük satırlar (hizmetler, telefon): kabartmada denenmiş
 
@@ -252,10 +252,11 @@ def oyma(k, s, cap, x, y, align="l", tr=0.0, max_w=None, min_cap=0.0):
     return yazi(k, s, cap, x, y, align, tr, max_w, kabartma=False, min_cap=min_cap)
 
 
-def ad_metni(s, k):
-    """Ad yazı tipine göre: zarif yazı tiplerinde yazıldığı gibi (hepsi büyükse baş harfler büyük), ötekilerde büyük."""
+def ad_metni(s, k, buyuk=None):
+    """Ad yazı tipine göre: zarif yazı tiplerinde yazıldığı gibi (hepsi büyükse baş harfler büyük), ötekilerde büyük.
+    buyuk: True / False ile zorlanır (kişi adı: "Mehmet Kaya")."""
     s = " ".join(s.split())
-    if k in KUCUK_HARFLI:
+    if buyuk is False or (buyuk is None and k in KUCUK_HARFLI):
         return tr_title(s) if s == tr_upper(s) else s
     return tr_upper(s)
 

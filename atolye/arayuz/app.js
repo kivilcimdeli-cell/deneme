@@ -30,7 +30,10 @@ async function git() {
   document.querySelectorAll("nav a").forEach(a => a.classList.toggle("etkin",
     a.getAttribute("href") === "#/" + (yol === "yeni" ? "" : yol)));
   try {
-    if (!URUNLER.length) URUNLER = await api("urunler");
+    if (!URUNLER.length) {
+      sayfa.innerHTML = `<p class="soluk">Yükleniyor… (ilk açılışta birkaç saniye sürer)</p>`;
+      URUNLER = await api("urunler");
+    }
     if (yol === "yeni") return yeniSiparis(decodeURIComponent(arg));
     if (yol === "musteri") return musteriSayfasi(decodeURIComponent(arg));
     if (yol === "musteriler") return musteriler();
@@ -155,17 +158,20 @@ async function musteriSayfasi(k, sessiz) {
   if (!SECILEN[k]) SECILEN[k] = (m.secimler.at(-1) || {}).kod || "";
   const sec = SECILEN[k];
 
-  const kataloglar = [...m.kataloglar].reverse().map(c => `
-    <div class="bolum"><div class="satir ara"><h3>${c.no}. katalog <span class="soluk">· ${tarih(c.tarih)}</span></h3>
+  const kataloglar = [...m.kataloglar].reverse().map((c, i) => `
+    <details class="bolum katalog"${i === 0 ? " open" : ""}><summary class="satir ara"><h3>${c.no}. katalog
+      <span class="soluk">· ${tarih(c.tarih)} · ${c.tasarimlar[0] ? esc(c.tasarimlar[0].kod) + "–" + esc(c.tasarimlar.at(-1).kod) : ""}</span></h3>
       <div class="satir">${c.pdf ? `<a class="dugme ince" href="${dosyaUrl(k, c.pdf)}" target="_blank">PDF'i aç</a>
         <a class="dugme ince" href="${dosyaUrl(k, c.pdf, 1)}">PDF indir</a>` : ""}
-        ${(c.sayfalar || []).length ? `<a class="dugme ince" href="${dosyaUrl(k, c.sayfalar[0])}" target="_blank">Sayfa görselleri</a>` : ""}</div></div>
+        ${(c.sayfalar || []).map((y, j) => `<a class="dugme ince" href="${dosyaUrl(k, y)}" target="_blank">Sayfa ${j + 1}</a>`).join("")}</div></summary>
       <div class="tasarimlar bolum">${c.tasarimlar.map(t => `
         <div class="tasarim${t.kod === sec ? " secili" : ""}${uretilen.has(t.kod) ? " uretildi" : ""}" data-kod="${esc(t.kod)}">
           <span class="kod">${esc(t.kod)}</span><img loading="lazy" src="${dosyaUrl(k, t.onizleme)}" alt="">
-          <p>${esc(t.ad || "")}</p></div>`).join("")}</div></div>`).join("");
+          <p>${esc(t.ad || "")}</p></div>`).join("")}</div></details>`).join("");
 
-  const ciktilar = m.ciktilar.slice().reverse().map(c => `
+  // en yeni üretim üstte; aynı üretimde eklentinin sırası (3MF önce)
+  const ciktilar = m.ciktilar.map((c, i) => [c, i]).sort((a, b) => (b[0].tarih || "").localeCompare(a[0].tarih || "")
+    || a[1] - b[1]).map(([c]) => `
     <div class="cikti">${c.tur === "resim" ? `<img src="${dosyaUrl(k, c.yol)}" alt="">` : `<span class="tur">${esc(c.tur)}</span>`}
       <div class="ad"><b>${esc(c.ad)}</b><br><span class="soluk">${esc(c.yol)} · ${tarih(c.tarih)}</span></div>
       <a class="dugme ince" href="${dosyaUrl(k, c.yol)}" target="_blank">Aç</a>
@@ -175,7 +181,8 @@ async function musteriSayfasi(k, sessiz) {
     <div class="satir ara"><div><p class="k">${esc(u.ad)}</p><h1>${esc(m.ad)}</h1>
       <p class="soluk">${esc(m.kimlik)} · ${tarih(m.olusturma)}</p></div>
       <div class="satir"><button class="ince" id="klasor">Klasörü aç</button>
-        <button class="ince" id="duzenle">Bilgileri düzenle</button></div></div>
+        <button class="ince" id="duzenle">Bilgileri düzenle</button>
+        <button class="ince" id="sil" title="Klasörü silinenler/ altına taşınır">Sil</button></div></div>
     <form class="kart bolum" id="form" hidden>${formHtml(u, m.bilgiler)}
       <div class="satir bolum"><button type="submit">Kaydet</button></div></form>
     ${aktif ? `<div class="kart bolum ilerleme"><div class="satir ara"><b>${esc(aktif.baslik)}</b><span>%${aktif.yuzde}</span></div>
@@ -186,6 +193,7 @@ async function musteriSayfasi(k, sessiz) {
        <div class="gunluk">${esc(sonHata.gunluk.slice(-15).join("\n"))}</div></div>` : ""}
     ${uyarilar(m)}
     <div class="iki bolum"><div>
+      ${m.ciktilar.length ? `<div class="kart" style="margin-bottom:20px"><h2>Çıktılar</h2><div class="ciktilar bolum">${ciktilar}</div></div>` : ""}
       ${u.katalog_adet ? `<div class="kart"><div class="satir ara"><h2>Katalog</h2>
           <button class="${m.kataloglar.length ? "ince" : "vurgu"}" id="katalog" ${aktif ? "disabled" : ""}>
             ${m.kataloglar.length ? "Yeni katalog üret (beğenmedi)" : "Katalog üret"}</button></div>
@@ -193,11 +201,11 @@ async function musteriSayfasi(k, sessiz) {
             Müşterinin beğendiği koda tıklayın, sonra baskı dosyalarını üretin.</p>
           ${kataloglar || ""}</div>
         <div class="kart bolum satir ara" style="position:sticky;bottom:12px">
-          <b>Seçilen: <span id="secilen">${esc(sec || "—")}</span></b>
+          <div class="satir"><b>Seçilen: <span id="secilen">${esc(sec || "—")}</span></b>
+            <input id="kodgir" placeholder="Kodu yaz (ör. M03)" style="width:170px"></div>
           <button class="vurgu" id="uret" ${!sec || aktif ? "disabled" : ""}>Seçilen tasarımın baskı dosyalarını üret</button></div>`
       : `<div class="kart satir ara"><h2>Baskı dosyası</h2>
           <button class="vurgu" id="uret" ${aktif ? "disabled" : ""}>${m.ciktilar.length ? "Yeniden üret" : "3MF üret"}</button></div>`}
-      <div class="kart bolum"><h2>Çıktılar</h2><div class="ciktilar bolum">${ciktilar || `<p class="soluk">Henüz yok.</p>`}</div></div>
     </div><div>
       <div class="kart"><h2>Özel istek (Claude)</h2>
         <p class="soluk">Algoritmanın yapamadığı bir şey mi var? ("logo daha büyük olsun", "arka yüze adres ekle")
@@ -210,6 +218,11 @@ async function musteriSayfasi(k, sessiz) {
 
   $("#klasor").onclick = () => api(`musteri/${kE}/klasor`, {}).catch(e => bildir(e.message, true));
   $("#duzenle").onclick = () => { $("#form").hidden = !$("#form").hidden; };
+  $("#sil").onclick = async () => {
+    if (!confirm(`${m.ad} silinsin mi? (Klasörü veri klasöründe silinenler/ altına taşınır.)`)) return;
+    try { await api(`musteri/${kE}/sil`, {}); bildir("Müşteri silindi"); location.hash = "#/musteriler"; }
+    catch (e) { bildir(e.message, true); }
+  };
   $("#form").onsubmit = async e => {
     e.preventDefault();
     try {
@@ -219,12 +232,18 @@ async function musteriSayfasi(k, sessiz) {
       bildir("Bilgiler kaydedildi"); musteriSayfasi(k);
     } catch (err) { bildir(err.message, true); }
   };
-  document.querySelectorAll(".tasarim").forEach(el => el.onclick = () => {
+  const sec_ = el => {
     SECILEN[k] = el.dataset.kod;
     document.querySelectorAll(".tasarim").forEach(x => x.classList.toggle("secili", x === el));
     $("#secilen").textContent = el.dataset.kod;
     if (!aktif) $("#uret").disabled = false;
-  });
+  };
+  document.querySelectorAll(".tasarim").forEach(el => el.onclick = () => sec_(el));
+  if ($("#kodgir")) $("#kodgir").oninput = e => {        // müşterinin söylediği kodu yazınca seçilir
+    const kod = e.target.value.trim().toLocaleUpperCase("tr").replace(/\s/g, "");
+    const el = [...document.querySelectorAll(".tasarim")].find(x => x.dataset.kod === kod);
+    if (el) { sec_(el); const d = el.closest("details"); if (d) d.open = true; el.scrollIntoView({block: "center"}); }
+  };
   const is_ = (yol, govde, mesaj) => api(`musteri/${kE}/${yol}`, govde).then(() => { bildir(mesaj); musteriSayfasi(k); })
     .catch(e => bildir(e.message, true));
   if ($("#katalog")) $("#katalog").onclick = () => is_("katalog", {}, "Katalog sıraya alındı");
@@ -234,10 +253,14 @@ async function musteriSayfasi(k, sessiz) {
 }
 
 function uyarilar(m) {
-  // son üretimden sonraki uyarılar (ör. ad soyad uzun, yazı küçüldü)
-  const son = m.notlar.map(n => n.metin).lastIndexOf(m.notlar.map(n => n.metin).filter(t => t.startsWith("Dosyalar üretildi")).at(-1));
-  const u = m.notlar.slice(Math.max(0, son - 6), son + 1).filter(n => n.metin.startsWith("Uyarı"));
-  return u.length ? `<div class="bolum uyari">${u.map(n => esc(n.metin.replace(/^Uyarı: /, "⚠ "))).join("<br>")}</div>` : "";
+  // son işin (katalog ya da baskı dosyaları) uyarıları: son "…üretildi" notundan önceki ardışık "Uyarı" notları
+  const n = m.notlar;
+  let son = -1;
+  for (let i = n.length - 1; i >= 0; i--) if (/üretildi/.test(n[i].metin)) { son = i; break; }
+  if (son < 0) return "";
+  const u = [];
+  for (let i = son - 1; i >= 0 && n[i].metin.startsWith("Uyarı"); i--) u.unshift(n[i]);
+  return u.length ? `<div class="bolum uyari">${u.map(x => esc(x.metin.replace(/^Uyarı: /, "⚠ "))).join("<br>")}</div>` : "";
 }
 
 // ------------------------------------------------------------------ işler

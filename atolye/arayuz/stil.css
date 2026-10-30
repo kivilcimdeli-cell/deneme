@@ -98,3 +98,6 @@ tr.tik { cursor: pointer; } tr.tik:hover td { background: #faf8f3; }
 .bildirim.hata { background: var(--err); }
 .iki { display: grid; gap: 20px; grid-template-columns: 1.6fr 1fr; align-items: start; }
 @media (max-width: 900px) { .iki { grid-template-columns: 1fr; } main { padding: 18px; } .ust { padding: 10px 16px; } }
+details.katalog > summary { cursor: pointer; list-style: none; }
+details.katalog > summary::-webkit-details-marker { display: none; }
+details.katalog:not([open]) > summary h3::after { content: " ▸ aç"; color: var(--orange); font-size: 13px; }

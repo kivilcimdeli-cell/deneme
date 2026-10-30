@@ -20,6 +20,9 @@ Başlatma: python -m atolye   (Windows'ta BOYDE_Atolye.bat)
 import os
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))      # depo kökü (scripts/, yazı tipleri)
-VERI = os.environ.get("BOYDE_VERI", os.path.join(KOK, "atolye_veri"))  # müşteri verileri (git'e girmez)
+# müşteri verileri (git'e girmez): Windows'ta Belgeler\BOYDE Atolye (yeni sürüm başka klasöre açılsa da kayıtlar kalır),
+# başka yerde depo içinde atolye_veri; BOYDE_VERI ile değiştirilir
+VERI = os.environ.get("BOYDE_VERI") or (os.path.join(os.path.expanduser("~"), "Documents", "BOYDE Atolye")
+                                        if os.name == "nt" else os.path.join(KOK, "atolye_veri"))
 SCRIPTS = os.path.join(KOK, "scripts")
 PORT = int(os.environ.get("BOYDE_PORT", "8765"))

@@ -130,10 +130,24 @@ def yap(is_, d, sablon=0, gif=False):
     """Siteyi müşteri klasörünün web/ altında üretir. Döner {"sablon", "ad", "url", "ciktilar"}."""
     import sablon_site
     klasor = is_.yol("web", "bilgiler.json")[:-len("bilgiler.json") - 1]
-    with open(os.path.join(klasor, "bilgiler.json"), "w", encoding="utf-8") as f:
-        json.dump(d, f, ensure_ascii=False, indent=2)
     n = sablon_sec(is_.musteri["kimlik"], d["isletme"], sablon)
-    site, T, _ = sablon_site.build(klasor, n, previews=True, gif=gif, record=False)
+    uyarilar = []
+    for i, dd in enumerate(_kisaltmalar(d)):            # şablonda yazı sığmazsa (uzun unvan) kısaltılır
+        with open(os.path.join(klasor, "bilgiler.json"), "w", encoding="utf-8") as f:
+            json.dump(dd, f, ensure_ascii=False, indent=2)
+        try:
+            site, T, _ = sablon_site.build(klasor, n, previews=True, gif=gif, record=False)
+            break
+        except AssertionError as e:
+            if "sığmadı" not in str(e) and "taştı" not in str(e):
+                raise
+            uyarilar.append(str(e))
+    else:
+        raise RuntimeError("sayfada yazılar sığmadı: " + "; ".join(uyarilar))
+    if i:
+        uyarilar = [f"Sayfa şablonuna sığmadığı için iş türü / unvan sayfada '{dd['hizmet']}' olarak yazıldı"
+                    if dd.get("hizmet") else "Sayfa şablonuna sığmadığı için iş türü / unvan sayfada yazılmadı"]
+    d = dd
     ad = re.match(r"https://([^.]+)\.", d["sayfa_url"]).group(1)
     zip_yol = os.path.join(klasor, f"{site.slug}_site.zip")
     hedef = os.path.join(klasor, f"{ad}_site.zip")
@@ -148,4 +162,20 @@ def yap(is_, d, sablon=0, gif=False):
     if gif:
         ciktilar.append({"ad": "Sayfa turu (GIF)", "yol": is_.goreli(os.path.join(klasor, "sayfa_tur.gif")),
                          "tur": "resim"})
-    return {"sablon": n, "sablon_ad": T.AD, "ad": ad, "url": d["sayfa_url"], "ciktilar": ciktilar}
+    return {"sablon": n, "sablon_ad": T.AD, "ad": ad, "url": d["sayfa_url"], "ciktilar": ciktilar,
+            "uyarilar": uyarilar if i else []}
+
+
+def _kisaltmalar(d):
+    """Sayfanın denenecek hâlleri: olduğu gibi; unvan (hizmet) ilk parçasına ("AVUKAT · ARABULUCU" → "AVUKAT") ya da
+    ilk iki kelimesine; unvansız."""
+    yield d
+    h = d.get("hizmet") or ""
+    if not h:
+        return
+    kisa = re.split(r"\s*[·,/|-]\s*", h)[0].strip()
+    if kisa == h:
+        kisa = " ".join(h.split()[:2])
+    if kisa and kisa != h:
+        yield dict(d, hizmet=kisa)
+    yield {k: v for k, v in d.items() if k != "hizmet"}

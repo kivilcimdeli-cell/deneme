@@ -5,25 +5,35 @@ Siparişten baskı dosyasına giden yerel uygulama. Bilgisayarda çalışır, ta
 1. Ürün seçilir, müşteri bilgileri girilir.
 2. Katalog üretilir: QR'lı isimlikte 10, anahtarlıkta 20 tasarım. PDF ve sayfa görselleri WhatsApp'tan gönderilir.
 3. Müşteri beğenmezse **Yeni katalog üret** denir. Gösterilen tasarımlar tekrar gelmez.
-4. Müşterinin söylediği koda (M03, A07…) tıklanır. **Baskı dosyalarını üret** ile X2D 3MF'i, önizlemeler ve web
-   sayfası hazırlanır.
+4. Müşterinin söylediği koda (M03, A07…) tıklanır ya da kod alttaki kutuya yazılır. **Baskı dosyalarını üret** ile
+   X2D 3MF'i, önizlemeler ve web sayfası hazırlanır. Çıktılar müşteri sayfasının en üstünde; **Aç** / **İndir**.
+5. Müşteri **Sil** ile silinir: klasörü veri klasöründe `silinenler/` altına taşınır (geri alınabilir).
 
 Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3MF üretilir.
 
 ## Kurulum (Windows, bir kez)
 
 1. [Python 3.11](https://www.python.org/downloads/) kurulur. Kurulumda **Add python.exe to PATH** işaretlenir.
-2. Depo indirilir. Git ile `git clone` ya da GitHub'dan ZIP.
-3. `kurulum.bat` çift tıklanır. Sanal ortamı, paketleri ve site önizlemeleri için Chromium'u kurar.
+2. Uygulama indirilir:
+   - **ZIP (önerilen, ~6 MB):** `BOYDE_Atolye.zip` bir klasöre açılır (ör. `C:\BOYDE_Atolye`).
+   - **Git:** depo `git clone` ile indirilir (tamamı ~370 MB: eski işlerin görselleri de içinde).
+3. `kurulum.bat` çift tıklanır. Sanal ortamı, paketleri ve site önizlemeleri için Chromium'u kurar (birkaç dakika).
 4. Her gün `BOYDE_Atolye.bat` ile açılır. Pencere kapanınca uygulama da kapanır.
 
-**Güncelleme:** `guncelle.bat` çalıştırılır. Depodaki son sürümü çeker; müşteri kayıtları korunur.
+**Güncelleme:**
+
+- **Git ile kurulduysa:** `guncelle.bat` son sürümü çeker.
+- **ZIP ile kurulduysa:** yeni ZIP aynı klasörün üzerine açılır ve `kurulum.bat` bir kez çalıştırılır.
+- **Kayıtlar:** müşteri kayıtları ayrı klasörde durur (aşağıda), güncellemeden etkilenmez.
+
+**Paket:** ZIP depodan `python3 scripts/atolye_paket.py` ile yapılır (`dist/BOYDE_Atolye.zip`).
 
 ## Ürünler
 
 | Ürün | Katalog | Seçilen kodla üretilenler |
 | --- | --- | --- |
 | QR'lı masa isimliği 9 × 12 | 10 tasarım (M01…) | iki takımlı X2D 3MF, müşteri önizlemesi, tabla kontrolü, web sayfası (zip) |
+| Kurumsal isimlik 10 × 20 | 10 tasarım (K01…) | tek takımlı X2D 3MF, önizlemeler, dijital kartvizit sayfası (zip) |
 | Türk bayraklı isimlik | yok | X2D 3MF (blok + sehpa), önizleme |
 | Toptan anahtarlık | 20 tasarım (A01…) | dolu tabla 3MF, tek adetlik deneme 3MF'i, tabla başına adet ve kaç tabla gerektiği |
 
@@ -36,13 +46,22 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 - **Web sayfası:** lastikçi tarzındaki 5 şablondan sıradaki kullanılır (kural `CLAUDE.md`'de).
   - Adres `https://<sayfa adı>.qrsistem.workers.dev/`. Isimlikteki QR bu adresi açar.
   - Zip, Cloudflare'de aynı adlı Worker'a elle yüklenir.
-  - Uygulamanın kullandığı şablon sırası `atolye_veri/site_sirasi.json`'da tutulur. Depodaki
+  - Uygulamanın kullandığı şablon sırası veri klasöründe `site_sirasi.json`'da tutulur. Depodaki
     `site_sablonlari/sira.json`'dan devam eder.
 - **Kontroller:** her üretimde yapılır.
   - QR üstten görünüşte ve baskı hatası benzetiminde okunuyor mu.
   - Kabartma yazıda harf içi ve harf arası en az 0,7 mm mi.
   - Parçalar iki nozulun ortak alanında mı.
   - PrusaSlicer kuruluysa ek bir dilimleyici denetimi yapılır (Windows'ta genelde atlanır).
+
+### Kurumsal isimlik 10 × 20
+
+- **Tasarımlar:** 10 düzen (`atolye/tasarim/isimlik20.py`): ad soyad, unvan, kurum, telefon; simge sektöre göre, logo
+  ya da kişinin baş harfleri.
+- **Uzun yazılar:** uzun unvan ve kurum iki satıra iner, gerekirse ad küçülür. Yine sığmazsa telefon isimlikten
+  çıkar; telefon sayfada kalır, notlarda uyarı çıkar.
+- **Kartvizit sayfası:** aynı 5 şablonla, kişinin kartviziti olarak yapılır. E-posta bağlantısı eklenir; **Rehbere
+  kaydet** kişiyi kurumuyla ekler.
 
 ### Toptan anahtarlık
 
@@ -53,7 +72,7 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 ## Öğrenme
 
 Kataloglarda gösterilen ve seçilen tasarımların özellikleri sayılır: düzen, zemin, renk, yazı tipi, simge.
-Kayıt `atolye_veri/tercihler.json`'da tutulur.
+Kayıt veri klasöründe `tercihler.json`'da tutulur.
 
 - **Ağırlık:** beğenilen özellikler sonraki kataloglarda daha sık çıkar.
 - **Keşif:** seçimlerin %30'u yeni şeyler denemeye ayrılır.
@@ -70,14 +89,15 @@ daha büyük olsun", "arka yüze adres ekle".
 
 ## Veriler
 
-Müşteri kayıtları ve çıktılar `atolye_veri/musteriler/<tarih_ad>/` klasöründedir:
+Veri klasörü Windows'ta **Belgeler\BOYDE Atolye**, başka sistemlerde depo içinde `atolye_veri/`. Müşteri
+kayıtları ve çıktılar `musteriler/<tarih_ad>/` altındadır (müşteri sayfasında **Klasörü aç**):
 
 - `musteri.json`
 - `katalog_N/` (PDF, sayfa JPG'leri, tasarım görselleri)
 - `cikti/` (3MF ve önizlemeler)
 - `web/` (site)
 
-`atolye_veri/` kişisel bilgi içerir ve git'e girmez. Yedeği elle alınır.
+Veri klasörü kişisel bilgi içerir ve git'e girmez. Yedeği elle alınır.
 
 **Ortam değişkenleri** (isteğe bağlı):
 
