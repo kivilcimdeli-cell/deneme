@@ -15,3 +15,11 @@
   - Bunlar şablonun içinde ayarlanır; düzen değiştirilmez.
 - **Şablonda düzeltme ya da iyileştirme:** `scripts/sablonlar/` altında yapılır.
   - Ardından `python3 scripts/sablon_site.py --katalog` ile beş örnek yeniden denetlenir.
+
+## BOYDE Atölye uygulaması (`atolye/`)
+
+- Kullanıcının bilgisayarında çalışan sipariş uygulaması: ürün → müşteri bilgileri → katalog → seçilen kod → 3MF (+ site).
+  Ayrıntı: `atolye/README.md`.
+- Yeni ürün istenince `atolye/urunler/<ad>.py` eklentisi yazılır ve `atolye/urunler/__init__.py`'deki `SIRA`'ya eklenir;
+  ortak parçalar `atolye/tasarim/`. İşletme siteleri uygulamada da yalnız 5 şablonla (`atolye/site.py`).
+- Müşteri verileri `atolye_veri/` (git'e girmez, kişisel bilgi); denemeler scratchpad'de `BOYDE_VERI` ile yapılır.

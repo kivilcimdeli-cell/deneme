@@ -57,7 +57,9 @@ def main():
     klasor = kayit.klasor(kimlik)
     once = {os.path.join(d, f) for d, _, fs in os.walk(klasor) for f in fs}
     print("@@ 5 Claude çalışıyor (bu iş birkaç dakika sürebilir)", flush=True)
-    p = subprocess.run([bul(), "-p", istem(m, istek), "--permission-mode", "acceptEdits", "--add-dir", klasor],
+    cli = bul()
+    onek = ["cmd", "/c"] if cli.lower().endswith((".cmd", ".bat")) else []   # Windows'ta npm kurulumu claude.cmd
+    p = subprocess.run(onek + [cli, "-p", istem(m, istek), "--permission-mode", "acceptEdits", "--add-dir", klasor],
                        cwd=KOK, text=True, encoding="utf-8", errors="replace", capture_output=True)
     print(p.stdout)
     if p.returncode:
