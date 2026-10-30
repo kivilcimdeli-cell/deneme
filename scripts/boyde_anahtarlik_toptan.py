@@ -24,6 +24,7 @@ Kullanım:
   python3 scripts/boyde_anahtarlik_toptan.py            # modeller: npz, ön ve arka görünüş, baskı kontrolü
   python3 scripts/boyde_anahtarlik_toptan.py --foto     # Blender fotoğrafları (bpy 4.2)
   python3 scripts/boyde_anahtarlik_toptan.py --katalog  # katalog
+  python3 scripts/boyde_anahtarlik_toptan.py --shopier  # Shopier görselleri (1200 × 1200)
 """
 import json
 import os
@@ -353,8 +354,8 @@ if __name__ == "__main__":
     if "--foto" in args:
         import boyde_anahtarlik_foto as AF
         AF.main(args)
-    elif "--katalog" in args:
+    elif "--katalog" in args or "--shopier" in args:
         import boyde_anahtarlik_katalog as AK
-        AK.main()
+        AK.main("katalog" if "--shopier" not in args else "shopier" if "--katalog" not in args else "hepsi")
     else:
         export()

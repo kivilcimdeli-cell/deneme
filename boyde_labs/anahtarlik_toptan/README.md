@@ -49,6 +49,19 @@
   deliğin en yakın kenarından geçer.
 - Fon: koyu anahtarlıklar beyaz fonda, beyaz gövdeli K02 logodaki siyahta.
 
+## Shopier (`shopier/`, 1200 × 1200, yükleme sırasıyla)
+
+| Dosya | Ne |
+| --- | --- |
+| `01_kapak.jpg` | toptan parti fotoğrafı, "Toptan anahtarlık" |
+| `02_bes_model.jpg` | beş model halka takımlarıyla, kodları |
+| `03_K01_…_halka.jpg` … `07_K05_…_halka.jpg` | her model zincirli halka takımıyla (solda ön, sağda arka yüz), BOYDE çerçevesinde |
+| `08_K01_…_arkali_onlu.jpg` … `12_K05_…_arkali_onlu.jpg` | her model masada arkalı önlü, BOYDE çerçevesinde |
+| `13_olcu_ozellik.jpg` | beş biçim gerçek oranlarıyla (ön ve arka), özellikler |
+| `14_nasil_siparis.jpg` | dört adım, WhatsApp |
+
+Ürün adı ve açıklaması: `boyde_labs/urunler/shopier/urun_metinleri.md` (4. ürün).
+
 ## Katalog
 
 `katalog.pdf` (A4, 6 sayfa):
@@ -65,4 +78,5 @@ Fiyat yazılmadı; "adet arttıkça birim fiyat düşer, teklif alın".
 python3 scripts/boyde_anahtarlik_toptan.py            # modeller, ön ve arka görünüş, baskı kontrolü
 python3 scripts/boyde_anahtarlik_toptan.py --foto     # Blender fotoğrafları (~15 dk)
 python3 scripts/boyde_anahtarlik_toptan.py --katalog  # katalog.pdf ve katalog.png
+python3 scripts/boyde_anahtarlik_toptan.py --shopier  # Shopier görselleri
 ```

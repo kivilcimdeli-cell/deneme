@@ -1,6 +1,7 @@
 # Shopier ürün metinleri
 
-Üç ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07).
+Dört ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07),
+toptan anahtarlık `boyde_labs/anahtarlik_toptan/shopier/` (01 … 14).
 Açıklamalar düz metin; Shopier'in açıklama kutusuna olduğu gibi yapıştırılır.
 
 Sipariş akışı (1 ve 2): müşteri katalogdan model seçmez. Siparişten sonra ona özel 10 tasarım hazırlanır, en beğendiği basılır
@@ -159,5 +160,55 @@ NASIL SİPARİŞ VERİLİR
 WhatsApp: 0546 475 45 08
 
 Görsellerdeki "AD SOYAD" örnektir; isimlik sizin adınızla basılır.
+Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
+```
+
+## 4 · Toptan anahtarlık (logolu, arkalı önlü)
+
+Örneklerde kendi markamız BOYDE LABS var; müşterinin anahtarlığı kendi logosu ve yazısıyla basılır. Beş standart
+biçim (K01–K05), zincirli halka takımı. Görseller: `boyde_labs/anahtarlik_toptan/shopier/` (01 kapak … 14 nasıl
+sipariş verilir), `python3 scripts/boyde_anahtarlik_toptan.py --shopier`.
+
+**Ürün adı**
+
+```
+Toptan Logolu Anahtarlık · Arkalı Önlü 3D Baskı · Zincirli Halka · BOYDE LABS
+```
+
+**Açıklama**
+
+```
+TOPTAN LOGOLU ANAHTARLIK · ARKALI ÖNLÜ
+Logonuzla, kendi atölyemizde 3D baskıyla üretiyoruz. Ön yüzde logonuz ve yazınız kabartma, arka yüzde telefonunuz, web adresiniz ya da sloganınız düz yazı. İşletmeler, oto galeriler, emlak ofisleri, oteller, spor salonları, kafeler, etkinlikler ve promosyon için.
+
+ÖZELLİKLER
+• Ön yüz: logo ve yazı 0,8 mm kabartma, renkli; elle hissedilir
+• Arka yüz: yazı yüzeyle aynı hizada; boya değil, baskının kendisi: silinmez
+• 3,2 mm sağlam PLA gövde, pahlı kenarlar
+• Zincirli halka takımı: çelik halka, kısa zincir ve ara halka takılı (isterseniz yalnız anahtarlık)
+• Renkler ve ölçü sizden
+
+BİÇİMLER (görsellerde)
+K01 Klasik · 60 × 30 mm
+K02 Dikey etiket · 30 × 56 mm
+K03 Kare · 40 × 40 mm
+K04 Bar · 72 × 24 mm
+K05 Kesik köşe · 56 × 32 mm
+Beğendiğiniz biçimin kodunu sipariş notuna yazın; ölçü ve renkleri logonuza göre ayarlayalım.
+
+FİYAT
+• Adet arttıkça birim fiyat düşer
+• … adet: … TL / adet
+• … adet: … TL / adet
+
+NASIL SİPARİŞ VERİLİR
+1. Logonuzu gönderin: logo, renkler, adet ve arka yüz yazısı (WhatsApp'tan).
+2. Tasarımı hazırlıyoruz: ön ve arka yüzün önizlemesini gönderiyoruz.
+3. Onaylayın: beğendiğiniz tasarımı onaylıyorsunuz.
+4. Basıp gönderiyoruz: kendi atölyemizde basıp kargoya veriyoruz.
+
+WhatsApp: 0546 475 45 08
+
+Görsellerdeki anahtarlıklar kendi markamızla (BOYDE LABS) örnektir; sizinkiler sizin logonuz ve yazınızla basılır.
 Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
 ```
