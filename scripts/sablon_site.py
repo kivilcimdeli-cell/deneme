@@ -61,7 +61,8 @@ from sablonlar.ortak import CHARS, e, tr_title, tr_upper  # noqa: E402
 
 CATALOG = os.path.join(A.ROOT, "site_sablonlari")
 ORDER = os.path.join(CATALOG, "sira.json")
-CHROMIUM = "/opt/pw-browsers/chromium"
+CHROMIUM = "/opt/pw-browsers/chromium"                    # bulut ortamı; yoksa (Windows) Playwright'ın kendi
+CHROMIUM = CHROMIUM if os.path.exists(CHROMIUM) else None  # tarayıcısı (playwright install chromium)
 # ---------------------------------------------------------------- bilgiler
 
 @dataclass

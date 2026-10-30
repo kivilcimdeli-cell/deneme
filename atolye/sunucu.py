@@ -25,7 +25,7 @@ import sys
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import KOK, PORT, isler, kayit, ogrenme, urunler
+from . import PORT, isler, kayit, ogrenme, urunler
 
 ARAYUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "arayuz")
 mimetypes.add_type("model/3mf", ".3mf")

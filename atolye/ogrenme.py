@@ -63,22 +63,25 @@ def puan(urun, ozellikler, d=None):
     return math.exp(sum(math.log(x) for x in p) / len(p)) if p else 1.0
 
 
-def sec(urun, adaylar, adet, haric=(), tohum=None):
+def sec(urun, adaylar, adet, haric=(), tohum=None, uygun=None, agirlik=None):
     """adaylar: [(imza, ozellikler)]; haric: bu müşteriye daha önce gösterilen imzalar (yeni katalogda tekrar
-    edilmez, aday yetmezse kullanılır). Döner: seçilen imzalar (adet kadar)."""
+    edilmez, aday yetmezse kullanılır). uygun(seçilenler, aday): katalog kuralı (aynı düzenden en çok iki gibi);
+    uyan aday kalmazsa kural gevşer. agirlik(imza): öğrenme puanıyla çarpılan ek ağırlık (tasarımın bu müşteriye
+    uygunluğu gibi). Döner: seçilen imzalar (adet kadar), seçiliş sırasıyla."""
     rnd = random.Random(tohum)
     d = _oku()
     taze = [a for a in adaylar if a[0] not in set(haric)]
     havuz = taze if len(taze) >= adet else taze + [a for a in adaylar if a[0] in set(haric)]
     secilen = []
     while havuz and len(secilen) < adet:
+        aday = [i for i, a in enumerate(havuz) if uygun is None or uygun(secilen, a)] or list(range(len(havuz)))
         if rnd.random() < KESIF:
-            i = rnd.randrange(len(havuz))
+            i = rnd.choice(aday)
         else:
-            w = [puan(urun, oz, d) for _, oz in havuz]
-            i = rnd.choices(range(len(havuz)), weights=w)[0]
-        secilen.append(havuz.pop(i)[0])
-    return secilen
+            w = [puan(urun, havuz[i][1], d) * (agirlik(havuz[i][0]) if agirlik else 1.0) for i in aday]
+            i = rnd.choices(aday, weights=w)[0]
+        secilen.append(havuz.pop(i))
+    return [imza for imza, _ in secilen]
 
 
 def ozet(urun):

@@ -1,0 +1,14 @@
+# BOYDE Atölye (Windows / Linux, Python 3.11). Sürümler bulut ortamında denenenler.
+manifold3d==3.5.4
+numpy==2.4.6
+pillow==12.3.0
+fonttools==4.66.1
+brotli==1.2.0
+uharfbuzz==0.56.2
+shapely==2.1.2
+scipy==1.17.1
+segno==1.6.6
+zxing-cpp==3.1.1
+opencv-python-headless==5.0.0.93
+svgelements==1.9.6
+playwright==1.64.0

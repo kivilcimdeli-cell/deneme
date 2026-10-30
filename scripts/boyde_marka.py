@@ -46,7 +46,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anahtarlik as A  # noqa: E402
 
 OUT = os.path.join(A.ROOT, "boyde_labs")
-CHROMIUM = "/opt/pw-browsers/chromium"
+CHROMIUM = "/opt/pw-browsers/chromium"                    # bulut ortamı; yoksa (Windows) Playwright'ın kendi
+CHROMIUM = CHROMIUM if os.path.exists(CHROMIUM) else None  # tarayıcısı (playwright install chromium)
 INK, PAPER, ORANGE, SAND, GRAY, CHAR = "#121316", "#F4F1EA", "#FF5A1F", "#E6E0D4", "#8B8E94", "#1C1D21"
 SLOGAN = "Katman katman, size özel."
 NAME = "BOYDE LABS"

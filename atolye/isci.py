@@ -43,8 +43,11 @@ def katalog(kimlik):
     is_ = Is(m, no, haric)
     is_.ilerle(2, f"{no}. katalog hazırlanıyor")
     sonuc = u.katalog(is_)
+    uyarilar = sonuc.pop("uyarilar", [])
     m = kayit.oku(kimlik)                                   # üretim sırasında değişmiş olabilir
     m["kataloglar"].append({"no": no, "tarih": kayit.simdi(), **sonuc})
+    for w in uyarilar:
+        kayit.not_ekle(m, "Uyarı: " + w)
     kayit.not_ekle(m, f"{no}. katalog üretildi ({len(sonuc['tasarimlar'])} tasarım)")
     kayit.yaz(m)
     ogrenme.gosterildi(u.KOD, [t["ozellikler"] for t in sonuc["tasarimlar"]])
