@@ -205,7 +205,7 @@ def katalog(is_):
                        tohum=random.randrange(1 << 30), uygun=uygun,
                        agirlik=lambda imza: kal[(by[imza][2]["bicim"], by[imza][2]["dizilim"], by[imza][2]["yazi"])] ** 3)
     is_.ilerle(8, f"{len(adaylar)} aday sıralandı; tasarımlar kuruluyor ve denetleniyor")
-    kabul, denenen = [], 0
+    kabul, eksik, denenen = [], [], 0          # eksik: arka yüz satırlarından biri sığmamış (yedek)
     for imza in sira:
         if len(kabul) >= KATALOG_ADET or denenen >= 45:
             break
@@ -216,8 +216,14 @@ def katalog(is_):
         k = _kur(c, arka, par)
         if not k.kalite or K.kontrol(k):
             continue
+        if any(w.startswith("arka yüze") for w in k.uyarilar):
+            eksik.append((imza, par, k))
+            continue
         kabul.append((imza, par, k))
         is_.ilerle(8 + 42 * len(kabul) / KATALOG_ADET, f"{len(kabul)} tasarım hazır ({denenen} denendi)")
+    for e in eksik:                            # tam tasarım yetmediyse arka yazısı eksik olanlar (uyarıyla)
+        if len(kabul) < KATALOG_ADET and sum(1 for _, p, _ in kabul if p["bicim"] == e[1]["bicim"]) < 3:
+            kabul.append(e)
     if not kabul:
         raise SystemExit("Bu bilgilerle baskıya uygun anahtarlık çıkmadı: daha kısa bir ad deneyin.")
     bas = len(is_.haric) + 1

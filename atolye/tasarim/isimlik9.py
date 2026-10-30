@@ -167,8 +167,10 @@ def hizmetler(d, c, p, x, y_ust, max_w, align="l", cap=4.4, n_max=2, y_alt=None,
         d.gosterilen = 0
         return y_ust
     y, alt, shown = y_ust, y_ust, 0
-    for i, items in enumerate(O.maddeleri_diz(c.hizmetler, cap, max_w, n_max)):
-        cs, a = _koy(O.madde_satiri(items, cap, x, 0.0, align, 0.8, max_w), y)
+    f = O.S.font(O.SATIR)                           # tek başına sığmayan madde varsa önce harf aralığı daralır
+    tr = next((t for t in (0.8, 0.6, 0.5) if all(f.width(m, cap, t) * 1.03 <= max_w for m in c.hizmetler)), 0.8)
+    for i, items in enumerate(O.maddeleri_diz(c.hizmetler, cap, max_w, n_max, tr=tr)):
+        cs, a = _koy(O.madde_satiri(items, cap, x, 0.0, align, tr, max_w), y)
         if y_alt is not None and a < y_alt:
             break
         d.add(f"hizmet {i + 1}", cs, renk if renk is not None else p.yazi)

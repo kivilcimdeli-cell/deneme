@@ -99,12 +99,15 @@ def l_klasik(d, c, p, k):
 
 
 def l_blok(d, c, p, k):
-    """Solda renkli blok: içinden oyma simge ve kurum; yanında ad, unvan, telefon; QR sağda (diş kliniği)."""
+    """Solda renkli blok: içinden oyma simge ve kurum; yanında ad, unvan, telefon; QR sağda (diş kliniği). Kurum
+    bloğa bütünüyle sığmazsa (uzun kelime) blokta yalnız simge kalır, kurum sağda unvanın altına yazılır."""
     cx = -69.0
     block = A.rrect(40.0, 80.0, 5.0, cx, 53.0)
     icon = _simge(d, c, p, cx, 74.0, 26.0, 24.0, oyma=True, ust=88.0)
+    kelime = O.tr_upper(c.kurum).split() if c.kurum else []
     cuts, y = [], icon.bounds()[1] - 4.0
-    for r in O.maddeleri_diz(O.tr_upper(c.kurum).split(), 4.6, 32.0, 3, tr=0.8) if c.kurum else []:
+    satirlar = O.maddeleri_diz(kelime, 4.6, 32.0, 3, tr=0.8)
+    for r in satirlar:
         cs = O.oyma(O.SATIR, " ".join(r), 4.6, cx, 0.0, "c", 0.8, 32.0, min_cap=O.MIN_BOY)
         b = cs.bounds()
         cs = cs.translate((0.0, y - b[3]))
@@ -112,13 +115,18 @@ def l_blok(d, c, p, k):
             break
         cuts.append(cs)
         y = cs.bounds()[1] - 2.4
+    blokta = len(cuts) == len(satirlar) and sum(len(r) for r in satirlar) == len(kelime)
+    if not blokta:
+        cuts = []
     if cuts:
         d.lines["blok yazısı"] = A.union(*cuts)
     d.add(None, block - A.union(icon, *cuts).offset(0.0, J), p.vurgu)
     x = -42.0
     w = 40.0 - x
     _, y, _ = ad_yaz(d, c, p, k, x, 86.0, 12.5, w, "l", 0.0, min_cap=9.0, cap2=11.0)
-    _unvan(d, c, p, x, y - 4.6, w, cap=6.2, tr=1.4)
+    y = _unvan(d, c, p, x, y - 4.6, w, cap=6.2, tr=1.4)
+    if kelime and not blokta:
+        _kurum(d, c, p, x, y - 3.6, w)
     telefon(d, c, p, x, 24.0, 5.6, max_w=w)
     qr(d, c, p, 66.0, 56.0, 40.0)
 

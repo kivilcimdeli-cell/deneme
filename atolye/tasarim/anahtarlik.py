@@ -252,22 +252,41 @@ def _on(c, p, dizilim, yazi_tipi, kutu, uyar):
     return items, lines, min(1.0, cap / (0.8 * pay)) * (1.0 if not c.alt or alt_cap else 0.85)
 
 
+def _arka_parcalari(s, ust, W):
+    """Bir arka satırın yerleşimi: [(metin, boy, harf aralığı)]. Tek satır; sığmazsa daha dar harf aralığı; o da
+    olmazsa kelimelerden iki satır (telefon: "0546 475" / "45 08"). Hiçbiri olmazsa []."""
+    for tr in (0.5, 0.2):
+        cap = O.sigan(ARKA, s, ust, W, tr)
+        if cap >= MIN_ARKA_BOY:
+            return [(s, cap, tr)]
+    kelime = s.split()
+    if len(kelime) > 1:
+        iki = min(([" ".join(kelime[:j]), " ".join(kelime[j:])] for j in range(1, len(kelime))),
+                  key=lambda x: max(len(x[0]), len(x[1])))
+        cap = min(O.sigan(ARKA, x, ust, W, 0.5) for x in iki)
+        if cap >= MIN_ARKA_BOY:
+            return [(x, cap, 0.5) for x in iki]
+    return []
+
+
 def _arka(p, satirlar, kutu, uyar):
     """Arka yüz gömme satırları (arkadan okunur hâlde), alt alta ortalı; tek renk (yazı rengi: tablaya bakan
-    katmanlarda tek filament). Sığmayan satır atlanır."""
+    katmanlarda tek filament). Genişe sığmayan satır daralır ya da ikiye bölünür; yine sığmayan ya da yükseklikte
+    taşan satır (yarım kalmasın diye bütünüyle) atlanır, uyarı verilir."""
     W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
     out, y = [], 0.0
     for i, s in enumerate(satirlar):
-        cap = O.sigan(ARKA, s, 3.6 if i == 0 else 3.2, W, 0.5)
-        if cap < MIN_ARKA_BOY:
+        parca = _arka_parcalari(s, 3.6 if i == 0 else 3.2, W)
+        yeni, y2 = [], y
+        for metin, cap, tr in parca:
+            cs, a = _ust_koy(O.yazi(ARKA, metin, cap, 0.0, 0.0, "c", tr, W, kabartma=False), y2)
+            yeni.append((cs, p.yazi))
+            y2 = a - 1.6
+        if not parca or -(y2 + 1.6) > H:
             uyar.append(f"arka yüze '{s}' sığmadı")
             continue
-        cs, a = _ust_koy(O.yazi(ARKA, s, cap, 0.0, 0.0, "c", 0.5, W, kabartma=False), y)
-        if -a > H:
-            uyar.append(f"arka yüze '{s}' sığmadı")
-            break
-        out.append((cs, p.yazi))
-        y = a - 1.6
+        out += yeni
+        y = y2
     return out
 
 

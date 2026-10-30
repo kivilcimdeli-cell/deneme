@@ -7,6 +7,8 @@ Siparişten baskı dosyasına giden yerel uygulama. Bilgisayarda çalışır, ta
 3. Müşteri beğenmezse **Yeni katalog üret** denir. Gösterilen tasarımlar tekrar gelmez.
 4. Müşterinin söylediği koda (M03, A07…) tıklanır ya da kod alttaki kutuya yazılır. **Baskı dosyalarını üret** ile
    X2D 3MF'i, önizlemeler ve web sayfası hazırlanır. Çıktılar müşteri sayfasının en üstünde; **Aç** / **İndir**.
+   - "A07 olsun ama kırmızı": üret düğmesinin altında **Renkleri değiştir** (gövde, yazı, vurgu); boş bırakılan
+     katalogdaki gibi kalır. Değişiklik geçmişe yazılır.
 5. Müşteri **Sil** ile silinir: klasörü veri klasöründe `silinenler/` altına taşınır (geri alınabilir).
 
 Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3MF üretilir.
@@ -80,7 +82,9 @@ gerekmez; yönetici izni istemez.
 - **Yapı:** ön yüz 0,8 mm kabartma, arka yüz gömme yazı.
 - **3 renk:** gövde, yazı (ad ve arka yüz), vurgu (simge, alt yazı). Seçilmeyen renk otomatik; seçilen yazı rengi
   gövdede zor okunuyorsa (sarı gövdede beyaz gibi) uyarı çıkar.
-- **Sığmayan yazı:** bir biçime sığmayan alt yazı ya da arka satır yazılmaz; müşteri notlarında uyarı çıkar.
+- **Sığmayan yazı:** alt yazı ve arka satırlar önce harf aralığını daraltır, sonra iki satıra iner ("0546 475" /
+  "45 08"). Yine sığmayan yazılmaz, müşteri notlarında uyarı çıkar; arka yazısı eksik kalan tasarım katalogda ancak
+  tam olanlar yetmezse gösterilir.
 
 ## Öğrenme
 
