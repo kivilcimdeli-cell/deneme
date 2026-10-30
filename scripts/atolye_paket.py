@@ -31,12 +31,27 @@ def dosyalar():
     return sorted(out)
 
 
+OKU_BENI = """BOYDE Atolye - kurulum (Windows)
+
+1. Python 3.11'i kurun: https://www.python.org/downloads/
+   Kurulumun ilk ekraninda "Add python.exe to PATH" kutusunu isaretleyin.
+2. Bu klasorde kurulum.bat dosyasina cift tiklayin (bir kez; birkac dakika surer).
+3. Her gun BOYDE_Atolye.bat ile acin. Panel tarayicida acilir: http://127.0.0.1:8765
+   Pencereyi kapatinca uygulama kapanir.
+
+Musteri kayitlari ve uretilen dosyalar: Belgeler\\BOYDE Atolye
+Guncelleme: yeni BOYDE_Atolye.zip'i bu klasorun uzerine acip kurulum.bat'i bir kez calistirin.
+Ayrinti: atolye\\README.md
+"""
+
+
 def main():
     os.makedirs(os.path.join(KOK, "dist"), exist_ok=True)
     yol = os.path.join(KOK, "dist", "BOYDE_Atolye.zip")
     with zipfile.ZipFile(yol, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for f in dosyalar():
             z.write(f, os.path.join("BOYDE_Atolye", os.path.relpath(f, KOK)))
+        z.writestr("BOYDE_Atolye/OKU_BENI.txt", OKU_BENI.replace("\n", "\r\n"))
     print(f"{os.path.relpath(yol, KOK)}  {len(dosyalar())} dosya, {os.path.getsize(yol) / 1e6:.1f} MB")
 
 
