@@ -147,6 +147,8 @@ function yeniSiparis(kod) {
 
 // ------------------------------------------------------------------ müşteri sayfası
 let SECILEN = {};
+let RENKSEC = {};                                         // üretimde renk değişikliği (müşteri başına)
+const RENK_ALANI = {govde: ["zemin", "Gövde"], metin: ["yazi_renk", "Yazı"], vurgu: ["renk", "Vurgu"]};
 
 async function musteriSayfasi(k, sessiz) {
   const m = await api("musteri/" + encodeURIComponent(k));
@@ -157,6 +159,14 @@ async function musteriSayfasi(k, sessiz) {
   const kE = encodeURIComponent(k);
   if (!SECILEN[k]) SECILEN[k] = (m.secimler.at(-1) || {}).kod || "";
   const sec = SECILEN[k];
+  const rs = RENKSEC[k] = RENKSEC[k] || {};
+  // "A07 olsun ama kırmızı": seçilen tasarım katalogdaki renkleriyle ya da burada seçilen renklerle üretilir
+  const renkSec = Object.entries(RENK_ALANI).map(([rol, [alan, ad]]) => {
+    const a = u.alanlar.find(x => x.ad === alan);
+    return a ? `<label class="renksec">${ad}<select data-renk="${rol}"><option value="">katalogdaki</option>
+      ${a.secenekler.filter(([v]) => v !== "otomatik").map(([v, t]) =>
+        `<option value="${esc(v)}"${rs[rol] === v ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>` : "";
+  }).join("");
 
   const kataloglar = [...m.kataloglar].reverse().map((c, i) => `
     <details class="bolum katalog"${i === 0 ? " open" : ""}><summary class="satir ara"><h3>${c.no}. katalog
@@ -200,10 +210,12 @@ async function musteriSayfasi(k, sessiz) {
           <p class="soluk">Her katalogda ${u.katalog_adet} örnek. Yeni katalog öncekilerde gösterilenleri tekrar etmez.
             Müşterinin beğendiği koda tıklayın, sonra baskı dosyalarını üretin.</p>
           ${kataloglar || ""}</div>
-        <div class="kart bolum satir ara" style="position:sticky;bottom:12px">
+        <div class="kart bolum" style="position:sticky;bottom:12px"><div class="satir ara">
           <div class="satir"><b>Seçilen: <span id="secilen">${esc(sec || "—")}</span></b>
             <input id="kodgir" placeholder="Kodu yaz (ör. M03)" style="width:170px"></div>
-          <button class="vurgu" id="uret" ${!sec || aktif ? "disabled" : ""}>Seçilen tasarımın baskı dosyalarını üret</button></div>`
+          <button class="vurgu" id="uret" ${!sec || aktif ? "disabled" : ""}>Seçilen tasarımın baskı dosyalarını üret</button></div>
+          ${renkSec ? `<div class="satir renkler"><span class="soluk">Renkleri değiştir (isteğe bağlı):</span>${renkSec}</div>` : ""}
+        </div>`
       : `<div class="kart satir ara"><h2>Baskı dosyası</h2>
           <button class="vurgu" id="uret" ${aktif ? "disabled" : ""}>${m.ciktilar.length ? "Yeniden üret" : "3MF üret"}</button></div>`}
     </div><div>
@@ -247,7 +259,8 @@ async function musteriSayfasi(k, sessiz) {
   const is_ = (yol, govde, mesaj) => api(`musteri/${kE}/${yol}`, govde).then(() => { bildir(mesaj); musteriSayfasi(k); })
     .catch(e => bildir(e.message, true));
   if ($("#katalog")) $("#katalog").onclick = () => is_("katalog", {}, "Katalog sıraya alındı");
-  $("#uret").onclick = () => is_("uret", {kod: SECILEN[k] || ""}, "Baskı dosyaları sıraya alındı");
+  document.querySelectorAll("[data-renk]").forEach(el => el.onchange = () => { rs[el.dataset.renk] = el.value; });
+  $("#uret").onclick = () => is_("uret", {kod: SECILEN[k] || "", renkler: rs}, "Baskı dosyaları sıraya alındı");
   $("#claude").onclick = () => is_("claude", {istek: $("#istek").value}, "Claude'a iletildi");
   if (aktif) zamanlayici = setTimeout(() => location.hash.includes(kE) && musteriSayfasi(k, true), 1500);
 }

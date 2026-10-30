@@ -11,22 +11,31 @@ Siparişten baskı dosyasına giden yerel uygulama. Bilgisayarda çalışır, ta
 
 Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3MF üretilir.
 
-## Kurulum (Windows, bir kez)
+## Kurulum (Windows)
+
+**Kurulum dosyası (önerilen):** `BOYDE_Atolye_Kurulum.exe` indirilip çift tıklanır. Python ya da bat dosyası
+gerekmez; yönetici izni istemez.
+
+- Masaüstünde ve Başlat menüsünde **BOYDE Atölye** simgesi olur. Simge paneli kendi penceresinde açar (Edge'in
+  uygulama penceresi, adres çubuğu yok); siyah konsol penceresi çıkmaz.
+- Pencere kapanınca uygulama da kapanır. Süren bir iş varsa bitmesi beklenir.
+- İlk açılışta "Windows bilgisayarınızı korudu" çıkarsa **Ek bilgi → Yine de çalıştır** (dosya imzasız).
+- **Güncelleme:** yeni kurulum dosyası aynı şekilde kurulur; eskisinin üzerine yazar.
+- **Nereden:** depodaki GitHub sürümleri (Releases, `atolye-1.0.N`). Her değişiklikte GitHub Actions Windows'ta yeniden
+  derler (`.github/workflows/atolye-windows.yml`): kurulum klasörü (`scripts/atolye_windows.py`: gömülü Python 3.11,
+  paketler, Chromium), duman testi (`scripts/atolye_duman.py`: dört ürün baştan sona), Inno Setup
+  (`paket/windows/atolye.iss`).
+
+**ZIP ile (eski yol):**
 
 1. [Python 3.11](https://www.python.org/downloads/) kurulur. Kurulumda **Add python.exe to PATH** işaretlenir.
-2. Uygulama indirilir:
-   - **ZIP (önerilen, ~6 MB):** `BOYDE_Atolye.zip` bir klasöre açılır (ör. `C:\BOYDE_Atolye`).
-   - **Git:** depo `git clone` ile indirilir (tamamı ~370 MB: eski işlerin görselleri de içinde).
-3. `kurulum.bat` çift tıklanır. Sanal ortamı, paketleri ve site önizlemeleri için Chromium'u kurar (birkaç dakika).
+2. `BOYDE_Atolye.zip` bir klasöre açılır (ör. `C:\BOYDE_Atolye`). Git ile de indirilebilir (depo ~370 MB).
+3. `kurulum.bat` çift tıklanır: sanal ortam, paketler, site önizlemeleri için Chromium (birkaç dakika).
 4. Her gün `BOYDE_Atolye.bat` ile açılır. Pencere kapanınca uygulama da kapanır.
+5. Güncelleme: git ile kurulduysa `guncelle.bat`; ZIP ile kurulduysa yeni ZIP aynı klasöre açılıp `kurulum.bat` bir
+   kez çalıştırılır. ZIP depodan `python3 scripts/atolye_paket.py` ile yapılır (`dist/BOYDE_Atolye.zip`).
 
-**Güncelleme:**
-
-- **Git ile kurulduysa:** `guncelle.bat` son sürümü çeker.
-- **ZIP ile kurulduysa:** yeni ZIP aynı klasörün üzerine açılır ve `kurulum.bat` bir kez çalıştırılır.
-- **Kayıtlar:** müşteri kayıtları ayrı klasörde durur (aşağıda), güncellemeden etkilenmez.
-
-**Paket:** ZIP depodan `python3 scripts/atolye_paket.py` ile yapılır (`dist/BOYDE_Atolye.zip`).
+**Kayıtlar** ayrı klasörde durur (aşağıda), güncellemeden ve kaldırmadan etkilenmez.
 
 ## Ürünler
 
@@ -40,6 +49,7 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 ### QR'lı isimlik
 
 - **Tasarımlar:** 10 düzen (`atolye/tasarim/isimlik9.py`), müşterinin bilgileriyle kurulur.
+  - Renkler: gövde (siyah ya da beyaz), yazı, vurgu; seçilmeyen otomatik. QR her zaman siyah-beyaz (okunsun diye).
   - Ad uzunsa küçülür ya da iki satıra bölünür.
   - Hizmetler sığdığı kadar yazılır.
   - Simge sektöre göre seçilir. Logo yüklenirse logo izlenip kabartma olur.
@@ -58,6 +68,7 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 
 - **Tasarımlar:** 10 düzen (`atolye/tasarim/isimlik20.py`): ad soyad, unvan, kurum, telefon; simge sektöre göre, logo
   ya da kişinin baş harfleri.
+- **Renkler:** gövde, yazı, vurgu (9 × 12'deki gibi); QR her zaman siyah-beyaz.
 - **Uzun yazılar:** uzun unvan ve kurum iki satıra iner, gerekirse ad küçülür. Yine sığmazsa telefon isimlikten
   çıkar; telefon sayfada kalır, notlarda uyarı çıkar.
 - **Kartvizit sayfası:** aynı 5 şablonla, kişinin kartviziti olarak yapılır. E-posta bağlantısı eklenir; **Rehbere
@@ -67,6 +78,8 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 
 - **Biçimler:** 8 biçim × 3 dizilim (`atolye/tasarim/anahtarlik.py`).
 - **Yapı:** ön yüz 0,8 mm kabartma, arka yüz gömme yazı.
+- **3 renk:** gövde, yazı (ad ve arka yüz), vurgu (simge, alt yazı). Seçilmeyen renk otomatik; seçilen yazı rengi
+  gövdede zor okunuyorsa (sarı gövdede beyaz gibi) uyarı çıkar.
 - **Sığmayan yazı:** bir biçime sığmayan alt yazı ya da arka satır yazılmaz; müşteri notlarında uyarı çıkar.
 
 ## Öğrenme

@@ -23,3 +23,6 @@
 - Yeni ürün istenince `atolye/urunler/<ad>.py` eklentisi yazılır ve `atolye/urunler/__init__.py`'deki `SIRA`'ya eklenir;
   ortak parçalar `atolye/tasarim/`. İşletme siteleri uygulamada da yalnız 5 şablonla (`atolye/site.py`).
 - Müşteri verileri `atolye_veri/` (git'e girmez, kişisel bilgi); denemeler scratchpad'de `BOYDE_VERI` ile yapılır.
+- Kullanıcıya verilen: Windows kurulum dosyası `BOYDE_Atolye_Kurulum.exe` (GitHub sürümü). Uygulamada değişiklik push
+  edilince GitHub Actions yeniden derler ve duman testinden geçirir (`.github/workflows/atolye-windows.yml`); yeni
+  bağlantı sürümler sayfasındadır. Yerelde deneme: `python3 scripts/atolye_duman.py`.

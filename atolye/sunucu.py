@@ -23,11 +23,13 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import PORT, VERI, isler, kayit, ogrenme, urunler
 
+NABIZ = [0.0]          # arayüzden son istek (açık panel birkaç saniyede bir iş durumunu sorar): pencere açık mı
 ARAYUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "arayuz")
 mimetypes.add_type("model/3mf", ".3mf")
 mimetypes.add_type("text/javascript", ".js")
@@ -41,6 +43,22 @@ class Hata(Exception):
 
 def _eksik(urun, bilgiler):
     return [a["etiket"] for a in urun.ALANLAR if a.get("zorunlu") and not str(bilgiler.get(a["ad"], "")).strip()]
+
+
+RENK_ALANI = {"govde": "zemin", "metin": "yazi_renk", "vurgu": "renk"}   # üretimde renk değişikliği: formdaki alan
+
+
+def _renkler(urun, istek):
+    """Üretimde seçilen tasarımın renklerini değiştirme ({govde, metin, vurgu}: renk adı). Yalnız ürünün formundaki
+    seçeneklerden (9 × 12 ve kurumsalda gövde siyah ya da beyaz); boş ya da "otomatik" olanlar katalogdaki gibi kalır."""
+    out = {}
+    for rol, v in (istek or {}).items():
+        alan = next((a for a in urun.ALANLAR if a["ad"] == RENK_ALANI.get(rol)), None)
+        if alan and v and v != "otomatik":
+            if v not in [x[0] for x in alan.get("secenekler", [])]:
+                raise Hata(400, f"Geçersiz renk: {v}")
+            out[rol] = v
+    return out
 
 
 def _musteri_tam(k):
@@ -118,6 +136,7 @@ class Panel(BaseHTTPRequestHandler):
         self._yonlendir("POST")
 
     def _yonlendir(self, yontem):
+        NABIZ[0] = time.time()
         u = urllib.parse.urlparse(self.path)
         parca = [urllib.parse.unquote(p) for p in u.path.strip("/").split("/") if p]
         q = urllib.parse.parse_qs(u.query)
@@ -206,7 +225,9 @@ class Panel(BaseHTTPRequestHandler):
             kod = (g.get("kod") or "").strip().upper()
             if u.KATALOG_ADET and not kod:
                 raise Hata(400, "Katalogdan bir tasarım kodu seçin")
-            isler.ekle(k, "uret", kod, baslik=f"{kod or 'Baskı'} dosyaları")
+            renkler = _renkler(u, g.get("renkler"))
+            isler.ekle(k, "uret", kod, baslik=f"{kod or 'Baskı'} dosyaları" + (" (renk değişti)" if renkler else ""),
+                       ek=json.dumps(renkler, ensure_ascii=False) if renkler else "")
             return _musteri_tam(k)
         if eylem == "claude":
             istek = (g.get("istek") or "").strip()

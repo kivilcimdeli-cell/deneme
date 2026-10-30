@@ -6,6 +6,7 @@ restoran_masalik/siteler/img/.doku/
 # atölye uygulamasının müşteri verileri: kişisel bilgi, git'e girmez
 atolye_veri/
 dist/
+build/
 
 # anahtarlık modellerinin ara dosyaları (betikler yeniden üretir)
 boyde_labs/anahtarlik_*/kaynak/*.npz

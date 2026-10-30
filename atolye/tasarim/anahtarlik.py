@@ -200,9 +200,16 @@ def _on(c, p, dizilim, yazi_tipi, kutu, uyar):
     satirlar, cap = _ad_satirlari(ad, yazi_tipi, pay, aw)
     if not cap:
         return None, None, 0.0
-    alt_cap = 0.0
-    if c.alt:
-        alt_cap = min(4.6, O.sigan(O.SATIR, c.alt, cap * 0.75, aw, 0.8))
+    alt_cap, alt_satir, alt_tr = 0.0, [c.alt], 0.8
+    if c.alt:                     # tek satır; sığmazsa iki satır (boy büyük kalır), en son daha dar harf aralığı
+        kelime = c.alt.split()
+        iki = min(([" ".join(kelime[:i]), " ".join(kelime[i:])] for i in range(1, len(kelime))),
+                  key=lambda x: max(len(x[0]), len(x[1])), default=None)
+        for satir_, tr in [([c.alt], 0.8)] + ([(iki, 0.8)] if iki else []) + [([c.alt], 0.5)]:
+            alt_cap = min([4.6] + [O.sigan(O.SATIR, x, cap * 0.75, aw, tr) for x in satir_])
+            if alt_cap >= MIN_ALT:
+                alt_satir, alt_tr = satir_, tr
+                break
         if alt_cap < MIN_ALT:
             alt_cap = 0.0
             uyar.append(f"'{c.alt}' bu biçime sığmadı")
@@ -215,8 +222,12 @@ def _on(c, p, dizilim, yazi_tipi, kutu, uyar):
         ad_cs = A.union(*yazilar)
         blok, lines = [(ad_cs, p.yazi)], {"ad": ad_cs}
         if alt_cap:
-            alt, _ = _ust_koy(O.yazi(O.SATIR, c.alt, alt_cap, 0.0, 0.0, "c", 0.8, aw),
-                              ad_cs.bounds()[1] - max(1.3, cap * 0.2))
+            y, altlar = ad_cs.bounds()[1] - max(1.3, cap * 0.2), []
+            for s in alt_satir:
+                cs, y = _ust_koy(O.yazi(O.SATIR, s, alt_cap, 0.0, 0.0, "c", alt_tr, aw), y)
+                altlar.append(cs)
+                y -= max(1.0, alt_cap * 0.3)
+            alt = A.union(*altlar)
             lines["alt"] = alt
             blok.append((alt, p.vurgu))
         bb = A.union(*[cs for cs, _ in blok]).bounds()

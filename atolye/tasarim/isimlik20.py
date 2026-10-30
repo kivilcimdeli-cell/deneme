@@ -305,7 +305,8 @@ def kontrol(d):
 
 
 def ad(d):
-    return f"{DUZENLER[d.duzen][0]} · {O.AD[d.palet.govde]} zemin, {O.AD[d.palet.vurgu]} · {O.YAZI_AD[d.yazi_tipi]}"
+    p = d.palet
+    return f"{DUZENLER[d.duzen][0]} · {O.AD[p.govde]} zemin, {O.AD[p.yazi]} yazı, {O.AD[p.vurgu]} · {O.YAZI_AD[d.yazi_tipi]}"
 
 
 def gorunus(parcalar, govde, boy=900, aci=(0, -90), duz=0.85):

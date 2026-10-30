@@ -161,7 +161,8 @@ def satir(d, ad, s, x, y_ust, cap, max_w, align, tr, renk, k=O.SATIR):
 
 def hizmetler(d, c, p, x, y_ust, max_w, align="l", cap=4.4, n_max=2, y_alt=None, renk=None, ara=1.8):
     """Hizmet maddeleri (araları yuvarlak nokta), satırlar arası `ara` mm; ilk satırın üstü y_ust, son satırın altı
-    y_alt'ın altına inmez. Sığmayan maddeler için uyarı. Döner son satırın alt kenarı."""
+    y_alt'ın altına inmez (düzenlerde y_alt, çağrının üstünden en az 2,6 mm yukarıda: satır arasından belirgin
+    büyük, yazılar birbirine yapışık görünmesin). Sığmayan maddeler için uyarı. Döner son satırın alt kenarı."""
     if not c.hizmetler:
         d.gosterilen = 0
         return y_ust
@@ -255,7 +256,7 @@ def l_serit(d, c, p, k):
     _, y, _ = ad_yaz(d, c, p, k, x, 82.0, 19.0, w, min_cap=10.0, cap2=13.0)
     if c.hizmet:
         y = satir(d, "iş türü", c.hizmet, x, y - 3.6, 5.2, w, "l", 2.6, p.vurgu)
-    hizmetler(d, c, p, x, y - 3.4, w, y_alt=33.0)
+    hizmetler(d, c, p, x, y - 3.4, w, y_alt=33.8)
     cagri(d, c, p, x, 29.0, max_w=w, tr=1.4)
     telefon(d, c, p, x, 20.0, 4.8, max_w=w)
     qr(d, c, p, 34.0, 50.0, 36.0)
@@ -288,7 +289,7 @@ def l_zarif(d, c, p, k):
         y -= 3.4
     if c.hizmet:
         y = satir(d, "iş türü", c.hizmet, X0, y, 5.2, 62.0, "l", 3.2, p.vurgu) - 3.4
-    hizmetler(d, c, p, X0, y, 62.0, y_alt=31.0)
+    hizmetler(d, c, p, X0, y, 62.0, y_alt=31.8)
     cagri(d, c, p, X0, 27.0, tr=1.4)
     telefon(d, c, p, X0, 18.4, 5.2)
     qr(d, c, p, 34.0, 49.0, 36.0, cerceve=True, tr=1.6)
@@ -306,7 +307,7 @@ def l_bant(d, c, p, k):
     y = 57.6
     if c.hizmet:
         y = satir(d, "iş türü", c.hizmet, X0, y, 4.6, 66.0, "l", 0.8, p.vurgu) - 3.0
-    hizmetler(d, c, p, X0, y, 66.0, y_alt=33.6)
+    hizmetler(d, c, p, X0, y, 66.0, y_alt=34.4)
     cagri(d, c, p, X0, 29.6)
     telefon(d, c, p, X0, 20.4, 5.4)
     qr(d, c, p, 36.0, 40.0, 34.0, tr=1.4)
@@ -327,7 +328,7 @@ def l_baslik(d, c, p, k):
         if x_end - hw - 4.0 >= 6.0:
             d.add(None, O.bar(-x_end, -hw - 4.0, yc, 1.3) + O.bar(hw + 4.0, x_end, yc, 1.3), p.vurgu)
         y = alt
-    hizmetler(d, c, p, X0, min(y - 4.0, 45.0), 64.0, y_alt=32.6)
+    hizmetler(d, c, p, X0, min(y - 4.0, 45.0), 64.0, y_alt=33.8)
     cagri(d, c, p, X0, 29.0)
     telefon(d, c, p, X0, 20.0, 5.2, max_w=62.0)
     qr(d, c, p, 36.0, 29.5, 34.0, yazi="")
@@ -375,7 +376,7 @@ def l_egik(d, c, p, k):
     _, y, _ = ad_yaz(d, c, p, k, X0, ib[1] - 3.0, 17.0, 64.0, "l", 0.3, min_cap=9.0, cap2=11.0)
     if c.hizmet:
         y = satir(d, "iş türü", c.hizmet, X0, y - 3.4, 4.6, 62.0, "l", 1.6, p.vurgu)
-    hizmetler(d, c, p, X0, y - 3.2, 62.0, y_alt=31.6)
+    hizmetler(d, c, p, X0, y - 3.2, 62.0, y_alt=32.8)
     cagri(d, c, p, X0, 28.0)
     telefon(d, c, p, X0, 19.0, 5.2)
     qr(d, c, p, 35.0, 50.0, 36.0)
@@ -389,7 +390,7 @@ def l_qr_solda(d, c, p, k):
     _, y, _ = ad_yaz(d, c, p, k, cx, ib[1] - 3.0, 9.0, w, "c", 0.3, min_cap=6.0, cap2=7.0)
     if c.hizmet:
         y = satir(d, "iş türü", c.hizmet, cx, y - 3.0, 4.6, w, "c", 1.2, p.vurgu)
-    hizmetler(d, c, p, cx, y - 3.4, w, "c", n_max=3, y_alt=29.4)
+    hizmetler(d, c, p, cx, y - 3.4, w, "c", n_max=3, y_alt=29.8)
     cagri(d, c, p, cx, 25.0, align="c", max_w=w)
     telefon(d, c, p, cx, 16.5, 4.8, "c", max_w=w)
 
@@ -433,7 +434,8 @@ def ozellikler(d, c):
 
 
 def ad(d):
-    return f"{DUZENLER[d.duzen][0]} · {O.AD[d.palet.govde]} zemin, {O.AD[d.palet.vurgu]} · {O.YAZI_AD[d.yazi_tipi]}"
+    p = d.palet
+    return f"{DUZENLER[d.duzen][0]} · {O.AD[p.govde]} zemin, {O.AD[p.yazi]} yazı, {O.AD[p.vurgu]} · {O.YAZI_AD[d.yazi_tipi]}"
 
 
 def kontrol(d):

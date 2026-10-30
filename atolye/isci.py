@@ -5,11 +5,12 @@ ayarları (10 × 20 ölçüleri gibi) ürünler arasında karışmaz.
 Kullanım: python -m atolye.isci katalog|uret <müşteri kimliği> [kod]
 Çıktı: "@@ <yüzde> <mesaj>" satırları ilerlemedir; sonuç musteri.json'a yazılır, öğrenme kaydı güncellenir.
 """
+import json
 import os
 import sys
 import traceback
 
-from . import SCRIPTS, kayit, ogrenme, urunler
+from . import SCRIPTS, kayit, ogrenme, urunler, utf8_cikti
 
 sys.path.insert(0, SCRIPTS)
 
@@ -54,7 +55,18 @@ def katalog(kimlik):
     is_.ilerle(100, f"{no}. katalog hazır")
 
 
-def uret(kimlik, kod=None):
+def renk_degistir(secilen, renkler):
+    """Seçilen tasarımın kopyası, renkleri değişmiş ({govde, metin, vurgu}: renk adı). Katalogdaki kayıt değişmez."""
+    from .tasarim import ortak as O
+    secilen = json.loads(json.dumps(secilen))
+    oz = secilen.setdefault("ozellikler", {})
+    for rol, ad in renkler.items():
+        secilen["parametreler"][rol] = O.KIMLIK[ad]
+        oz[{"govde": "zemin", "metin": "metin", "vurgu": "renk"}[rol]] = ad
+    return secilen
+
+
+def uret(kimlik, kod=None, renkler=None):
     m = kayit.oku(kimlik)
     u = urunler.bul(m["urun"])
     secilen = None
@@ -65,13 +77,18 @@ def uret(kimlik, kod=None):
                 break
         if not secilen:
             raise SystemExit(f"Katalogda {kod} kodlu tasarım yok")
+        if renkler:
+            secilen = renk_degistir(secilen, renkler)
     is_ = Is(m)
     is_.ilerle(2, f"{kod or u.AD} için dosyalar hazırlanıyor")
     sonuc = u.uret(is_, secilen)
     m = kayit.oku(kimlik)
     if secilen:
-        m["secimler"].append({"kod": kod, "tarih": kayit.simdi()})
+        m["secimler"].append({"kod": kod, "tarih": kayit.simdi(), **({"renkler": renkler} if renkler else {})})
         ogrenme.secildi(u.KOD, secilen["ozellikler"])
+        if renkler:
+            ad = {"govde": "gövde", "metin": "yazı", "vurgu": "vurgu"}
+            kayit.not_ekle(m, f"{kod} renk değişikliğiyle: " + ", ".join(f"{ad[r]} {v}" for r, v in renkler.items()))
     for c in sonuc["ciktilar"]:
         c["tarih"] = kayit.simdi()
     eski = {c["yol"] for c in sonuc["ciktilar"]}
@@ -84,12 +101,14 @@ def uret(kimlik, kod=None):
 
 
 def main():
+    utf8_cikti()
     eylem, kimlik = sys.argv[1], sys.argv[2]
     try:
         if eylem == "katalog":
             katalog(kimlik)
         elif eylem == "uret":
-            uret(kimlik, sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None)
+            uret(kimlik, sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None,
+                 json.loads(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] else None)
         else:
             raise SystemExit(f"bilinmeyen eylem: {eylem}")
     except SystemExit:

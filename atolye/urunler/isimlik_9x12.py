@@ -38,8 +38,10 @@ def _secenekler():
 
 try:
     _SEKTOR, _RENK = _secenekler()
+    from atolye.tasarim.ortak import yazi_secenekleri as _ys
+    _YAZI = _ys()
 except Exception:                                      # noqa: BLE001 (tasarım modülleri yüklenemezse form yine açılır)
-    _SEKTOR, _RENK = [("genel", "Genel")], [("otomatik", "Otomatik")]
+    _SEKTOR, _RENK, _YAZI = [("genel", "Genel")], [("otomatik", "Otomatik")], [("otomatik", "Otomatik")]
 
 ALANLAR = [
     {"ad": "isletme", "etiket": "İşletme adı", "tur": "text", "zorunlu": True, "grup": "İsimlik",
@@ -58,7 +60,10 @@ ALANLAR = [
     {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı", "tur": "text", "varsayilan": "TARA"},
     {"ad": "zemin", "etiket": "Gövde rengi", "tur": "select", "varsayilan": "otomatik",
      "secenekler": [("otomatik", "Otomatik (siyah ve beyaz karışık)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")]},
-    {"ad": "renk", "etiket": "Vurgu rengi (filament)", "tur": "select", "secenekler": _RENK, "varsayilan": "otomatik"},
+    {"ad": "yazi_renk", "etiket": "Yazı rengi (ad, hizmetler, telefon)", "tur": "select", "secenekler": _YAZI,
+     "varsayilan": "otomatik", "ipucu": "QR her zaman siyah-beyaz kalır (okunsun diye)."},
+    {"ad": "renk", "etiket": "Vurgu rengi (simge, çizgiler, çağrı)", "tur": "select", "secenekler": _RENK,
+     "varsayilan": "otomatik"},
     {"ad": "logo", "etiket": "Logo (isteğe bağlı)", "tur": "dosya", "kabul": "image/png,image/jpeg",
      "ipucu": "Düz zeminde tek renk logo en iyisi. İsimlikte simgenin yerine kabartma, sitede işaret olur."},
 
@@ -131,35 +136,33 @@ def _icerik(is_, b):
 
 
 def _adaylar(b, c, renkler):
-    """[(imza, özellikler, (düzen, gövde, vurgu, vurgu2, yazı tipi))]."""
+    """[(imza, özellikler, (düzen, gövde, vurgu, vurgu2, yazı tipi, yazı rengi))] ve renk uyarıları."""
     from atolye.tasarim import isimlik9 as T
     from atolye.tasarim import ortak as O
-    zemin = b.get("zemin") or "otomatik"
-    govdeler = [O.BLACK, O.WHITE] if zemin == "otomatik" else [O.KIMLIK[zemin]]
-    sabit = O.KIMLIK.get(b.get("renk") or "otomatik")
+    paletler, uyar = O.isimlik_paletleri(b, renkler, [O.BLACK, O.WHITE])
     simge = c.simge if c.simge in ("logo", "monogram") else "simge"
     out = []
     for duzen, (_, _, fonts) in T.DUZENLER.items():
-        for g in govdeler:
-            uygun = O.KOYUDA if g == O.BLACK else O.ACIKTA
-            vurgular = [sabit] if sabit else ([r for r in renkler if r in uygun][:3] or uygun[:2])
-            for v in vurgular:
-                v2 = (O.BLUE if v != O.BLUE else O.RED) if c.simge == "direk" and duzen == "serit" else 0
-                for f in fonts:
-                    oz = {"sablon": duzen, "zemin": O.AD[g], "renk": O.AD[v], "yazi": f, "simge": simge}
-                    out.append((f"{duzen}|{O.AD[g]}|{O.AD[v]}|{f}", oz, (duzen, g, v, v2, f)))
-    return out
+        for g, y, v in paletler:
+            v2 = (O.BLUE if v != O.BLUE else O.RED) if c.simge == "direk" and duzen == "serit" else 0
+            oto = y == O.Palet(g, v).yazi                               # otomatik yazı rengi: eski imza
+            for f in fonts:
+                oz = {"sablon": duzen, "zemin": O.AD[g], "metin": O.AD[y], "renk": O.AD[v], "yazi": f, "simge": simge}
+                out.append((f"{duzen}|{O.AD[g]}|{O.AD[v]}|{f}" + ("" if oto else f"|{O.AD[y]}"), oz,
+                            (duzen, g, v, v2, f, y)))
+    return out, uyar
 
 
 def _parametre(p):
-    duzen, g, v, v2, f = p
-    return {"duzen": duzen, "govde": g, "vurgu": v, "vurgu2": v2, "yazi": f}
+    duzen, g, v, v2, f, y = p
+    return {"duzen": duzen, "govde": g, "vurgu": v, "vurgu2": v2, "yazi": f, "metin": y}
 
 
 def _kur(c, par):
     from atolye.tasarim import isimlik9 as T
     from atolye.tasarim import ortak as O
-    return T.tasarla(par["duzen"], c, O.Palet(par["govde"], par["vurgu"], par.get("vurgu2", 0)), par["yazi"])
+    return T.tasarla(par["duzen"], c, O.Palet(par["govde"], par["vurgu"], par.get("vurgu2", 0), par.get("metin", 0)),
+                     par["yazi"])
 
 
 # ---------------------------------------------------------------- katalog
@@ -173,7 +176,8 @@ def katalog(is_):
     from atolye.tasarim import ortak as O
     b = is_.bilgiler
     c, renkler, _, uyar = _icerik(is_, b)
-    adaylar = _adaylar(b, c, renkler)
+    adaylar, renk_uyar = _adaylar(b, c, renkler)
+    uyar += renk_uyar
     by = {a[0]: a for a in adaylar}
     en_cok = 1 if is_.no == 1 else 2                 # ilk katalogda her düzenden bir tasarım
 

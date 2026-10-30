@@ -97,11 +97,60 @@ def _kaydet():
 _kaydet()
 
 
-class Palet:
-    """Gövde, yazı (koyu gövdede beyaz, açıkta siyah), vurgu ve isteğe bağlı ikinci vurgu."""
+def parlaklik(renk):
+    """Göreli parlaklık (0 siyah … 1 beyaz), önizleme tonundan."""
+    def kanal(x):
+        x /= 255
+        return x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4
+    r, g, b = (kanal(x) for x in TON[renk])
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
-    def __init__(self, govde, vurgu, vurgu2=0):
-        self.govde, self.vurgu, self.vurgu2 = govde, vurgu, vurgu2
+
+def kontrast(a, b):
+    """İki rengin kontrast oranı (1 aynı … 21 siyah-beyaz). 2'nin altı kabartmada bile zor okunur."""
+    x, y = sorted((parlaklik(a), parlaklik(b)), reverse=True)
+    return (x + 0.05) / (y + 0.05)
+
+
+OKUNUR = 2.0                                             # yazı ile gövde arasında en az bu kontrast
+
+
+def yazi_secenekleri():
+    """Formdaki "yazı rengi" seçenekleri (anahtarlık ve isimlikler)."""
+    return [("otomatik", "Otomatik (koyu gövdede beyaz, açıkta siyah)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")] + [
+        (AD[c], AD[c].capitalize()) for c in (RED, ORANGE, YELLOW, GOLD, TURQ, BLUE, NAVY, GREEN, PINK, PURPLE, GRAY)]
+
+
+def isimlik_paletleri(b, renkler, govdeler):
+    """QR'lı isimlikler (9 × 12, 10 × 20) için 3 renk: [(gövde, yazı, vurgu)] ve uyarılar. Formda seçilen renkler
+    (zemin, yazi_renk, renk) sabit. Gövde seçilmediyse `govdeler`; seçilen yazı rengi bir gövdede okunmuyorsa o gövde
+    atlanır. Vurgu seçilmediyse sektörün o gövdede okunan renkleri (yazı renginden farklı). QR her zaman siyah-beyaz."""
+    zemin = KIMLIK.get(b.get("zemin") or "otomatik")
+    yazi = KIMLIK.get(b.get("yazi_renk") or "otomatik")
+    sabit = KIMLIK.get(b.get("renk") or "otomatik")
+    uyar = []
+    if zemin and yazi and kontrast(zemin, yazi) < OKUNUR:
+        uyar.append(f"Yazı rengi ({AD[yazi]}) {AD[zemin]} gövdede zor okunur; yine de seçildiği gibi yapıldı.")
+    out = []
+    for g in [zemin] if zemin else govdeler:
+        y = Palet(g, WHITE, yazi=yazi or 0).yazi
+        if yazi and not zemin and kontrast(g, y) < OKUNUR:
+            continue
+        uygun = KOYUDA if Palet(g, WHITE).koyu else ACIKTA
+        vurgular = [sabit] if sabit else ([r for r in renkler if r in uygun and r != y][:3] or
+                                          [r for r in uygun if r != y][:2])
+        out += [(g, y, v) for v in vurgular]
+    if not out and yazi:
+        uyar.append(f"Yazı rengi ({AD[yazi]}) gövdelerin hiçbirinde okunmuyor; yazı rengi otomatik seçildi.")
+        return isimlik_paletleri({**b, "yazi_renk": "otomatik"}, renkler, govdeler)[0], uyar
+    return out, uyar
+
+
+class Palet:
+    """Gövde, yazı (seçilmediyse koyu gövdede beyaz, açıkta siyah), vurgu ve isteğe bağlı ikinci vurgu."""
+
+    def __init__(self, govde, vurgu, vurgu2=0, yazi=0):
+        self.govde, self.vurgu, self.vurgu2, self._yazi = govde, vurgu, vurgu2, yazi
 
     @property
     def koyu(self):
@@ -110,7 +159,7 @@ class Palet:
 
     @property
     def yazi(self):
-        return WHITE if self.koyu else BLACK
+        return self._yazi or (WHITE if self.koyu else BLACK)
 
     @property
     def sc(self):
@@ -122,7 +171,8 @@ class Palet:
 
     @property
     def ad(self):
-        return f"{AD[self.govde]} zemin · {AD[self.vurgu]}" + (f" · {AD[self.vurgu2]}" if self.vurgu2 else "")
+        return (f"{AD[self.govde]} zemin · {AD[self.yazi]} yazı · {AD[self.vurgu]}" +
+                (f" · {AD[self.vurgu2]}" if self.vurgu2 else ""))
 
 
 # ---------------------------------------------------------------- yazı

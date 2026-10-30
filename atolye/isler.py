@@ -6,11 +6,10 @@ import itertools
 import os
 import queue
 import subprocess
-import sys
 import threading
 import time
 
-from . import KOK, SCRIPTS, kayit
+from . import KOK, PYTHON, SCRIPTS, kayit
 
 _SAYAC = itertools.count(1)
 _ISLER = {}
@@ -26,8 +25,9 @@ def _ortam():
     return env
 
 
-def ekle(kimlik, eylem, arg="", baslik="", komut=None):
-    """Kuyruğa iş ekler. komut verilirse (Claude köprüsü gibi) o çalıştırılır, yoksa isci.py."""
+def ekle(kimlik, eylem, arg="", baslik="", komut=None, ek=""):
+    """Kuyruğa iş ekler. komut verilirse (Claude köprüsü gibi) o çalıştırılır, yoksa isci.py (ek: isci'ye ikinci
+    argüman, ör. üretimde renk değişikliği JSON'u)."""
     with _KILIT:
         for j in _ISLER.values():
             if j["kimlik"] == kimlik and j["durum"] in ("bekliyor", "calisiyor"):
@@ -35,7 +35,7 @@ def ekle(kimlik, eylem, arg="", baslik="", komut=None):
         no = next(_SAYAC)
         j = {"no": no, "kimlik": kimlik, "eylem": eylem, "arg": arg, "baslik": baslik or eylem,
              "durum": "bekliyor", "yuzde": 0, "mesaj": "Sırada", "gunluk": [], "eklendi": time.time(),
-             "komut": komut or [sys.executable, "-m", "atolye.isci", eylem, kimlik, arg]}
+             "komut": komut or [PYTHON, "-m", "atolye.isci", eylem, kimlik, arg] + ([ek] if ek else [])}
         _ISLER[no] = j
     _KUYRUK.put(no)
     return _ozet(j)
@@ -52,6 +52,11 @@ def durum(no):
 
 def musteri_isleri(kimlik):
     return [_ozet(j) for j in _ISLER.values() if j["kimlik"] == kimlik]
+
+
+def mesgul():
+    """Bekleyen ya da süren iş var mı (masaüstü başlatıcı kapanmadan önce bakar)."""
+    return any(j["durum"] in ("bekliyor", "calisiyor") for j in _ISLER.values())
 
 
 def hepsi():

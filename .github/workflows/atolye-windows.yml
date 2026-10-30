@@ -1,0 +1,64 @@
+# BOYDE Atölye Windows kurulum dosyası (BOYDE_Atolye_Kurulum.exe): Python'suz, bat'sız kurulum.
+# Adımlar: kurulum klasörü (gömülü Python 3.11, paketler, Chromium: scripts/atolye_windows.py) → duman testi (dört ürün
+# baştan sona, Windows'ta: scripts/atolye_duman.py) → Inno Setup (paket/windows/atolye.iss) → GitHub sürümü (indirme
+# bağlantısı) ve yapıt.
+name: BOYDE Atölye Windows kurulumu
+
+on:
+  push:
+    branches: [claude/bambulab-dual-side-setup-vb4pwj]
+    paths:
+      - "atolye/**"
+      - "scripts/**"
+      - "paket/windows/**"
+      - "isimlik/orijinal/**"
+      - "site_sablonlari/**"
+      - ".github/workflows/atolye-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atolye-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kurulum:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      SURUM: 1.0.${{ github.run_number }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Kurulum klasörü (gömülü Python, paketler, Chromium)
+        run: python scripts/atolye_windows.py
+
+      - name: Duman testi (dört ürün, kurulumdaki Python'la)
+        run: build\BOYDE_Atolye\python\python.exe build\BOYDE_Atolye\scripts\atolye_duman.py
+
+      - name: Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Kurulum dosyası
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DSurum=$env:SURUM" paket\windows\atolye.iss'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BOYDE_Atolye_Kurulum_${{ env.SURUM }}
+          path: dist/BOYDE_Atolye_Kurulum.exe
+          retention-days: 30
+
+      - name: Sürüm (indirme bağlantısı)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "atolye-$env:SURUM" dist\BOYDE_Atolye_Kurulum.exe
+          --target "${{ github.sha }}" --title "BOYDE Atölye $env:SURUM" --latest
+          --notes "Windows kurulum dosyası: BOYDE_Atolye_Kurulum.exe indirip çift tıklayın. Python ya da bat dosyası gerekmez; masaüstündeki BOYDE Atölye simgesiyle açılır. Müşteri kayıtları Belgeler\BOYDE Atolye klasöründe kalır."

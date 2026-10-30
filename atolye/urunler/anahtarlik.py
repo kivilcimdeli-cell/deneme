@@ -30,14 +30,16 @@ def _secenekler():
     renkler = (O.RED, O.ORANGE, O.YELLOW, O.GOLD, O.TURQ, O.BLUE, O.NAVY, O.GREEN, O.PINK, O.PURPLE, O.GRAY)
     zemin = [("otomatik", "Otomatik (katalogda farklı gövdeler)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")] + [
         (O.AD[c], O.AD[c].capitalize()) for c in renkler]
+    yazi = [("otomatik", "Otomatik (koyu gövdede beyaz, açıkta siyah)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")] + [
+        (O.AD[c], O.AD[c].capitalize()) for c in renkler]
     renk = [("otomatik", "Otomatik")] + [(O.AD[c], O.AD[c].capitalize()) for c in renkler + (O.WHITE, O.BLACK)]
-    return sektor, zemin, renk
+    return sektor, zemin, yazi, renk
 
 
 try:
-    _SEKTOR, _ZEMIN, _RENK = _secenekler()
+    _SEKTOR, _ZEMIN, _YAZI, _RENK = _secenekler()
 except Exception:                                      # noqa: BLE001 (tasarım modülleri yüklenemezse form yine açılır)
-    _SEKTOR, _ZEMIN, _RENK = [("genel", "Genel")], [("otomatik", "Otomatik")], [("otomatik", "Otomatik")]
+    _SEKTOR, _ZEMIN, _YAZI, _RENK = [("genel", "Genel")], *[[("otomatik", "Otomatik")]] * 3
 
 ALANLAR = [
     {"ad": "marka", "etiket": "Ön yüzdeki ad (marka)", "tur": "text", "zorunlu": True, "grup": "Anahtarlık",
@@ -52,8 +54,11 @@ ALANLAR = [
      "ornek": "0532 123 45 67\n@kullaniciadi\nKepez · Antalya",
      "ipucu": "Satır satır, en çok 3. Biçime sığmayan satır yazılmaz (uyarı verilir)."},
     {"ad": "adet", "etiket": "Sipariş adedi", "tur": "sayi", "zorunlu": True, "varsayilan": "100", "min": 1},
-    {"ad": "zemin", "etiket": "Gövde rengi", "tur": "select", "secenekler": _ZEMIN, "varsayilan": "otomatik"},
-    {"ad": "renk", "etiket": "Vurgu rengi (simge, alt yazı)", "tur": "select", "secenekler": _RENK,
+    {"ad": "zemin", "etiket": "1. renk: gövde", "tur": "select", "secenekler": _ZEMIN, "varsayilan": "otomatik",
+     "grup": "Renkler (3 renk)"},
+    {"ad": "yazi_renk", "etiket": "2. renk: yazı (ad ve arka yüz)", "tur": "select", "secenekler": _YAZI,
+     "varsayilan": "otomatik", "ipucu": "Gövdede okunmayan yazı rengi (sarı gövdede beyaz gibi) seçilirse uyarı çıkar."},
+    {"ad": "renk", "etiket": "3. renk: vurgu (simge, alt yazı)", "tur": "select", "secenekler": _RENK,
      "varsayilan": "otomatik"},
 
     {"ad": "yetkili", "etiket": "Yetkili", "tur": "text", "grup": "Kayıt (anahtarlığa yazılmaz)"},
@@ -90,23 +95,34 @@ def _icerik(is_, b):
 
 
 def _paletler(b, renkler):
-    """[(gövde, vurgu)]: gövde seçiliyse o, değilse siyah, beyaz, gri ve sektörün ilk rengi."""
+    """3 renk: [(gövde, yazı, vurgu)] ve uyarılar. Seçilen renkler sabit. Gövde seçilmediyse siyah, beyaz, gri ve
+    sektörün ilk rengi; yazı seçilmediyse gövdeye göre siyah ya da beyaz (seçilen yazı rengi bir gövdede okunmuyorsa o
+    gövde atlanır); vurgu seçilmediyse sektörün renkleri (renkli gövdede gövdeye zıt siyah ya da beyaz)."""
     from atolye.tasarim import ortak as O
     zemin = O.KIMLIK.get(b.get("zemin") or "otomatik")
+    yazi = O.KIMLIK.get(b.get("yazi_renk") or "otomatik")
     sabit = O.KIMLIK.get(b.get("renk") or "otomatik")
+    uyar = []
+    if zemin and yazi and O.kontrast(zemin, yazi) < O.OKUNUR:
+        uyar.append(f"Yazı rengi ({O.AD[yazi]}) {O.AD[zemin]} gövdede zor okunur; yine de seçildiği gibi yapıldı.")
     govdeler = [zemin] if zemin else [O.BLACK, O.WHITE, O.GRAY, renkler[0]]
     out = []
     for g in govdeler:
-        p = O.Palet(g, O.WHITE)
+        p = O.Palet(g, O.WHITE, yazi=yazi or 0)
+        if yazi and not zemin and O.kontrast(g, yazi) < O.OKUNUR:
+            continue
         if sabit:
             vurgular = [sabit]
         elif g in (O.BLACK, O.WHITE, O.GRAY):
             uygun = O.KOYUDA if p.koyu else [r for r in O.ACIKTA if g != O.GRAY or r not in (O.GOLD, O.TURQ)]
-            vurgular = [r for r in renkler if r in uygun and r != g][:2] or [O.ORANGE]
-        else:
-            vurgular = [O.BLACK if p.koyu else O.WHITE]       # renkli gövdede vurgu gövdeye zıt
-        out += [(g, v) for v in vurgular if v != g and v != p.yazi]
-    return out or [(O.BLACK, O.ORANGE)]
+            vurgular = [r for r in renkler if r in uygun and r not in (g, p.yazi)][:2] or [O.ORANGE]
+        else:                                                   # renkli gövdede vurgu gövdeye zıt
+            vurgular = [x for x in ((O.BLACK, O.WHITE) if p.koyu else (O.WHITE, O.BLACK)) if x != p.yazi][:1]
+        out += [(g, p.yazi, v) for v in vurgular if v != g and (sabit or v != p.yazi)]
+    if not out and yazi:
+        uyar.append(f"Yazı rengi ({O.AD[yazi]}) gövdelerin hiçbirinde okunmuyor; yazı rengi otomatik seçildi.")
+        return _paletler({**b, "yazi_renk": "otomatik"}, renkler)[0], uyar
+    return out or [(O.BLACK, O.WHITE, O.ORANGE)], uyar
 
 
 def _kalite_tahmini(c, bicim, dizilim, yazi_tipi):
@@ -124,13 +140,15 @@ def _kalite_tahmini(c, bicim, dizilim, yazi_tipi):
 def _kur(c, arka, par):
     from atolye.tasarim import anahtarlik as K
     from atolye.tasarim import ortak as O
-    return K.tasarla(par["bicim"], par["dizilim"], c, O.Palet(par["govde"], par["vurgu"]), par["yazi"], arka)
+    return K.tasarla(par["bicim"], par["dizilim"], c, O.Palet(par["govde"], par["vurgu"], yazi=par.get("metin", 0)),
+                     par["yazi"], arka)
 
 
 def _ad_kart(par):
     from atolye.tasarim import anahtarlik as K
     from atolye.tasarim import ortak as O
-    return (f"{K.BICIMLER[par['bicim']][0]} · {O.AD[par['govde']]}, {O.AD[par['vurgu']]} · "
+    yazi = O.Palet(par["govde"], par["vurgu"], yazi=par.get("metin", 0)).yazi
+    return (f"{K.BICIMLER[par['bicim']][0]} · {O.AD[par['govde']]}, {O.AD[yazi]}, {O.AD[par['vurgu']]} · "
             f"{O.YAZI_AD.get(par['yazi'], par['yazi'])}")
 
 
@@ -158,6 +176,8 @@ def katalog(is_):
     b = is_.bilgiler
     c, renkler, arka, uyar = _icerik(is_, b)
     is_.ilerle(4, "Biçimler bu ada göre deneniyor")
+    paletler, renk_uyar = _paletler(b, renkler)
+    uyar += renk_uyar
     kal, adaylar = {}, []
     simge = c.simge if c.simge in ("logo", "monogram") else "simge"
     for bicim, (_, _, dizilimler) in K.BICIMLER.items():
@@ -166,10 +186,12 @@ def katalog(is_):
                 q = kal[(bicim, dz, f)] = _kalite_tahmini(c, bicim, dz, f)
                 if q < 0.45:
                     continue
-                for g, v in _paletler(b, renkler):
-                    oz = {"bicim": bicim, "dizilim": dz, "zemin": O.AD[g], "renk": O.AD[v], "yazi": f, "simge": simge}
-                    par = {"bicim": bicim, "dizilim": dz, "govde": g, "vurgu": v, "yazi": f}
-                    adaylar.append((f"{bicim}|{dz}|{O.AD[g]}|{O.AD[v]}|{f}", oz, par))
+                for g, y, v in paletler:
+                    oz = {"bicim": bicim, "dizilim": dz, "zemin": O.AD[g], "metin": O.AD[y], "renk": O.AD[v],
+                          "yazi": f, "simge": simge}
+                    par = {"bicim": bicim, "dizilim": dz, "govde": g, "vurgu": v, "metin": y, "yazi": f}
+                    oto = y == O.Palet(g, v).yazi                       # otomatik yazı rengi: eski imza
+                    adaylar.append((f"{bicim}|{dz}|{O.AD[g]}|{O.AD[v]}|{f}" + ("" if oto else f"|{O.AD[y]}"), oz, par))
     if not adaylar:
         raise SystemExit("Ad hiçbir biçime okunur boyda sığmadı: 'Ön yüzdeki ad' alanına daha kısa bir ad yazın.")
     by = {a[0]: a for a in adaylar}

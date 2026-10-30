@@ -13,7 +13,7 @@ import shutil
 import subprocess
 import sys
 
-from . import KOK, kayit, urunler
+from . import KOK, PYTHON, kayit, urunler, utf8_cikti
 
 
 def bul():
@@ -25,7 +25,7 @@ def komut(m, istek):
     """Sunucu için iş komutu (Claude yoksa None)."""
     if not bul():
         return None
-    return [sys.executable, "-m", "atolye.claude", m["kimlik"], istek]
+    return [PYTHON, "-m", "atolye.claude", m["kimlik"], istek]
 
 
 def istem(m, istek):
@@ -52,6 +52,7 @@ Kurallar:
 
 
 def main():
+    utf8_cikti()
     kimlik, istek = sys.argv[1], sys.argv[2]
     m = kayit.oku(kimlik)
     klasor = kayit.klasor(kimlik)
@@ -60,7 +61,8 @@ def main():
     cli = bul()
     onek = ["cmd", "/c"] if cli.lower().endswith((".cmd", ".bat")) else []   # Windows'ta npm kurulumu claude.cmd
     p = subprocess.run(onek + [cli, "-p", istem(m, istek), "--permission-mode", "acceptEdits", "--add-dir", klasor],
-                       cwd=KOK, text=True, encoding="utf-8", errors="replace", capture_output=True)
+                       cwd=KOK, text=True, encoding="utf-8", errors="replace", capture_output=True,
+                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))     # Windows'ta konsol açılmasın
     print(p.stdout)
     if p.returncode:
         print(p.stderr)
