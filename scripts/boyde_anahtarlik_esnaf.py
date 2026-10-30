@@ -247,6 +247,8 @@ if __name__ == "__main__":
     if "--foto" in args:
         import boyde_anahtarlik_foto as AF
         AF.cover = kapak
+        dizi = AF.lineup
+        AF.lineup = lambda samples, size: dizi(samples, size, dark=True)        # beş model siyah fonda
         AF.main([a for a in args if a != "--foto"])
     elif "--shopier" in args:
         import boyde_anahtarlik_esnaf_shopier as ES

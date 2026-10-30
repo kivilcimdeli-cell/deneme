@@ -230,7 +230,21 @@ def lift_all(pts, clearance):
     return pts
 
 
-def shoot(sc, corners, az, el, fill, fstop, path, dark, lens=85):
+def halo(pts, energy=45.0):
+    """Siyah fonda koyu parçalar kaybolmasın: parçaların hemen arkasında fona bakan yumuşak kenarlı spot; fonda hafif
+    hale olur, parçalar önünde siluet ve kenar ışığıyla ayrılır. Işık kameraya görünmez."""
+    c, top = pts.mean(0), pts.max(0)
+    li = bpy.data.lights.new("hale", "SPOT")
+    li.energy, li.color = energy, (1.0, 0.97, 0.93)
+    li.spot_size, li.spot_blend, li.shadow_soft_size = math.radians(110), 1.0, 0.08
+    ob = bpy.data.objects.new("hale", li)
+    ob.location = (c[0], top[1] + 0.04, c[2])
+    R.look_at(ob, (c[0], top[1] + 1.0, c[2] + 0.3))
+    ob.visible_camera = False
+    bpy.context.scene.collection.objects.link(ob)
+
+
+def shoot(sc, corners, az, el, fill, fstop, path, dark, lens=85, glow=False):
     cam = F.camera(sc, lens)
     a, e = math.radians(az), math.radians(el)
     direction = np.array([math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)])
@@ -239,6 +253,8 @@ def shoot(sc, corners, az, el, fill, fstop, path, dark, lens=85):
     F.frame(cam, corners, res.resolution_x / res.resolution_y, fill)
     cam.data.dof.aperture_fstop = fstop
     F.lights(sc, corners.mean(0), direction, "studyo")
+    if glow:
+        halo(corners)
     F.shoot(sc, path, F.KOYU if dark else F.BEYAZ)
     saturate(path)
 
@@ -317,9 +333,10 @@ def cover(samples, size=(1600, 1600)):
     shoot(sc, np.vstack(pts), -12, 42, 0.96, 6.3, os.path.join(T.FOTO, "kapak.jpg"), False, lens=70)
 
 
-def lineup(samples, size=(1800, 1000)):
-    """Beş model halka takımlarıyla yan yana asılı (önden); çelik halkaların tepesi aynı yükseklikte."""
-    sc = studio(False, samples, size)
+def lineup(samples, size=(1800, 1000), dark=False):
+    """Beş model halka takımlarıyla yan yana asılı (önden); çelik halkaların tepesi aynı yükseklikte. dark: siyah fon,
+    arkada hale (siyah anahtarlık fonda kaybolmasın)."""
+    sc = studio(dark, samples, size)
     loaded = [load(k) for k in T.KEYS]
     sets = [hang(meta, (-16, 12, -8, 14, -14)[k], (0, 0, 0)) for k, (meta, _) in enumerate(loaded)]
     spans = []
@@ -337,7 +354,7 @@ def lineup(samples, size=(1800, 1000)):
         M[0, 3] += dx
         groups += [put(parts, M, f"anahtarlik{k}"), put_wires(wires, f"halka{k}", (dx, 0, 0))]
     pts = lift_all(np.vstack(groups), 0.02)
-    shoot(sc, pts, 0, 6, 0.88, 8.0, os.path.join(T.FOTO, "dizi.jpg"), False)
+    shoot(sc, pts, 0, 6, 0.88, 8.0, os.path.join(T.FOTO, "dizi.jpg"), dark, glow=dark)
 
 
 def main(args):

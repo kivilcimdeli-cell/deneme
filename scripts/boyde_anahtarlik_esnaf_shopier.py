@@ -11,8 +11,6 @@ import os
 import shutil
 import sys
 
-from PIL import Image
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import boyde_anahtarlik_esnaf as E  # noqa: E402
 import boyde_anahtarlik_katalog as KT  # noqa: E402
@@ -60,19 +58,16 @@ def shopier(P):
         <p style="margin-top:18px;font-size:30px;line-height:1.35;color:#3b3d42">Emlakçıya ev, galeriye araba, otele
           oda anahtarlığı; önde logonuz, arkada müşterinize bir söz.</p></div></div>""", name(1, "kapak"))
 
-    # 02 beş model: yatay fotoğraf kareye, üstü ve altı fona karışır
-    im = Image.open(os.path.join(E.FOTO, "dizi.jpg")).convert("RGB")
-    mid, edge = im.getpixel((im.width // 2, 12)), im.getpixel((6, 6))
-    chips = "".join(f'<span class="chip" style="background:#fff;color:{INK};font-size:19px;padding:8px 14px;'
-                    f'box-shadow:0 0 0 1.5px rgba(18,19,22,.08)"><b style="color:{ORANGE}">{k.kod}</b>&nbsp;{k.ad}'
-                    f'<span style="color:{GRAY}">&nbsp;· {E.SEKTOR[k.key].removesuffix(" için")}</span></span>'
-                    for k in models)
-    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;
-      background:radial-gradient(ellipse 85% 60% at 50% 46%,rgb{mid} 0,rgb{mid} 40%,rgb{edge} 100%)">
+    # 02 beş model: siyah fonda (logodaki siyah); yatay fotoğraf kareye, üstü ve altı fona karışır
+    chips = "".join(f'<span class="chip" style="background:rgba(244,241,234,.08);color:{PAPER};font-size:19px;'
+                    f'padding:8px 14px;box-shadow:inset 0 0 0 1.5px rgba(244,241,234,.14)"><b style="color:{ORANGE}">'
+                    f'{k.kod}</b>&nbsp;{k.ad}<span style="color:rgba(244,241,234,.6)">&nbsp;· '
+                    f'{E.SEKTOR[k.key].removesuffix(" için")}</span></span>' for k in models)
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:{INK}">
       <img src="{foto('dizi', 1200)}" style="position:absolute;left:0;top:50%;width:1200px;transform:translateY(-44%);
         -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 84%,transparent 100%)">
-      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
-      <div style="position:absolute;left:64px;right:64px;top:150px;color:{INK}">
+      <div style="position:absolute;left:64px;top:56px">{K.logo("koyu", 260, 52)}</div>
+      <div style="position:absolute;left:64px;right:64px;top:150px;color:{PAPER}">
         <p class="k">5 SEKTÖR · 5 BİÇİM</p>
         <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">İşinizin şeklinde,<br>arkalı önlü.</h2>
       </div>

@@ -33,14 +33,14 @@
 | `<model>_iki.jpg` | masada iki adet: biri önden (kabartma), biri ters çevrilmiş (arka yüz) |
 | `<model>_halka.jpg` | zincirli halka takımında asılı iki adet: biri önünü, biri arkasını gösterir |
 | `kapak.jpg` | sekiz adet masada, iki sıra: beş model önden, üçü bir de arkadan |
-| `dizi.jpg` | beş model halka takımlarıyla yan yana |
+| `dizi.jpg` | beş model halka takımlarıyla yan yana, siyah fonda (arkada hafif hale: siyah araba fonda kaybolmasın) |
 
 ## Shopier (`shopier/`, 1200 × 1200, yükleme sırasıyla)
 
 | Dosya | Ne |
 | --- | --- |
 | `01_kapak.jpg` | beş model, "Esnafa özel anahtarlık" |
-| `02_bes_model.jpg` | beş model halka takımlarıyla; kodları ve sektörleri |
+| `02_bes_model.jpg` | beş model halka takımlarıyla, siyah fonda; kodları ve sektörleri |
 | `03_E01_ev_halka.jpg` … `07_E05_kemik_halka.jpg` | her model zincirli halka takımıyla (solda ön, sağda arka yüz); sağ üstte sektör |
 | `08_E01_ev_arkali_onlu.jpg` … `12_E05_kemik_arkali_onlu.jpg` | her model masada arkalı önlü; altta arka yüzdeki söz |
 | `13_olcu_ozellik.jpg` | beş biçim gerçek oranlarıyla (ön ve arka), özellikler |
