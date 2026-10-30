@@ -105,18 +105,38 @@ def word(cap, x, y, align="l", tr=0.0):
     return b, labs + rule, (bx0, y2 - c2 / 2, bx1, by0 + cap)
 
 
-def lifted(k, s, cap, x, y, align="l", tr=0.0, max_w=None, lift=0.5, grow=0.08):
+def lifted(k, s, cap, x, y, align="l", tr=0.0, max_w=None, lift=0.5, grow=0.08, fill=0.6, spread=0.0):
     """Kabartma baskı için yazı: İ / Ö noktaları küçültülmez; yukarı kaldırılır ve biraz büyür (harfle arası ≥ 0,7 mm;
-    küçülen nokta dilimleyicide basılmıyor). y büyük harflerin ortası."""
+    küçülen nokta dilimleyicide basılmıyor). y büyük harflerin ortası. fill: noktanın kutusunu doldurma oranı (Ğ'nin
+    şapkası için 0,5); spread > 0: Ö / Ü'nün iki noktası arası en az bu kadar olsun diye yana açılır."""
     f = S.font(k)
     if max_w:
         cap = f.fit_cap(s, cap, max_w, tr)
-    out = []
+    out, dots = [], []
     for p in f.text(s, cap, x, y, align=align, tracking=tr).decompose():
         b = p.bounds()
         box = (b[2] - b[0]) * (b[3] - b[1])
-        dot = p.area() < 2.5 and box > 0 and p.area() / box > 0.6 and b[1] > y
-        out.append(p.offset(grow, S.J).translate((0.0, lift)) if dot else p)
+        dot = p.area() < 2.5 and box > 0 and p.area() / box > fill and b[1] > y
+        (dots if dot else out).append(p.offset(grow, S.J).translate((0.0, lift)) if dot else p)
+    if spread:
+        dots.sort(key=lambda p: p.bounds()[0])
+        for a, b in zip(dots, dots[1:]):
+            ab, bb = a.bounds(), b.bounds()
+            gap = bb[0] - ab[2]
+            if abs(ab[1] - bb[1]) < 0.3 and 0 < gap < spread:          # aynı harfin iki noktası
+                push = (spread - gap) / 2 + 0.02
+                dots[dots.index(a)] = a.translate((-push, 0.0))
+                dots[dots.index(b)] = b.translate((push, 0.0))
+    return A.union(*(out + dots))
+
+
+def bolder(cs, grow=0.06):
+    """Kabartmada tek çizgili harfler (ı, l, i, z...) dilimleyicide kenarda zayıf basılır: deliksiz harfler `grow` mm
+    kalınlaşır; iç boşluklu harfler (a, e, o) ve noktalar olduğu gibi kalır (iç boşluk daralmasın)."""
+    out = []
+    for p in cs.decompose():
+        solid = len(p.to_polygons()) == 1 and p.area() > 2.5
+        out.append(p.offset(grow, S.J) if solid else p)
     return A.union(*out)
 
 
@@ -447,17 +467,19 @@ def b9_shopier():
 
 def p_shopier():
     """10 × 20 B07 (Hizmetler), seçilen: QR Shopier mağazamızı açar, telefon yok; solda altta mağaza adresi.
-    Zemin beyaz ("büyük olanın tabanı beyaz olsun"): yazı, işaret ve QR kareleri siyah, sehpa beyaz."""
+    Zemin beyaz ("büyük olanın tabanı beyaz olsun"): yazı, işaret ve QR kareleri siyah, sehpa beyaz.
+    Yazılar ve işaret 2 mm kabartma ("10 × 20'nin yazılarını neden kabartmalı yapmamışsın"; 9 × 12 gibi); QR yüzeyle
+    aynı hizada (kabartma QR'da kare kenarlarının gölgesi okumayı bozar). İ / Ö noktaları yukarı alınır (lifted)."""
     d = S.Design("p_shopier", LIGHT)
     d.url = SHOPIER
-    lockup(d, d.flat, 22.0, -86.0, 80.0, BLACK)
+    lockup(d, d.add, 22.0, -86.0, 80.0, BLACK)
     for k, s in enumerate(("QR'lı masa isimliği", "Kurumsal isimlik ve kartvizit", "Size özel 3D baskı")):
         y = 53.0 - k * 11.0
-        d.flat(f"no {k}", t("sg7", f"0{k + 1}", 5.0, -86.0, y, "l", 0.2), ORANGE)
-        d.flat(f"hizmet {k}", t("mont6", s, 5.0, -72.0, y, "l", 0.1, 112.0), BLACK)      # küçülmesin: i noktaları
-    d.flat("mağaza", t("sg7", "shopier.com/boyde", 5.0, -86.0, 18.0, "l", 0.1, 90.0), ORANGE)
+        d.add(f"no {k}", t("sg7", f"0{k + 1}", 5.0, -86.0, y, "l", 0.4), ORANGE)
+        d.add(f"hizmet {k}", bolder(lifted("mont", s, 5.0, -72.0, y, "l", 0.6, 116.0, fill=0.5, spread=0.8)), BLACK)
+    d.add("mağaza", lifted("sg7", "shopier.com/boyde", 5.8, -86.0, 18.0, "l", 0.35, 120.0), ORANGE)
     tile = d.qr(shopier_qr(), 66.0, 60.0, 38.0)          # beyaz zeminde siyah kareler: 38 mm (benzetimde okunur)
-    d.flat("TARA", t("mont6", "TARA", 4.4, 66.0, tile.bounds()[1] - 5.6, "c", 1.8, 40.0), ORANGE)
+    d.add("TARA", t("mont", "TARA", 4.6, 66.0, tile.bounds()[1] - 5.8, "c", 1.8, 40.0), ORANGE)
     return d
 
 

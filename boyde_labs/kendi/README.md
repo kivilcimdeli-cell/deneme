@@ -53,6 +53,7 @@
 - "Telefon numaralarını sil."
 - "Büyük olanın tabanı beyaz olsun."
 - "Küçükte QR ile yazıların yerini değiştir, QR sağda."
+- "10 × 20'nin yazılarını neden kabartmalı yapmamışsın, o şekilde düzelt."
 
 - **QR:** `https://www.shopier.com/boyde`, 3. sürüm, hata düzeltme Q. Üstten görünüşte ve baskı hatası benzetiminde
   okunur.
@@ -60,23 +61,26 @@
 - **9 × 12:** siyah gövde, kabartma.
   - Solda işaret, BOYDE LABS, "1 TARA · 2 SİPARİŞ VER · 3 TASARIM SEÇ", shopier.com/boyde.
   - Sağda QR (34 mm), altında TARA.
-- **10 × 20:** beyaz gövde ve sehpa; yazılar siyah ve turuncu, yüzeyle aynı hizada.
+- **10 × 20:** beyaz gövde ve sehpa; yazılar ve işaret 2 mm kabartma, siyah ve turuncu (9 × 12 gibi).
   - İşaret ve yazı, 01 · 02 · 03 hizmetler, shopier.com/boyde.
-  - Sağda QR, altında TARA. Beyaz zeminde siyah kareler baskıda yayılır; QR bu yüzden 38 mm (34 mm benzetimde
-    okunmadı).
+  - Sağda QR, altında TARA. QR yüzeyle aynı hizada siyah dolgu: kabartma QR'da kare kenarlarının gölgesi okumayı
+    bozar. Beyaz zeminde siyah kareler baskıda yayılır; QR bu yüzden 38 mm (34 mm benzetimde okunmadı).
+  - Kabartmada harf içi ve ara ≥ 0,7 mm: hizmetler kalın Montserrat, harf aralığı açık; İ, Ö, Ğ işaretleri yukarı
+    alınır, Ö'nün iki noktası yana açılır; tek çizgili harfler (ı, l, i) 0,06 mm kalın. Adres 5,8 mm.
 - **Fotoğraflar:** `fotograf/b9_shopier_studyo.jpg`, `fotograf/p_shopier_studyo.jpg`.
 - **Baskı dosyaları** (`baski/`, `scripts/boyde_isimlik_baski.py`), Bambu Lab X2D:
 
 | Dosya | Ne | AMS | Filament · süre (PrusaSlicer eşdeğeri) |
 | --- | --- | --- | --- |
 | `boyde_isimlik_9x12_b07_x2d.3mf` | iki takım; siyah gövde 1 cm, kabartma 2 mm, QR ve adres dolgu | 1 siyah · 2 beyaz · 3 turuncu | ~117 g · ~3 sa 23 dk |
-| `boyde_isimlik_10x20_b07_x2d.3mf` | tek takım; beyaz gövde 5 mm, yazılar yüzeyle aynı hizada | 1 siyah · 2 beyaz · 3 turuncu | ~82 g · ~2 sa 28 dk |
+| `boyde_isimlik_10x20_b07_x2d.3mf` | tek takım; beyaz gövde 5 mm, yazılar ve işaret 2 mm kabartma, QR dolgu | 1 siyah · 2 beyaz · 3 turuncu | ~85 g · ~2 sa 29 dk |
 
 - **Ayarlar:** Bambu standart 0,20 mm, ütüleme ve destek kapalı, Textured PEI, Generic PLA.
   - 9 × 12: siyah ve turuncu ana nozulda, beyaz yardımcıda.
-  - 10 × 20: beyaz ana nozulda; siyah ve turuncu yardımcıda (yalnız üst 4 katman).
+  - 10 × 20: beyaz ana nozulda; siyah ve turuncu yardımcıda (QR dolgusu ve kabartma).
 - **Denetim:** her üretimde dilimlenir. Her yazı, nokta ve QR kendi renginde basılıyor mu bakılır.
-  - Noktalar ve QR'ın tek kareleri ayrı ölçülür.
+  - Noktalar ayrı ölçülür. QR iki kez: büyük parçaları %85, tek kareler dahil bütün kareleri %70 kuralıyla
+    (komşusuna yalnız köşeden değen kare de tek kare sayılır).
   - Önizleme `onizleme_*.png`, ölçüm `olcum_*.json`.
 - **9 × 12 kabartma:** harf içi ve ara ≥ 0,7 mm. İ noktaları yukarı alındı; adımlarda orta nokta yok.
 
