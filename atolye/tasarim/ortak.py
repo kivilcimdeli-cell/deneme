@@ -98,14 +98,15 @@ _kaydet()
 
 
 class Palet:
-    """Gövde (siyah ya da beyaz), yazı (gövdenin tersi), vurgu ve isteğe bağlı ikinci vurgu."""
+    """Gövde, yazı (koyu gövdede beyaz, açıkta siyah), vurgu ve isteğe bağlı ikinci vurgu."""
 
     def __init__(self, govde, vurgu, vurgu2=0):
         self.govde, self.vurgu, self.vurgu2 = govde, vurgu, vurgu2
 
     @property
     def koyu(self):
-        return self.govde == BLACK
+        r, g, b = TON[self.govde]
+        return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.46
 
     @property
     def yazi(self):
@@ -130,7 +131,7 @@ S.FONTS.update({"oswald": "Oswald-Bold.ttf", "anton": "Anton-Regular.ttf", "russ
                 "archivo": "ArchivoBlack-Regular.ttf", "poppins": "Poppins-ExtraBold.ttf",
                 "poppins_i": "Poppins-ExtraBoldItalic.ttf", "michroma": "Michroma-Regular.ttf",
                 "fraunces": "Fraunces-Black.ttf", "unbounded": "Unbounded-ExtraBold.ttf",
-                "manrope": "Manrope-ExtraBold.ttf", "teko": "Teko-Bold.ttf"})
+                "manrope": "Manrope-ExtraBold.ttf", "man6": "Manrope-SemiBold.ttf", "teko": "Teko-Bold.ttf"})
 YAZI_AD = {"lexend": "Lexend", "outfit": "Outfit", "bebas": "Bebas Neue", "lora": "Lora", "mont": "Montserrat",
            "cinzel": "Cinzel", "sora": "Sora", "righteous": "Righteous", "sairai": "Saira eğik",
            "playfair": "Playfair", "oswald": "Oswald", "anton": "Anton", "russo": "Russo One",
