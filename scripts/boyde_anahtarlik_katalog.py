@@ -23,7 +23,7 @@ OZELLIK = [("Ön yüz kabartma", "Logonuz ve yazınız 0,8 mm kabartma, renkli; 
                                  "kendisi: silinmez."),
            ("Standart biçimler", "Dikdörtgen, kare, dikey etiket, bar, kesik köşe; ölçü ve renkler sizden."),
            ("Sağlam gövde", "3,2 mm PLA gövde, pahlı kenarlar; delik çevresinde kalın et payı."),
-           ("Halkalı ya da halkasız", "Çelik anahtarlık halkası takılı ya da yalnız anahtarlık.")]
+           ("Zincirli halka takımı", "Çelik halka, kısa zincir ve ara halka takılı; ya da yalnız anahtarlık.")]
 ADIM = [("01", "Logonuzu gönderin", "Logo, renkler, adet ve arka yüz yazısı."),
         ("02", "Tasarımı hazırlıyoruz", "Ön ve arka yüzün önizlemesini gönderiyoruz."),
         ("03", "Onaylayın", "Beğendiğiniz tasarımı onaylıyorsunuz."),
@@ -53,7 +53,7 @@ def model_block(k):
       <img src="{foto(f'{k.key}_{v}', 700)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;
         display:block">
       <figcaption style="margin-top:6px;font-size:10.5px;letter-spacing:.14em;color:{GRAY}">{c}</figcaption></figure>"""
-                    for v, c in (("iki", "ÖN VE ARKA YÜZ"), ("halka", "ÇELİK HALKAYLA")))
+                    for v, c in (("iki", "ÖN VE ARKA YÜZ"), ("halka", "ZİNCİRLİ HALKA TAKIMIYLA")))
     return f"""<div style="display:flex;align-items:center;gap:14px">
         <span class="chip code" style="background:{ORANGE};color:#fff;font-size:15px;padding:6px 12px">{k.kod}</span>
         <p class="u" style="font-size:20px">{k.ad}</p>

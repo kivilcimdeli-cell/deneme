@@ -8,6 +8,8 @@
 - "Hepsi standart anahtarlık şeklinde (dikdörtgen vs.) olsun, markaları sallama, BOYDE LABS olarak yap."
 - "Ön yüz kabartmalı yazı, arka yüz düz yazı; arkalı önlü, tek karede iki açıdan görünsün."
 - "Katman katmanı sil, 'Her katman size özel' yaz."
+- "Yazılar hizalanmamış gibi; anahtarlık halkaları gönderdiğim görseldeki gibi olmalı" (çelik halka, kısa zincir,
+  ara halka).
 
 ## Modeller
 
@@ -17,12 +19,15 @@
 | K02 | Dikey etiket | 30 × 56 mm | beyaz · siyah · turuncu | delik üstte; işaret üstte, yazı altında |
 | K03 | Kare | 40 × 40 mm | turuncu · siyah · beyaz | delik köşede; büyük işaret, altında yazı |
 | K04 | Bar | 72 × 24 mm | siyah · beyaz · turuncu | delik sağda; büyük BOYDE LABS, yanında katman şeritleri |
-| K05 | Kesik köşe | 56 × 32 mm | gri · siyah · turuncu · beyaz | sağ üst köşe kesik, delik orada |
+| K05 | Kesik köşe | 56 × 32 mm | gri · siyah · turuncu · beyaz | sağ üst köşe kesik, delik orada (kesik kenardan 3,5 mm et payıyla) |
 
 - **Ön yüz:** 3b · Katman işareti ve BOYDE / LABS 0,8 mm (4 katman) kabartma, renkli.
 - **Arka yüz:** "Her katman size özel." ve shopier.com/boyde; yüzeyle aynı hizada gömme renk (0,6 mm, tablaya
   bakan ilk 3 katman).
-- **Gövde:** 3,2 mm, alt ve üst kenarda 3 katmanlık pah; delik Ø5,2 mm.
+- **Gövde:** 3,2 mm, alt ve üst kenarda 3 katmanlık pah; delik Ø5,2 mm, çevresinde en az 3,5 mm et.
+- **Hizalama:** deliğin payı çıkınca kalan alan bulunur; ön yüz grubu bu alanın tam ortasında, alt alta olanlar
+  (işaret ve yazı, arka satırlar) aynı dikey eksende, sınır kutularıyla ortalı. Arka yüz aynı alanın aynasında
+  ortalı (arkadan bakınca delik öbür yanda). Kenara ya da deliğe taşan öğe yok (betik ölçer: kırpılan alan 0).
 - **Baskıya uygunluk:** kabartma kenardan 1 mm, delikten 0,8 mm içeride.
   - LABS en az 4,2 mm ve kalın; 3 mm'de çizgileri 0,5 mm kalıyordu.
   - İşaretteki nozulun 0,7 mm'den dar yarıkları kapalı. Katman çizgileri 0,15 mm ince, araları 0,7 mm'nin
@@ -35,11 +40,13 @@
 | Dosya | Ne |
 | --- | --- |
 | `<model>_iki.jpg` | masada iki adet: biri önden (kabartma), biri ters çevrilmiş (arka yüz) |
-| `<model>_halka.jpg` | çelik halkalarda asılı iki adet: biri önünü, biri arkasını gösterir |
-| `kapak.jpg` | 12 adet K01 (yarısı önden, yarısı arkadan) ve iki boş halka: toptan parti |
-| `dizi.jpg` | beş model halkalarıyla yan yana |
+| `<model>_halka.jpg` | zincirli halka takımında asılı iki adet: biri önünü, biri arkasını gösterir |
+| `kapak.jpg` | 12 adet K01 (yarısı önden, yarısı arkadan) ve iki boş halka takımı: toptan parti |
+| `dizi.jpg` | beş model halka takımlarıyla yan yana |
 
-- Halka Ø25 mm çelik, iki tur; iki tur da deliğin içinden geçer.
+- Halka takımı (gönderilen görseldeki gibi): Ø25 mm çelik halka (iki tur), 4 halkalık zincir (halkalar sırayla
+  90° dönük) ve deliğin içinden geçen Ø7 mm ara halka. Her halka bir öncekinin teline dik; ara halka yüze dik,
+  deliğin en yakın kenarından geçer.
 - Fon: koyu anahtarlıklar beyaz fonda, beyaz gövdeli K02 logodaki siyahta.
 
 ## Katalog

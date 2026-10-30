@@ -7,13 +7,15 @@ gövdeyle döner.
 Kullanıcı: "arkalı önlü, tek karede iki açıdan görünsün": her model karesinde iki adet; biri ön yüzü (kabartma),
 biri arka yüzü (düz yazı) gösterir.
 
-Çelik halka (split ring): Ø25 mm, 1,4 mm tel, iki tur. İki tur da anahtarlığın deliğinden geçer (gerçekte de
-anahtarlık iki teli birden sarar); halka düzlemi anahtarlığın yüzüne dik.
+Halka takımı (kullanıcının gönderdiği görseldeki gibi): Ø25 mm çelik halka (iki tur), 4 halkalık zincir (halkalar
+sırayla 90° dönük, birbirine geçmiş) ve anahtarlığın deliğinden geçen Ø7 mm ara halka. Her halka bir öncekinin
+teline dik; ara halka anahtarlığın yüzüne dik, deliğin en yakın kenarından geçer; anahtarlık deliğinin üst kenarı
+ara halkanın teline oturur.
 
 Görünüşler:
   <model>_iki    masada iki adet: biri önden, biri ters çevrilmiş (arka yüz); 3/4 yukarıdan
   <model>_halka  çelik halkalarda asılı iki adet: biri önünü, biri arkasını gösterir
-  kapak          12 adet K01 (yarısı önden, yarısı arkadan) ve iki boş halka: toptan parti
+  kapak          12 adet K01 (yarısı önden, yarısı arkadan) ve iki boş halka takımı: toptan parti
   dizi           beş model halkalarıyla yan yana asılı (önden)
 """
 import json
@@ -31,7 +33,10 @@ import boyde_urun_foto as F  # noqa: E402
 import restoran_masalik_foto as R  # noqa: E402
 
 MM = F.MM
-RING_R, WIRE_R, PITCH = 12.0, 0.7, 1.5                  # halka: orta yarıçap, tel yarıçapı, tur aralığı (mm)
+RING_R, RING_W, RING_P = 12.0, 0.6, 1.3                  # çelik halka: orta yarıçap, tel yarıçapı, tur aralığı (mm)
+LINK_S, LINK_E, LINK_W, LINKS = 3.0, 1.9, 0.45, 4         # zincir halkası: düz boy, uç yarıçapı, tel yarıçapı; sayı
+JUMP_R, JUMP_W = 3.0, 0.5                                 # ara halka: orta yarıçap, tel yarıçapı
+UP = np.array([0.0, 0.0, 1.0])
 DOYGUNLUK = 0.2                                         # AgX renkleri soldurur: renkli yüzeyler biraz doyurulur
 
 
@@ -84,7 +89,7 @@ def put(parts, M, name):
                       for i, (V, Fc, rgb, metal) in enumerate(parts)])
 
 
-def tube(path, radial, side, r=WIRE_R, seg=12):
+def tube(path, radial, side, r, seg=12):
     """Yol boyunca tel: path (N × 3), radial ve side kesitin iki ekseni (N × 3); uçlar kapalı."""
     phi = np.linspace(0, 2 * np.pi, seg, endpoint=False)
     V = (path[:, None, :] + r * (np.cos(phi)[None, :, None] * radial[:, None, :]
@@ -99,39 +104,98 @@ def tube(path, radial, side, r=WIRE_R, seg=12):
     return V, faces
 
 
-def ring_hole_frame():
-    """Halka, deliğin çerçevesinde (a: delikten dışa, b: yüzde a'ya dik, c: yüz normali); iki tur da delikten geçer."""
+def split_ring(c, a, b, n):
+    """Çelik halka (iki tur): merkez c, düzlemi (a, b), turlar n boyunca kayar. Döner: tel ve alt noktası (iki turun
+    ortası; b'nin tersi yönünde)."""
     th = np.linspace(0.12, 4 * np.pi - 0.12, 520)
-    off = PITCH * th / (2 * np.pi) - PITCH
-    path = np.c_[RING_R * (1 + np.cos(th)), off, RING_R * np.sin(th)]
-    radial = np.c_[np.cos(th), np.zeros_like(th), np.sin(th)]
-    return tube(path, radial, np.tile([0.0, 1.0, 0.0], (len(th), 1)))
+    off = RING_P * th / (2 * np.pi) - RING_P
+    radial = np.outer(np.cos(th), a) + np.outer(np.sin(th), b)
+    path = c + RING_R * radial + np.outer(off, n)
+    bottom = c - RING_R * b + n * (RING_P * 0.75 + RING_P * 1.75 - 2 * RING_P) / 2
+    return tube(path, radial, np.tile(n, (len(th), 1)), RING_W), bottom
 
 
-def ring_flat():
-    """Masada yatan boş halka (eksen düşey), alt yüzü z = 0'da."""
-    th = np.linspace(0.12, 4 * np.pi - 0.12, 520)
-    path = np.c_[RING_R * np.cos(th), RING_R * np.sin(th), WIRE_R + PITCH * th / (2 * np.pi)]
-    radial = np.c_[np.cos(th), np.sin(th), np.zeros_like(th)]
-    return tube(path, radial, np.tile([0.0, 0.0, 1.0], (len(th), 1)))
+def link(c, axis, a):
+    """Zincir halkası (stadyum biçimi): merkez c, uzun ekseni `axis`, düzlemi (a, axis)."""
+    pts, rad = [], []
+    half = LINK_S / 2
+    for y in np.linspace(-half, half, 12, endpoint=False):           # sağ düz kenar (yukarı)
+        pts.append((LINK_E, y)), rad.append((1.0, 0.0))
+    for t in np.linspace(0, np.pi, 24, endpoint=False):              # üst yarım daire
+        pts.append((LINK_E * np.cos(t), half + LINK_E * np.sin(t))), rad.append((np.cos(t), np.sin(t)))
+    for y in np.linspace(half, -half, 12, endpoint=False):           # sol düz kenar (aşağı)
+        pts.append((-LINK_E, y)), rad.append((-1.0, 0.0))
+    for t in np.linspace(np.pi, 2 * np.pi, 25):                      # alt yarım daire (kapanır)
+        pts.append((LINK_E * np.cos(t), -half + LINK_E * np.sin(t))), rad.append((np.cos(t), np.sin(t)))
+    pts, rad = np.array(pts), np.array(rad)
+    path = c + np.outer(pts[:, 0], a) + np.outer(pts[:, 1], axis)
+    radial = np.outer(rad[:, 0], a) + np.outer(rad[:, 1], axis)
+    return tube(path, radial, np.tile(np.cross(a, axis), (len(pts), 1)), LINK_W, seg=10)
+
+
+def jump_ring(c, a, b):
+    """Ara halka: merkez c, düzlemi (a, b); ağzı a yönünde (küçük boşluk)."""
+    th = np.linspace(0.15, 2 * np.pi - 0.15, 90)
+    radial = np.outer(np.cos(th), a) + np.outer(np.sin(th), b)
+    return tube(c + JUMP_R * radial, radial, np.tile(np.cross(a, b), (len(th), 1)), JUMP_W, seg=10)
 
 
 def hang(meta, yaw, top):
-    """Asılı duruş: delik yukarıda, ön yüz kameraya `yaw` derece dönük (180'e yakınsa arka yüz görünür); halkanın
-    tepesi `top` noktasında (mm). Döner: anahtarlığın M'si (baskı koordinatı -> dünya), halkanın M'si."""
-    hx, hy = meta["delik"]
-    cx, cy = meta["merkez"]
-    d = np.array([hx - cx, hy - cy, 0.0])
-    d /= np.linalg.norm(d)
-    n = np.cross([0, 0, 1.0], d)
+    """Asılı duruş: halka takımının tepesi `top` (mm); ön yüz kameraya `yaw` derece dönük (180'e yakınsa arka yüz
+    görünür). Çelik halkanın düzlemi anahtarlığın yüzüne paralel; zincir sarkar; ara halka yüze dik, delikten geçer.
+    Döner: anahtarlığın M'si (baskı koordinatı -> dünya) ve halka takımının telleri [(V, yüzler)] (dünya, mm)."""
     psi = math.radians(yaw)
     face = np.array([math.sin(psi), -math.cos(psi), 0.0])
-    up = np.array([0, 0, 1.0])
-    Rw = np.c_[up, np.cross(face, up), face]
-    rot = Rw @ np.c_[d, n, up].T
+    side = np.cross(face, UP)
+    top = np.asarray(top, float)
+    wires = []
+    w, bottom = split_ring(top - UP * RING_R, side, UP, face)
+    wires.append(w)
+    length = LINK_S + 2 * LINK_E
+    c = bottom + UP * (RING_W + LINK_W) - UP * length / 2            # ilk halka çelik halkanın teline asılı
+    for i in range(LINKS):
+        wires.append(link(c, UP, face if i % 2 == 0 else side))       # sırayla 90° dönük
+        end = c - UP * length / 2
+        c = c - UP * (length - 2 * LINK_W)
+    jc = end + UP * (LINK_W + JUMP_W) - UP * JUMP_R                   # ara halka son halkanın teline asılı
+    wires.append(jump_ring(jc, UP, face))
+    hole_w = jc - UP * JUMP_R - UP * (meta["delik_r"] - JUMP_W)       # deliğin üst kenarı telin üstünde
+    hx, hy = meta["delik"]
+    d = np.array(meta["kenar_yonu"] + [0.0])
+    n = np.cross(UP, d)
+    rot = np.c_[UP, side, face] @ np.c_[d, n, UP].T                   # d -> yukarı, yüz normali -> face
     h = np.array([hx, hy, meta["kalinlik"] / 2])
-    origin = np.asarray(top, float) - up * (2 * RING_R + WIRE_R)   # halkanın tepesi deliğin 2R üstünde
-    return np.c_[rot, origin - rot @ h], np.c_[Rw, origin]
+    return np.c_[rot, hole_w - rot @ h], wires
+
+
+def loose_set(x, y, angle):
+    """Masada yatan boş halka takımı: çelik halka düz, zincir `angle` yönünde uzanır (halkalar sırayla yatık ve
+    yan yatmış), ucunda yatık ara halka."""
+    a = math.radians(angle)
+    u = np.array([math.cos(a), math.sin(a), 0.0])
+    v = np.cross(UP, u)
+    wires = []
+    w, _ = split_ring(np.array([x, y, RING_W + RING_P]), u, v, UP)
+    wires.append(w)
+    length = LINK_S + 2 * LINK_E
+    p = np.array([x, y, 0.0]) + u * (RING_R - RING_W - LINK_W)        # ilk halkanın ucu çelik halkanın telinde
+    for i in range(LINKS):
+        upright = i % 2 == 0
+        c = p + u * length / 2 + UP * ((LINK_E + LINK_W) if upright else LINK_W)
+        wires.append(link(c, u, UP if upright else v))
+        p = p + u * (length - 2 * LINK_W)
+    wires.append(jump_ring(np.array([p[0], p[1], JUMP_W]) + u * (JUMP_R - JUMP_W - LINK_W), u, v))
+    return wires
+
+
+def put_wires(wires, name, shift=(0.0, 0.0, 0.0)):
+    I = np.c_[np.eye(3), shift]
+    return np.vstack([add(f"{name}_{i}", V, fc, steel(), I, smooth=True) for i, (V, fc) in enumerate(wires)])
+
+
+def world(parts, M):
+    """Anahtarlığın dünyadaki noktaları (mm): yerleşim hesabı için (sahneye eklemeden)."""
+    return np.vstack([V for V, _, _, _ in parts]) @ M[:, :3].T + M[:, 3]
 
 
 def flat(meta, alpha, x, y, flip=False):
@@ -216,23 +280,27 @@ def model_shots(key, samples, views=("iki", "halka")):
         shoot(sc, pts, 14, 50, 0.74, 4.5, os.path.join(T.FOTO, f"{key}_iki.jpg"), dark)
     if "halka" not in views:
         return
-    # halkalarda asılı: solda ön yüz, sağda arka yüz
+    # halka takımında asılı: solda ön yüz, sağda arka yüz; aralarında 10 mm (gerçek enlerine göre)
     sc = studio(dark, samples, F.SIZE)
-    hx, hy = meta["delik"]
-    cx, cy = meta["merkez"]
-    hang_w = h if abs(hx - cx) > abs(hy - cy) else w        # asılıyken eni: delik yandaysa boyu
-    gap = hang_w / 2 + 8.0
+    sets = [hang(meta, yaw, (0, 0, 0)) for yaw in (22, 180 - 22)]
+    spans = []
+    for M, wires in sets:
+        q = np.vstack([world(parts, M)] + [V for V, _ in wires])[:, 0]
+        spans.append((q.min(), q.max()))
+    move = spans[0][1] - spans[1][0] + 10.0
+    centre = (spans[0][0] + spans[1][1] + move) / 2
     groups = []
-    for x, yaw, name in ((-gap, 22, "on"), (gap, 180 - 22, "arka")):
-        M, Mr = hang(meta, yaw, (x, 0, 0))
-        V, faces = ring_hole_frame()
-        groups += [put(parts, M, f"anahtarlik_{name}"), add(f"halka_{name}", V, faces, steel(), Mr, smooth=True)]
+    for (M, wires), dx, name in zip(sets, (-centre, move - centre), ("on", "arka")):
+        M = M.copy()
+        M[0, 3] += dx
+        groups += [put(parts, M, f"anahtarlik_{name}"), put_wires(wires, f"halka_{name}", (dx, 0, 0))]
     pts = lift_all(np.vstack(groups), 0.016)
-    shoot(sc, pts, 0, 7, 0.76, 6.3, os.path.join(T.FOTO, f"{key}_halka.jpg"), dark)
+    shoot(sc, pts, 0, 7, 0.78, 6.3, os.path.join(T.FOTO, f"{key}_halka.jpg"), dark)
 
 
 def cover(samples, size=(1600, 1600)):
-    """Toptan parti: 12 adet K01 4 × 3 dizili (yarısı önden, yarısı arkadan), hafif dönük; yanında iki boş halka."""
+    """Toptan parti: 12 adet K01 4 × 3 dizili (yarısı önden, yarısı arkadan), hafif dönük; yanında iki boş halka
+    takımı."""
     sc = studio(False, samples, size)
     meta, parts = load(T.KEYS[0])
     w, h = (np.ptp(np.vstack([V for V, _, _, _ in parts])[:, i]) for i in (0, 1))
@@ -244,29 +312,30 @@ def cover(samples, size=(1600, 1600)):
         y = (1.5 - j) * (h + 7.0)
         flip = (i + j) % 2 == 1
         pts.append(put(parts, flat(meta, float(rng.uniform(-6, 6)), x, y, flip), f"k{k}"))
-    V, faces = ring_flat()
-    for x, y in ((-1.5 * w - 32.0, -h * 0.9), (1.5 * w + 32.0, h * 0.7)):     # dizinin dışında
-        pts.append(add("halka", V, faces, steel(), np.c_[np.eye(3), [x, y, 0.0]], smooth=True))
+    for k, (x, y, a) in enumerate(((-1.5 * w - 32.0, -h * 0.4, -100.0), (1.5 * w + 32.0, h * 0.4, 80.0))):
+        pts.append(put_wires(loose_set(x, y, a), f"takim{k}"))                     # dizinin dışında
     shoot(sc, np.vstack(pts), -12, 42, 0.96, 6.3, os.path.join(T.FOTO, "kapak.jpg"), False, lens=70)
 
 
 def lineup(samples, size=(1800, 1000)):
-    """Beş model halkalarıyla yan yana asılı (önden); halkaların tepesi aynı yükseklikte."""
+    """Beş model halka takımlarıyla yan yana asılı (önden); çelik halkaların tepesi aynı yükseklikte."""
     sc = studio(False, samples, size)
     loaded = [load(k) for k in T.KEYS]
-    widths = []
-    for meta, parts in loaded:
-        (hx, hy), (cx, cy) = meta["delik"], meta["merkez"]
-        V = np.vstack([V for V, _, _, _ in parts])
-        widths.append(np.ptp(V[:, 1]) if abs(hx - cx) > abs(hy - cy) else np.ptp(V[:, 0]))
-    gap = 16.0
-    xs = np.cumsum([0.0] + [(a + b) / 2 + gap for a, b in zip(widths, widths[1:])])
-    xs -= xs.mean()
+    sets = [hang(meta, (-16, 12, -8, 14, -14)[k], (0, 0, 0)) for k, (meta, _) in enumerate(loaded)]
+    spans = []
+    for (M, wires), (_, parts) in zip(sets, loaded):
+        q = np.vstack([world(parts, M)] + [V for V, _ in wires])[:, 0]
+        spans.append((q.min(), q.max()))
+    xs, x = [], 0.0
+    for lo, hi in spans:                                                    # aralarında 12 mm
+        xs.append(x - lo)
+        x += hi - lo + 12.0
+    xs = np.array(xs) - (x - 12.0) / 2
     groups = []
-    for k, ((meta, parts), x) in enumerate(zip(loaded, xs)):
-        M, Mr = hang(meta, (-16, 12, -8, 14, -14)[k], (x, 0, 0))
-        V, faces = ring_hole_frame()
-        groups += [put(parts, M, f"anahtarlik{k}"), add(f"halka{k}", V, faces, steel(), Mr, smooth=True)]
+    for k, ((M, wires), (_, parts), dx) in enumerate(zip(sets, loaded, xs)):
+        M = M.copy()
+        M[0, 3] += dx
+        groups += [put(parts, M, f"anahtarlik{k}"), put_wires(wires, f"halka{k}", (dx, 0, 0))]
     pts = lift_all(np.vstack(groups), 0.02)
     shoot(sc, pts, 0, 6, 0.88, 8.0, os.path.join(T.FOTO, "dizi.jpg"), False)
 
