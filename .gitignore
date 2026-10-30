@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 restoran_masalik/.onbellek.pkl
 restoran_masalik/siteler/img/.doku/
+
+# atölye uygulamasının müşteri verileri: kişisel bilgi, git'e girmez
+atolye_veri/
