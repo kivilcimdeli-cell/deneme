@@ -27,6 +27,9 @@ KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))      # depo k�
 VERI = os.environ.get("BOYDE_VERI") or (os.path.join(os.path.expanduser("~"), "Documents", "BOYDE Atolye")
                                         if os.name == "nt" else os.path.join(KOK, "atolye_veri"))
 SCRIPTS = os.path.join(KOK, "scripts")
+# sürüm: Windows kurulumunda derleme yazar (surum.txt); depodan çalışırken "geliştirme"
+SURUM = (open(os.path.join(KOK, "surum.txt"), encoding="utf-8").read().strip()
+         if os.path.exists(os.path.join(KOK, "surum.txt")) else "geliştirme")
 PORT = int(os.environ.get("BOYDE_PORT", "8765"))
 # alt süreçlerin Python'u: Windows kurulumunda uygulama konsolsuz pythonw.exe ile açılır; işler yanındaki python.exe
 # ile (pencere açmadan, CREATE_NO_WINDOW) çalışır, çıktıları boruya düzgün akar

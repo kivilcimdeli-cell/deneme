@@ -13,6 +13,14 @@ Siparişten baskı dosyasına giden yerel uygulama. Bilgisayarda çalışır, ta
 
 Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3MF üretilir.
 
+**Arayüz** (`atolye/arayuz/`):
+
+- **Sol menü:** Yeni sipariş, Müşteriler, İşler (süren iş sayısı), son müşteriler; altta Claude durumu ve sürüm.
+- **Müşteri sayfası:** adımlar (Bilgiler → Katalog → Seçim → Baskı dosyaları), kataloglar sekmeli, altta yapışık
+  üretim çubuğu (kod, renk değişikliği); sağda çıktılar, Claude'a özel istek, geçmiş. **Bilgileri düzenle** sağdan
+  açılan panelde (Esc kapatır).
+- **Görünüm:** renkler marka paletinden; yazı tipleri uygulamayla gelir (Space Grotesk, Figtree; internet gerekmez).
+
 ## Kurulum (Windows)
 
 **Kurulum dosyası (önerilen):** `BOYDE_Atolye_Kurulum.exe` indirilip çift tıklanır. Python ya da bat dosyası

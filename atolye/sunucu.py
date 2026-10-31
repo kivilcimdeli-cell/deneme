@@ -13,7 +13,8 @@
   POST /api/musteri/<k>/klasor        müşteri klasörünü dosya gezgininde aç
   POST /api/musteri/<k>/sil           müşteriyi sil (klasörü veri klasöründe silinenler/ altına taşınır, geri alınabilir)
   GET  /api/is/<no>, /api/isler       iş durumu
-  GET  /api/durum                     Claude Code bu bilgisayarda bulunuyor mu
+  GET  /api/durum                     Claude Code bulunuyor mu, sürüm, veri klasörü
+  GET  /yazi/<dosya>.ttf              arayüzün yazı tipleri (scripts/fonts)
   GET  /api/ogrenme/<urun>            öğrenilen tercihler
   GET  /dosya/<k>/<yol>               müşteri klasöründeki bir dosya (katalog, 3MF, önizleme)
 """
@@ -28,11 +29,13 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import PORT, VERI, isler, kayit, ogrenme, urunler
+from . import PORT, SCRIPTS, SURUM, VERI, isler, kayit, ogrenme, urunler
 
 NABIZ = [0.0]          # arayüzden son istek (açık panel birkaç saniyede bir iş durumunu sorar): pencere açık mı
 ARAYUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "arayuz")
+YAZI = os.path.join(SCRIPTS, "fonts")    # arayüzün yazı tipleri (internet gerekmez)
 mimetypes.add_type("model/3mf", ".3mf")
+mimetypes.add_type("font/ttf", ".ttf")
 mimetypes.add_type("text/javascript", ".js")
 
 
@@ -146,6 +149,8 @@ class Panel(BaseHTTPRequestHandler):
                 return self._dosya(os.path.join(ARAYUZ, "index.html"))
             if yontem == "GET" and parca[0] == "arayuz":
                 return self._dosya(self._guvenli(ARAYUZ, "/".join(parca[1:])))
+            if yontem == "GET" and parca[0] == "yazi" and len(parca) == 2 and parca[1].endswith(".ttf"):
+                return self._dosya(self._guvenli(YAZI, parca[1]))
             if yontem == "GET" and parca[0] == "dosya" and len(parca) >= 3:
                 kok = kayit.klasor(parca[1])
                 return self._dosya(self._guvenli(kok, "/".join(parca[2:])), indir="indir" in q)
@@ -168,7 +173,7 @@ class Panel(BaseHTTPRequestHandler):
             return kayit.liste()
         if yontem == "GET" and p == ["durum"]:
             from .claude import bul
-            return {"claude": bool(bul())}
+            return {"claude": bool(bul()), "surum": SURUM, "veri": VERI}
         if yontem == "GET" and p == ["isler"]:
             return isler.hepsi()
         if yontem == "GET" and len(p) == 2 and p[0] == "is":

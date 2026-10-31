@@ -8,15 +8,24 @@
 <link rel="stylesheet" href="/arayuz/stil.css">
 </head>
 <body>
-<header class="ust">
-  <a class="logo" href="#/"><span class="isaret"><i></i><i></i><i></i></span><b>BOYDE</b><small>ATÖLYE</small></a>
-  <nav>
-    <a href="#/">Yeni sipariş</a>
-    <a href="#/musteriler">Müşteriler</a>
-    <a href="#/isler">İşler <span id="is-rozet" class="rozet" hidden></span></a>
-  </nav>
-</header>
-<main id="sayfa"></main>
+<div class="uygulama">
+  <aside class="yan">
+    <a class="logo" href="#/"><span class="isaret"><i></i><i></i><i></i></span>
+      <span><b>BOYDE</b><small>ATÖLYE</small></span></a>
+    <nav id="menu">
+      <a href="#/" data-yol=""><span data-ikon="arti"></span>Yeni sipariş</a>
+      <a href="#/musteriler" data-yol="musteriler"><span data-ikon="kisiler"></span>Müşteriler</a>
+      <a href="#/isler" data-yol="isler"><span data-ikon="isler"></span>İşler<span id="is-rozet" class="rozet" hidden></span></a>
+    </nav>
+    <div class="yan-son">
+      <p class="yan-baslik">Son müşteriler</p>
+      <div id="son-musteriler"></div>
+    </div>
+    <div class="yan-alt" id="yan-alt"></div>
+  </aside>
+  <main id="sayfa"></main>
+</div>
+<div id="cekmece" class="cekmece-arka" hidden></div>
 <div id="bildirim" class="bildirim" hidden></div>
 <script src="/arayuz/app.js"></script>
 </body>

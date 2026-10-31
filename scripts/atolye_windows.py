@@ -45,6 +45,8 @@ def uygulama():
         os.makedirs(os.path.dirname(hedef), exist_ok=True)
         shutil.copy2(f, hedef)
     shutil.copy2(os.path.join(P.KOK, "paket", "windows", "BOYDE_Atolye.ico"), HEDEF)
+    with open(os.path.join(HEDEF, "surum.txt"), "w", encoding="utf-8") as f:   # arayüzde görünür (atolye.SURUM)
+        f.write(os.environ.get("SURUM", "yerel"))
 
 
 def python():
