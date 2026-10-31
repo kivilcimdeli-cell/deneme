@@ -147,11 +147,13 @@ function yeniSiparis(kod) {
 
 // ------------------------------------------------------------------ müşteri sayfası
 let SECILEN = {};
+let CLAUDE = null;                                        // Claude Code bu bilgisayarda var mı (null: bakılmadı)
 let RENKSEC = {};                                         // üretimde renk değişikliği (müşteri başına)
 const RENK_ALANI = {govde: ["zemin", "Gövde"], metin: ["yazi_renk", "Yazı"], vurgu: ["renk", "Vurgu"]};
 
 async function musteriSayfasi(k, sessiz) {
   const m = await api("musteri/" + encodeURIComponent(k));
+  if (CLAUDE === null) CLAUDE = (await api("durum").catch(() => ({}))).claude ?? false;
   const u = URUNLER.find(x => x.kod === m.urun);
   const aktif = m.isler.find(j => j.durum === "bekliyor" || j.durum === "calisiyor");
   const sonHata = [...m.isler].reverse().find(j => j.durum === "hata");
@@ -222,8 +224,16 @@ async function musteriSayfasi(k, sessiz) {
       <div class="kart"><h2>Özel istek (Claude)</h2>
         <p class="soluk">Algoritmanın yapamadığı bir şey mi var? ("logo daha büyük olsun", "arka yüze adres ekle")
           Bu müşterinin dosyalarıyla birlikte Claude'a iletilir; sonucu çıktılara eklenir.</p>
-        <textarea id="istek" placeholder="İsteği yazın…"></textarea>
-        <div class="satir" style="margin-top:10px"><button id="claude" ${aktif ? "disabled" : ""}>Claude'a ilet</button></div></div>
+        ${CLAUDE ? `<textarea id="istek" placeholder="İsteği yazın…"></textarea>
+        <div class="satir" style="margin-top:10px"><button id="claude" ${aktif ? "disabled" : ""}>Claude'a ilet</button></div>`
+        : `<div class="uyari kurulum"><b>Claude Code bu bilgisayarda bulunamadı.</b> Bu özellik komut satırındaki Claude
+          Code ile çalışır; Claude'un sohbet uygulaması yetmez. Bir kez kurulur:
+          <ol><li>Başlat menüsünden <b>PowerShell</b>'i açın, şunu yapıştırıp Enter'a basın:
+            <code>irm https://claude.ai/install.ps1 | iex</code></li>
+          <li>Bitince <b>yeni</b> bir PowerShell penceresi açıp <code>claude</code> yazın, hesabınızla bir kez giriş yapın,
+            sonra pencereyi kapatın. (<code>claude</code> tanınmazsa: <code>&amp; "$env:USERPROFILE\\.local\\bin\\claude.exe"</code>)</li>
+          <li>Burada <b>Yeniden dene</b>'ye basın.</li></ol>
+          <button class="ince" id="claude-yokla">Yeniden dene</button></div>`}</div>
       <div class="kart bolum"><h2>Geçmiş</h2><ul class="notlar bolum">${m.notlar.slice().reverse().map(n =>
         `<li><time>${tarih(n.tarih)}</time>${esc(n.metin)}</li>`).join("")}</ul></div>
     </div></div>`;
@@ -261,7 +271,12 @@ async function musteriSayfasi(k, sessiz) {
   if ($("#katalog")) $("#katalog").onclick = () => is_("katalog", {}, "Katalog sıraya alındı");
   document.querySelectorAll("[data-renk]").forEach(el => el.onchange = () => { rs[el.dataset.renk] = el.value; });
   $("#uret").onclick = () => is_("uret", {kod: SECILEN[k] || "", renkler: rs}, "Baskı dosyaları sıraya alındı");
-  $("#claude").onclick = () => is_("claude", {istek: $("#istek").value}, "Claude'a iletildi");
+  if ($("#claude")) $("#claude").onclick = () => is_("claude", {istek: $("#istek").value}, "Claude'a iletildi");
+  if ($("#claude-yokla")) $("#claude-yokla").onclick = async () => {
+    CLAUDE = (await api("durum").catch(() => ({}))).claude ?? false;
+    bildir(CLAUDE ? "Claude Code bulundu" : "Claude Code hâlâ bulunamadı", !CLAUDE);
+    musteriSayfasi(k);
+  };
   if (aktif) zamanlayici = setTimeout(() => location.hash.includes(kE) && musteriSayfasi(k, true), 1500);
 }
 

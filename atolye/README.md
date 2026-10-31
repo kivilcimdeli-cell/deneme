@@ -100,9 +100,14 @@ Kayıt veri klasöründe `tercihler.json`'da tutulur.
 Algoritmanın karşılamadığı istekler müşterinin sayfasındaki **Claude'a ilet** kutusuna yazılır. Örnekler: "logo
 daha büyük olsun", "arka yüze adres ekle".
 
-İstek bilgisayardaki Claude Code'a gider, sonuç dosyaları müşterinin çıktılarına eklenir. Bunun için
-[Claude Code](https://claude.com/claude-code) kurulu ve oturum açık olmalı. `claude` komutu yolda değilse
-`BOYDE_CLAUDE` ortam değişkenine tam yolu yazılır.
+İstek bilgisayardaki Claude Code'a gider (tek seferlik iş: dosya düzenleme ve uygulamanın Python'uyla komutlar
+serbest), sonuç dosyaları müşterinin çıktılarına eklenir.
+
+- **Gerekli:** komut satırındaki [Claude Code](https://claude.com/claude-code); Claude'un sohbet uygulaması yetmez.
+  Windows'ta PowerShell'de `irm https://claude.ai/install.ps1 | iex`, sonra yeni pencerede `claude` ile bir kez giriş.
+- **Bulma:** PATH, Windows'un güncel PATH'i (kayıt defteri) ve bilinen kurulum yerleri (`~/.local/bin`, npm, winget)
+  aranır. Başka yerdeyse `BOYDE_CLAUDE` ortam değişkenine tam yolu yazılır.
+- Bulunamazsa kutuda kurulum adımları ve **Yeniden dene** düğmesi çıkar (uygulamayı yeniden açmak gerekmez).
 
 ## Veriler
 

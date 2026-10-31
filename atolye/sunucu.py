@@ -13,6 +13,7 @@
   POST /api/musteri/<k>/klasor        müşteri klasörünü dosya gezgininde aç
   POST /api/musteri/<k>/sil           müşteriyi sil (klasörü veri klasöründe silinenler/ altına taşınır, geri alınabilir)
   GET  /api/is/<no>, /api/isler       iş durumu
+  GET  /api/durum                     Claude Code bu bilgisayarda bulunuyor mu
   GET  /api/ogrenme/<urun>            öğrenilen tercihler
   GET  /dosya/<k>/<yol>               müşteri klasöründeki bir dosya (katalog, 3MF, önizleme)
 """
@@ -165,6 +166,9 @@ class Panel(BaseHTTPRequestHandler):
             return [urunler.tanim(m) for m in urunler.hepsi()]
         if yontem == "GET" and p == ["musteriler"]:
             return kayit.liste()
+        if yontem == "GET" and p == ["durum"]:
+            from .claude import bul
+            return {"claude": bool(bul())}
         if yontem == "GET" and p == ["isler"]:
             return isler.hepsi()
         if yontem == "GET" and len(p) == 2 and p[0] == "is":
@@ -235,7 +239,7 @@ class Panel(BaseHTTPRequestHandler):
                 raise Hata(400, "İstek boş")
             komut = claude_komutu(m, istek)
             if not komut:
-                raise Hata(400, "Claude Code bu bilgisayarda kurulu değil (README: Claude köprüsü)")
+                raise Hata(400, "Claude Code bulunamadı: Özel istek kutusundaki adımlarla kurun")
             kayit.not_ekle(m, "Claude'a iletildi: " + istek)
             kayit.yaz(m)
             isler.ekle(k, "claude", baslik="Claude: " + istek[:40], komut=komut)

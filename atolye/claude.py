@@ -16,9 +16,33 @@ import sys
 from . import KOK, PYTHON, kayit, urunler, utf8_cikti
 
 
+def _arama_yolu():
+    """Claude Code'un aranacağı klasörler: PATH; Windows'ta kayıt defterindeki güncel PATH (Claude Code uygulamadan
+    sonra kurulduysa uygulamanın PATH'i eski kalır); bilinen kurulum yerleri (resmî kurulum ~/.local/bin, npm,
+    winget). Claude'un sohbet (masaüstü) uygulaması aranmaz: o komut satırı değil."""
+    yollar = [os.environ.get("PATH", "")]
+    if os.name == "nt":
+        import winreg
+        for kok, anahtar in ((winreg.HKEY_CURRENT_USER, "Environment"),
+                             (winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment")):
+            try:
+                with winreg.OpenKey(kok, anahtar) as k:
+                    yollar.append(os.path.expandvars(winreg.QueryValueEx(k, "Path")[0]))
+            except OSError:
+                pass
+    ev = os.path.expanduser("~")
+    yollar += [os.path.join(ev, ".local", "bin"), os.path.join(ev, ".claude", "local"),
+               os.path.join(os.environ.get("APPDATA", ev), "npm"),
+               os.path.join(os.environ.get("LOCALAPPDATA", ev), "Microsoft", "WinGet", "Links")]
+    return os.pathsep.join(y for y in yollar if y)
+
+
 def bul():
-    yol = os.environ.get("BOYDE_CLAUDE") or shutil.which("claude") or shutil.which("claude.cmd")
-    return yol if yol and os.path.exists(yol) else None
+    yol = os.environ.get("BOYDE_CLAUDE")
+    if yol and os.path.exists(yol):
+        return yol
+    ara = _arama_yolu()
+    return shutil.which("claude", path=ara) or shutil.which("claude.cmd", path=ara)
 
 
 def komut(m, istek):
@@ -46,6 +70,8 @@ Kurallar:
 - Sonuç dosyalarını müşterinin klasöründe cikti/ altına yaz (eski dosyanın üstüne değil, yeni adla: ..._v2.3mf).
 - Depodaki üreticileri kullan (scripts/, atolye/urunler/); baskıya uygunluk kontrollerini (QR okuma, harf içi ve ara)
   atlama. Renk paletini ve marka kurallarını (CLAUDE.md) koru.
+- Python: {PYTHON} (uygulamanın kendi Python'u; paketler bunda). Betikleri bununla, uygulama klasöründe ({KOK})
+  çalıştır; başka Python kurmaya çalışma.
 - İstek ürün eklentisinde kalıcı bir iyileştirme gerektiriyorsa eklentiyi de düzelt ve bunu tek satırla belirt.
 - Bitince ne yaptığını en fazla 3 satırla yaz.
 """
@@ -60,7 +86,9 @@ def main():
     print("@@ 5 Claude çalışıyor (bu iş birkaç dakika sürebilir)", flush=True)
     cli = bul()
     onek = ["cmd", "/c"] if cli.lower().endswith((".cmd", ".bat")) else []   # Windows'ta npm kurulumu claude.cmd
-    p = subprocess.run(onek + [cli, "-p", istem(m, istek), "--permission-mode", "acceptEdits", "--add-dir", klasor],
+    # tek seferlik iş, kimse onaylayamaz: dosya düzenleme ve komutlar (uygulamanın Python'u ile üreticiler) serbest
+    p = subprocess.run(onek + [cli, "-p", istem(m, istek), "--permission-mode", "acceptEdits",
+                               "--allowedTools", "Bash,Read,Edit,Write,Glob,Grep", "--add-dir", klasor],
                        cwd=KOK, text=True, encoding="utf-8", errors="replace", capture_output=True,
                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))     # Windows'ta konsol açılmasın
     print(p.stdout)
