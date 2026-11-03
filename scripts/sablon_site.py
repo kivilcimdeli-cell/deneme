@@ -36,7 +36,9 @@ Kullanım:
   python3 scripts/sablon_site.py autotufan_isimlik            # sıradaki ya da kayıtlı şablonla
   python3 scripts/sablon_site.py autotufan_isimlik --sablon 3 # şablonu elle seç (kayıt güncellenir)
   python3 scripts/sablon_site.py autotufan_isimlik --hizli    # GIF'siz
+  python3 scripts/sablon_site.py kuafor_klasoru --guzellik    # güzellik işletmesi: 6–10 arasında sıradaki
   python3 scripts/sablon_site.py --katalog                    # beş şablonun örnekleri ve katalog görseli
+  python3 scripts/sablon_site.py --katalog-guzellik           # güzellik şablonları (6–10): örnekler ve katalog
   python3 scripts/sablon_site.py --sira                       # kayıtlı işletmeler ve sıradaki şablon
 """
 import base64
@@ -219,13 +221,20 @@ def order():
     return json.load(open(ORDER, encoding="utf-8")) if os.path.exists(ORDER) else []
 
 
-def pick(site, forced=0):
-    """Şablon: elle seçilen > bilgiler.json'daki > kayıtlı > sıradaki. Yeni ya da değişen seçim kaydedilir."""
+def next_template(rows, guzellik=False):
+    """Sıradaki şablon: lastikçi tarzında 1–5, güzellikte 6–10; her aile kendi içinde döner."""
+    lo, k = (len(sablonlar.ALL) + 1, len(sablonlar.GUZELLIK)) if guzellik else (1, len(sablonlar.ALL))
+    last = [r["sablon"] for r in rows if lo <= r["sablon"] < lo + k]
+    return lo + (last[-1] - lo + 1) % k if last else lo
+
+
+def pick(site, forced=0, guzellik=False):
+    """Şablon: elle seçilen > bilgiler.json'daki > kayıtlı > sıradaki (güzellik: 6–10 arasında sıradaki). Yeni ya da
+    değişen seçim kaydedilir."""
     rows = order()
     rel = os.path.relpath(site.folder, A.ROOT)
     known = next((r for r in rows if r["klasor"] == rel), None)
-    n = forced or site.sablon or (known and known["sablon"]) or (rows[-1]["sablon"] % len(sablonlar.ALL) + 1 if rows
-                                                                  else 1)
+    n = forced or site.sablon or (known and known["sablon"]) or next_template(rows, guzellik)
     if not known or known["sablon"] != n:
         rows = [r for r in rows if r["klasor"] != rel] + [{"isletme": site.isletme, "klasor": rel, "sablon": n,
                                                             "tarih": datetime.date.today().isoformat()}]
@@ -575,10 +584,10 @@ def tour_gif(site, T, out, path):
 
 # ---------------------------------------------------------------- üretim
 
-def build(folder, n=0, out=None, previews=True, gif=True, overrides=None, record=True):
+def build(folder, n=0, out=None, previews=True, gif=True, overrides=None, record=True, guzellik=False):
     """İşletmenin sitesi: site/, zip, deneme dosyası; önizleme ve tur. Döner: (site, şablon, ilk ekran görüntüsü)."""
     site = load(folder, overrides)
-    n = pick(site, n) if record else (n or site.sablon or 1)
+    n = pick(site, n, guzellik) if record else (n or site.sablon or 1)
     T = sablonlar.get(n)
     base = out or site.folder
     out = os.path.join(base, "site")
@@ -604,13 +613,15 @@ def build(folder, n=0, out=None, previews=True, gif=True, overrides=None, record
     return site, T, first
 
 
-def catalog():
+def catalog(guzellik=False):
     """Beş şablonun her biri kendi örnek işletmesiyle (1–4 lastikçilerin kendileri, 5 Auto Tufan),
-    site_sablonlari/<no>_<ad>/ altında önizleme ve deneme dosyası; katalog.png: ilk ekranları yan yana."""
+    site_sablonlari/<no>_<ad>/ altında önizleme ve deneme dosyası; katalog.png: ilk ekranları yan yana.
+    guzellik: güzellik şablonları (6–10, örnekleri uydurma işletmeler) site_sablonlari/guzellik/ altında."""
     tiles = []
-    for T in sablonlar.ALL:
+    root = os.path.join(CATALOG, "guzellik") if guzellik else CATALOG
+    for T in (sablonlar.GUZELLIK if guzellik else sablonlar.ALL):
         folder, over = T.ORNEK
-        base = os.path.join(CATALOG, f"{T.NO}_{T.SLUG}")
+        base = os.path.join(root, f"{T.NO}_{T.SLUG}")
         os.makedirs(base, exist_ok=True)
         site, _, first = build(folder, T.NO, out=base, gif=False, overrides=over, record=False)
         shutil.rmtree(os.path.join(base, "site"))                    # katalogda önizleme ve deneme dosyası kalır
@@ -622,33 +633,35 @@ def catalog():
     gap, top = 40, 150
     sheet = Image.new("RGB", (len(tiles) * (W + gap) + gap, top + 844 + 60), (236, 238, 242))
     dr = ImageDraw.Draw(sheet)
-    dr.text((gap, 34), "SİTE ŞABLONLARI · lastikçi tarzı · sırayla", font=font(34), fill=(20, 20, 24))
+    dr.text((gap, 34), "SİTE ŞABLONLARI · " + ("güzellik · kuaför, salon, tırnak, kirpik, spa" if guzellik else
+                                               "lastikçi tarzı · sırayla"), font=font(34), fill=(20, 20, 24))
     for k, (T, site, first) in enumerate(tiles):
         x = gap + k * (W + gap)
         dr.text((x, 96), f"{T.NO} · {T.AD}", font=font(24), fill=(20, 20, 24))
         dr.text((x, 126), f"örnek: {site.isletme}", font=font(17, False), fill=(96, 98, 106))
         shot = first.resize((W, 844), Image.LANCZOS)
         sheet.paste(shot, (x, top + 20))
-    sheet.save(os.path.join(CATALOG, "katalog.png"), optimize=True)
-    print("katalog:", os.path.relpath(os.path.join(CATALOG, "katalog.png"), A.ROOT))
+    sheet.save(os.path.join(root, "katalog.png"), optimize=True)
+    print("katalog:", os.path.relpath(os.path.join(root, "katalog.png"), A.ROOT))
 
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if "--katalog" in sys.argv:
-        catalog()
+    if "--katalog" in sys.argv or "--katalog-guzellik" in sys.argv:
+        catalog("--katalog-guzellik" in sys.argv)
         return
     if "--sira" in sys.argv or not args:
         rows = order()
         for r in rows:
             print(f"  {r['sablon']} · {sablonlar.get(r['sablon']).AD:11s} {r['isletme']} ({r['klasor']}, {r['tarih']})")
-        nxt = rows[-1]["sablon"] % len(sablonlar.ALL) + 1 if rows else 1
-        print(f"sıradaki şablon: {nxt} · {sablonlar.get(nxt).AD}")
+        for g, ad in ((False, "sıradaki şablon"), (True, "güzellikte sıradaki (--guzellik)")):
+            nxt = next_template(rows, g)
+            print(f"{ad}: {nxt} · {sablonlar.get(nxt).AD}")
         return
     n = int(sys.argv[sys.argv.index("--sablon") + 1]) if "--sablon" in sys.argv else 0
     if n:
         args = [a for a in args if a != str(n)]
-    build(args[0], n, gif="--hizli" not in sys.argv)
+    build(args[0], n, gif="--hizli" not in sys.argv, guzellik="--guzellik" in sys.argv)
 
 
 if __name__ == "__main__":

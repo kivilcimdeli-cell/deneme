@@ -10,3 +10,4 @@ build/
 
 # anahtarlık modellerinin ara dosyaları (betikler yeniden üretir)
 boyde_labs/anahtarlik_*/kaynak/*.npz
+boyde_labs/guzellik/kaynak/*.npz

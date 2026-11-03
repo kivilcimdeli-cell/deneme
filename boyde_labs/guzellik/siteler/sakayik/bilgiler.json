@@ -1,0 +1,19 @@
+{
+  "telefon": "0546 475 45 08",
+  "whatsapp_mesaj": "Merhaba, randevu almak istiyorum.",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "banka": "Örnek Bankası",
+  "isletme": "Şakayık Güzellik Salonu",
+  "marka": "ŞAKAYIK",
+  "hizmet": "GÜZELLİK SALONU",
+  "etiket": "CİLT · KAŞ · KİRPİK · MANİKÜR",
+  "aciklama": "Cilt bakımından maniküre, kendinize ayıracağınız bir saat. Randevu için yazın.",
+  "renk": "#7A2850",
+  "instagram": "@sakayikguzellik",
+  "google": "https://www.google.com/search?q=%C5%9Eakay%C4%B1k+G%C3%BCzellik",
+  "iban_alici": "ŞAKAYIK GÜZELLİK",
+  "isaret": "logo/isaret.svg",
+  "konum": "Muratpaşa, Antalya"
+}

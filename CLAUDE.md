@@ -11,10 +11,14 @@
   - Üretici sıradakini kendisi seçip kaydeder.
   - Bir işletme bir kez şablon aldıysa yeniden üretimde aynı şablonda kalır.
   - Sıradaki: `python3 scripts/sablon_site.py --sira`.
+- **Güzellik işletmeleri** (kuaför, güzellik salonu, tırnak, kirpik, cilt bakım, spa…): kullanıcının istediği
+  5 güzellik şablonundan (6–10) biri, kendi içinde sırayla: `python3 scripts/sablon_site.py <klasör> --guzellik`.
+  - Lastikçi sırası (1–5) bundan etkilenmez; ayrıntı `site_sablonlari/README.md` → Güzellik şablonları.
 - **İşletmeye göre değişenler** (`bilgiler.json`): vurgu rengi (`renk`), etiket, açıklama, logo işareti (`isaret`).
   - Bunlar şablonun içinde ayarlanır; düzen değiştirilmez.
 - **Şablonda düzeltme ya da iyileştirme:** `scripts/sablonlar/` altında yapılır.
-  - Ardından `python3 scripts/sablon_site.py --katalog` ile beş örnek yeniden denetlenir.
+  - Ardından `python3 scripts/sablon_site.py --katalog` (güzellikte `--katalog-guzellik`) ile beş örnek yeniden
+    denetlenir.
 
 ## BOYDE Atölye uygulaması (`atolye/`)
 

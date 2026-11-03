@@ -49,7 +49,8 @@ def _uygulama_sirasi():
 
 
 def siradaki():
-    rows = sorted(_depo_sirasi() + _uygulama_sirasi(), key=lambda r: r.get("tarih", ""))
+    rows = sorted((r for r in _depo_sirasi() + _uygulama_sirasi() if r["sablon"] <= 5),   # 6–10: güzellik şablonları
+                  key=lambda r: r.get("tarih", ""))
     return rows[-1]["sablon"] % 5 + 1 if rows else 1
 
 
