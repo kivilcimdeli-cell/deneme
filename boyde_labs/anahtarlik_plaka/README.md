@@ -23,7 +23,10 @@ zemini, solda TR bandı. TR bandı **mavi** (örnekteki gibi) ya da **kırmızı
 - **Delik:** Ø3,5 mm, TR bandının sol üstünde (üstte 2,45, solda 3,25 mm et). Kullanıcının örneğinde kesici gövdeydi,
   birleştirince STL'e çıkmamıştı.
 - **Ad:** genişliğe sığdırılır; İ noktaları ve Ğ işaretiyle şeride sığmazsa küçülür. Küçük boyda da harf içi ve İ
-  noktası ≥ 0,7 mm kalsın diye Outfit ExtraBold (Montserrat'ta noktalar 0,7 mm'nin altına iniyordu).
+  noktası ≥ 0,7 mm kalsın diye Outfit ExtraBold (Montserrat'ta noktalar 0,7 mm'nin altına iniyordu). Küçülünce ince
+  kalan adlarda (Ş, Ç çengelli) yazı küçülmek yerine şeritte kayar (alt çerçeveye ya da plakaya 0,6 mm kalana dek).
+- **Atölye:** uygulamada "Plakalı anahtarlık" ürünü bu modeli kullanır (`atolye/urunler/plakali.py`): plaka, yazı ve
+  bant rengi girilir; sipariş adedi kadar X2D 3MF ve önizleme hazırlanır.
 - **Kontrol:** yazılar zeminden taşmaz (kırpılan 0), 0,7 mm'den ince kalan yer yok.
 
 Örnek yazılar uydurma (gerçek plaka ya da kişi değil): 34 BYD 34 · BOYDE LABS (kırmızı), 06 BYD 06 · ADINIZ

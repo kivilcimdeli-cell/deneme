@@ -12,7 +12,8 @@ Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz):
   0–1,2    kırmızı  TR bandı (ya da mavi)
   1,0–2,3  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
   1,2–1,9  beyaz    TR
-  2,0–3,0  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm)
+  2,0–3,0  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm; küçülünce ince
+                    kalan adlar şeritte kayar)
 Örnek yazılar uydurma (gerçek plaka ya da kişi değil); görsellerde markamız BOYDE LABS.
 
 Çıktı : boyde_labs/anahtarlik_plaka/kaynak/<model>.npz (git'e girmez), <model>_on.png, <model>_arka.png
@@ -40,9 +41,10 @@ OUT = os.path.join(A.ROOT, "boyde_labs", "anahtarlik_plaka")
 SRC = os.path.join(OUT, "kaynak")
 FOTO = os.path.join(OUT, "fotograf")
 
-SIYAH, BEYAZ = T.U.RGB[A.BLACK], T.U.RGB[A.WHITE]
-BANT = {"kirmizi": T.U.RGB[5], "mavi": T.U.RGB[4]}            # TR bandının rengi
+SIYAH, BEYAZ = A.BLACK, A.WHITE                   # filament renkleri (kimlik; RGB: T.U.RGB)
+BANT = {"kirmizi": A.RED, "mavi": A.BLUE}           # TR bandının rengi
 BANT_AD = {"kirmizi": "kırmızı", "mavi": "mavi"}
+RGB = T.U.RGB
 W, H, R = 70.0, 22.0, 3.6                         # dış ölçü ve köşe
 IC = (2.05, 1.6, 67.95, 20.45)                    # çerçevenin içi
 SERIT_UST = 7.8                                   # alt şeridin üstü (adın zemini)
@@ -67,7 +69,9 @@ def _yazi(font, s, cap, cx, cy, max_w, tr=0.3):
 
 
 def tasarla(plaka, ad, bant_rengi="kirmizi"):
-    """bant_rengi: "kirmizi" ya da "mavi". Döner [(Manifold, rgb)] (baskı yönünde) ve ölçüler: plaka ve ad yazısının boyu, kırpılan alan."""
+    """bant_rengi: "kirmizi" ya da "mavi"; ad boş olabilir (alt şerit düz kalır). Döner [(ad, Manifold, renk)]
+    (baskı yönünde; renk filament kimliği) ve ölçüler: plaka ve ad yazısının boyu, kırpılan ve ince kalan alan.
+    Atölye'nin plakalı anahtarlık ürünü de bunu kullanır (atolye/urunler/plakali.py)."""
     dis = A.rrect(W, H, R, W / 2, H / 2)
     ic = A.rrect(IC[2] - IC[0], IC[3] - IC[1], 2.3, (IC[0] + IC[2]) / 2, (IC[1] + IC[3]) / 2)
     delik = A.circle(DELIK_R, *DELIK)
@@ -79,26 +83,51 @@ def tasarla(plaka, ad, bant_rengi="kirmizi"):
     plaka_cs = _yazi("saira6", plaka.upper(), 6.5, (BANT_SAG + IC[2]) / 2, (SERIT_UST + IC[3]) / 2,
                      IC[2] - BANT_SAG - 5.0, 0.4)
     tr_cs = _yazi("saira6", "TR", 4.0, (IC[0] + BANT_SAG) / 2, 10.9, BANT_SAG - IC[0] - 2.0, 0.3)
-    serit = ((IC[1] + SERIT_UST) / 2, SERIT_UST - IC[1] - 1.3)              # şeridin ortası, yazıya kalan boy
-    ad_cs = _yazi("outfit", ad, 4.3, W / 2, serit[0], IC[2] - IC[0] - 4.0, 0.6)
-    cap = 4.3
-    for _ in range(4):                             # İ noktaları, Ğ işareti şeride sığmazsa ad küçülür
-        b = ad_cs.bounds()
-        if b[3] - b[1] <= serit[1]:
-            break
-        cap *= serit[1] / (b[3] - b[1]) * 0.99
-        ad_cs = _yazi("outfit", ad, cap, W / 2, serit[0], IC[2] - IC[0] - 4.0, 0.6)
+    ad_cs = _ad(ad) if ad.strip() else m3.CrossSection()
     kirp = (plaka_cs - zemin.offset(-0.8, J)).area() + (ad_cs - (siyah - ust).offset(-0.6, J)).area()
 
     def kat(cs, z0, z1):
         return cs.extrude(z1 - z0).translate((0, 0, z0))
-    parcalar = [(kat(siyah, 0, Z_GOVDE), SIYAH), (kat(zemin - delik, 0, Z_ZEMIN), BEYAZ),
-                (kat(bant - delik, 0, Z_BANT), BANT[bant_rengi]),
-                (kat(plaka_cs, Z_ZEMIN, Z_ZEMIN + PLAKA_H), SIYAH), (kat(tr_cs, Z_BANT, Z_BANT + TR_H), BEYAZ),
-                (kat(ad_cs, Z_GOVDE, Z_GOVDE + AD_H), BEYAZ)]
-    olcu = {"plaka_boy": plaka_cs.bounds()[3] - plaka_cs.bounds()[1], "ad_boy": ad_cs.bounds()[3] - ad_cs.bounds()[1],
-            "kirpilan": kirp, "ince": _ince(ad_cs) + _ince(plaka_cs)}
+    parcalar = [("govde", kat(siyah, 0, Z_GOVDE), SIYAH), ("zemin", kat(zemin - delik, 0, Z_ZEMIN), BEYAZ),
+                ("bant", kat(bant - delik, 0, Z_BANT), BANT[bant_rengi]),
+                ("plaka", kat(plaka_cs, Z_ZEMIN, Z_ZEMIN + PLAKA_H), SIYAH),
+                ("tr", kat(tr_cs, Z_BANT, Z_BANT + TR_H), BEYAZ)]
+    if ad.strip():
+        parcalar.append(("ad", kat(ad_cs, Z_GOVDE, Z_GOVDE + AD_H), BEYAZ))
+    olcu = {"plaka_boy": plaka_cs.bounds()[3] - plaka_cs.bounds()[1],
+            "ad_boy": ad_cs.bounds()[3] - ad_cs.bounds()[1] if ad.strip() else 0.0,
+            "kirpilan": kirp, "ince": (_ince(ad_cs) if ad.strip() else 0.0) + _ince(plaka_cs)}
     return parcalar, olcu
+
+
+def _ad(ad):
+    """Alttaki yazı: siyah şeridin ortasında, Outfit ExtraBold 4,3 mm; şeride (kenarlardan 1,3 mm pay) sığmazsa küçülür.
+    Küçülünce ince kalırsa (İ noktası, Ş çengeli taşan adlar) yazı küçülmek yerine şeridin boş yanına (alt çerçeveye
+    ya da plakaya 0,6 mm kalana dek) kayar; uzun ad ince kalırsa harf arası daraltılır. En az ince kalan seçilir."""
+    orta, boy = (IC[1] + SERIT_UST) / 2, SERIT_UST - IC[1] - 1.3          # şeridin ortası, yazıya kalan boy
+    alt, ust = 0.8, SERIT_UST - 0.6                                        # kaydırınca işaretlerle birlikte en çok
+    en = IC[2] - IC[0] - 4.0
+
+    def yerlestir(tr, sinir):
+        cap = 4.3
+        for _ in range(5):
+            cs = _yazi("outfit", ad, cap, W / 2, orta, en, tr)
+            b = cs.bounds()
+            if b[3] - b[1] <= boy:
+                return cs
+            if b[3] - b[1] <= sinir:                                       # şeride kaydırarak sığar
+                return cs.translate((0, min(0.0, ust - b[3]) + max(0.0, alt - b[1])))
+            cap *= sinir / (b[3] - b[1]) * 0.99
+        return cs
+    sec = None
+    for tr, sinir in ((0.6, boy), (0.6, ust - alt), (0.3, ust - alt)):
+        cs = yerlestir(tr, sinir)
+        ince = _ince(cs)
+        if sec is None or ince < sec[1] - 0.05:
+            sec = (cs, ince)
+        if ince == 0:
+            break
+    return sec[0]
 
 
 def _ince(cs, en=0.7):
@@ -115,10 +144,10 @@ def yon():
 def kaydet(anahtar, parcalar):
     """npz: anahtarlık fotoğraf betiğinin (boyde_anahtarlik_foto) okuduğu biçim."""
     arr = {}
-    for i, (man, _) in enumerate(parcalar):
+    for i, (_, man, _) in enumerate(parcalar):
         V, F = A.mesh_arrays(man)
         arr[f"v{i}"], arr[f"f{i}"] = V.astype(np.float32), F.astype(np.int32)
-    meta = {"parcalar": [{"renk": list(rgb), "metal": False} for _, rgb in parcalar], "delik": list(DELIK),
+    meta = {"parcalar": [{"renk": list(RGB[c]), "metal": False} for _, _, c in parcalar], "delik": list(DELIK),
             "delik_r": DELIK_R, "kenar_yonu": yon(), "merkez": [W / 2, H / 2], "kalinlik": Z_GOVDE,
             "toplam": Z_GOVDE + AD_H}
     np.savez_compressed(os.path.join(SRC, f"{anahtar}.npz"), meta=json.dumps(meta), **arr)
@@ -126,7 +155,7 @@ def kaydet(anahtar, parcalar):
 
 def gorunus(anahtar, parcalar):
     from cift_tarafli_isimlik import render, rotation
-    mesh = [(*A.mesh_arrays(man), rgb) for man, rgb in parcalar]
+    mesh = [(*A.mesh_arrays(man), RGB[c]) for _, man, c in parcalar]
     for ad, rot in (("on", A.R_TOP), ("arka", rotation(180, 180))):
         im = render(mesh, 1400, rot, margin=0.0, ambient=0.62)
         im.crop(im.getbbox()).save(os.path.join(SRC, f"{anahtar}_{ad}.png"), optimize=True)

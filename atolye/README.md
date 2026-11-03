@@ -33,7 +33,7 @@ gerekmez; yönetici izni istemez.
 - **Güncelleme:** yeni kurulum dosyası aynı şekilde kurulur; eskisinin üzerine yazar.
 - **Nereden:** depodaki GitHub sürümleri (Releases, `atolye-1.0.N`). Her değişiklikte GitHub Actions Windows'ta yeniden
   derler (`.github/workflows/atolye-windows.yml`): kurulum klasörü (`scripts/atolye_windows.py`: gömülü Python 3.11,
-  paketler, Chromium), duman testi (`scripts/atolye_duman.py`: dört ürün baştan sona), Inno Setup
+  paketler, Chromium), duman testi (`scripts/atolye_duman.py`: beş ürün baştan sona), Inno Setup
   (`paket/windows/atolye.iss`).
 
 **ZIP ile (eski yol):**
@@ -55,6 +55,7 @@ gerekmez; yönetici izni istemez.
 | Kurumsal isimlik 10 × 20 | 10 tasarım (K01…) | tek takımlı X2D 3MF, önizlemeler, dijital kartvizit sayfası (zip) |
 | Türk bayraklı isimlik | yok | X2D 3MF (blok + sehpa), önizleme |
 | Toptan anahtarlık | 20 tasarım (A01…) | dolu tabla 3MF, tek adetlik deneme 3MF'i, tabla başına adet ve kaç tabla gerektiği |
+| Plakalı anahtarlık | yok | sipariş adedi kadar tabla 3MF'i (çoksa dolu tabla), deneme 3MF'i, ön ve arka önizleme |
 
 ### QR'lı isimlik
 
@@ -93,6 +94,19 @@ gerekmez; yönetici izni istemez.
 - **Sığmayan yazı:** alt yazı ve arka satırlar önce harf aralığını daraltır, sonra iki satıra iner ("0546 475" /
   "45 08"). Yine sığmayan yazılmaz, müşteri notlarında uyarı çıkar; arka yazısı eksik kalan tasarım katalogda ancak
   tam olanlar yetmezse gösterilir.
+
+### Plakalı anahtarlık
+
+- **Tasarım:** Shopier'deki ürün (`scripts/boyde_plakali_anahtarlik.py`, `tasarla()`): 70 × 22 × 3 mm, siyah
+  çerçeve ve alt şerit, beyaz plaka zemini, kırmızı ya da mavi TR bandı; plaka 1,3 mm, alttaki yazı 1 mm kabartma.
+- **Form:** plaka (zorunlu), alttaki yazı (ad soyad ya da söz; boş olabilir), TR bandının rengi, adet; müşterinin
+  adı ve telefonu yalnız kayıt için.
+- **Plaka:** büyük harfe çevrilir, boşluklar yerine konur (`34abc123` → `34 ABC 123`). İl kodu 01–81, 1–3 harf,
+  2–4 rakam değilse yazıldığı gibi basılır, uyarı çıkar.
+- **Alttaki yazı:** şeride sığacak kadar küçülür; İ noktası, Ş/Ç çengeli taşarsa önce şeritte kayar. 4 mm'nin
+  altına inerse ya da 0,7 mm'den ince yerler kalırsa uyarı çıkar (kısaltma ya da önce deneme baskısı).
+- **Tabla:** sipariş adedi kadar kopya (tek adette yalnız `_tek.3mf`); dolu tablaya 24 adet sığar, fazlası için kaç
+  tabla gerektiği yazılır. AMS siyah, beyaz, bant rengi; siyah ve bant ana nozulda, beyaz yardımcıda.
 
 ## Öğrenme
 

@@ -1,8 +1,9 @@
 """BOYDE Atölye duman testi: uygulamayı gerçek sunucusuyla, panelin kullandığı API üzerinden baştan sona dener.
-Dört ürün: müşteri kaydı → katalog → katalogdaki ilk kodla baskı dosyaları; işler hatasız bitiyor mu, çıktı dosyaları
+Beş ürün: müşteri kaydı → katalog → katalogdaki ilk kodla baskı dosyaları; işler hatasız bitiyor mu, çıktı dosyaları
 diskte var mı. Windows kurulum derlemesinde (CI) gömülü Python'la çalışır; geliştirirken de kullanılır.
 
-Örnek bilgiler uydurma (gerçek işletme ya da kişi yok); telefon örnek numara. Anahtarlıkta üç renk seçili.
+Örnek bilgiler uydurma (gerçek işletme ya da kişi yok); telefon örnek numara. Anahtarlıkta üç renk seçili; plakalıda
+plaka boşluksuz ve küçük harfle (biçime getiriliyor mu).
 
 Kullanım: python scripts/atolye_duman.py [ürün kodu ...]    (boşsa hepsi; veri klasörü geçici, port 8790)
 """
@@ -27,6 +28,7 @@ ORNEK = {
     "bayrakli": {"ad_soyad": "Deniz Yılmaz"},
     "anahtarlik": {"marka": "DENEME", "alt": "OTO YIKAMA", "sektor": "genel", "arka": TEL, "adet": "100",
                    "zemin": "siyah", "yazi_renk": "beyaz", "renk": "turuncu"},
+    "plakali": {"plaka": "34byd34", "yazi": "Adınız Soyadınız", "bant": "mavi", "adet": "40"},
 }
 SURE = 20 * 60                                            # bir iş için en çok (saniye)
 
