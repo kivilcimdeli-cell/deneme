@@ -2,13 +2,14 @@
 
 Kullanıcının örneği (Bambu Studio, Birleştir.stl, 70 × 22 × 3 mm): siyah çerçeve ve alt şerit, beyaz plaka zemini, solda
 TR bandı; plaka yazısı 1,3 mm (Anek Latin SemiBold, 10 mm), ad 1 mm (Arial, 6 mm) kabartma. Ölçüler STL'den alındı.
-Kullanıcı: "kırmızı versiyonunda yap TR yazısını": bant kırmızı, TR beyaz. Delik bandın sol üstünde (örnekte kesici
+TR bandı mavi (örnekteki gibi) ya da kırmızı ("kırmızı versiyonunda yap TR yazısını", "mavisini neden yapmadın"), TR
+beyaz. Delik bandın sol üstünde (örnekte kesici
 gövde olarak duruyor; birleştirince STL'e çıkmamış).
 
 Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz):
   0–2,0    siyah    çerçeve (2 mm) ve alt şerit (adın zemini)
   0–1,0    beyaz    plaka zemini (çerçevenin 1 mm içinde)
-  0–1,2    kırmızı  TR bandı
+  0–1,2    kırmızı  TR bandı (ya da mavi)
   1,0–2,3  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
   1,2–1,9  beyaz    TR
   2,0–3,0  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm)
@@ -39,7 +40,9 @@ OUT = os.path.join(A.ROOT, "boyde_labs", "anahtarlik_plaka")
 SRC = os.path.join(OUT, "kaynak")
 FOTO = os.path.join(OUT, "fotograf")
 
-SIYAH, BEYAZ, KIRMIZI = T.U.RGB[A.BLACK], T.U.RGB[A.WHITE], T.U.RGB[5]
+SIYAH, BEYAZ = T.U.RGB[A.BLACK], T.U.RGB[A.WHITE]
+BANT = {"kirmizi": T.U.RGB[5], "mavi": T.U.RGB[4]}            # TR bandının rengi
+BANT_AD = {"kirmizi": "kırmızı", "mavi": "mavi"}
 W, H, R = 70.0, 22.0, 3.6                         # dış ölçü ve köşe
 IC = (2.05, 1.6, 67.95, 20.45)                    # çerçevenin içi
 SERIT_UST = 7.8                                   # alt şeridin üstü (adın zemini)
@@ -47,10 +50,11 @@ BANT_SAG = 12.1                                   # TR bandının sağ kenarı
 DELIK, DELIK_R = (5.0, 17.8), 1.75                # Ø3,5; üstte 2,45, solda 3,25 mm et
 Z_GOVDE, Z_ZEMIN, Z_BANT = 2.0, 1.0, 1.2
 PLAKA_H, TR_H, AD_H = 1.3, 0.7, 1.0
-ORNEK = [("p01", "34 BYD 34", "BOYDE LABS"), ("p02", "06 BYD 06", "ADINIZ SOYADINIZ"),
-         ("p03", "35 BYD 35", "İSİM SOYİSİM")]
-KAPAK_EK = [("p04", "16 BYD 16", "BOYDE LABS"), ("p05", "07 BYD 07", "ADINIZ SOYADINIZ"),
-            ("p06", "01 BYD 01", "İSİM SOYİSİM")]          # yalnız kapakta (altı farklı plaka)
+ORNEK = [("p01", "34 BYD 34", "BOYDE LABS", "kirmizi"), ("p02", "06 BYD 06", "ADINIZ SOYADINIZ", "mavi"),
+         ("p03", "35 BYD 35", "İSİM SOYİSİM", "kirmizi")]
+KAPAK_EK = [("p04", "16 BYD 16", "BOYDE LABS", "mavi"), ("p05", "07 BYD 07", "ADINIZ SOYADINIZ", "kirmizi"),
+            ("p06", "01 BYD 01", "İSİM SOYİSİM", "mavi")]      # yalnız kapakta (altı farklı plaka)
+RENK_EK = [("p07", "34 BYD 34", "BOYDE LABS", "mavi")]       # renk seçenekleri: p01'in mavisi
 
 
 def _ortala(cs, cx, cy):
@@ -62,8 +66,8 @@ def _yazi(font, s, cap, cx, cy, max_w, tr=0.3):
     return _ortala(S.t(font, s, cap, 0.0, 0.0, "c", tr, max_w), cx, cy)
 
 
-def tasarla(plaka, ad):
-    """Döner [(Manifold, rgb)] (baskı yönünde) ve ölçüler: plaka ve ad yazısının boyu, kırpılan alan."""
+def tasarla(plaka, ad, bant_rengi="kirmizi"):
+    """bant_rengi: "kirmizi" ya da "mavi". Döner [(Manifold, rgb)] (baskı yönünde) ve ölçüler: plaka ve ad yazısının boyu, kırpılan alan."""
     dis = A.rrect(W, H, R, W / 2, H / 2)
     ic = A.rrect(IC[2] - IC[0], IC[3] - IC[1], 2.3, (IC[0] + IC[2]) / 2, (IC[1] + IC[3]) / 2)
     delik = A.circle(DELIK_R, *DELIK)
@@ -89,7 +93,7 @@ def tasarla(plaka, ad):
     def kat(cs, z0, z1):
         return cs.extrude(z1 - z0).translate((0, 0, z0))
     parcalar = [(kat(siyah, 0, Z_GOVDE), SIYAH), (kat(zemin - delik, 0, Z_ZEMIN), BEYAZ),
-                (kat(bant - delik, 0, Z_BANT), KIRMIZI),
+                (kat(bant - delik, 0, Z_BANT), BANT[bant_rengi]),
                 (kat(plaka_cs, Z_ZEMIN, Z_ZEMIN + PLAKA_H), SIYAH), (kat(tr_cs, Z_BANT, Z_BANT + TR_H), BEYAZ),
                 (kat(ad_cs, Z_GOVDE, Z_GOVDE + AD_H), BEYAZ)]
     olcu = {"plaka_boy": plaka_cs.bounds()[3] - plaka_cs.bounds()[1], "ad_boy": ad_cs.bounds()[3] - ad_cs.bounds()[1],
@@ -130,11 +134,11 @@ def gorunus(anahtar, parcalar):
 
 def export():
     os.makedirs(SRC, exist_ok=True)
-    for anahtar, plaka, ad in ORNEK + KAPAK_EK:
-        parcalar, o = tasarla(plaka, ad)
+    for anahtar, plaka, ad, bant in ORNEK + KAPAK_EK + RENK_EK:
+        parcalar, o = tasarla(plaka, ad, bant)
         kaydet(anahtar, parcalar)
         gorunus(anahtar, parcalar)
-        print(f"{anahtar} {plaka:10s} {ad:18s} plaka {o['plaka_boy']:.1f} mm, ad {o['ad_boy']:.1f} mm  "
+        print(f"{anahtar} {plaka:10s} {ad:18s} {BANT_AD[bant]:8s} plaka {o['plaka_boy']:.1f} mm, ad {o['ad_boy']:.1f} mm  "
               f"ince<0.7: {o['ince']:.2f} mm²  kırpılan: {o['kirpilan']:.2f} mm²", flush=True)
 
 
@@ -142,7 +146,7 @@ def export():
 
 def bagla():
     """Anahtarlık fotoğraf betiğini (yükleme, sahne, halka takımı) bu klasöre ve örneklere çevirir."""
-    T.OUT, T.SRC, T.FOTO, T.KEYS = OUT, SRC, FOTO, [a for a, _, _ in ORNEK]
+    T.OUT, T.SRC, T.FOTO, T.KEYS = OUT, SRC, FOTO, [o[0] for o in ORNEK]
 
 
 def masa(dizilis, yol, samples, size, adim=8.0, kaydir=-0.1, takim=()):
@@ -189,7 +193,7 @@ def masa(dizilis, yol, samples, size, adim=8.0, kaydir=-0.1, takim=()):
 
 def fotograflar(args):
     """Her örnek: masada önlü arkalı (iki) ve halka takımında asılı (halka; delik sol üstte, plaka dik asılır);
-    kapak: altı farklı plaka önden; uc: üç örnek alt alta."""
+    kapak: altı farklı plaka önden (kırmızı ve mavi); uc: üç örnek alt alta; renk: aynı plaka kırmızı ve mavi."""
     import boyde_anahtarlik_foto as AF
     samples = 32
     if "--ornek" in args:
@@ -199,7 +203,7 @@ def fotograflar(args):
         AF.F.SIZE = (500, 500)
     os.makedirs(FOTO, exist_ok=True)
     secili = [a for a in args if not a.startswith("-") and not a.isdigit()]
-    for a, _, _ in ORNEK:
+    for a, *_ in ORNEK:
         if not secili or a in secili:
             AF.model_shots(a, samples)
     if not secili or "kapak" in secili:
@@ -208,6 +212,9 @@ def fotograflar(args):
     if not secili or "uc" in secili:
         masa([[("p01", False, -3)], [("p02", False, 2)], [("p03", False, -2)]], "uc.jpg", samples,
              (600, 600) if kucuk else (1600, 1600), adim=7.0, kaydir=0.0)
+    if not secili or "renk" in secili:
+        masa([[("p01", False, -3)], [("p07", False, 2)]], "renk.jpg", samples,
+             (600, 600) if kucuk else (1600, 1600), adim=9.0, kaydir=0.0)
 
 
 if __name__ == "__main__":

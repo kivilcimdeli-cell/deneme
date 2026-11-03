@@ -3,18 +3,19 @@
 ![Shopier kapağı](shopier/01_kapak.jpg)
 
 İstek: "Shopier'e yüklememiz gereken bir ürün daha var: kişiye özel plakalı anahtarlık; STL dosyası ve bütün ürün
-bilgileri burada" (Bambu Studio örneği, `Birleştir.stl`). "Kırmızı versiyonunda yap TR yazısını."
+bilgileri burada" (Bambu Studio örneği, `Birleştir.stl`). "Kırmızı versiyonunda yap TR yazısını", "mavisini neden
+yapmadın", "ikisini tek görselde birleştir".
 
 ## Model (`scripts/boyde_plakali_anahtarlik.py`)
 
 Ölçüler kullanıcının STL'inden: 70 × 22 mm, köşe R3,6; 2 mm siyah çerçeve, alt şerit (adın zemini), beyaz plaka
-zemini, solda TR bandı. Örnekte TR bandı maviydi; istek üzerine **kırmızı**, TR beyaz.
+zemini, solda TR bandı. TR bandı **mavi** (örnekteki gibi) ya da **kırmızı**; TR beyaz.
 
 | Katman (z, mm) | Renk | Ne |
 | --- | --- | --- |
 | 0–2,0 | siyah | çerçeve ve alt şerit |
 | 0–1,0 | beyaz | plaka zemini |
-| 0–1,2 | kırmızı | TR bandı |
+| 0–1,2 | kırmızı ya da mavi | TR bandı (`tasarla(plaka, ad, "kirmizi"/"mavi")`) |
 | 1,0–2,3 | siyah | plaka yazısı, 1,3 mm kabartma (Saira SemiBold, DIN benzeri; büyük harf boyu ~6,5 mm) |
 | 1,2–1,9 | beyaz | TR |
 | 2,0–3,0 | beyaz | ad ya da söz, 1 mm kabartma (Outfit ExtraBold) |
@@ -25,8 +26,9 @@ zemini, solda TR bandı. Örnekte TR bandı maviydi; istek üzerine **kırmızı
   noktası ≥ 0,7 mm kalsın diye Outfit ExtraBold (Montserrat'ta noktalar 0,7 mm'nin altına iniyordu).
 - **Kontrol:** yazılar zeminden taşmaz (kırpılan 0), 0,7 mm'den ince kalan yer yok.
 
-Örnek yazılar uydurma (gerçek plaka ya da kişi değil): 34 BYD 34 · BOYDE LABS, 06 BYD 06 · ADINIZ SOYADINIZ,
-35 BYD 35 · İSİM SOYİSİM; kapakta ayrıca 16, 07 ve 01.
+Örnek yazılar uydurma (gerçek plaka ya da kişi değil): 34 BYD 34 · BOYDE LABS (kırmızı), 06 BYD 06 · ADINIZ
+SOYADINIZ (mavi), 35 BYD 35 · İSİM SOYİSİM (kırmızı); kapakta ayrıca 16, 07 ve 01 (karışık); renk görselinde 34 BYD 34
+kırmızı ve mavi.
 
 ## Fotoğraflar (`fotograf/`)
 
@@ -34,19 +36,21 @@ zemini, solda TR bandı. Örnekte TR bandı maviydi; istek üzerine **kırmızı
 | --- | --- |
 | `<model>_iki.jpg` | masada iki adet: biri önden, biri ters (düz arka yüz) |
 | `<model>_halka.jpg` | zincirli halka takımında asılı (delik sol üstte: plaka dik asılır) |
-| `kapak.jpg` | altı farklı plaka masada, önden |
+| `kapak.jpg` | altı farklı plaka masada, önden (kırmızı ve mavi) |
 | `uc.jpg` | üç örnek alt alta |
+| `renk.jpg` | aynı plaka kırmızı ve mavi bantla, alt alta |
 
 ## Shopier (`shopier/`, 1200 × 1200, yükleme sırasıyla)
 
 | Dosya | Ne |
 | --- | --- |
-| `01_kapak.jpg` | altı plaka, "Plakalı anahtarlık" |
-| `02_uc_ornek.jpg` | üç örnek, plaka ve yazıları |
-| `03_p01_onlu_arkali.jpg` … `05_p03_onlu_arkali.jpg` | her örnek önlü arkalı, BOYDE çerçevesinde |
-| `06_halka.jpg` | zincirli halka takımıyla |
-| `07_olcu_ozellik.jpg` | ön görünüş 70 × 22 mm, renkler, özellikler |
-| `08_nasil_siparis.jpg` | dört adım, WhatsApp |
+| `01_kapak.jpg` | altı plaka (kırmızı ve mavi), "Plakalı anahtarlık" |
+| `02_renk_secenek.jpg` | aynı plaka kırmızı ve mavi bantla, tek görselde: "Kırmızı ya da mavi, siz seçin." |
+| `03_uc_ornek.jpg` | üç örnek, plaka ve yazıları |
+| `04_p01_onlu_arkali.jpg` … `06_p03_onlu_arkali.jpg` | her örnek önlü arkalı, BOYDE çerçevesinde |
+| `07_halka.jpg` | zincirli halka takımıyla |
+| `08_olcu_ozellik.jpg` | ön görünüş 70 × 22 mm, renkler, özellikler |
+| `09_nasil_siparis.jpg` | dört adım, WhatsApp |
 
 Ürün adı ve açıklaması: `boyde_labs/urunler/shopier/urun_metinleri.md` (6. ürün).
 

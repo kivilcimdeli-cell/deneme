@@ -2,8 +2,9 @@
 çağrılır). Görsel dil anahtarlıklarınkiyle aynı (boyde_anahtarlik_katalog: çerçeve, logo, renkler).
 
 1200 × 1200 JPG, yükleme sırasıyla:
-  01 kapak (altı plaka) · 02 üç örnek · 03–05 örnekler önlü arkalı · 06 zincirli halka takımıyla ·
-  07 ölçü ve özellikler (ön görünüş, 70 × 22 mm, katmanlar) · 08 nasıl sipariş verilir
+  01 kapak (altı plaka, kırmızı ve mavi) · 02 renk seçenekleri (aynı plaka kırmızı ve mavi, tek görselde) ·
+  03 üç örnek · 04–06 örnekler önlü arkalı · 07 zincirli halka takımıyla ·
+  08 ölçü ve özellikler (ön görünüş, 70 × 22 mm, renkler) · 09 nasıl sipariş verilir
 
 Çıktı : boyde_labs/anahtarlik_plaka/shopier/*.jpg
 """
@@ -20,11 +21,11 @@ import boyde_plakali_anahtarlik as P  # noqa: E402
 INK, PAPER, ORANGE, GRAY = K.INK, K.PAPER, K.ORANGE, K.GRAY
 ETIKET = "KİŞİYE ÖZEL PLAKA"
 OZELLIK = [("Plakanız ve yazınız", "Plaka 1,3 mm, alttaki ad ya da söz 1 mm kabartma; elle hissedilir."),
-           ("Türk plakası görünümü", "Kırmızı TR bandı, beyaz plaka zemini, siyah çerçeve."),
+           ("Türk plakası görünümü", "Kırmızı ya da mavi TR bandı, beyaz plaka zemini, siyah çerçeve."),
            ("Sizin yazınız", "Ad soyad, lakap ya da kısa bir söz; Türkçe karakterlerle (İ, Ş, Ğ…)."),
            ("Sağlam ve hafif", "70 × 22 × 3 mm, 3D baskı PLA; 2 mm çerçeve, arka yüz düz."),
            ("Zincirli halka takımı", "Çelik halka, kısa zincir ve ara halka takılı gelir.")]
-ADIM = [("01", "Plakanızı ve yazınızı yazın", "Sipariş notuna plaka ve altına yazılacak ad ya da söz."),
+ADIM = [("01", "Plakanızı ve yazınızı yazın", "Sipariş notuna plaka, altına yazılacak ad ya da söz, bant rengi."),
         ("02", "Önizleme gönderiyoruz", "Anahtarlığınızın görüntüsünü WhatsApp'tan iletiyoruz."),
         ("03", "Onaylayın", "Beğendiyseniz onaylıyorsunuz; isterseniz yazıyı değiştiriyoruz."),
         ("04", "Basıp gönderiyoruz", "Kendi atölyemizde basıp kargoya veriyoruz.")]
@@ -46,12 +47,26 @@ def shopier(Pn):
         <h1 class="u" style="margin-top:14px;font-size:76px;line-height:1.02;letter-spacing:-.02em">Plakalı<br>
           anahtarlık</h1>
         <p style="margin-top:18px;font-size:30px;line-height:1.35;color:#3b3d42">Kendi plakanız, altında adınız; kırmızı
-          TR bandı, siyah çerçeve.</p></div></div>""", name(1, "kapak"))
+          ya da mavi TR bandı.</p></div></div>""", name(1, "kapak"))
 
-    # 02 üç örnek: fotoğraf tam kadraj (fonu sayfanın fonu), üstte başlık, altta plakalar
+    # 02 renk seçenekleri: aynı plaka kırmızı ve mavi bantla, tek görselde
+    renk = "".join(f'<span class="chip" style="background:#fff;color:{INK};font-size:21px;padding:10px 16px;'
+                   f'box-shadow:0 0 0 1.5px rgba(18,19,22,.08)"><i style="width:20px;height:20px;border-radius:6px;'
+                   f'background:{r}"></i>&nbsp;{t}</span>' for r, t in (("#c41e26", "Kırmızı TR bandı"),
+                                                                       ("#1c42a8", "Mavi TR bandı")))
+    K.sq(Pn, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:#fff">
+      <img src="{foto('renk', 1200)}" style="position:absolute;inset:0;width:1200px;height:1200px;display:block">
+      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
+      <div style="position:absolute;right:64px;top:62px;text-align:right;color:{INK}">
+        <p class="k">RENK SEÇENEKLERİ</p>
+        <h2 class="u" style="margin-top:10px;font-size:40px;line-height:1.08">Kırmızı ya da mavi,<br>siz seçin.</h2></div>
+      <div style="position:absolute;left:64px;right:64px;bottom:56px;display:flex;flex-wrap:wrap;gap:12px">{renk}
+      </div></div>""", name(2, "renk_secenek"))
+
+    # 03 üç örnek: fotoğraf tam kadraj (fonu sayfanın fonu), üstte başlık, altta plakalar
     cipler = "".join(f'<span class="chip" style="background:#fff;color:{INK};font-size:19px;padding:8px 14px;'
                      f'box-shadow:0 0 0 1.5px rgba(18,19,22,.08)"><b>{plaka}</b>&nbsp;<span style="color:{GRAY}">·'
-                     f'&nbsp;{ad}</span></span>' for _, plaka, ad in P.ORNEK)
+                     f'&nbsp;{ad}</span></span>' for _, plaka, ad, _ in P.ORNEK)
     K.sq(Pn, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:#fff">
       <img src="{foto('uc', 1200)}" style="position:absolute;inset:0;width:1200px;height:1200px;display:block">
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
@@ -59,17 +74,17 @@ def shopier(Pn):
         <p class="k">ÖRNEKLER</p>
         <h2 class="u" style="margin-top:10px;font-size:40px;line-height:1.08">Her plakaya,<br>her isme.</h2></div>
       <div style="position:absolute;left:64px;right:64px;bottom:56px;display:flex;flex-wrap:wrap;gap:10px">{cipler}
-      </div></div>""", name(2, "uc_ornek"))
+      </div></div>""", name(3, "uc_ornek"))
 
-    # 03–05 önlü arkalı, 06 halka takımıyla
-    for i, (a, plaka, ad) in enumerate(P.ORNEK):
-        KT.framed(Pn, f"{a}_iki", plaka[:2], f"{plaka} · {ad}", "70 × 22 mm · önde plaka ve yazı kabartma, arka yüz düz",
-                  name(3 + i, f"{a}_onlu_arkali"), ETIKET)
-    a, plaka, ad = P.ORNEK[0]
+    # 04–06 önlü arkalı, 07 halka takımıyla
+    for i, (a, plaka, ad, bant) in enumerate(P.ORNEK):
+        KT.framed(Pn, f"{a}_iki", plaka[:2], f"{plaka} · {ad}", f"70 × 22 mm · {P.BANT_AD[bant]} TR bandı · önde "
+                  "plaka ve yazı kabartma, arka yüz düz", name(4 + i, f"{a}_onlu_arkali"), ETIKET)
+    a, plaka, ad, _ = P.ORNEK[0]
     KT.framed(Pn, f"{a}_halka", plaka[:2], "Zincirli halka takımıyla", "Çelik halka, kısa zincir ve ara halka; "
-              "delik TR bandının üstünde", name(6, "halka"), ETIKET)
+              "delik TR bandının üstünde", name(7, "halka"), ETIKET)
 
-    # 07 ölçü ve özellikler: ön görünüş ölçülü (14,5 px/mm)
+    # 08 ölçü ve özellikler: ön görünüş ölçülü (14,5 px/mm)
     px = 14.5
     on = K.uri(os.path.join(P.SRC, f"{a}_on.png"), 1100, "PNG")
     w, h = P.W * px, P.H * px
@@ -78,7 +93,8 @@ def shopier(Pn):
     katman = "".join(f"""<div style="display:flex;align-items:center;gap:10px"><i style="width:18px;height:18px;
       border-radius:5px;background:{r};box-shadow:inset 0 0 0 1.5px rgba(18,19,22,.15)"></i><span>{t}</span></div>"""
                      for r, t in (("#1e1f23", "Siyah: çerçeve, alt şerit, plaka yazısı"),
-                                  ("#eeeee9", "Beyaz: plaka zemini, TR, ad"), ("#c41e26", "Kırmızı: TR bandı")))
+                                  ("#eeeee9", "Beyaz: plaka zemini, TR, ad"),
+                                  ("linear-gradient(135deg,#c41e26 50%,#1c42a8 50%)", "Kırmızı ya da mavi: TR bandı")))
     K.sq(Pn, f"""<div style="position:relative;width:1200px;height:1200px;background:{PAPER};padding:56px;color:{INK}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div><p class="k">ÖLÇÜ VE ÖZELLİKLER</p>
@@ -95,9 +111,9 @@ def shopier(Pn):
       <div style="margin-top:26px;width:{w:.0f}px;display:flex;justify-content:space-between;font-size:17px;
         color:#55575c">{katman}</div>
       <ul style="margin-top:56px;list-style:none;display:grid;gap:18px;font-size:24px;line-height:1.35">{feats}</ul>
-      </div>""", name(7, "olcu_ozellik"))
+      </div>""", name(8, "olcu_ozellik"))
 
-    # 08 nasıl sipariş verilir
+    # 09 nasıl sipariş verilir
     rows = "".join(f"""<div style="display:flex;gap:28px;padding:18px 0;border-top:2px solid rgba(244,241,234,.14)">
       <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a_}</b><div><p style="font-size:32px;
       font-weight:700">{b}</p><p style="margin-top:8px;font-size:23px;color:rgba(244,241,234,.72)">{c}</p></div>
@@ -111,7 +127,7 @@ def shopier(Pn):
         object-position:50% 30%;border-radius:22px;display:block">
       <div style="position:absolute;left:64px;bottom:50px">{K.logo("koyu", 300, 60)}</div>
       <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{K.TEL}</p></div>""",
-         name(8, "nasil_siparis"))
+         name(9, "nasil_siparis"))
     return out
 
 
