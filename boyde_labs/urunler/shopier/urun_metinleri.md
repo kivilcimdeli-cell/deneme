@@ -1,8 +1,8 @@
 # Shopier ürün metinleri
 
-Beş ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07),
+Altı ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07),
 toptan anahtarlık `boyde_labs/anahtarlik_toptan/shopier/` (01 … 14), esnafa özel anahtarlık
-`boyde_labs/anahtarlik_esnaf/shopier/` (01 … 14).
+`boyde_labs/anahtarlik_esnaf/shopier/` (01 … 14), plakalı anahtarlık `boyde_labs/anahtarlik_plaka/shopier/` (01 … 08).
 Açıklamalar düz metin; Shopier'in açıklama kutusuna olduğu gibi yapıştırılır.
 
 Sipariş akışı (1 ve 2): müşteri katalogdan model seçmez. Siparişten sonra ona özel 10 tasarım hazırlanır, en beğendiği basılır
@@ -262,5 +262,50 @@ NASIL SİPARİŞ VERİLİR
 WhatsApp: 0546 475 45 08
 
 Görsellerdeki anahtarlıklar kendi markamızla (BOYDE LABS) örnektir; sizinkiler sizin logonuz ve yazınızla basılır.
+Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
+```
+
+## 6 · Kişiye özel plakalı anahtarlık
+
+Türk plakası biçiminde: kırmızı TR bandı, beyaz plaka zemini, siyah çerçeve; plaka ve altındaki ad (ya da kısa söz)
+kabartma. Görsellerdeki plakalar ve yazılar örnektir. Görseller: `boyde_labs/anahtarlik_plaka/shopier/` (01 kapak … 08
+nasıl sipariş verilir), `python3 scripts/boyde_plakali_anahtarlik.py --shopier`.
+
+**Ürün adı**
+
+```
+Kişiye Özel Plakalı Anahtarlık · Plaka ve İsim Kabartmalı 3D Baskı · Zincirli Halka · BOYDE LABS
+```
+
+**Açıklama**
+
+```
+KİŞİYE ÖZEL PLAKALI ANAHTARLIK
+Aracınızın plakası, altında adınız ya da kısa bir söz: Türk plakası görünümünde, kabartmalı anahtarlık. Kendi atölyemizde 3D baskıyla üretiyoruz. Araç sahiplerine, yeni araç alanlara, sevgiliye ve arkadaşa hediye olarak.
+
+ÖZELLİKLER
+• Plaka yazısı 1,3 mm, alttaki yazı 1 mm kabartma; elle hissedilir
+• Kırmızı TR bandı, beyaz plaka zemini, siyah çerçeve
+• Ad soyad, lakap ya da kısa bir söz; Türkçe karakterlerle (İ, Ş, Ğ…)
+• Ölçü: 70 × 22 × 3 mm; hafif, 3D baskı PLA, arka yüz düz
+• Zincirli halka takımıyla gelir (çelik halka, kısa zincir, ara halka)
+
+SİPARİŞ NOTUNA YAZIN
+1. Plaka (ör. 34 ABC 123)
+2. Plakanın altına yazılacak ad ya da söz (en çok 16–18 harf; uzun yazı biraz küçülür)
+
+FİYAT
+• 1 adet: … TL
+• 2 adet ve üzeri: … TL / adet
+
+NASIL SİPARİŞ VERİLİR
+1. Plakanızı ve yazınızı sipariş notuna yazın.
+2. Önizleme gönderiyoruz: anahtarlığınızın görüntüsünü WhatsApp'tan iletiyoruz.
+3. Onaylayın: beğendiyseniz onaylıyorsunuz; isterseniz yazıyı değiştiriyoruz.
+4. Basıp gönderiyoruz: kendi atölyemizde basıp kargoya veriyoruz.
+
+WhatsApp: 0546 475 45 08
+
+Görsellerdeki plakalar ve yazılar örnektir; sizinki yazdığınız plaka ve yazıyla basılır.
 Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
 ```
