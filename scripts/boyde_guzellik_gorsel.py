@@ -96,7 +96,7 @@ def modeller(P, cat, path):
     sut = 4 if cat == "9x12" else 3
     w = (1200 - 2 * 56 - (sut - 1) * 22) // sut
     kart = "".join(f"""<div style="width:{w}px;text-align:center">
-      <div style="height:{w * (0.78 if cat == '9x12' else 0.56):.0f}px;display:grid;place-items:center">
+      <div style="height:{w * (0.78 if cat == '9x12' else 0.5):.0f}px;display:grid;place-items:center">
         <img src="{K.uri(os.path.join(G.SRC, f'{key}_duz.png'), 700, 'PNG')}" style="max-width:100%;max-height:100%;
         filter:drop-shadow(0 10px 16px rgba(18,19,22,.18))"></div>
       <p style="margin-top:10px;font-size:17px;font-weight:700"><span class="code" style="color:{ORANGE}">{kod}</span>
@@ -106,7 +106,8 @@ def modeller(P, cat, path):
         <div><p class="k">GÜZELLİK KOLEKSİYONU · {KAT[cat]['olcu'].upper()}</p>
         <h2 class="u" style="margin-top:12px;font-size:44px;line-height:1.08">10 tasarım, hepsi size özel<br>
           renk ve yazıyla.</h2></div>{K.logo("acik", 220, 44)}</div>
-      <div style="margin-top:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:30px 22px">{kart}</div>
+      <div style="margin-top:{40 if cat == '9x12' else 30}px;display:flex;flex-wrap:wrap;justify-content:center;
+        gap:{30 if cat == '9x12' else 18}px 22px">{kart}</div>
       <p style="position:absolute;left:56px;right:56px;bottom:40px;font-size:16px;color:#55575c">
         Örneklerdeki işletme ve kişi adları, telefon ve QR'lar örnektir; tasarım sizin bilgilerinizle hazırlanır.</p>
       </div>""", path)
