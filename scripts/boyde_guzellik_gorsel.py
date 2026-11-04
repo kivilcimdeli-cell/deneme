@@ -13,7 +13,10 @@ Girdi : boyde_labs/guzellik/fotograf (scripts/boyde_guzellik.py --foto), kaynak/
         boyde_labs/guzellik/siteler/<işletme>/ (örnek işletmelerin bilgileri; sablon_site ile kurulur)
 Örneklerdeki işletme ve kişi adları, telefon (BOYDE'nin), IBAN ve QR'lar örnektir (QR'lar okunmaz).
 
-Kullanım: python3 scripts/boyde_guzellik_gorsel.py
+  ../katalog.pdf, ../katalog.png  A4 katalog (9 sayfa) ve sayfaların önizlemesi
+
+Kullanım: python3 scripts/boyde_guzellik_gorsel.py              # hepsi
+          python3 scripts/boyde_guzellik_gorsel.py --katalog    # yalnız katalog
 """
 import os
 import shutil
@@ -152,7 +155,197 @@ def site_gorseli(P, i, ekran, key, path):
         <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px">{cips}</div></div></div>""", path)
 
 
+# ---------------------------------------------------------------- katalog (A4, boyde_katalog.catalog düzeninde)
+
+W, H = 794, 1123
+FILAMENT = {G.PUDRA: "PLA Matte Sakura Pink", G.GUL: "dusty rose", G.FUSYA: "PLA Basic Hot Pink",
+            G.NUDE: "PLA Matte Latte Brown", G.KREM: "PLA Matte Ivory White", G.MOKA: "PLA Matte Dark Chocolate",
+            G.MURDUM: "PLA Matte Plum", G.LILA: "PLA Matte Lilac Purple", G.ROSE: "PLA Silk Rose Gold",
+            G.ADACAYI: "sage (adaçayı)"}
+OZELLIK = {"9x12": ["120 × 90 mm, 1 cm gövde; gövde rengi size göre (beyaz, pudra, nude, lila, siyah…)",
+                    "Yazı ve çiçek motifleri 2 mm kabartma, 3–4 renk",
+                    "QR yüzeyle aynı hizada (renkli gövdede beyaz karoda): keskin, kolay okunur",
+                    "15° eğik sehpa dahil, tutkal gerekmez",
+                    "QR salonunuza özel sayfayı açar: randevu (WhatsApp), Instagram, konum, yorum, IBAN"],
+           "10x20": ["200 × 100 mm, 5 mm gövde", "Yazı ve motifler yüzeyle aynı hizada renkli: el yazısı adlar ince "
+                     "ayrıntısıyla", "Ad soyad, unvan, salon adı ve telefon", "Sehpa dahil",
+                     "QR dijital kartvizitinizi açar: ara, randevu, Instagram, rehbere kaydet"]}
+
+
+def sayfa(body, dark=False, no=None):
+    bg = f"background:{INK};color:{PAPER}" if dark else f"background:{PAPER};color:{INK}"
+    foot = (f'<p style="position:absolute;left:48px;right:48px;bottom:26px;display:flex;justify-content:space-between;'
+            f'font-size:10px;letter-spacing:.2em;color:{K.GRAY}"><span>BOYDE LABS · GÜZELLİK KOLEKSİYONU</span>'
+            f'<span>{no:02d}</span></p>') if no else ""
+    return f'<div class="pg" style="{bg};padding:48px">{body}{foot}</div>'
+
+
+def kart(u):
+    key, kod, kim, sektor, tasarim, renk = u
+    return f"""<div style="background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+      <img src="{foto(key, maxw=560)}" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block">
+      <div style="padding:10px 12px 12px"><div style="display:flex;justify-content:space-between;align-items:center">
+        <b class="code" style="font-size:13px">{kod}</b><span style="font-size:9.5px;font-weight:700;color:{K.GRAY};
+        letter-spacing:.06em">ÖRNEK TASARIM</span></div>
+        <p style="margin-top:5px;font-size:13px;font-weight:700">{sektor} · {tasarim}</p>
+        <p style="margin-top:2px;font-size:11px;color:#55575c;white-space:nowrap;overflow:hidden;
+          text-overflow:ellipsis">{kim} · {renk}</p></div></div>"""
+
+
+def katalog(P):
+    """boyde_labs/guzellik/katalog.pdf ve katalog.png (sayfaların önizlemesi): kapak, nasıl çalışır, renkler ve
+    motifler, iki kategori (giriş ve 10 model), siteler, sipariş."""
+    import json
+    import sablonlar
+    import boyde_site_gorsel as SG
+    from PIL import Image
+    pages, no = [], 1
+    kp = os.path.join(G.FOTO, "kapak_9x12.jpg")                # koyu gölgeli: yazılar açık
+    pages.append(sayfa(f"""<div style="position:absolute;inset:0;background:url({K.uri(kp, 1100)}) center/cover"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.72) 0,rgba(18,19,22,0) 28%,
+        rgba(18,19,22,0) 50%,rgba(18,19,22,.96) 100%)"></div>
+      <div style="position:relative">{K.logo("koyu", 260, 52)}</div>
+      <div style="position:absolute;left:48px;right:48px;bottom:64px">
+        <p class="k">ÜRÜN KATALOĞU · GÜZELLİK KOLEKSİYONU</p>
+        <h1 class="u" style="margin-top:12px;font-size:50px;line-height:1.04">Kuaför ve güzellik<br>salonlarına
+          isimlik</h1>
+        <p style="margin-top:16px;font-size:16px;line-height:1.5;opacity:.85">Pembe, nude, lila tonlarında; çiçek
+          motifli, el yazısı adlı QR'lı isimlikler. Salonunuz için 9 × 12 cm masa isimliği, ekibiniz için 10 × 20 cm
+          kurumsal isimlik. Tasarımdan 3D baskıya, kendi atölyemizde.</p></div>""", dark=True))
+    no += 1
+
+    cats = "".join(f"""<div style="background:#fff;border-radius:16px;overflow:hidden">
+      <img src="{foto(k, 'on', 600)}" style="width:100%;height:210px;object-fit:cover;display:block">
+      <div style="padding:14px 16px"><p class="k" style="font-size:10px">{KAT[cat]['olcu'].upper()} ·
+        SİZE ÖZEL 10 TASARIM</p><p class="u" style="margin-top:6px;font-size:17px">{KAT[cat]['ad']}</p>
+        <p style="margin-top:6px;font-size:12px;line-height:1.45;color:#55575c">{KAT[cat]['kisa']}</p></div>
+      </div>""" for cat, k in (("9x12", "g_sakayik"), ("10x20", "p_aylin")))
+    steps = "".join(f"""<div style="display:flex;gap:14px;padding:12px 0;border-top:1px solid #ddd6ca">
+      <b class="u" style="color:{ORANGE};font-size:18px;width:36px">{a}</b><div><p style="font-weight:700;
+      font-size:14px">{b}</p><p style="margin-top:3px;font-size:12px;color:#55575c">{c}</p></div></div>"""
+                    for a, b, c in K.SIPARIS)
+    pages.append(sayfa(f"""<p class="k">NASIL ÇALIŞIR</p>
+      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Tezgâhınızda durur,<br>müşteriniz
+        okutur, randevu alır.</h2>
+      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:#3b3d42;max-width:620px">İsimlikteki QR'ı
+        okutan müşteriniz salonunuza özel sayfayı açar: tek dokunuşla arar, WhatsApp'tan randevu ister, Instagram'ınıza
+        ve konumunuza ulaşır, Google'da yorum yapar, IBAN'ınızı kopyalar. Kurumsal isimlikte QR dijital kartvizittir.
+        Bilgileriniz değişirse sayfayı güncelleriz; isimlik aynı kalır.</p>
+      <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">{cats}</div>
+      <div style="margin-top:22px">{steps}</div>
+      <img src="{K.uri(os.path.join(G.FOTO, 'kapak_10x20.jpg'), 900)}" style="margin-top:14px;width:100%;height:190px;
+        object-fit:cover;object-position:50% 46%;border-radius:14px;display:block">
+      <p style="margin-top:12px;font-size:11px;color:{K.GRAY}">{K.NOT_ORNEK}</p>""", no=no))
+    no += 1
+
+    sw = "".join(f"""<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;
+      border-radius:12px"><i style="flex:none;width:40px;height:40px;border-radius:10px;background:rgb{rgb};
+      box-shadow:inset 0 0 0 1px rgba(18,19,22,.1)"></i><div><p style="font-weight:700;font-size:13.5px">
+      {ad.capitalize()}</p><p style="font-size:11px;color:#55575c">{FILAMENT[k]}</p></div></div>"""
+                 for k, (ad, rgb) in G.RENK.items())
+    yaz = "".join(f"""<div style="padding:10px;background:#fff;border-radius:12px"><img src="{K.uri(
+        os.path.join(G.SRC, f'{k}_duz.png'), 500, 'PNG')}" style="width:100%;height:150px;object-fit:contain;
+        display:block"><p style="margin-top:6px;font-size:11.5px;color:#55575c">{t}</p></div>"""
+                  for k, t in (("g_defne", "Pacifico ve çiçekli dal"), ("g_ela", "Yesteryear ve kirpik"),
+                               ("g_gulce", "Fraunces ve güllü dal"), ("g_sakayik", "Fraunces italik ve şakayık"),
+                               ("g_papatya", "Pacifico ve papatya"), ("g_lotus", "Fraunces ve nilüfer")))
+    pages.append(sayfa(f"""<p class="k">RENKLER VE DOKUNUŞLAR</p>
+      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Salonunuzun renginde,<br>çiçekli ve el
+        yazısıyla.</h2>
+      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:#3b3d42;max-width:620px">Gövde ve yazı
+        renklerini salonunuza göre seçiyoruz: pudra pembe, ten rengi, lila, krem ya da siyah gövde; beyaz, mürdüm,
+        moka, rose gold yazılar. Adınız el yazısı ya da yumuşak harflerle; yanında çiçek, papatya, şakayık, nilüfer,
+        kirpik, oje, ruj, fiyonk gibi motifler.</p>
+      <div style="margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">{sw}</div>
+      <div style="margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">{yaz}</div>
+      <p style="margin-top:14px;font-size:11px;color:{K.GRAY}">Renkler fotoğraftaki tonlardır; baskıda yakın renkte
+        filament kullanılır. Beyaz, siyah, sarı ve altın da var.</p>""", no=no))
+    no += 1
+
+    for cat in KAT:
+        k = KAT[cat]
+        us = [u for u in G.URUNLER if u[0].startswith(k["on"])]
+        feats = "".join(f'<li style="padding:7px 0;border-top:1px solid rgba(244,241,234,.14)">{f}</li>'
+                        for f in OZELLIK[cat])
+        pages.append(sayfa(f"""<p class="k">KATEGORİ · {k['olcu'].upper()}</p>
+          <h2 class="u" style="margin-top:10px;font-size:34px;line-height:1.1">{k['ad']}</h2>
+          <p style="margin-top:10px;font-size:14px;color:rgba(244,241,234,.78)">{k['kisa']} Size özel 10 tasarım; en
+            beğendiğinizi basıyoruz.</p>
+          <img src="{K.uri(os.path.join(G.FOTO, f'kapak_{cat}.jpg'), 900)}" style="margin-top:22px;width:100%;
+            height:520px;object-fit:cover;border-radius:16px;display:block;box-shadow:0 0 0 1.5px rgba(244,241,234,.16)">
+          <ul style="margin-top:20px;list-style:none;font-size:13.5px;line-height:1.4">{feats}</ul>""",
+                           dark=True, no=no))
+        no += 1
+        grid = "".join(kart(u) for u in us) + f"""<div style="border-radius:14px;background:{ORANGE};color:#fff;
+          padding:14px;display:flex;flex-direction:column;justify-content:flex-end"><p class="u" style="font-size:15px">
+          Size özel 10 tasarım</p><p style="margin-top:5px;font-size:11.5px;line-height:1.4">Sizin adınız ve
+          renklerinizle; en beğendiğinizi basıyoruz.</p></div>
+          <div style="border-radius:14px;background:{INK};color:{PAPER};padding:14px;display:flex;
+          flex-direction:column;justify-content:space-between">{K.logo("koyu", 150, 30)}<p style="font-size:14px;
+          font-weight:700">{K.TEL}</p></div>"""
+        pages.append(sayfa(f"""<div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div><p class="k">{k['olcu'].upper()} · {k['ad'].upper()}</p><h2 class="u" style="margin-top:8px;
+          font-size:22px">{us[0][1]}–{us[-1][1]}</h2></div>{K.logo("acik", 150, 30)}</div>
+          <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">{grid}</div>""",
+                           no=no))
+        no += 1
+
+    tel = []
+    for klasor, n, _ in SITELER:
+        shot = os.path.join(G.OUT, "siteler", klasor, "ekran_ust.png")
+        d = json.load(open(os.path.join(G.OUT, "siteler", klasor, "bilgiler.json"), encoding="utf-8"))
+        tel.append(f"""<div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          {SG.phone(K.uri(shot, 500, "PNG"), 132, SG.bg_of(shot))}
+          <p style="font-weight:700;font-size:14px;text-align:center">{d['isletme']}</p>
+          <p style="margin-top:-8px;font-size:11.5px;color:rgba(244,241,234,.65)">Şablon: {sablonlar.get(n).AD}</p>
+          </div>""")
+    pages.append(sayfa(f"""<p class="k">İSİMLİKLE GELEN SİTE</p>
+      <h2 class="u" style="margin-top:10px;font-size:28px;line-height:1.15">Her isimliğe<br>salonunuza özel sayfa.</h2>
+      <p style="margin-top:14px;font-size:13.5px;line-height:1.6;color:rgba(244,241,234,.78);max-width:620px">QR'ı
+        okutan müşteriniz bu sayfayı açar: ara, randevu (WhatsApp), Instagram, Google yorum, konum, rehbere kaydet ve
+        IBAN (tek dokunuşla kopyalanır). Güzellik salonları için beş şablondan biri, sizin renginiz ve logonuzla;
+        uygulama gerekmez.</p>
+      <div style="margin-top:26px;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 40px">{''.join(tel)}
+      </div>
+      <p style="margin-top:22px;font-size:11px;color:{K.GRAY}">Örnek işletmeler; telefon BOYDE LABS'in, IBAN ve QR
+        örnektir.</p>""", dark=True, no=no))
+    no += 1
+
+    kolaj = "".join(f'<img src="{foto(k, v, 500)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;'
+                    f'display:block">' for k, v in (("g_papatya", "studyo"), ("g_lal", "masa"), ("p_melis", "studyo"),
+                                                    ("g_ipek", "on"), ("p_gizem", "masa"), ("g_lotus", "studyo")))
+    pages.append(sayfa(f"""<p class="k">SİPARİŞ</p>
+      <h2 class="u" style="margin-top:10px;font-size:26px">Salonunuza özel tasarım</h2>
+      <p style="margin-top:10px;font-size:13px;color:#3b3d42;max-width:620px">Adınızı, logonuzu, renklerinizi,
+        telefonunuzu ve Instagram'ınızı gönderin; size özel 10 tasarım hazırlayalım. Ekibiniz için kurumsal
+        isimlikleri de aynı renk ve motiflerle yapıyoruz.</p>
+      <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">{kolaj}</div>
+      <div style="margin-top:28px;background:{INK};color:{PAPER};border-radius:18px;padding:30px 32px;
+        background-image:{BM.stripes_bg(PAPER, .035, 22)}">
+        <p class="k">SİPARİŞ</p>
+        <p class="u" style="margin-top:10px;font-size:24px;line-height:1.2">Shopier mağazamızdan<br>ya da telefonla.</p>
+        <p style="margin-top:14px;font-size:28px;font-weight:700">{K.TEL}</p>
+        <p style="margin-top:6px;font-size:13px;color:rgba(244,241,234,.75)">Siparişten sonra size özel 10 tasarım
+          gönderiyoruz; en beğendiğinizi basıyoruz.</p>
+        <div style="margin-top:22px">{K.logo("koyu", 240, 48)}</div></div>""", no=no))
+
+    path = os.path.join(G.OUT, "katalog.pdf")
+    shots = P.pdf(pages, W, H, path, css=K.CSS)
+    cols, tw, th = 4, 397, 562
+    rows = (len(shots) + cols - 1) // cols
+    sheet = Image.new("RGB", (cols * tw + (cols + 1) * 16, rows * th + (rows + 1) * 16), SAND)
+    for i, s in enumerate(shots):
+        sheet.paste(s.resize((tw, th), Image.LANCZOS), (16 + (i % cols) * (tw + 16), 16 + (i // cols) * (th + 16)))
+    sheet.save(os.path.join(G.OUT, "katalog.png"), optimize=True)
+    return path, len(pages)
+
+
 def main():
+    if "--katalog" in sys.argv:                          # yalnız katalog (görseller ve site ekranları hazırsa)
+        with BM.painter() as P:
+            path, n = katalog(P)
+        print(f"{os.path.relpath(path, G.A.ROOT)}: {n} sayfa", flush=True)
+        return
     shutil.rmtree(OUT, ignore_errors=True)
     ekranlar = [site_ekrani(klasor, n) for klasor, n, _ in SITELER]
     with BM.painter() as P:
@@ -169,6 +362,8 @@ def main():
         for i, ((klasor, _, key), ekran) in enumerate(zip(SITELER, ekranlar), 1):
             site_gorseli(P, i, ekran, key, os.path.join(OUT, "siteler", f"{i:02d}_{klasor}.jpg"))
             print(f"siteler/{i:02d}_{klasor}.jpg: {ekran[0]} · {ekran[1]}", flush=True)
+        path, n = katalog(P)
+        print(f"{os.path.relpath(path, G.A.ROOT)}: {n} sayfa", flush=True)
 
 
 if __name__ == "__main__":

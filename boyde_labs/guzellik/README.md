@@ -1,6 +1,8 @@
 # BOYDE LABS · güzellik koleksiyonu
 
-![9 × 12 modeller](shopier/9x12/ek/modeller.jpg)
+![Katalog](katalog.png)
+
+Katalog: [`katalog.pdf`](katalog.pdf) (A4, 9 sayfa).
 
 İstek: "pembe beyaz ve kadınların kullandığı tarzdaki renklerden hem 9 × 12 hem de 10 × 20 10'ar adet örnek ürün;
 kuaför, beauty salonları, tırnakçılar... sadece pembe-beyaz değil, hafif ten rengi gibi güzel görünen renkler; yazı
@@ -110,6 +112,7 @@ Fotoğraflarda kullanılan tonlar; baskıda karşılığı yakın Bambu filament
 
 | Dosya | Ne |
 | --- | --- |
+| `katalog.pdf` | A4 katalog (9 sayfa): kapak, nasıl çalışır, renkler ve dokunuşlar, iki kategori (giriş ve 10 model), siteler, sipariş; `katalog.png` sayfaların önizlemesi |
 | `kaynak/<ürün>_duz.png` | düz görünüş (saydam); `.npz` modeller git'e girmez |
 | `fotograf/<ürün>_studyo.jpg`, `_on.jpg`, `_masa.jpg` | Blender fotoğrafları (açık gövdeliler koyu fonda, koyular beyazda) |
 | `fotograf/kapak_9x12.jpg`, `kapak_10x20.jpg` | kategori kapakları |
@@ -123,5 +126,6 @@ Fotoğraflarda kullanılan tonlar; baskıda karşılığı yakın Bambu filament
 python3 scripts/boyde_guzellik.py                  # 20 model, QR denetimi, düz görünüşler (~2 dk)
 python3 scripts/boyde_guzellik.py --foto           # fotoğraflar ve kapaklar (bpy 4.2; ürün başına ~4 dk)
 python3 scripts/sablon_site.py --katalog-guzellik  # 5 güzellik şablonu, örnekleriyle
-python3 scripts/boyde_guzellik_gorsel.py           # Shopier ve site görselleri
+python3 scripts/boyde_guzellik_gorsel.py           # Shopier ve site görselleri, katalog
+python3 scripts/boyde_guzellik_gorsel.py --katalog # yalnız katalog
 ```
