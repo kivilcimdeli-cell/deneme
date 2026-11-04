@@ -156,17 +156,19 @@ def katalog(P):
     import boyde_site_gorsel as SG
     pages, no = [], 1
     kp = os.path.join(PR.FOTO, "kapak.jpg")
-    pages.append(sayfa(f"""<div style="position:absolute;inset:0;background:url({K.uri(kp, 1200)}) center/cover"></div>
-      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,19,22,.78) 0,rgba(18,19,22,0) 26%,
-        rgba(18,19,22,0) 48%,rgba(18,19,22,.97) 100%)"></div>
-      <div style="position:relative">{K.logo("koyu", 260, 52)}</div>
-      <div style="position:absolute;left:48px;right:48px;bottom:64px">
-        <p class="k">ÜRÜN KATALOĞU · PROMOSYON KOLEKSİYONU</p>
-        <h1 class="u" style="margin-top:12px;font-size:46px;line-height:1.05">Nail art ve güzellik<br>stüdyolarına
-          promosyon</h1>
-        <p style="margin-top:16px;font-size:16px;line-height:1.5;opacity:.86">Müşterinize hediye edin, sizi her gün
-          hatırlasın: fiyonk çanta süsü, oje ve fiyonk kutu açacağı, NFC'li makyaj fırçası, ruj kutusu. Salonunuzun
-          adı ve renkleriyle, kendi atölyemizde 3D baskı.</p></div>""", dark=True))
+    pages.append(sayfa(f"""<div style="display:flex;justify-content:space-between;align-items:center">
+        {K.logo("acik", 230, 46)}<p class="k" style="font-size:11px">PROMOSYON KOLEKSİYONU</p></div>
+      <img src="{K.uri(kp, 1300, crop=kesit(kp, 698 / 600))}" style="margin-top:26px;width:100%;height:600px;
+        object-fit:cover;border-radius:22px;display:block">
+      <p class="k" style="margin-top:30px">ÜRÜN KATALOĞU · NAIL ART VE GÜZELLİK STÜDYOLARI</p>
+      <h1 class="u" style="margin-top:12px;font-size:44px;line-height:1.05">Müşterinize hediye,<br>salonunuza
+        reklam.</h1>
+      <p style="margin-top:14px;font-size:15px;line-height:1.5;color:#3b3d42;max-width:640px">Fiyonk çanta süsü,
+        oje ve fiyonk kutu açacağı, NFC'li makyaj fırçası, ruj kutusu: salonunuzun adı, baş harfi ve renkleriyle,
+        kendi atölyemizde 3D baskı.</p>
+      <div style="position:absolute;left:48px;right:48px;bottom:40px;display:flex;justify-content:space-between;
+        font-size:12px;font-weight:700;color:{K.GRAY}"><span>5 ürün · 20 çeşit · P01–P20</span>
+        <span>{K.TEL}</span></div>"""))
     no += 1
 
     turler = "".join(f"""<div style="background:#fff;border-radius:14px;overflow:hidden">

@@ -684,13 +684,15 @@ def fotograflar(args):
         if not sec and "--tur" not in args and "--kapak" in args:
             continue
         ks = [k for k, v in URUNLER.items() if v[0] == tur]
+        genis = (900, 430) if kucuk else (1900, 900)      # katalogda tür sayfasının geniş fotoğrafı
         if tur == "ruj":
-            masa([[(ks[0], False, -4)], [(ks[1], False, 3)], [(ks[2], False, -2)], [(ks[3], False, 4)]],
-                 f"grup_{tur}.jpg", samples, boy, adim=6.0)
+            masa([[(ks[0], False, 84), (ks[1], False, -86), (ks[2], False, 93), (ks[3], False, -94)]],
+                 f"grup_{tur}.jpg", samples, genis, adim=10.0, fill=0.9, el=46)
         else:
-            masa([[(ks[0], False, -6), (ks[1], False, 5)], [(ks[2], False, 4), (ks[3], False, -5)]],
-                 f"grup_{tur}.jpg", samples, boy, adim=9.0)
-        asili(ks, f"dizi_{tur}.jpg", samples, (900, 550) if kucuk else (1800, 1100))
+            masa([[(ks[0], False, -6), (ks[1], False, 5), (ks[2], False, -4), (ks[3], False, 6)]],
+                 f"grup_{tur}.jpg", samples, genis, adim=9.0, fill=0.92, el=46)
+        if "--grup" not in args:
+            asili(ks, f"dizi_{tur}.jpg", samples, (900, 550) if kucuk else (1800, 1100))
         print(f"{tur}: grup, dizi", flush=True)
     if (not sec and "--tur" not in args) or "--kapak" in args or "kapak" in sec:
         masa([[("f1", False, -8), ("n1", False, 6), ("o2", False, -4)],
