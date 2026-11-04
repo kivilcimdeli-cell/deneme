@@ -121,7 +121,7 @@ def kesit(path, oran=1.0):
 
 def cesit_karti(k, tur, dark):
     _, ad, _ = PR.URUNLER[k]
-    p = os.path.join(PR.FOTO, f"{k}_halka.jpg")
+    p = os.path.join(PR.FOTO, f"{k}_{'iki' if tur == 'ruj' else 'halka'}.jpg")     # uzun kutular asılıyken küçük
     alt = "rgba(244,241,234,.65)" if dark else "#55575c"
     kutu = "rgba(244,241,234,.06)" if dark else "#fff"
     return f"""<div style="background:{kutu};border-radius:14px;overflow:hidden">
