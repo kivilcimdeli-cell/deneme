@@ -3,12 +3,15 @@
 Görsel dil BOYDE'nin öbür ürün görselleriyle aynı (scripts/boyde_katalog.py: logo, turuncu model kodu, buzlu cam
 şerit; renk paleti değişmez); ürünlerin pembe, nude, lila tonları fotoğraflardan gelir.
 
-Çıktı (boyde_labs/guzellik/shopier/):
-  9x12/01_G01_<ürün>.jpg … 10    BOYDE çerçevesinde stüdyo fotoğrafı: kod, tasarım, sektör, renkler
-  10x20/01_K01_<ürün>.jpg … 10
-  <kat>/ek/kapak.jpg             kategori kapağı (masada birkaç isimlik, başlık)
-  <kat>/ek/modeller.jpg          10 model bir arada (düz görünüşler, kodlarıyla)
-  siteler/0N_<işletme>.jpg       5 site şablonu (6–10): isimliğin fotoğrafı ve telefonda QR'ın açtığı sayfa
+Çıktı (boyde_labs/guzellik/shopier/), her kategori bir Shopier ürünü, yükleme sırasıyla:
+  9x12/ ve 10x20/
+    01_kapak                     kategori kapağı (masada birkaç isimlik, başlık)
+    02_on_tasarim                10 model bir arada (düz görünüşler, kodlarıyla)
+    03_G01_<ürün> … 12_G10_…     BOYDE çerçevesinde stüdyo fotoğrafı: kod, tasarım, sektör, renkler (10 × 20: K01…)
+    13_renk_ozellik              ölçülü görünüş, 10 renk (Bambu karşılığıyla), özellikler
+    14_site / 14_kartvizit       5 güzellik şablonu telefonda: salonun sayfası / kişinin dijital kartviziti
+    15_nasil_siparis             dört adım, telefon
+  site_ornekleri/0N_<işletme>    ek: isimliğin fotoğrafı ve telefonda QR'ın açtığı sayfa (5 şablon)
 Girdi : boyde_labs/guzellik/fotograf (scripts/boyde_guzellik.py --foto), kaynak/<ürün>_duz.png,
         boyde_labs/guzellik/siteler/<işletme>/ (örnek işletmelerin bilgileri; sablon_site ile kurulur)
 Örneklerdeki işletme ve kişi adları, telefon (BOYDE'nin), IBAN ve QR'lar örnektir (QR'lar okunmaz).
@@ -37,6 +40,8 @@ KAT = {"9x12": {"ad": "QR'lı masa isimliği", "olcu": "9 × 12 cm", "kisa": "Ku
 # örnek siteler: (işletme klasörü, şablon, isimliği)
 SITELER = [("defne", 6, "g_defne"), ("sakayik", 7, "g_sakayik"), ("ela", 8, "g_ela"), ("lal", 9, "g_lal"),
            ("papatya", 10, "g_papatya")]
+# 10 × 20 kişilerinin dijital kartvizitleri (aynı beş şablon): (klasör, şablon)
+KARTVIZIT = [("kisi_aylin", 6), ("kisi_gizem", 7), ("kisi_melis", 8), ("kisi_buse", 9), ("kisi_burcu", 10)]
 
 
 def foto(key, view="studyo", maxw=1200):
@@ -153,6 +158,92 @@ def site_gorseli(P, i, ekran, key, path):
         <p style="font-size:24px;line-height:1.4;color:#3b3d42;max-width:640px">İsimlikteki QR'ı okutan müşteri bu
           sayfayı açar. Her şey tek dokunuşla:</p>
         <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px">{cips}</div></div></div>""", path)
+
+
+def renk_ozellik(P, cat, path):
+    """Renkler ve özellikler: ölçülü düz görünüş, renk seçenekleri (Bambu karşılığıyla), özellikler."""
+    key = "g_papatya" if cat == "9x12" else "p_aylin"
+    mm_w, mm_h, px = (120, 90, 4.3) if cat == "9x12" else (200, 100, 2.6)
+    top = 300 if cat == "9x12" else 330
+    w, h = mm_w * px, mm_h * px
+    sw = "".join(f"""<div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:#fff;
+      border-radius:12px"><i style="flex:none;width:34px;height:34px;border-radius:9px;background:rgb{rgb};
+      box-shadow:inset 0 0 0 1px rgba(18,19,22,.1)"></i><div><p style="font-weight:700;font-size:17px">
+      {ad.capitalize()}</p><p style="font-size:12.5px;color:#55575c">{FILAMENT[k]}</p></div></div>"""
+                 for k, (ad, rgb) in G.RENK.items())
+    feats = "".join(f'<li style="display:flex;gap:12px"><b style="color:{ORANGE}">—</b><span>{x}</span></li>'
+                    for x in OZELLIK[cat])
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{PAPER};padding:56px;color:{INK}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><p class="k">RENKLER VE ÖZELLİKLER · {KAT[cat]['olcu'].upper()}</p>
+        <h2 class="u" style="margin-top:12px;font-size:44px;line-height:1.08">Salonunuzun renginde,<br>
+          çiçekli ve el yazısıyla.</h2></div>{K.logo("acik", 220, 44)}</div>
+      <div style="position:absolute;left:56px;top:{top}px;width:{w:.0f}px;height:{h:.0f}px">
+        <img src="{K.uri(os.path.join(G.SRC, f'{key}_duz.png'), 1000, 'PNG')}" style="width:100%;height:100%;
+          display:block;filter:drop-shadow(0 14px 22px rgba(0,0,0,.2))">
+        <div style="position:absolute;left:0;right:0;top:-30px;border-top:2px solid {K.GRAY}"></div>
+        <span style="position:absolute;left:50%;top:-50px;transform:translateX(-50%);padding:0 10px;
+          background:{PAPER};font-size:19px;font-weight:700">{mm_w} mm</span>
+        <div style="position:absolute;top:0;bottom:0;right:-30px;border-right:2px solid {K.GRAY}"></div>
+        <span style="position:absolute;top:50%;right:-96px;transform:translateY(-50%);font-size:19px;
+          font-weight:700">{mm_h} mm</span></div>
+      <div style="position:absolute;right:56px;top:226px;width:440px;display:grid;grid-template-columns:1fr 1fr;
+        gap:8px">{sw}</div>
+      <ul style="position:absolute;left:56px;right:56px;top:{max(top + h + 80, 600):.0f}px;list-style:none;
+        display:grid;gap:16px;font-size:24px;line-height:1.35">{feats}</ul></div>""", path)
+
+
+def bes_telefon(P, cat, ekranlar, path):
+    """Beş güzellik şablonu yan yana telefonda: 9 × 12'de salonun sayfası, 10 × 20'de kişinin dijital kartviziti."""
+    import boyde_site_gorsel as SG
+    tel = "".join(f"""<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        {SG.phone(K.uri(yol, 600, "PNG"), 184, zemin)}
+        <p style="font-size:17px;font-weight:700;text-align:center;max-width:208px;line-height:1.25">{ad}</p>
+        <p style="margin-top:-8px;font-size:15px;color:rgba(244,241,234,.62)">Şablon: {sablon}</p></div>"""
+                  for ad, sablon, yol, zemin in ekranlar)
+    if cat == "9x12":
+        k, h = "İSİMLİKLE GELEN SİTE", "QR'ı okutan müşteriniz<br>salonunuzun sayfasını açar."
+        cips = ("Ara", "Randevu (WhatsApp)", "Instagram", "Google yorum", "Konum", "IBAN", "Rehbere kaydet")
+        alt = "Beş şablondan biri, sizin renginiz ve logonuzla; uygulama gerekmez. Örnek işletmeler; QR'lar örnek."
+    else:
+        k, h = "İSİMLİKLE GELEN DİJİTAL KARTVİZİT", "QR'ı okutan kişi<br>kartvizitinizi açar."
+        cips = ("Ara", "Randevu (WhatsApp)", "E-posta", "Instagram", "Konum", "Rehbere kaydet")
+        alt = "Adınız, göreviniz ve salonunuz tek dokunuşla rehbere eklenir. Örnek kişiler; e-posta ve QR'lar örnek."
+    cips = "".join(f'<span class="chip" style="background:rgba(244,241,234,.1);color:{PAPER};font-size:18px;'
+                   f'padding:8px 14px">{x}</span>' for x in cips)
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};color:{PAPER};
+      background-image:{BM.stripes_bg(PAPER, .03, 30)}">
+      <div style="position:absolute;left:60px;right:60px;top:56px;display:flex;justify-content:space-between;
+        align-items:flex-start"><div><p class="k">{k}</p>
+        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">{h}</h2></div>{K.logo("koyu", 220, 44)}
+      </div>
+      <div style="position:absolute;left:0;right:0;top:360px;display:flex;justify-content:center;gap:22px">{tel}</div>
+      <div style="position:absolute;left:60px;right:60px;bottom:56px">
+        <div style="display:flex;flex-wrap:wrap;gap:10px">{cips}</div>
+        <p style="margin-top:16px;font-size:17px;color:rgba(244,241,234,.6)">{alt}</p></div></div>""", path)
+
+
+ADIM = [("01", "Sipariş verin", "Shopier'dan adedi seçin, ödemeyi güvenle yapın."),
+        ("02", "Bilgilerinizi gönderin", "Salon adı ya da ad soyad, logo, renkler, telefon, Instagram, konum."),
+        ("03", "Size özel 10 tasarım", "Seçtiğiniz renk ve motiflerle 10 farklı tasarım gönderiyoruz."),
+        ("04", "En beğendiğinizi basalım", "3D basıp kargoya veriyoruz; QR'ın açtığı sayfanız da hazır.")]
+
+
+def nasil_siparis(P, cat, path):
+    rows = "".join(f"""<div style="display:flex;gap:28px;padding:16px 0;border-top:2px solid rgba(244,241,234,.14)">
+      <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a}</b><div><p style="font-size:31px;
+      font-weight:700">{b}</p><p style="margin-top:8px;font-size:22px;color:rgba(244,241,234,.72)">{c}</p></div>
+      </div>""" for a, b, c in ADIM)
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};color:{PAPER};padding:64px;
+      background-image:{BM.stripes_bg(PAPER, .035, 30)}">
+      <p class="k">NASIL SİPARİŞ VERİLİR · {KAT[cat]['olcu'].upper()}</p>
+      <h2 class="u" style="margin-top:12px;font-size:48px;line-height:1.1">Salonunuzu anlatın,<br>gerisini biz
+        yapalım.</h2>
+      <div style="margin-top:28px">{rows}</div>
+      <img src="{K.uri(os.path.join(G.FOTO, f'kapak_{cat}.jpg'), 1200)}" style="margin-top:12px;width:100%;
+        height:230px;object-fit:cover;object-position:50% 45%;border-radius:22px;display:block">
+      <div style="position:absolute;left:64px;bottom:50px">{K.logo("koyu", 300, 60)}</div>
+      <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{K.TEL}</p></div>""", path)
 
 
 # ---------------------------------------------------------------- katalog (A4, boyde_katalog.catalog düzeninde)
@@ -348,20 +439,27 @@ def main():
         return
     shutil.rmtree(OUT, ignore_errors=True)
     ekranlar = [site_ekrani(klasor, n) for klasor, n, _ in SITELER]
+    kartlar = [site_ekrani(klasor, n) for klasor, n in KARTVIZIT]
     with BM.painter() as P:
-        for cat in KAT:
+        for cat in KAT:                                  # Shopier'e yükleme sırası: 01 … 15
             out = os.path.join(OUT, cat)
-            os.makedirs(os.path.join(out, "ek"))
+            os.makedirs(out)
+
+            def ad(i, s):
+                return os.path.join(out, f"{i:02d}_{s}.jpg")
             us = [u for u in G.URUNLER if u[0].startswith(KAT[cat]["on"])]
-            for k, u in enumerate(us, 1):
-                cerceve(P, cat, u, os.path.join(out, f"{k:02d}_{u[1]}_{u[0][2:]}.jpg"))
-            kapak(P, cat, os.path.join(out, "ek", "kapak.jpg"))
-            modeller(P, cat, os.path.join(out, "ek", "modeller.jpg"))
-            print(f"shopier/{cat}: {len(us)} model, kapak, modeller", flush=True)
-        os.makedirs(os.path.join(OUT, "siteler"))
+            kapak(P, cat, ad(1, "kapak"))
+            modeller(P, cat, ad(2, "on_tasarim"))
+            for k, u in enumerate(us, 3):
+                cerceve(P, cat, u, ad(k, f"{u[1]}_{u[0][2:]}"))
+            renk_ozellik(P, cat, ad(13, "renk_ozellik"))
+            bes_telefon(P, cat, ekranlar if cat == "9x12" else kartlar, ad(14, "site" if cat == "9x12" else "kartvizit"))
+            nasil_siparis(P, cat, ad(15, "nasil_siparis"))
+            print(f"shopier/{cat}: {len(os.listdir(out))} görsel (01 kapak … 15 nasıl sipariş)", flush=True)
+        os.makedirs(os.path.join(OUT, "site_ornekleri"))
         for i, ((klasor, _, key), ekran) in enumerate(zip(SITELER, ekranlar), 1):
-            site_gorseli(P, i, ekran, key, os.path.join(OUT, "siteler", f"{i:02d}_{klasor}.jpg"))
-            print(f"siteler/{i:02d}_{klasor}.jpg: {ekran[0]} · {ekran[1]}", flush=True)
+            site_gorseli(P, i, ekran, key, os.path.join(OUT, "site_ornekleri", f"{i:02d}_{klasor}.jpg"))
+            print(f"site_ornekleri/{i:02d}_{klasor}.jpg: {ekran[0]} · {ekran[1]}", flush=True)
         path, n = katalog(P)
         print(f"{os.path.relpath(path, G.A.ROOT)}: {n} sayfa", flush=True)
 

@@ -116,8 +116,9 @@ Fotoğraflarda kullanılan tonlar; baskıda karşılığı yakın Bambu filament
 | `kaynak/<ürün>_duz.png` | düz görünüş (saydam); `.npz` modeller git'e girmez |
 | `fotograf/<ürün>_studyo.jpg`, `_on.jpg`, `_masa.jpg` | Blender fotoğrafları (açık gövdeliler koyu fonda, koyular beyazda) |
 | `fotograf/kapak_9x12.jpg`, `kapak_10x20.jpg` | kategori kapakları |
-| `shopier/9x12/`, `shopier/10x20/` | 10'ar model görseli (BOYDE çerçevesinde; G01…, K01…); `ek/kapak.jpg`, `ek/modeller.jpg` |
-| `shopier/siteler/` | 5 site görseli: isimliğin fotoğrafı ve telefonda QR'ın açtığı sayfa |
+| `shopier/9x12/`, `shopier/10x20/` | her biri bir Shopier ürünü, yükleme sırasıyla 15 görsel: 01 kapak, 02 on tasarım bir arada, 03–12 modeller BOYDE çerçevesinde (G01…, K01…), 13 renkler ve özellikler, 14 site (10 × 20: dijital kartvizit), 15 nasıl sipariş. Ürün adı ve açıklaması: `boyde_labs/urunler/shopier/urun_metinleri.md` (7 ve 8) |
+| `shopier/site_ornekleri/` | ek: 5 site görseli, isimliğin fotoğrafı ve telefonda QR'ın açtığı sayfa |
+| `siteler/kisi_<ad>/` | 10 × 20 kişilerinin dijital kartvizit örnekleri (aynı beş şablon) |
 | `siteler/<işletme>/` | örnek sitelerin `bilgiler.json`'u, logo işareti, telefon ekranı |
 
 ## Yeniden üretmek

@@ -1,8 +1,9 @@
 # Shopier ürün metinleri
 
-Altı ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07),
+Sekiz ürün. Görseller: `9x12/` ve `10x20/` (01_M01 … 10_M10, isteğe bağlı `ek/`), `bayrakli/` (01 … 07),
 toptan anahtarlık `boyde_labs/anahtarlik_toptan/shopier/` (01 … 14), esnafa özel anahtarlık
-`boyde_labs/anahtarlik_esnaf/shopier/` (01 … 14), plakalı anahtarlık `boyde_labs/anahtarlik_plaka/shopier/` (01 … 09).
+`boyde_labs/anahtarlik_esnaf/shopier/` (01 … 14), plakalı anahtarlık `boyde_labs/anahtarlik_plaka/shopier/` (01 … 09),
+güzellik koleksiyonu `boyde_labs/guzellik/shopier/9x12/` ve `10x20/` (01 … 15).
 Açıklamalar düz metin; Shopier'in açıklama kutusuna olduğu gibi yapıştırılır.
 
 Sipariş akışı (1 ve 2): müşteri katalogdan model seçmez. Siparişten sonra ona özel 10 tasarım hazırlanır, en beğendiği basılır
@@ -308,5 +309,141 @@ NASIL SİPARİŞ VERİLİR
 WhatsApp: 0546 475 45 08
 
 Görsellerdeki plakalar ve yazılar örnektir; sizinki yazdığınız plaka ve yazıyla basılır.
+Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
+```
+
+## 7 · Güzellik koleksiyonu: QR'lı masa isimliği (9 × 12 cm)
+
+Kuaför, güzellik salonu, tırnak, kirpik, cilt bakım, lazer, makyaj, spa ve gelin başı için; pembe, nude, lila tonlarında,
+çiçek motifli, el yazısı adlı. Görseller: `boyde_labs/guzellik/shopier/9x12/` (01 kapak, 02 on tasarım, 03–12 G01–G10,
+13 renkler ve özellikler, 14 site, 15 nasıl sipariş), `python3 scripts/boyde_guzellik_gorsel.py`. Katalog:
+`boyde_labs/guzellik/katalog.pdf`.
+
+**Ürün adı**
+
+```
+Kuaför ve Güzellik Salonu İsimliği 9×12 cm · QR Kodlu · Çiçek Motifli · Size Özel 10 Tasarım · BOYDE LABS
+```
+
+**Açıklama**
+
+```
+KUAFÖR VE GÜZELLİK SALONU İSİMLİĞİ · 9 × 12 cm
+Salonunuzun renginde, çiçek motifli ve el yazısı adlı QR'lı masa isimliği. Size özel 10 tasarım hazırlıyoruz, en beğendiğinizi kendi atölyemizde 3D baskıyla üretiyoruz.
+
+Müşteriniz tezgâhınızdaki ya da masanızdaki isimliğin QR'ını telefonuyla okutur, salonunuza özel sayfanız açılır. Her şey tek dokunuşla:
+• Ara
+• Randevu (WhatsApp, hazır mesajlı)
+• Instagram
+• Konum (yol tarifi)
+• Google yorum
+• IBAN (tek dokunuşla kopyala)
+
+RENKLER VE DOKUNUŞLAR
+• Gövde: beyaz, pudra pembe, ten rengi (nude), krem, lila, adaçayı, fuşya ya da siyah
+• Yazı ve motifler: mürdüm, gül kurusu, moka, rose gold, beyaz...
+• Çiçek, papatya, gül, şakayık, nilüfer; kirpik, oje, ruj, fiyonk, gelin tacı motifleri
+• Adınız el yazısı ya da yumuşak harflerle
+
+ÖZELLİKLER
+• Ölçü: 120 × 90 mm, 1 cm kalın gövde
+• Yazı ve çiçek motifleri 2 mm kabartma, 3–4 renk
+• QR yüzeyle aynı hizada (renkli gövdede beyaz karoda): keskin, kolay okunur
+• 15° eğik sehpa dahil, tutkal gerekmez
+• Sayfanız isimlikle birlikte, salonunuza yakışan beş şablondan biriyle hazırlanır. Bilgileriniz değişirse sayfayı güncelleriz, isimlik aynı kalır.
+
+ÖRNEK ÇALIŞMALARIMIZ (görsellerde)
+G01 Bayan kuaförü · Çiçekli dal
+G02 Güzellik salonu · Şakayık
+G03 Tırnak stüdyosu · Oje
+G04 Kirpik ve kaş · Kirpik
+G05 Cilt bakım · Güllü dal
+G06 Lazer epilasyon · Parıltı
+G07 Makyaj stüdyosu · Ruj ve fiyonk
+G08 Spa ve masaj · Nilüfer
+G09 Gelin saçı ve makyaj · Çelenk ve taç
+G10 Kuaför ve güzellik · Papatya
+Görseller fikir versin diye; sizin isimliğiniz sıfırdan, size özel çizilir. Beğendiğiniz bir örnek varsa kodunu sipariş notuna yazın, tasarımları ona göre hazırlayalım.
+
+FİYAT
+• 1 adet: 1.700 TL
+• 2 adet: 2.000 TL
+
+NASIL ÇALIŞIR
+1. Sipariş verin: adedi seçin, ödemeyi Shopier'dan güvenle yapın.
+2. Bilgilerinizi WhatsApp'tan gönderin: salon adı, logo, sevdiğiniz renkler, telefon, Instagram, konum, IBAN.
+3. Seçtiğiniz renk ve motiflerle size özel 10 farklı tasarım hazırlayıp gönderiyoruz.
+4. En beğendiğinizi seçin; 3D basıp kargoya veriyoruz.
+
+WhatsApp: 0546 475 45 08
+
+Görsellerdeki işletme adları, telefon numaraları ve QR'lar örnektir.
+Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
+```
+
+## 8 · Güzellik koleksiyonu: kurumsal isimlik (10 × 20 cm)
+
+Saç tasarımcısı, nail artist, estetisyen, makyaj ve kirpik uzmanı, salon sahibi için. Görseller:
+`boyde_labs/guzellik/shopier/10x20/` (01 kapak, 02 on tasarım, 03–12 K01–K10, 13 renkler ve özellikler, 14 dijital
+kartvizit, 15 nasıl sipariş).
+
+**Ürün adı**
+
+```
+Kuaför ve Güzellik Uzmanı İsimliği 10×20 cm · Dijital Kartvizit QR · Çiçek Motifli · Size Özel 10 Tasarım · BOYDE LABS
+```
+
+**Açıklama**
+
+```
+GÜZELLİK UZMANI İSİMLİĞİ · 10 × 20 cm
+Saç tasarımcısı, nail artist, estetisyen, makyaj ve kirpik uzmanı için: el yazısıyla adınız, unvanınız, salonunuz ve dijital kartvizit QR'ı. Size özel 10 tasarım hazırlıyoruz, en beğendiğinizi kendi atölyemizde 3D baskıyla üretiyoruz.
+
+Masanıza gelen müşteriniz QR'ı telefonuyla okutur, dijital kartvizitiniz açılır:
+• Ara
+• Randevu (WhatsApp)
+• E-posta ve Instagram
+• Konum
+• Rehbere kaydet (adınız, unvanınız ve salonunuz tek dokunuşla)
+
+RENKLER VE DOKUNUŞLAR
+• Gövde: beyaz, pudra pembe, ten rengi (nude), krem, lila, adaçayı, fuşya ya da siyah
+• Yazı ve motifler: mürdüm, gül kurusu, moka, rose gold, beyaz...
+• Çiçekli dal, şakayık, papatya, nilüfer, çelenk; kirpik, oje, ruj, fiyonk motifleri
+• Adınız el yazısıyla
+
+ÖZELLİKLER
+• Ölçü: 200 × 100 mm, 5 mm gövde
+• Yazı ve motifler yüzeyle aynı hizada renkli: el yazısı adlar ince ayrıntısıyla
+• Salonunuzun isimliğiyle aynı renk ve motiflerle yapılabilir
+• Sehpa dahil
+• Kartvizit sayfanız isimlikle birlikte hazırlanır. Bilgileriniz değişirse sayfayı güncelleriz, isimlik aynı kalır.
+
+ÖRNEK ÇALIŞMALARIMIZ (görsellerde)
+K01 Saç tasarımcısı · Çiçekli dal
+K02 Nail artist · Üç oje
+K03 Uzman estetisyen · Şakayık
+K04 Makeup artist · Ruj ve fiyonk
+K05 Lash & brow artist · Kirpik
+K06 Cilt bakım uzmanı · Çelenk monogram
+K07 Lazer epilasyon uzmanı · Parıltı
+K08 Kalıcı makyaj sanatçısı · Kaş ve alt bant
+K09 Spa ve masaj terapisti · Nilüfer
+K10 Kurucu, güzellik merkezi · Papatya
+Görseller fikir versin diye; sizin isimliğiniz sıfırdan, size özel çizilir. Beğendiğiniz bir örnek varsa kodunu sipariş notuna yazın, tasarımları ona göre hazırlayalım.
+
+FİYAT
+• 1 adet: … TL
+• 2 adet: … TL
+
+NASIL ÇALIŞIR
+1. Sipariş verin: adedi seçin, ödemeyi Shopier'dan güvenle yapın.
+2. Bilgilerinizi WhatsApp'tan gönderin: ad soyad, unvan, salon adı ve logosu, sevdiğiniz renkler, telefon, e-posta, Instagram.
+3. Seçtiğiniz renk ve motiflerle size özel 10 farklı tasarım hazırlayıp gönderiyoruz.
+4. En beğendiğinizi seçin; 3D basıp kargoya veriyoruz.
+
+WhatsApp: 0546 475 45 08
+
+Görsellerdeki kişi ve salon adları, telefon numaraları ve QR'lar örnektir.
 Ürün size özel üretildiği için cayma hakkı kapsamında değildir.
 ```

@@ -81,7 +81,7 @@ CSS = """
 .tile span:last-child{min-width:0}
 .tile b{display:block;font:800 15.5px/1.2 var(--ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile small{display:-webkit-box;margin-top:3px;font-size:13px;line-height:1.3;color:var(--muted);overflow:hidden;
-  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:break-word}
 footer{display:flex;align-items:center;gap:12px;margin-top:44px;padding-top:18px;border-top:1px solid var(--line2);
   color:var(--dim);font-size:13px}
 footer svg{width:42px;height:42px;flex:none}
@@ -110,6 +110,11 @@ def _ad(site, t0):
     return "".join(f'<span class="ln"{G.d(t0 + .25 * k)}>{e(t)}</span>' for k, t in enumerate(G.isim(site)))
 
 
+def _kir(L):
+    """Dar kutucukta e-posta "@"tan sonra alta geçer (harf ortasından bölünmesin)."""
+    return e(L.sub).replace("@", "@<wbr>") if L.key == "eposta" else e(L.sub)
+
+
 def og(site):
     return (f'<div class="wrap"><header class="hero">{_sakayik()}<p class="eyebrow">{e(site.etiket)}</p>'
             f'<h1 class="mark">{_ad(site, 0)}</h1><p class="kind">{e(site.hizmet)}</p></header></div>')
@@ -119,7 +124,7 @@ def body(site, ctx):
     logo, _ = drawn_mark(site, "own", 0.4)
     base = 0.3 if site.isaret else 0.0
     tiles = "\n  ".join(f'<a class="tile" {G.a_attr(L)}{G.d(1.45 + base + .07 * k)}><span class="ib">'
-                        f'{svg(L.icon)}</span><span><b>{e(L.title)}</b><small>{e(L.sub)}</small></span></a>'
+                        f'{svg(L.icon)}</span><span><b>{e(L.title)}</b><small>{_kir(L)}</small></span></a>'
                         for k, L in enumerate(G.baglantilar(site, ctx)))
     right = f"@{site.instagram}" if site.instagram else ""
     mini = G.sv("", "0 0 60 60", G.sakayik(30, 30, 27, dolgu="#fff", cizgi="var(--fl)"))
