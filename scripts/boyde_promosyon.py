@@ -328,8 +328,11 @@ def fiyonk_acacak(dolgu, cerceve, dugum_renk, sus, harf=None, arka=None, arka_re
     if arka:                                           # arka yüzde iki ilmeğe bölünmüş ad (düğüm araya girmez)
         w = arka.split()
         k = min(range(1, len(w)), key=lambda i: abs(len(" ".join(w[:i])) - len(" ".join(w[i:])))) if len(w) > 1 else 1
-        sol, sag_ = " ".join(w[:k]), " ".join(w[k:])
-        ay = A.union(*[yazi("josefin", t, 3.8, x, 2.0, 15.5, 0.6) for t, x in ((sol, -18.5), (sag_, 18.5)) if t])
+        parcalar_ = []
+        for kel, x in ((w[:k], -18.0), (w[k:], 18.0)):  # her ilmekte kelimeler alt alta
+            for j, t in enumerate(kel):
+                parcalar_.append(yazi("josefin", t, 3.8, x, 2.0 + 2.9 * (len(kel) - 1) - 5.8 * j, 16.0, 0.6))
+        ay = A.union(*parcalar_)
         ay = ayna(ay) ^ ic.offset(-0.6, J)
         fm = fm - kat(ay, 0.0, 0.6)
         parts.append(("arka yazı", kat(ay, 0.0, 0.6), arka_renk))
