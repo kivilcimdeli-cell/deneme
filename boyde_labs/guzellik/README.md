@@ -108,6 +108,16 @@ Fotoğraflarda kullanılan tonlar; baskıda karşılığı yakın Bambu filament
   - Bilgiler ve logo işareti: isimliklerdeki motiften.
   - Önizleme ve deneme dosyası: `site_sablonlari/guzellik/<no>_<ad>/`.
 
+## Atölye uygulamasında
+
+İki ürün olarak: **Güzellik isimliği 9 × 12** (`atolye/urunler/guzellik_9x12.py`) ve **Güzellik isimliği 10 × 20**
+(kişi; `guzellik_10x20.py`).
+
+- **Düzenler:** müşterinin bilgileriyle buradaki 20 modelden genelleştirildi (`atolye/tasarim/guzellik.py`).
+- **Katalog:** 10 tasarım (G01…, K01…).
+- **Çıktı:** X2D 3MF, önizlemeler ve güzellik şablonlarından (6–10) sayfa.
+- **Ayrıntı:** `atolye/README.md`.
+
 ## Dosyalar
 
 | Dosya | Ne |

@@ -275,7 +275,7 @@ def _plaka(d, key, title):
     return Plaka()
 
 
-def _musteri_onizleme(d, parts, path, baslik, alt):
+def _musteri_onizleme(d, parts, path, baslik, alt, ust="QR'LI MASA İSİMLİĞİ"):
     """Müşteriye: önden (sehpasında) ve masada 3/4."""
     from PIL import Image, ImageDraw, ImageFont
 
@@ -286,7 +286,7 @@ def _musteri_onizleme(d, parts, path, baslik, alt):
     canvas = Image.new("RGB", (1200, 1300), (244, 241, 234))
     dr = ImageDraw.Draw(canvas)
     f = os.path.join(O.A.FONT_DIR, "SpaceGrotesk_700Bold.ttf")
-    dr.text((60, 40), "QR'LI MASA İSİMLİĞİ", fill=(255, 90, 31), font=ImageFont.truetype(f, 24))
+    dr.text((60, 40), ust, fill=(255, 90, 31), font=ImageFont.truetype(f, 24))
     dr.text((60, 76), baslik, fill=(18, 19, 22), font=ImageFont.truetype(f, 44))
     canvas.paste(on, ((1200 - on.width) // 2, 160), on)
     canvas.paste(iso, ((1200 - iso.width) // 2, 740), iso)

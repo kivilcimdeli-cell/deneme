@@ -1,7 +1,8 @@
 """İşletmenin web sayfası (isimlikteki QR'ın açtığı dijital kartvizit): scripts/sablon_site.py'nin beş şablonu.
 
 Kural (CLAUDE.md): sayfa lastikçi tarzındaki 5 şablondan biriyle yapılır, şablonlar sırayla döner (1 → 2 → … → 5 → 1);
-bir işletme bir kez şablon aldıysa yeniden üretimde aynı şablonda kalır. Depoda yapılanların sırası
+güzellik işletmeleri (güzellik ürünleri) 5 güzellik şablonundan (6–10), kendi içinde sırayla. Bir işletme bir kez
+şablon aldıysa yeniden üretimde aynı şablonda kalır. Depoda yapılanların sırası
 site_sablonlari/sira.json'da; uygulamanın yaptıkları atolye_veri/site_sirasi.json'da (müşteri bilgisi: git'e girmez).
 Sıradaki şablon ikisinin en son kaydından devam eder.
 
@@ -48,17 +49,22 @@ def _uygulama_sirasi():
         return []
 
 
-def siradaki():
-    rows = sorted((r for r in _depo_sirasi() + _uygulama_sirasi() if r["sablon"] <= 5),   # 6–10: güzellik şablonları
-                  key=lambda r: r.get("tarih", ""))
-    return rows[-1]["sablon"] % 5 + 1 if rows else 1
+def _aile(n, guzellik):
+    return (6 <= n <= 10) if guzellik else (1 <= n <= 5)
 
 
-def sablon_sec(kimlik, isletme, istenen=0):
-    """Bu müşterinin şablonu: elle seçilen > kayıtlı > sıradaki. Kaydeder, döner numara."""
+def siradaki(guzellik=False):
+    """Sıradaki şablon: lastikçi 1–5, güzellik 6–10; her aile kendi içinde döner (depo ve uygulama kayıtları)."""
+    import sablon_site
+    rows = sorted(_depo_sirasi() + _uygulama_sirasi(), key=lambda r: r.get("tarih", ""))
+    return sablon_site.next_template(rows, guzellik)
+
+
+def sablon_sec(kimlik, isletme, istenen=0, guzellik=False):
+    """Bu müşterinin şablonu: elle seçilen > kayıtlı (aynı aileden) > sıradaki. Kaydeder, döner numara."""
     rows = _uygulama_sirasi()
-    kayitli = next((r for r in rows if r["kimlik"] == kimlik), None)
-    n = int(istenen or 0) or (kayitli and kayitli["sablon"]) or siradaki()
+    kayitli = next((r for r in rows if r["kimlik"] == kimlik and _aile(r["sablon"], guzellik)), None)
+    n = int(istenen or 0) or (kayitli and kayitli["sablon"]) or siradaki(guzellik)
     if not kayitli or kayitli["sablon"] != n:
         rows = [r for r in rows if r["kimlik"] != kimlik] + [
             {"isletme": isletme, "kimlik": kimlik, "sablon": n,
@@ -127,11 +133,12 @@ def bilgiler(b, klasor, marka, hizmet, renk_hex, ad, isaret=None):
     return d, uyar
 
 
-def yap(is_, d, sablon=0, gif=False):
-    """Siteyi müşteri klasörünün web/ altında üretir. Döner {"sablon", "ad", "url", "ciktilar"}."""
+def yap(is_, d, sablon=0, gif=False, guzellik=False):
+    """Siteyi müşteri klasörünün web/ altında üretir (guzellik: 6–10 şablonları). Döner {"sablon", "ad", "url",
+    "ciktilar"}."""
     import sablon_site
     klasor = is_.yol("web", "bilgiler.json")[:-len("bilgiler.json") - 1]
-    n = sablon_sec(is_.musteri["kimlik"], d["isletme"], sablon)
+    n = sablon_sec(is_.musteri["kimlik"], d["isletme"], sablon, guzellik)
     uyarilar = []
     for i, dd in enumerate(_kisaltmalar(d)):            # şablonda yazı sığmazsa (uzun unvan) kısaltılır
         with open(os.path.join(klasor, "bilgiler.json"), "w", encoding="utf-8") as f:

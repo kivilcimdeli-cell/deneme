@@ -60,6 +60,20 @@ RENK = {
     PURPLE: ("mor", "#5E43B7", (104, 72, 178), "#6B4BC8"),
     GRAY: ("gri", "#8E9089", (139, 142, 148), "#8B8E94"),
 }
+# güzellik koleksiyonu (scripts/boyde_guzellik.py: aynı kimlikler ve tonlar); 3MF rengi yakın Bambu filamenti
+PUDRA, GUL, FUSYA, NUDE, KREM, MOKA, MURDUM, LILA, ROSE, ADACAYI = range(41, 51)
+RENK.update({
+    PUDRA: ("pudra pembe", "#E8AFCF", (238, 178, 194), "#E3A3B6"),         # PLA Matte Sakura Pink
+    GUL: ("gül kurusu", "#B5707E", (192, 110, 126), "#B9667A"),            # dusty rose
+    FUSYA: ("fuşya", "#E03C8A", (222, 52, 124), "#DE347C"),                # PLA Basic Hot Pink / Magenta
+    NUDE: ("ten rengi", "#D3B7A7", (218, 186, 166), "#C49A84"),            # PLA Matte Latte Brown
+    KREM: ("krem", "#F2EAD8", (243, 234, 218), "#C9B48E"),                 # PLA Matte Ivory White
+    MOKA: ("moka", "#4D3324", (92, 62, 52), "#6B4A3E"),                    # PLA Matte Dark Chocolate
+    MURDUM: ("mürdüm", "#7B2D52", (112, 38, 74), "#7A2850"),               # PLA Matte Plum
+    LILA: ("lila", "#AE96D4", (184, 160, 216), "#9479C9"),                 # PLA Matte Lilac Purple
+    ROSE: ("rose gold", "#C98A7E", (214, 152, 138), "#D08A78"),            # PLA Silk Rose Gold
+    ADACAYI: ("adaçayı", "#9FB39A", (146, 170, 138), "#6F8F66"),           # sage
+})
 AD = {k: v[0] for k, v in RENK.items()}
 KIMLIK = {v[0]: k for k, v in RENK.items()}
 TON = {k: v[2] for k, v in RENK.items()}
@@ -71,7 +85,9 @@ ACIKTA = [RED, ORANGE, BLUE, NAVY, GOLD, TURQ, PINK, GREEN, PURPLE]    # beyaz g
 def _kaydet():
     """Yeni renkleri 3MF yazıcısına (anahtarlik), önizlemeye ve yıkama tablosuna tanıtır. Yıkama hacmi benzer
     renkten alınır (turkuaz mavi gibi, turuncu kırmızı gibi...)."""
-    benzer = {TURQ: BLUE, PINK: RED, GREEN: BLUE, ORANGE: RED, NAVY: BLUE, PURPLE: BLUE, GRAY: GOLD}
+    benzer = {TURQ: BLUE, PINK: RED, GREEN: BLUE, ORANGE: RED, NAVY: BLUE, PURPLE: BLUE, GRAY: GOLD,
+              PUDRA: RED, GUL: RED, FUSYA: RED, NUDE: A.SKIN, KREM: WHITE, MOKA: BLACK, MURDUM: RED, LILA: BLUE,
+              ROSE: GOLD, ADACAYI: BLUE}
     for k, (ad, hexc, ton, _) in RENK.items():
         A.COLOURS.setdefault(k, hexc)
         A.COLOUR_NAMES.setdefault(k, ad)

@@ -1,9 +1,9 @@
 """BOYDE Atölye duman testi: uygulamayı gerçek sunucusuyla, panelin kullandığı API üzerinden baştan sona dener.
-Beş ürün: müşteri kaydı → katalog → katalogdaki ilk kodla baskı dosyaları; işler hatasız bitiyor mu, çıktı dosyaları
+Yedi ürün: müşteri kaydı → katalog → katalogdaki ilk kodla baskı dosyaları; işler hatasız bitiyor mu, çıktı dosyaları
 diskte var mı. Windows kurulum derlemesinde (CI) gömülü Python'la çalışır; geliştirirken de kullanılır.
 
 Örnek bilgiler uydurma (gerçek işletme ya da kişi yok); telefon örnek numara. Anahtarlıkta üç renk seçili; plakalıda
-plaka boşluksuz ve küçük harfle (biçime getiriliyor mu).
+plaka boşluksuz ve küçük harfle (biçime getiriliyor mu); güzellik 10 × 20'de gövde pudra pembe.
 
 Kullanım: python scripts/atolye_duman.py [ürün kodu ...]    (boşsa hepsi; veri klasörü geçici, port 8790)
 """
@@ -29,6 +29,11 @@ ORNEK = {
     "anahtarlik": {"marka": "DENEME", "alt": "OTO YIKAMA", "sektor": "genel", "arka": TEL, "adet": "100",
                    "zemin": "siyah", "yazi_renk": "beyaz", "renk": "turuncu"},
     "plakali": {"plaka": "34byd34", "yazi": "Adınız Soyadınız", "bant": "mavi", "adet": "40"},
+    "guzellik_9x12": {"isletme": "Deneme Güzellik Salonu", "marka": "Deneme", "hizmet": "GÜZELLİK SALONU",
+                      "dal": "guzellik", "telefon": TEL, "hizmetler": "Cilt bakımı, Manikür",
+                      "site_adi": "denemeguzellik"},
+    "guzellik_10x20": {"ad_soyad": "Deniz Yılmaz", "unvan": "Nail Artist", "kurum": "Deneme Nails", "telefon": TEL,
+                       "dal": "tirnak", "zemin": "pudra pembe", "site_adi": "denizyilmaznails"},
 }
 SURE = 20 * 60                                            # bir iş için en çok (saniye)
 

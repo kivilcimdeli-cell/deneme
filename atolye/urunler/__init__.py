@@ -16,7 +16,7 @@ ilerle(yüzde, mesaj).
 """
 import importlib
 
-SIRA = ["isimlik_9x12", "kurumsal_10x20", "bayrakli", "anahtarlik", "plakali"]
+SIRA = ["isimlik_9x12", "kurumsal_10x20", "guzellik_9x12", "guzellik_10x20", "bayrakli", "anahtarlik", "plakali"]
 
 
 def hepsi():

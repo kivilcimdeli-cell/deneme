@@ -32,9 +32,11 @@ const YOL = {
   bayrak: "M5 21V4M5 4h13l-2.5 4.5L18 13H5",
   anahtar: "M8.5 19.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM11.7 11.8 20 3.5M16.5 7l3 3M14.5 9l2 2",
   plaka: "M2.5 8A1.5 1.5 0 0 1 4 6.5h16A1.5 1.5 0 0 1 21.5 8v8a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 16ZM7 6.5v11M10 12h8",
+  cicek: "M9.10 7.40a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M4.73 10.58a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M6.40 15.72a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M11.80 15.72a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M13.47 10.58a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M10.40 12.00a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0",
+  cicekkart: "M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5ZM7.15 9.80a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M5.06 11.32a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M5.86 13.78a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M8.44 13.78a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M9.24 11.32a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M7.80 12.00a0.7 0.7 0 1 0 1.4 0a0.7 0.7 0 1 0 -1.4 0M13.5 10h4.5M13.5 13.5h3",
 };
 const URUN_IKON = {isimlik_9x12: "qr", kurumsal_10x20: "kart", bayrakli: "bayrak", anahtarlik: "anahtar",
-  plakali: "plaka"};
+  plakali: "plaka", guzellik_9x12: "cicek", guzellik_10x20: "cicekkart"};
 const ikon = (ad, cls = "") => `<span class="ikon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${YOL[ad] || YOL.kup}"/></svg></span>`;
 

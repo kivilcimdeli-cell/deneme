@@ -3,9 +3,9 @@
 Siparişten baskı dosyasına giden yerel uygulama. Bilgisayarda çalışır, tarayıcıda açılır (`http://127.0.0.1:8765`).
 
 1. Ürün seçilir, müşteri bilgileri girilir.
-2. Katalog üretilir: QR'lı isimlikte 10, anahtarlıkta 20 tasarım. PDF ve sayfa görselleri WhatsApp'tan gönderilir.
+2. Katalog üretilir: isimliklerde 10, anahtarlıkta 20 tasarım. PDF ve sayfa görselleri WhatsApp'tan gönderilir.
 3. Müşteri beğenmezse **Yeni katalog üret** denir. Gösterilen tasarımlar tekrar gelmez.
-4. Müşterinin söylediği koda (M03, A07…) tıklanır ya da kod alttaki kutuya yazılır. **Baskı dosyalarını üret** ile
+4. Müşterinin söylediği koda (M03, G05, A07…) tıklanır ya da kod alttaki kutuya yazılır. **Baskı dosyalarını üret** ile
    X2D 3MF'i, önizlemeler ve web sayfası hazırlanır. Çıktılar müşteri sayfasının en üstünde; **Aç** / **İndir**.
    - "A07 olsun ama kırmızı": üret düğmesinin altında **Renkleri değiştir** (gövde, yazı, vurgu); boş bırakılan
      katalogdaki gibi kalır. Değişiklik geçmişe yazılır.
@@ -33,7 +33,7 @@ gerekmez; yönetici izni istemez.
 - **Güncelleme:** yeni kurulum dosyası aynı şekilde kurulur; eskisinin üzerine yazar.
 - **Nereden:** depodaki GitHub sürümleri (Releases, `atolye-1.0.N`). Her değişiklikte GitHub Actions Windows'ta yeniden
   derler (`.github/workflows/atolye-windows.yml`): kurulum klasörü (`scripts/atolye_windows.py`: gömülü Python 3.11,
-  paketler, Chromium), duman testi (`scripts/atolye_duman.py`: beş ürün baştan sona), Inno Setup
+  paketler, Chromium), duman testi (`scripts/atolye_duman.py`: yedi ürün baştan sona), Inno Setup
   (`paket/windows/atolye.iss`).
 
 **ZIP ile (eski yol):**
@@ -53,6 +53,8 @@ gerekmez; yönetici izni istemez.
 | --- | --- | --- |
 | QR'lı masa isimliği 9 × 12 | 10 tasarım (M01…) | iki takımlı X2D 3MF, müşteri önizlemesi, tabla kontrolü, web sayfası (zip) |
 | Kurumsal isimlik 10 × 20 | 10 tasarım (K01…) | tek takımlı X2D 3MF, önizlemeler, dijital kartvizit sayfası (zip) |
+| Güzellik isimliği 9 × 12 | 10 tasarım (G01…) | iki takımlı X2D 3MF, önizlemeler, randevu sayfası (zip, güzellik şablonu) |
+| Güzellik isimliği 10 × 20 | 10 tasarım (K01…) | tek takımlı X2D 3MF, önizlemeler, kartvizit sayfası (zip, güzellik şablonu) |
 | Türk bayraklı isimlik | yok | X2D 3MF (blok + sehpa), önizleme |
 | Toptan anahtarlık | 20 tasarım (A01…) | dolu tabla 3MF, tek adetlik deneme 3MF'i, tabla başına adet ve kaç tabla gerektiği |
 | Plakalı anahtarlık | yok | sipariş adedi kadar tabla 3MF'i (çoksa dolu tabla), deneme 3MF'i, ön ve arka önizleme |
@@ -84,6 +86,31 @@ gerekmez; yönetici izni istemez.
   çıkar; telefon sayfada kalır, notlarda uyarı çıkar.
 - **Kartvizit sayfası:** aynı 5 şablonla, kişinin kartviziti olarak yapılır. E-posta bağlantısı eklenir; **Rehbere
   kaydet** kişiyi kurumuyla ekler.
+
+### Güzellik isimlikleri (9 × 12 ve 10 × 20)
+
+Kuaför, güzellik salonu, tırnak, kirpik, cilt bakım, lazer, makyaj, spa, gelin başı için; Shopier'deki güzellik
+koleksiyonunun (`boyde_labs/guzellik/`) uygulamadaki karşılığı.
+
+- **Tasarımlar:** 9 × 12'de 10, 10 × 20'de 10 düzen (`atolye/tasarim/guzellik.py`), örnek ürünlerden (G01–G10,
+  K01–K10) genelleştirildi.
+  - Ad el yazısıyla (Pacifico, Kaushan, Yesteryear, Norican, Dancing Script, Playball) ya da yumuşak serifle
+    (Fraunces, Marcellus); el yazısında harfler bağlı kalır.
+  - Süsler: çiçekli dal, şakayık, gül, papatya, nilüfer, çelenk, parıltı, fiyonk. Simge formdaki **dala** göre:
+    makas, şakayık, oje, kirpik, ruj, gül, parıltı, nilüfer, taç, çiçek (simge yuvaya küçük kalırsa çiçek).
+  - Uzun ad iki satıra iner, süslerin altında kalır; uzun iş türü (GÜZELLİK SALONU) iki satıra iner. Çelenkte ad
+    sığmazsa o düzen katalogda çıkmaz.
+- **Renkler:** paletler gövdeye göre: pudra, ten rengi, krem, lila, adaçayı, fuşya, beyaz, siyah; yazı ve süslerde
+  mürdüm, moka, gül kurusu, rose gold, sarı… Formda gövde, yazı, vurgu seçilebilir; katalogda düzenin kendi paleti
+  öne çıkar, aynı gövde rengi en çok üç kez. Renkli gövdede QR beyaz karoda (ya da koyu kareler doğrudan gövdede).
+- **9 × 12:** isimlik9 yapısı: gövde 1 cm, yazı ve süsler 2 mm kabartma, siyah sehpa, iki takım. Kabartmada harf
+  içi ve satırlar en az 0,7 mm; süslerin uçları 0,9 mm'ye yuvarlanır.
+- **10 × 20:** isimlik20 yapısı (200 × 100 mm, gövde 5 mm, sehpa gövde renginde); yazılar ve süsler yüzeyle aynı
+  hizada renkli dolgu (üst 0,8 mm), dolguda harf içi ve ara en az 0,45 mm. Gövde ve sehpa ana nozulda, dolgular
+  yardımcıda.
+- **Sayfa:** 5 güzellik şablonundan (6 Pudra, 7 Şakayık, 8 Gece, 9 Kemer, 10 Papatya) sıradaki; güzellik sırası
+  lastikçi sırasından ayrı döner. WhatsApp satırı "Randevu al"; 10 × 20'de kişinin kartviziti (kurum, e-posta,
+  rehbere kaydet).
 
 ### Toptan anahtarlık
 

@@ -25,7 +25,8 @@
 - Kullanıcının bilgisayarında çalışan sipariş uygulaması: ürün → müşteri bilgileri → katalog → seçilen kod → 3MF (+ site).
   Ayrıntı: `atolye/README.md`.
 - Yeni ürün istenince `atolye/urunler/<ad>.py` eklentisi yazılır ve `atolye/urunler/__init__.py`'deki `SIRA`'ya eklenir;
-  ortak parçalar `atolye/tasarim/`. İşletme siteleri uygulamada da yalnız 5 şablonla (`atolye/site.py`).
+  ortak parçalar `atolye/tasarim/`. İşletme siteleri uygulamada da yalnız bu şablonlarla (`atolye/site.py`): 1–5,
+  güzellik ürünlerinde (guzellik_9x12, guzellik_10x20) 6–10, her aile kendi sırasıyla.
 - Müşteri verileri `atolye_veri/` (git'e girmez, kişisel bilgi); denemeler scratchpad'de `BOYDE_VERI` ile yapılır.
 - Kullanıcıya verilen: Windows kurulum dosyası `BOYDE_Atolye_Kurulum.exe` (GitHub sürümü). Uygulamada değişiklik push
   edilince GitHub Actions yeniden derler ve duman testinden geçirir (`.github/workflows/atolye-windows.yml`); yeni
