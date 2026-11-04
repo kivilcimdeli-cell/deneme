@@ -119,13 +119,42 @@ def kesit(path, oran=1.0):
     return (0, (h - nh) // 2, w, (h - nh) // 2 + nh)
 
 
+def kadraj(path, oran, pay=0.1, en_az=0.35):
+    """Ürünleri saran kırpma kutusu (en / boy = oran): fondan ayrılan piksellerin kutusu, `pay` kadar genişletilir;
+    kutu görüntünün en az `en_az`ı kadar (çok yakın olmasın)."""
+    import numpy as np
+    from PIL import Image
+    im = Image.open(path).convert("RGB")
+    a = np.asarray(im.resize((im.width // 4, im.height // 4)), float)
+    kose = np.median(np.concatenate([a[:6, :6].reshape(-1, 3), a[:6, -6:].reshape(-1, 3), a[-6:, :6].reshape(-1, 3),
+                                     a[-6:, -6:].reshape(-1, 3)]), 0)
+    fark = np.abs(a - kose).max(2) > 38
+    ys, xs = np.nonzero(fark)
+    W_, H_ = im.size
+    if len(xs) < 20:
+        return kesit(path, oran)
+    x0, x1, y0, y1 = xs.min() * 4, xs.max() * 4 + 4, ys.min() * 4, ys.max() * 4 + 4
+    w, h = (x1 - x0) * (1 + 2 * pay), (y1 - y0) * (1 + 2 * pay)
+    w, h = max(w, h * oran, W_ * en_az), max(h, w / oran, H_ * en_az)
+    w, h = max(w, h * oran), max(h, w / oran)
+    if w > W_:
+        w, h = W_, W_ / oran
+    if h > H_:
+        h, w = H_, H_ * oran
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    bx = min(max(cx - w / 2, 0), W_ - w)
+    by = min(max(cy - h / 2, 0), H_ - h)
+    return (round(bx), round(by), round(bx + w), round(by + h))
+
+
 def cesit_karti(k, tur, dark):
     _, ad, _ = PR.URUNLER[k]
     p = os.path.join(PR.FOTO, f"{k}_{'iki' if tur == 'ruj' else 'halka'}.jpg")     # uzun kutular asılıyken küçük
     alt = "rgba(244,241,234,.65)" if dark else "#55575c"
     kutu = "rgba(244,241,234,.06)" if dark else "#fff"
     return f"""<div style="background:{kutu};border-radius:14px;overflow:hidden">
-      <img src="{K.uri(p, 420, crop=kesit(p, 1.0))}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">
+      <img src="{K.uri(p, 420, crop=kadraj(p, 1.0, 0.08))}" style="width:100%;aspect-ratio:1;object-fit:cover;
+        display:block">
       <div style="padding:9px 11px 11px"><b class="code" style="font-size:12px;color:{ORANGE}">{KODLAR[k]}</b>
         <p style="margin-top:4px;font-size:12.5px;font-weight:700;line-height:1.25">{ad}</p>
         <p style="margin-top:3px;font-size:10.5px;line-height:1.35;color:{alt}">{TUR[tur]['renk'][k]}</p></div></div>"""
@@ -144,7 +173,7 @@ def tur_sayfasi(i, tur, no, dark):
       <h2 class="u" style="margin-top:8px;font-size:30px;line-height:1.1">{t['ad']}</h2></div>
       <b class="code" style="font-size:15px;color:{ORANGE}">{KODLAR[ks[0]]}–{KODLAR[ks[-1]]}</b></div>
       <p style="margin-top:10px;font-size:13px;line-height:1.55;color:{alt}">{t['metin']}</p>
-      <img src="{K.uri(grup, 1100, crop=kesit(grup, 698 / 330))}" style="margin-top:16px;width:100%;height:330px;
+      <img src="{K.uri(grup, 1100, crop=kadraj(grup, 698 / 360, 0.06))}" style="margin-top:16px;width:100%;height:360px;
         object-fit:cover;border-radius:16px;display:block">
       <div style="margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">{kartlar}</div>
       <ul style="margin-top:14px;list-style:none;font-size:12.5px;line-height:1.4">{feats}</ul>""", dark=dark, no=no)
@@ -172,8 +201,8 @@ def katalog(P):
     no += 1
 
     turler = "".join(f"""<div style="background:#fff;border-radius:14px;overflow:hidden">
-      <img src="{K.uri(os.path.join(PR.FOTO, f'dizi_{tur}.jpg'), 520, crop=kesit(os.path.join(PR.FOTO,
-        f'dizi_{tur}.jpg'), 1.3))}" style="width:100%;aspect-ratio:1.3;object-fit:cover;display:block">
+      <img src="{K.uri(os.path.join(PR.FOTO, f'dizi_{tur}.jpg'), 520, crop=kadraj(os.path.join(PR.FOTO,
+        f'dizi_{tur}.jpg'), 1.3, 0.06))}" style="width:100%;aspect-ratio:1.3;object-fit:cover;display:block">
       <div style="padding:10px 12px 12px"><p class="k" style="font-size:10px">{i:02d}</p>
         <p class="u" style="margin-top:4px;font-size:14px;line-height:1.2">{TUR[tur]['ad']}</p>
         <p style="margin-top:4px;font-size:11px;line-height:1.4;color:#55575c">{TUR[tur]['kisa']}</p></div></div>"""
@@ -223,9 +252,9 @@ def katalog(P):
       <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">{sw}</div>
       <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
         <div>{kl}</div>
-        <div style="display:grid;gap:10px"><img src="{K.uri(p_, 600, crop=kesit(p_, 1.5))}" style="width:100%;
+        <div style="display:grid;gap:10px"><img src="{K.uri(p_, 600, crop=kadraj(p_, 1.5))}" style="width:100%;
           aspect-ratio:1.5;object-fit:cover;border-radius:14px;display:block"><img src="{K.uri(q_, 600,
-          crop=kesit(q_, 1.5))}" style="width:100%;aspect-ratio:1.5;object-fit:cover;border-radius:14px;display:block">
+          crop=kadraj(q_, 1.5))}" style="width:100%;aspect-ratio:1.5;object-fit:cover;border-radius:14px;display:block">
           <p style="font-size:10.5px;color:{K.GRAY}">Ön yüzde baş harf, arka yüzde salon adı ya da Instagram adı.</p>
         </div></div>""", no=no))
     no += 1
@@ -249,14 +278,14 @@ def katalog(P):
         başındaki NFC etiketine telefon dokundurulunca salonunuzun sayfası açılır: Hemen Ara, WhatsApp'tan Randevu al,
         Instagram, Google yorum, konum, rehbere kaydet. Sayfa güzellik salonları için tasarladığımız beş şablondan
         biri; sizin renginiz ve adınızla. Bilgileriniz değişirse sayfayı güncelleriz, fırça aynı kalır.</p>
-      <img src="{K.uri(nf, 1100, crop=kesit(nf, 698 / 300))}" style="margin-top:18px;width:100%;height:300px;
+      <img src="{K.uri(nf, 1100, crop=kadraj(nf, 698 / 300, 0.05))}" style="margin-top:18px;width:100%;height:300px;
         object-fit:cover;border-radius:16px;display:block">
       <div style="margin-top:24px;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 46px">{''.join(tel)}</div>
       <p style="margin-top:16px;font-size:10.5px;color:{K.GRAY}">Örnek işletmeler; telefon BOYDE LABS'in. NFC'li
         akıllı telefonların çoğunda çalışır; QR'lı isimliklerimizle aynı sayfayı açar.</p>""", dark=True, no=no))
     no += 1
 
-    kolaj = "".join(f'<img src="{foto(f"{k}_iki.jpg", 500, kesit(os.path.join(PR.FOTO, f"{k}_iki.jpg"), 1.0))}" '
+    kolaj = "".join(f'<img src="{foto(f"{k}_iki.jpg", 500, kadraj(os.path.join(PR.FOTO, f"{k}_iki.jpg"), 1.0))}" '
                     f'style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block">'
                     for k in ("f3", "b2", "n2", "o3", "r2", "b4"))
     paket = [("Hediye paketi", "Tek ürün, tek renk: randevu sonrası küçük bir teşekkür."),
