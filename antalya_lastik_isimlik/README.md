@@ -2,7 +2,11 @@
 
 - **İsimlik:** QR'lı masa isimliği 9 × 12, Atölye uygulamasında yapıldı (`baski/isimlik_9x12_uzar1_m06_x2d_v2.3mf`):
   ANTALYA, OTO LASTİK TAMİRİ, 0542 831 41 07, QR (TARA).
-- **Sade, ortalı (v5, müşterinin seçtiği):** "müşteri sade tasarımı istedi ama yazıları biraz ortalayalım" →
+- **Sade, üst yazılar aşağıda (v6, son):** v5'e "beğenmedim, sade ve üstteki yazıları biraz alta al, böyle yazılar
+  karışmış" → `baski/isimlik_9x12_uzar1_m06_x2d_v6.3mf` (önden: `baski/onden_v6.png`).
+  - v2'de yalnız üst öbek (ANTALYA, OTO LASTİK TAMİRİ) 8 mm aşağı; HEMEN ARA ve telefon yerinde; öbekler arası 22 mm.
+  - `python3 scripts/isimlik_ortala.py baski/…_v2.3mf baski/…_v6.3mf --ust-in 8`
+- **Sade, ortalı (v5):** "müşteri sade tasarımı istedi ama yazıları biraz ortalayalım" →
   `baski/isimlik_9x12_uzar1_m06_x2d_v5.3mf` (önden: `baski/onden_v5.png`).
   - v2'nin sağ sütunu: üst öbek (ANTALYA, OTO LASTİK TAMİRİ) 16,4 mm aşağı, alt öbek (HEMEN ARA, telefon) 7,7 mm
     yukarı; aralarında 30 mm yerine 6 mm.

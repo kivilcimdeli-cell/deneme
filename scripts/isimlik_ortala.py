@@ -11,8 +11,12 @@ ortalayalım". Sağ sütunda iki öbek var: üstte ad ve iş türü (ANTALYA, OT
 
 Okuma yönü: u = y (soldan sağa), v = -x (aşağıdan yukarı).
 
+- `--ust-in N`: yalnız üst öbek N mm aşağı iner, alt öbek yerinde kalır (kullanıcı: "beğenmedim, sade ve üstteki
+  yazıları biraz alta al, böyle yazılar karışmış": iki öbeği yaklaştırmak yazıları birbirine karıştırdı).
+
 Kullanım:
   python3 scripts/isimlik_ortala.py <giriş.3mf> <çıkış.3mf> [--ara 8] [--sinir 18] [--onizleme önden.png]
+  python3 scripts/isimlik_ortala.py <giriş.3mf> <çıkış.3mf> --ust-in 7
     --sinir: sağ sütunun sol sınırı (u, mm); solundakiler (QR, TARA) kaymaz
 """
 import argparse
@@ -34,6 +38,7 @@ def main():
     ap.add_argument("cikis")
     ap.add_argument("--ara", type=float, default=8.0, help="iki öbek arası (mm)")
     ap.add_argument("--sinir", type=float, default=18.0)
+    ap.add_argument("--ust-in", type=float, default=None, help="yalnız üst öbeği bu kadar indir (mm)")
     ap.add_argument("--onizleme", default=None)
     a = ap.parse_args()
 
@@ -60,6 +65,10 @@ def main():
     tepe = orta + toplam / 2
     d_ust = tepe - ust.max()
     d_alt = (tepe - (ust.max() - ust.min()) - a.ara) - alt.max()
+    if a.ust_in is not None:                           # yalnız üst öbek iner
+        d_ust, d_alt = -a.ust_in, 0.0
+        tepe, toplam = ust.max() + d_ust, ust.max() + d_ust - alt.min()
+        a.ara = (ust.min() + d_ust) - alt.max()
     print(f"önce: üst öbek v {ust.min():.1f} … {ust.max():.1f}, alt öbek {alt.min():.1f} … {alt.max():.1f}, "
           f"ara {bosluk:.1f} mm; sol blok {v_sol.min():.1f} … {v_sol.max():.1f} (ortası {orta:.1f})")
     print(f"kayma: üst öbek {d_ust:+.1f} mm, alt öbek {d_alt:+.1f} mm → sütun {tepe - toplam:.1f} … {tepe:.1f}, "
