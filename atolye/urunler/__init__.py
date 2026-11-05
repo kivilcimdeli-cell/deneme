@@ -6,6 +6,7 @@ Bir eklentide olması gerekenler:
   KATALOG_ADET  katalogdaki örnek sayısı; 0: katalog yok, bilgiler girilince doğrudan üretilir
   ALANLAR       form: [{"ad", "etiket", "tur": text|tel|textarea|select|renk|dosya|sayi, "zorunlu", "ipucu",
                 "secenekler": [(değer, etiket)], "varsayilan", "grup"}]
+  KATEGORI      arayüzde bölümü: isimlik, guzellik, anahtarlik (yoksa "diger")
   ad(bilgiler)              müşteri listesinde görünen ad
   katalog(is_)              (KATALOG_ADET > 0) is_.no'lu kataloğu üretir; döner {"tasarimlar": [{"kod", "ad",
                             "ozellikler", "onizleme"}], "pdf", "sayfalar"}
@@ -40,4 +41,4 @@ def bul(kod):
 def tanim(m):
     """Arayüze giden ürün tanımı."""
     return {"kod": m.KOD, "ad": m.AD, "aciklama": m.ACIKLAMA, "katalog_adet": m.KATALOG_ADET,
-            "alanlar": m.ALANLAR, "simge": getattr(m, "SIMGE", "")}
+            "alanlar": m.ALANLAR, "simge": getattr(m, "SIMGE", ""), "kategori": getattr(m, "KATEGORI", "diger")}

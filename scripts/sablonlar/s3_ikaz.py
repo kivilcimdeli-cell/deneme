@@ -85,8 +85,8 @@ button{font:inherit;color:inherit}
   stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s,transform .15s}
 .tile:active .go{stroke:var(--ac);transform:translate(2px,-2px)}
 .tile b{display:block;font:800 16px/1.2 var(--ui);white-space:nowrap}
-.tile small{display:block;margin-top:3px;font-size:13px;line-height:1.3;color:var(--muted);overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
+.tile small{display:-webkit-box;margin-top:3px;font-size:13px;line-height:1.3;color:var(--muted);overflow:hidden;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 /* ---- ödeme ---- */
 .sec{display:flex;align-items:center;gap:12px;margin:40px 0 14px;font:800 12px/1 var(--ui);letter-spacing:.32em;
   color:var(--muted)}

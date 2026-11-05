@@ -15,6 +15,7 @@ import os
 import re
 
 KOD = "kurumsal_10x20"
+KATEGORI = "isimlik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
 AD = "Kurumsal isimlik 10 × 20"
 SIMGE = "🪪"
 ACIKLAMA = ("200 × 100 mm kişiye özel isimlik: ad soyad, unvan, kurum; yazılar kabartma, QR dijital kartviziti açar, "

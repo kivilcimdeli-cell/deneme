@@ -47,7 +47,31 @@ def pencere():
         return None
     os.makedirs(PROFIL, exist_ok=True)
     return subprocess.Popen([exe, f"--app={ADRES}", f"--user-data-dir={PROFIL}", "--no-first-run",
-                             "--no-default-browser-check", "--window-size=1360,900"])
+                             "--no-default-browser-check", *pencere_boyu()])
+
+
+def calisma_alani():
+    """Ekranın görev çubuğu dışında kalan alanı (x, y, en, boy; ölçekli piksel) ya da None (Windows dışı)."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        r = wintypes.RECT()
+        if ctypes.windll.user32.SystemParametersInfoW(0x30, 0, ctypes.byref(r), 0):     # SPI_GETWORKAREA
+            return r.left, r.top, r.right - r.left, r.bottom - r.top
+    except Exception:                                    # noqa: BLE001
+        pass
+    return None
+
+
+def pencere_boyu():
+    """Pencere ekrana sığsın: büyütülmüş açılır; boyu da çalışma alanından büyük olmaz (eskiden 1360 × 900 sabitti,
+    768 ya da ölçekli 864 piksellik ekranlarda altı görev çubuğunun altında kalıyor, çekmecenin Kaydet düğmesi
+    görünmüyordu)."""
+    alan = calisma_alani()
+    if not alan:
+        return ["--start-maximized"]
+    x, y, w, h = alan
+    return ["--start-maximized", f"--window-position={x},{y}", f"--window-size={min(w, 1360)},{min(h, 900)}"]
 
 
 def uyari(metin):

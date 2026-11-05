@@ -90,8 +90,8 @@ button{font:inherit;color:inherit}
 .row .ib{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:rgba(var(--ac-rgb),.12)}
 .row .ic{width:21px;height:21px;fill:var(--ac)}
 .row b{display:block;font:700 16px/1.25 var(--ui);white-space:nowrap}
-.row small{display:block;margin-top:2px;font-size:13.5px;line-height:1.3;color:var(--muted);overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
+.row small{display:-webkit-box;margin-top:2px;font-size:13.5px;line-height:1.3;color:var(--muted);overflow:hidden;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 .row .go{width:16px;height:16px;fill:none;stroke:var(--dim);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 /* ---- ödeme ---- */
 .sec{display:flex;align-items:center;gap:12px;margin:40px 0 14px;font:800 12px/1 var(--ui);letter-spacing:.3em;

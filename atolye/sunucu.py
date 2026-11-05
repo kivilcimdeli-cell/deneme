@@ -65,6 +65,17 @@ def _renkler(urun, istek):
     return out
 
 
+def _sayfa_adi_dogrula(u, b):
+    """Sayfa adresi 20 harften uzunsa kaydetmeden söylenir (eskiden kesilip '…lastikta' gibi kalıyordu)."""
+    if not any(a["ad"] == "site_adi" for a in u.ALANLAR):
+        return
+    from .site import sayfa_adi_hatasi
+    kaynak = b.get("marka") or b.get("isletme") or b.get("ad_soyad") or ""
+    hata = sayfa_adi_hatasi(b, kaynak)
+    if hata:
+        raise Hata(400, hata)
+
+
 def _musteri_tam(k):
     m = kayit.oku(k)
     m["isler"] = isler.musteri_isleri(k)
@@ -187,6 +198,7 @@ class Panel(BaseHTTPRequestHandler):
             eksik = _eksik(u, b)
             if eksik:
                 raise Hata(400, "Eksik: " + ", ".join(eksik))
+            _sayfa_adi_dogrula(u, b)
             m = kayit.olustur(u.KOD, b, u.ad(b))
             return _musteri_tam(m["kimlik"])
         if len(p) >= 2 and p[0] == "musteri":
@@ -212,6 +224,7 @@ class Panel(BaseHTTPRequestHandler):
             eksik = _eksik(u, b)
             if eksik:
                 raise Hata(400, "Eksik: " + ", ".join(eksik))
+            _sayfa_adi_dogrula(u, b)
             m["bilgiler"], m["ad"] = b, u.ad(b)
             kayit.not_ekle(m, "Bilgiler güncellendi")
             kayit.yaz(m)

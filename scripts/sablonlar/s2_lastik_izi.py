@@ -113,8 +113,8 @@ button{font:inherit;color:inherit}
 .tile .go{position:absolute;top:12px;right:11px;width:16px;height:16px;fill:none;stroke:var(--dim);stroke-width:2.2;
   stroke-linecap:round;stroke-linejoin:round}
 .tile b{display:block;font:700 italic 18px/1 var(--display);letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
-.tile small{display:block;margin-top:4px;font-size:12px;line-height:1.2;color:var(--muted);overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
+.tile small{display:-webkit-box;margin-top:4px;font-size:12px;line-height:1.2;color:var(--muted);overflow:hidden;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 .stars{display:flex;gap:1px;margin-top:5px}
 .stars svg{width:12px;height:12px;fill:var(--star)}
 /* ---- ödeme ---- */

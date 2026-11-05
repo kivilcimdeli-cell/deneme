@@ -35,6 +35,12 @@ const YOL = {
   cicek: "M9.10 7.40a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M4.73 10.58a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M6.40 15.72a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M11.80 15.72a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M13.47 10.58a2.9 2.9 0 1 0 5.8 0a2.9 2.9 0 1 0 -5.8 0M10.40 12.00a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0",
   cicekkart: "M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5ZM7.15 9.80a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M5.06 11.32a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M5.86 13.78a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M8.44 13.78a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M9.24 11.32a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M7.80 12.00a0.7 0.7 0 1 0 1.4 0a0.7 0.7 0 1 0 -1.4 0M13.5 10h4.5M13.5 13.5h3",
 };
+// ürün bölümleri (eklentideki KATEGORI): Yeni sipariş sayfasında başlıklar, Müşteriler'de süzgeç
+const KATEGORILER = [
+  ["isimlik", "Masa isimlikleri", "QR'lı işletme isimliği, kurumsal kişi isimliği, bayraklı isimlik"],
+  ["guzellik", "Güzellik koleksiyonu", "Kuaför, güzellik, tırnak, kirpik: çiçekli, el yazılı isimlikler"],
+  ["anahtarlik", "Anahtarlıklar", "Markalı toptan anahtarlık, plakalı anahtarlık"],
+  ["diger", "Diğer", ""]];
 const URUN_IKON = {isimlik_9x12: "qr", kurumsal_10x20: "kart", bayrakli: "bayrak", anahtarlik: "anahtar",
   plakali: "plaka", guzellik_9x12: "cicek", guzellik_10x20: "cicekkart"};
 const ikon = (ad, cls = "") => `<span class="ikon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -137,12 +143,17 @@ async function anaSayfa() {
     "bu ay çalışılan"], ["kup", rows.filter(r => r.cikti).length, "baskı dosyası hazır"]];
   sayfa.innerHTML = baslik("Yeni sipariş", "Ürünü seçin. Müşteri bilgilerinden sonra katalog ya da baskı dosyası hazırlanır.") + `
     <div class="ozet">${ozet.map(([i, n, t]) => `<div class="kart">${ikon(i)}<div><b>${n}</b><span>${t}</span></div></div>`).join("")}</div>
-    <div class="bolum urunler">${URUNLER.map(u => `
-      <a class="kart urun" href="#/yeni/${u.kod}">
-        <span class="urun-ikon">${ikon(URUN_IKON[u.kod])}</span><h2>${esc(u.ad)}</h2>
-        <p>${esc(u.aciklama)}</p>
-        <span class="urun-alt"><span class="cip">${u.katalog_adet ? `${u.katalog_adet} tasarımlık katalog` : "Doğrudan 3MF"}</span>
-          ${ikon("ok", "ok")}</span></a>`).join("")}</div>
+    ${KATEGORILER.map(([kk, kad, kalt]) => {
+      const us = URUNLER.filter(u => (u.kategori || "diger") === kk);
+      return us.length ? `<section class="bolum kategori"><div class="kategori-bas"><h2>${esc(kad)}</h2>
+        ${kalt ? `<span class="soluk kucuk">${esc(kalt)}</span>` : ""}</div>
+        <div class="urunler">${us.map(u => `
+        <a class="kart urun" href="#/yeni/${u.kod}">
+          <span class="urun-ikon">${ikon(URUN_IKON[u.kod])}</span><h2>${esc(u.ad)}</h2>
+          <p>${esc(u.aciklama)}</p>
+          <span class="urun-alt"><span class="cip">${u.katalog_adet ? `${u.katalog_adet} tasarımlık katalog` : "Doğrudan 3MF"}</span>
+            ${ikon("ok", "ok")}</span></a>`).join("")}</div></section>` : "";
+    }).join("")}
     <div class="bolum"><div class="kart-baslik"><h2>Son müşteriler</h2>
       ${rows.length ? `<a class="dugme ince kucuk" href="#/musteriler">Hepsi ${ikon("ok")}</a>` : ""}</div>
       ${listeHtml(rows.slice(0, 5))}</div>`;
@@ -153,12 +164,14 @@ async function musteriler() {
   const rows = await api("musteriler");
   sayfa.innerHTML = baslik("Müşteriler", `${rows.length} kayıt · ${esc(DURUM.veri || "")}`) + `
     <div class="arac-cubugu"><div class="arama">${ikon("ara")}<input id="ara" placeholder="Ad ya da ürün ara…"></div>
-      <div class="suzgec">${[["", "Tümü"], ...URUNLER.map(u => [u.kod, u.ad])].map(([k, a]) =>
+      <div class="suzgec">${[["", "Tümü"], ...KATEGORILER.filter(([kk]) => URUNLER.some(u => (u.kategori || "diger") === kk))
+        .map(([kk, kad]) => [kk, kad])].map(([k, a]) =>
         `<button data-urun="${k}" class="${SUZGEC === k ? "etkin" : ""}">${esc(a)}</button>`).join("")}</div></div>
     <div id="liste"></div>`;
   const ciz = () => {
     const q = $("#ara").value.toLocaleLowerCase("tr");
-    $("#liste").innerHTML = listeHtml(rows.filter(r => (!SUZGEC || r.urun === SUZGEC) &&
+    const kat = kod => (URUNLER.find(u => u.kod === kod) || {}).kategori || "diger";
+    $("#liste").innerHTML = listeHtml(rows.filter(r => (!SUZGEC || kat(r.urun) === SUZGEC) &&
       (r.ad + " " + urunAdi(r.urun)).toLocaleLowerCase("tr").includes(q)), rows.length ? "Aramaya uyan müşteri yok." : "Henüz müşteri yok.");
   };
   $("#ara").oninput = ciz;
@@ -186,13 +199,20 @@ function alanHtml(a, deger) {
     ${a.ipucu ? `<span class="ipucu">${esc(a.ipucu)}</span>` : ""}</label>`;
 }
 
-function formHtml(u, bilgiler = {}) {                     // alan grupları ayrı kartlarda
+function formHtml(u, bilgiler = {}) {          // alan grupları ayrı kartlarda; ilki açık, öbürleri katlanır
   const bolumler = [];
   for (const a of u.alanlar) {
-    if (!bolumler.length || (a.grup && a.grup !== bolumler.at(-1).ad)) bolumler.push({ad: a.grup || "Bilgiler", h: ""});
-    bolumler.at(-1).h += alanHtml(a, bilgiler[a.ad]);
+    if (!bolumler.length || (a.grup && a.grup !== bolumler.at(-1).ad))
+      bolumler.push({ad: a.grup || "Bilgiler", h: "", ac: false, dolu: 0});
+    const b = bolumler.at(-1);
+    b.h += alanHtml(a, bilgiler[a.ad]);
+    if (a.zorunlu) b.ac = true;                     // zorunlu alanı olan bölüm kapanmaz (form doğrulaması görünsün)
+    if (bilgiler[a.ad] && String(bilgiler[a.ad]) !== String(a.varsayilan ?? "")) b.dolu += 1;
   }
-  return bolumler.map(b => `<section class="kart form-bolum"><h3>${esc(b.ad)}</h3><div class="alanlar">${b.h}</div></section>`).join("");
+  return bolumler.map((b, i) => `<details class="kart form-bolum" ${i === 0 || b.ac || b.dolu ? "open" : ""}>
+    <summary><h3>${esc(b.ad)}</h3><span class="soluk kucuk">${b.dolu ? `${b.dolu} alan dolu`
+      : i ? "isteğe bağlı · açmak için tıklayın" : ""}</span>${ikon("sag", "ac-kapa")}</summary>
+    <div class="alanlar">${b.h}</div></details>`).join("");
 }
 
 function formOku(form, u) {
@@ -241,24 +261,37 @@ addEventListener("keydown", e => { if (e.key === "Escape") cekmeceKapat(); });
 
 function cekmeceAc(k, m, u) {
   const c = $("#cekmece");
+  const son = m.secimler.at(-1) || {};
+  const sonKod = son.kod || "";
+  const yeniden = u.katalog_adet ? !!sonKod : m.ciktilar.length > 0;   // üretilmiş bir tasarım varsa
+  const uretDugme = (form) => yeniden ? `<button type="submit"${form ? ' form="duzen-form"' : ""} data-uret="1">
+    ${ikon("kup")}Kaydet ve yeniden üret${sonKod ? ` (${esc(sonKod)})` : ""}</button>` : "";
   c.innerHTML = `<div class="cekmece">
     <div class="cekmece-bas"><div><p class="soluk kucuk">${esc(m.ad)} · ${esc(u.ad)}</p><h2>Bilgileri düzenle</h2></div>
       <button class="ince simge-dugme" id="cekmece-kapat" title="Kapat (Esc)">${ikon("kapat")}</button></div>
-    <form id="duzen-form">${formHtml(u, m.bilgiler)}</form>
+    <form id="duzen-form">${formHtml(u, m.bilgiler)}
+      <div class="form-sonu"><button class="vurgu" type="submit">${ikon("tik")}Kaydet</button>${uretDugme(false)}</div></form>
     <div class="cekmece-alt"><button class="vurgu" type="submit" form="duzen-form">${ikon("tik")}Kaydet</button>
-      <button class="ince" id="cekmece-vazgec">Vazgeç</button>
-      <span class="soluk kucuk" style="margin-left:auto;align-self:center">Sonraki katalog ve üretimde kullanılır.</span></div></div>`;
+      ${uretDugme(true)}<button class="ince" id="cekmece-vazgec">Vazgeç</button>
+      <span class="soluk kucuk cekmece-ipucu">${yeniden
+        ? "Yeniden üretince 3MF ve sayfa yeni bilgilerle yenilenir." : "Sonraki katalog ve üretimde kullanılır."}</span></div></div>`;
   c.hidden = false;
   c.onclick = e => { if (e.target === c) cekmeceKapat(); };
   $("#cekmece-kapat").onclick = $("#cekmece-vazgec").onclick = cekmeceKapat;
   $("#duzen-form").onsubmit = async e => {
     e.preventDefault();
+    const uret = e.submitter && e.submitter.dataset.uret;
+    $$("#cekmece button[type=submit]").forEach(b => (b.disabled = true));
     try {
       const {b, dosyalar} = formOku(e.target, u);
       await api(`musteri/${encodeURIComponent(k)}/bilgi`, {bilgiler: b});
       await dosyalariYukle(k, dosyalar);
-      cekmeceKapat(); bildir("Bilgiler kaydedildi"); musteriSayfasi(k);
-    } catch (err) { bildir(err.message, true); }
+      if (uret) await api(`musteri/${encodeURIComponent(k)}/uret`, {kod: sonKod, renkler: son.renkler || {}});
+      cekmeceKapat(); bildir(uret ? "Kaydedildi; dosyalar yeniden üretiliyor" : "Bilgiler kaydedildi"); musteriSayfasi(k);
+    } catch (err) {
+      bildir(err.message, true);
+      $$("#cekmece button[type=submit]").forEach(b => (b.disabled = false));
+    }
   };
 }
 
@@ -340,13 +373,23 @@ async function musteriSayfasi(k, sessiz) {
       <button class="vurgu" id="uret" ${!sec || aktif ? "disabled" : ""}>${ikon("kup")}Baskı dosyalarını üret</button></div>
     ${renkSec ? `<div class="renkler"><span>Renkleri değiştir (isteğe bağlı):</span>${renkSec}</div>` : ""}</div>`;
 
-  // en yeni üretim üstte; aynı üretimde eklentinin sırası (3MF önce)
-  const ciktilar = m.ciktilar.map((c, i) => [c, i]).sort((a, b) => (b[0].tarih || "").localeCompare(a[0].tarih || "")
-    || a[1] - b[1]).map(([c]) => `
+  // gruplar: baskı dosyaları, web sayfası, Claude; her grupta en yeni üstte (aynı üretimde eklentinin sırası)
+  const grupAd = c => c.yol.startsWith("web/") ? "web" : c.ad.startsWith("Claude") ? "claude" : "baski";
+  const GRUPLAR = [["baski", "Baskı dosyaları", "kup"], ["web", "Web sayfası", "qr"], ["claude", "Claude'un yaptıkları", "yildiz"]];
+  const ciktiSatir = c => `
     <div class="cikti">${c.tur === "resim" ? `<img src="${dosyaUrl(k, c.yol)}" alt="">` : `<span class="tur t-${esc(c.tur)}">${esc(c.tur)}</span>`}
       <div class="ad"><b title="${esc(c.yol)}">${esc(c.ad)}</b><span>${once(c.tarih)}</span></div>
       <div class="satir"><a class="dugme ince kucuk simge-dugme" href="${dosyaUrl(k, c.yol)}" target="_blank" title="Aç">${ikon("ac")}</a>
-        <a class="dugme kucuk simge-dugme" href="${dosyaUrl(k, c.yol, 1)}" title="İndir">${ikon("indir")}</a></div></div>`).join("");
+        <a class="dugme kucuk simge-dugme" href="${dosyaUrl(k, c.yol, 1)}" title="İndir">${ikon("indir")}</a></div></div>`;
+  const sirali = m.ciktilar.map((c, i) => [c, i]).sort((a, b) => (b[0].tarih || "").localeCompare(a[0].tarih || "")
+    || a[1] - b[1]).map(([c]) => c);
+  const yayin = (m.notlar.slice().reverse().find(n => /Yayın: Cloudflare/.test(n.metin)) || {}).metin || "";
+  const ciktilar = GRUPLAR.map(([g, ad, ik]) => {
+    const cs = sirali.filter(c => grupAd(c) === g);
+    return cs.length ? `<div class="cikti-grup"><p class="grup-bas">${ikon(ik)}${esc(ad)}<span class="cip">${cs.length}</span></p>
+      ${cs.map(ciktiSatir).join("")}
+      ${g === "web" && yayin ? `<p class="soluk kucuk yayin">${esc(yayin.replace(/^Uyarı: /, ""))}</p>` : ""}</div>` : "";
+  }).join("");
   const notlar = m.notlar.slice().reverse();
   const gosterilen = GECMIS[k] ? notlar : notlar.slice(0, 6);
 
@@ -434,7 +477,12 @@ function uyarilar(m) {
   if (son < 0) return "";
   const u = [];
   for (let i = son - 1; i >= 0 && n[i].metin.startsWith("Uyarı"); i--) u.unshift(n[i]);
-  return u.length ? `<div class="uyari">${u.map(x => esc(x.metin.replace(/^Uyarı: /, "⚠ "))).join("<br>")}</div>` : "";
+  const bilgi = x => /^Uyarı: (Yayın: Cloudflare|PrusaSlicer kurulu değil)/.test(x.metin);   // her üretimde çıkan notlar
+  const asil = u.filter(x => !bilgi(x)), diger = u.filter(x => bilgi(x) && !/Yayın: Cloudflare/.test(x.metin));
+  const sat = x => esc(x.metin.replace(/^Uyarı: /, "⚠ "));
+  return (asil.length ? `<div class="uyari">${asil.map(sat).join("<br>")}</div>` : "") +
+    (diger.length ? `<details class="uyari bilgi-not"><summary>Bilgi notları (${diger.length})</summary>
+      ${diger.map(sat).join("<br>")}</details>` : "");
 }
 
 // ------------------------------------------------------------------ işler

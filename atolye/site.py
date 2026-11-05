@@ -25,11 +25,33 @@ HESAP = "qrsistem"
 EN_UZUN = 20                                            # sayfa adı: 4. sürüm QR'a sığsın (kare ≥ 0,9 mm)
 
 
-def sayfa_adi(metin):
-    """Türkçe harfler sadeleşir, yalnız a-z ve 0-9 (Cloudflare Worker adı)."""
+def _kelimeler(metin):
     from sablonlar.ortak import tr_upper
     s = tr_upper(metin).translate(str.maketrans("ÇĞİÖŞÜÂÎÛ", "CGIOSUAIU")).lower()
-    return re.sub(r"[^a-z0-9]+", "", s)[:EN_UZUN] or "isletme"
+    return [w for w in re.split(r"[^a-z0-9]+", s) if w]
+
+
+def sayfa_adi(metin):
+    """Türkçe harfler sadeleşir, yalnız a-z ve 0-9 (Cloudflare Worker adı). EN_UZUN'u aşan ad kelime sınırında kısalır
+    (07 Antalya Oto Lastik Tamiri → 07antalyaotolastik); tek kelime çok uzunsa kesilir."""
+    kel, out = _kelimeler(metin), ""
+    for w in kel:
+        if len(out + w) > EN_UZUN:
+            break
+        out += w
+    return out or "".join(kel)[:EN_UZUN] or "isletme"
+
+
+def sayfa_adi_hatasi(bilgiler, kaynak=""):
+    """Formdaki sayfa adresi (site_adi) EN_UZUN'dan uzunsa kayıtta gösterilecek hata (kesilip garip bir adres
+    olmasın); değilse None. kaynak: boş bırakılırsa kullanılacak ad (öneri için)."""
+    yazilan = (bilgiler.get("site_adi") or "").strip()
+    tam = "".join(_kelimeler(yazilan))
+    if len(tam) <= EN_UZUN:
+        return None
+    oneri = sayfa_adi(kaynak) if kaynak else sayfa_adi(yazilan)
+    return (f"Sayfa adresi en çok {EN_UZUN} harf olabilir (QR isimliğe sığsın diye): '{tam}' {len(tam)} harf. "
+            f"Daha kısa yazın (ör. '{oneri}') ya da boş bırakın (addan kısaltılır).")
 
 
 def sayfa_url(ad):
@@ -187,3 +209,46 @@ def _kisaltmalar(d):
     if kisa and kisa != h:
         yield dict(d, hizmet=kisa)
     yield {k: v for k, v in d.items() if k != "hizmet"}
+
+
+# ---------------------------------------------------------------- sayfayı yeniden üretmek (Claude'un özel istekleri)
+
+def yeniden(kimlik, sablon=0):
+    """Müşterinin sayfasını web/bilgiler.json'dan aynı şablonla (ya da `sablon` ile) yeniden üretir; çıktıları
+    müşterinin kaydına işler (aynı yoldakiler yenilenir). Claude'un sayfa değişikliği isteklerinde kullanılır:
+    bilgiler.json düzenlenir, sonra `python -m atolye.site <kimlik>`. Döner yap()'ın sonucu."""
+    from . import kayit, urunler
+    from .isci import Is
+    m = kayit.oku(kimlik)
+    is_ = Is(m)
+    yol = is_.yol("web", "bilgiler.json")
+    try:
+        with open(yol, encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, ValueError):
+        raise SystemExit("Bu müşterinin sayfası yok (web/bilgiler.json): önce baskı dosyalarını üretin.")
+    u = urunler.bul(m["urun"])
+    sonuc = yap(is_, d, sablon, guzellik=u.KOD.startswith("guzellik"))
+    m = kayit.oku(kimlik)
+    for c in sonuc["ciktilar"]:
+        c["tarih"] = kayit.simdi()
+    yeni = {c["yol"] for c in sonuc["ciktilar"]}
+    m["ciktilar"] = [c for c in m["ciktilar"] if c["yol"] not in yeni] + sonuc["ciktilar"]
+    for w in sonuc.get("uyarilar", []):
+        kayit.not_ekle(m, "Uyarı: " + w)
+    kayit.not_ekle(m, f"Sayfa yeniden üretildi (şablon {sonuc['sablon']} · {sonuc['sablon_ad']}): {sonuc['url']}")
+    kayit.yaz(m)
+    return sonuc
+
+
+if __name__ == "__main__":
+    from . import utf8_cikti
+    utf8_cikti()
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    n = int(sys.argv[sys.argv.index("--sablon") + 1]) if "--sablon" in sys.argv else 0
+    if n:
+        args = [a for a in args if a != str(n)]
+    s = yeniden(args[0], n)
+    print(f"Sayfa yeniden üretildi: şablon {s['sablon']} · {s['sablon_ad']} · {s['url']}")
+    for c in s["ciktilar"]:
+        print(f"  {c['yol']}")

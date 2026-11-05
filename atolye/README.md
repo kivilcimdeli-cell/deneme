@@ -16,9 +16,14 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 **Arayüz** (`atolye/arayuz/`):
 
 - **Sol menü:** Yeni sipariş, Müşteriler, İşler (süren iş sayısı), son müşteriler; altta Claude durumu ve sürüm.
+- **Bölümler:** ürünler Yeni sipariş sayfasında başlıklar altında (Masa isimlikleri, Güzellik koleksiyonu,
+  Anahtarlıklar; eklentideki `KATEGORI`), Müşteriler sayfasında aynı bölümlerle süzülür.
 - **Müşteri sayfası:** adımlar (Bilgiler → Katalog → Seçim → Baskı dosyaları), kataloglar sekmeli, altta yapışık
-  üretim çubuğu (kod, renk değişikliği); sağda çıktılar, Claude'a özel istek, geçmiş. **Bilgileri düzenle** sağdan
-  açılan panelde (Esc kapatır).
+  üretim çubuğu (kod, renk değişikliği); sağda çıktılar (Baskı dosyaları, Web sayfası, Claude'un yaptıkları),
+  Claude'a özel istek, geçmiş. **Bilgileri düzenle** sağdan açılan panelde (Esc kapatır): **Kaydet** ve, üretilmiş
+  tasarım varsa, **Kaydet ve yeniden üret** düğmeleri hem formun sonunda hem panelin altında.
+- **Form:** alan grupları katlanır kartlarda; ilki, zorunlu alanı olan ve dolu olanlar açık, öbürleri kapalı.
+- **Pencere:** ekranın görev çubuğu dışındaki alanına sığar, büyütülmüş açılır.
 - **Görünüm:** renkler marka paletinden; yazı tipleri uygulamayla gelir (Space Grotesk, Figtree; internet gerekmez).
 
 ## Kurulum (Windows)
@@ -153,6 +158,12 @@ daha büyük olsun", "arka yüze adres ekle".
 İstek bilgisayardaki Claude Code'a gider (tek seferlik iş: dosya düzenleme ve uygulamanın Python'uyla komutlar
 serbest), sonuç dosyaları müşterinin çıktılarına eklenir.
 
+- **Sayfa değişikliği** (ör. "Instagram adresini değiştir", "açıklamayı kısalt"): Claude `web/bilgiler.json`'u
+  düzenler ve sayfayı aynı şablonla yeniden üretir: `python -m atolye.site <kimlik> [--sablon N]`. Zip, önizleme ve
+  deneme dosyası aynı adla yenilenir, çıktılarda en üste çıkar.
+- **Algılama:** iş bitince `cikti/`, katalog ve `web/` (zip, önizleme, deneme) altında yeni ya da değişen dosyalar
+  çıktılara yazılır; hiçbiri yoksa geçmişe not düşülür.
+
 - **Gerekli:** komut satırındaki [Claude Code](https://claude.com/claude-code); Claude'un sohbet uygulaması yetmez.
   Windows'ta PowerShell'de `irm https://claude.ai/install.ps1 | iex`, sonra yeni pencerede `claude` ile bir kez giriş.
 - **Bulma:** PATH, Windows'un güncel PATH'i (kayıt defteri) ve bilinen kurulum yerleri (`~/.local/bin`, npm, winget)
@@ -179,11 +190,13 @@ Veri klasörü kişisel bilgi içerir ve git'e girmez. Yedeği elle alınır.
 ## Yeni ürün eklemek
 
 `atolye/urunler/<ad>.py` yazılır ve `atolye/urunler/__init__.py`'deki `SIRA` listesine eklenir. Eklentinin arayüzü
-o dosyanın başında anlatılıyor: `KOD`, `AD`, `ACIKLAMA`, `KATALOG_ADET`, `ALANLAR`, `ad()`, `katalog()`, `uret()`.
+o dosyanın başında anlatılıyor: `KOD`, `KATEGORI`, `AD`, `ACIKLAMA`, `KATALOG_ADET`, `ALANLAR`, `ad()`, `katalog()`,
+`uret()`.
 
 Ortak parçalar `atolye/tasarim/` altında:
 
 - `ortak.py`: renkler, kabartma yazı, simgeler, QR, kontroller.
 - `katalog.py`: A4 katalog sayfaları.
 - `logo.py`: logo izleme.
-- `atolye/site.py`: web sayfası.
+- `atolye/site.py`: web sayfası. Sayfa adresi (`site_adi`) en çok 20 harf (QR isimliğe sığsın diye); uzunsa
+  kaydederken önerili bir hata verilir, boşsa addan kelime sınırında kısaltılır.

@@ -1,6 +1,8 @@
 """Claude köprüsü: algoritmanın karşılamadığı özel istekler ("logo daha büyük olsun", "arka yüze adres ekle")
 bilgisayardaki Claude Code'a (claude CLI) tek seferlik iş olarak gider. Claude depoda (scripts/, atolye/) çalışır,
-müşterinin klasörüne yazar; iş bitince klasöre eklenen yeni dosyalar müşterinin çıktılarına kaydedilir.
+müşterinin klasörüne yazar; iş bitince cikti/, katalog ve web/ altında yeni ya da değişen dosyalar müşterinin
+çıktılarına kaydedilir (sayfa değişikliği: web/bilgiler.json düzenlenip `python -m atolye.site <kimlik>` ile sayfa
+aynı şablonla yeniden üretilir; zip, önizleme ve deneme dosyası aynı adla yenilenir, çıktılarda en üste çıkar).
 
 Kurulum (bir kez): Claude Code'u kurun ve oturum açın (https://claude.com/claude-code). Komut `claude` yolda değilse
 BOYDE_CLAUDE ortam değişkenine tam yolunu yazın.
@@ -67,7 +69,14 @@ Mevcut çıktılar: {', '.join(c['yol'] for c in m.get('ciktilar', [])) or '-'}
 İstek: {istek}
 
 Kurallar:
-- Sonuç dosyalarını müşterinin klasöründe cikti/ altına yaz (eski dosyanın üstüne değil, yeni adla: ..._v2.3mf).
+- Baskı dosyası (3MF, önizleme) değişikliği: sonuç dosyalarını müşterinin klasöründe cikti/ altına yaz (eski dosyanın
+  üstüne değil, yeni adla: ..._v2.3mf).
+- Web sayfası (QR'ın açtığı sayfa) değişikliği: {klasor}/web/bilgiler.json'u düzenle (alanlar: isletme, marka, hizmet,
+  telefon, whatsapp, whatsapp_mesaj, instagram, google, harita, konum, web, aciklama, etiket, renk, iban...), sonra
+  sayfayı aynı şablonla yeniden üret: `{PYTHON} -m atolye.site {m['kimlik']}` (şablonu değiştirmek istenirse sonuna
+  `--sablon N`). Zip, sayfa_onizleme.png ve sayfa_deneme.html web/ altında yenilenir ve çıktılara kendiliğinden
+  eklenir; zip'i elle başka yere koyma. Şablonun düzenini bu müşteri için değiştirme (CLAUDE.md: yalnız renk,
+  etiket, açıklama, bağlantılar, logo işareti); düzen hatası varsa scripts/sablonlar/ altında düzelt.
 - Depodaki üreticileri kullan (scripts/, atolye/urunler/); baskıya uygunluk kontrollerini (QR okuma, harf içi ve ara)
   atlama. Renk paletini ve marka kurallarını (CLAUDE.md) koru.
 - Python: {PYTHON} (uygulamanın kendi Python'u; paketler bunda). Betikleri bununla, uygulama klasöründe ({KOK})
@@ -77,12 +86,39 @@ Kurallar:
 """
 
 
+def _durum(klasor):
+    """Klasördeki dosyalar: {göreli yol: (değişme zamanı, boy)}."""
+    out = {}
+    for d, _, fs in os.walk(klasor):
+        for f in fs:
+            p = os.path.join(d, f)
+            try:
+                st = os.stat(p)
+            except OSError:
+                continue
+            out[os.path.relpath(p, klasor).replace(os.sep, "/")] = (st.st_mtime_ns, st.st_size)
+    return out
+
+
+def _cikti_mi(rel):
+    """Çıktı sayılan dosyalar: cikti/ ve katalog klasörlerindekiler; web/ altında yalnız sayfanın zip'i, önizlemesi,
+    deneme dosyası ve turu (web/site/ iç dosyaları, bilgiler.json, logo değil)."""
+    if rel.endswith((".json", ".tmp", ".log", ".npz")):
+        return False
+    if rel.startswith(("cikti/", "katalog")):
+        return True
+    if rel.startswith("web/") and rel.count("/") == 1:
+        ad = rel[4:]
+        return ad.endswith("_site.zip") or ad in ("sayfa_onizleme.png", "sayfa_deneme.html", "sayfa_tur.gif")
+    return False
+
+
 def main():
     utf8_cikti()
     kimlik, istek = sys.argv[1], sys.argv[2]
     m = kayit.oku(kimlik)
     klasor = kayit.klasor(kimlik)
-    once = {os.path.join(d, f) for d, _, fs in os.walk(klasor) for f in fs}
+    once = _durum(klasor)
     print("@@ 5 Claude çalışıyor (bu iş birkaç dakika sürebilir)", flush=True)
     cli = bul()
     onek = ["cmd", "/c"] if cli.lower().endswith((".cmd", ".bat")) else []   # Windows'ta npm kurulumu claude.cmd
@@ -95,14 +131,20 @@ def main():
     if p.returncode:
         print(p.stderr)
         sys.exit(p.returncode)
-    yeni = sorted({os.path.join(d, f) for d, _, fs in os.walk(klasor) for f in fs} - once)
-    m = kayit.oku(kimlik)
-    for y in yeni:
-        rel = os.path.relpath(y, klasor).replace(os.sep, "/")
-        if rel.startswith(("cikti/", "katalog")) and not rel.endswith((".json", ".tmp")):
-            tur = "resim" if rel.lower().endswith((".png", ".jpg", ".jpeg")) else rel.rsplit(".", 1)[-1]
+    sonra = _durum(klasor)
+    m = kayit.oku(kimlik)                                  # atolye.site çıktıları kaydetmiş olabilir
+    eklenen = 0
+    for rel in sorted(r for r, v in sonra.items() if once.get(r) != v and _cikti_mi(r)):
+        tur = "resim" if rel.lower().endswith((".png", ".jpg", ".jpeg", ".gif")) else rel.rsplit(".", 1)[-1]
+        var = next((c for c in m["ciktilar"] if c["yol"] == rel), None)
+        if var:                                            # aynı adla yenilenen dosya: çıktılarda en üste
+            var["tarih"] = kayit.simdi()
+        else:
             m["ciktilar"].append({"ad": f"Claude: {os.path.basename(rel)}", "yol": rel, "tur": tur,
                                   "tarih": kayit.simdi()})
+        eklenen += 1
+    if not eklenen:
+        kayit.not_ekle(m, "Claude yeni ya da değişen bir çıktı dosyası bırakmadı (açıklamasına bakın)")
     ozet = p.stdout.strip().splitlines()[-3:]
     kayit.not_ekle(m, "Claude: " + " ".join(ozet)[:400])
     kayit.yaz(m)

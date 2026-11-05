@@ -10,6 +10,7 @@ altına inerse uyarı verilir (okunur ama küçük; iki satırlı tasarım ya da
   tabla.png               tabla yerleşimi (kontrol için)
 """
 KOD = "bayrakli"
+KATEGORI = "isimlik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
 AD = "Türk bayraklı masa isimliği"
 SIMGE = "🇹🇷"
 ACIKLAMA = "Çapraz blok 240 × 56 mm, kırmızı bayrak, siyah zeminde beyaz kabartma ad soyad, 12° eğik sehpa. Ad soyadı " \
