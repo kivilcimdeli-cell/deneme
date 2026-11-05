@@ -10,8 +10,9 @@ yerine kayar; baş harf kullanılmaz).
 Katalogda değişenler (öğrenmenin saydığı özellikler): düzen, zemin (siyah / beyaz), vurgu rengi, adın yazı tipi,
 simge türü. Her tasarım baskıya uygunluk denetiminden geçer (ortak.olc); geçemeyen katalogda gösterilmez.
 
-Lastik sektörü: simge lastik izi (İnce Oto Lastik'in sitesindeki diş baskısı; jantın yerine), katalogun yarısı
-simgesiz (YARI_SIMGESIZ) ve yalnız lastikte "Lastik izi" düzeni (eğik, uçları solan diş bandı; SEKTOR_DUZENI).
+Simgesi olan her sektörde katalogun yarısı simgesiz (standart), yarısı simgeli (YARI_SIMGESIZ, 5 + 5). Lastik
+sektörü: simge lastik izi (İnce Oto Lastik'in sitesindeki diş baskısı; jantın yerine) ve yalnız lastikte "Lastik izi"
+düzeni (eğik, uçları solan diş bandı; SEKTOR_DUZENI).
 """
 from dataclasses import dataclass, field
 
@@ -366,6 +367,15 @@ def l_cerceve(d, c, p, k):
     qr(d, c, p, 33.0, 50.0, 34.0, cerceve=True, tr=1.6)
 
 
+def _blok_is_turu(s):
+    """Renk bloktaki iş türü: sığarsa tek satır, sığmazsa kelimelerden en iyi ikiye bölünüş (eskiden maddeleri_diz
+    kelimeleri madde gibi dizip ikinci satıra sığmayanı düşürüyordu: OTO BAKIM SERVİSİ → OTO / BAKIM)."""
+    cc, tt = O.sigdir(O.SATIR, s, 4.4, 40.0, 0.8)
+    if len(s.split()) < 2 or O.genislik(O.SATIR, s, cc, tt) <= 40.0:
+        return [s]
+    return list(_iki_satir(s, 4.4, 40.0, 0.8))
+
+
 def l_blok(d, c, p, k):
     """Solda renkli blok: içinden oyma simge, ad ve iş türü; sağda çağrı, QR ve telefon (veteriner)."""
     cx = -30.0
@@ -377,8 +387,8 @@ def l_blok(d, c, p, k):
                        oyma=True)
     cuts = [txt]
     if c.hizmet:                                     # iş türü en çok iki satır (VETERİNER / KLİNİĞİ)
-        for r in O.maddeleri_diz(c.hizmet.split(), 4.4, 40.0, 2, tr=0.8):
-            cs, y = _koy(O.oyma(O.SATIR, " ".join(r), 4.4, cx, 0.0, "c", 0.8, 40.0, min_cap=O.MIN_BOY), y - 3.0)
+        for r in _blok_is_turu(c.hizmet):               # kelime düşmez (OTO BAKIM / SERVİSİ)
+            cs, y = _koy(O.oyma(O.SATIR, r, 4.4, cx, 0.0, "c", 0.8, 40.0, min_cap=O.MIN_BOY), y - 3.0)
             cuts.append(cs)
     if c.hizmetler and y > 27.0:
         cs, _ = _koy(O.oyma(O.SATIR, O.tr_upper(c.hizmetler[0]), 4.4, cx, 0.0, "c", 0.8, 40.0, min_cap=O.MIN_BOY),
@@ -389,7 +399,7 @@ def l_blok(d, c, p, k):
         b = A.union(*cuts).bounds()
         dy = 49.0 - (b[1] + b[3]) / 2
         cuts = [cs.translate((0.0, dy)) for cs in cuts]
-    d.gosterilen = len(cuts) - 1 - (len(O.maddeleri_diz(c.hizmet.split(), 4.4, 40.0, 2)) if c.hizmet else 0)
+    d.gosterilen = len(cuts) - 1 - (len(_blok_is_turu(c.hizmet)) if c.hizmet else 0)
     d.lines["blok yazısı"] = A.union(*cuts)
     d.add(None, block - A.union(*[cs for cs in [icon] + cuts if cs is not None]).offset(0.0, J), p.vurgu)
     cagri(d, c, p, 30.0, 80.0, align="c", max_w=44.0, tr=1.4)
@@ -508,7 +518,8 @@ DUZENLER = {
 # yalnız bazı sektörlerde gösterilen düzenler (öbürleri her sektörde)
 SEKTOR_DUZENI = {"lastik_izi": {"lastik"}}
 # katalogun yarısı simgesiz (standart), yarısı sektör simgeli olan sektörler: lastikte hepsi simgeli çıkıyordu
-YARI_SIMGESIZ = {"lastik"}
+# (önce yalnız lastik; kullanıcı: "diğer sektörlere de ekle": simgesi olan her sektör)
+YARI_SIMGESIZ = {k for k, v in SEKTORLER.items() if v[1] != "yok"}
 SIMGESIZ_DUZEN = {"lastik_izi", "serit"}               # simge çizmeyen düzenler: yalnız simgesiz sayılır
 ONE_CIKAN = {"lastik": "lastik_izi"}                   # sektörün katalogunda (gösterilmediyse) hep bulunan düzen
 
@@ -523,6 +534,8 @@ def simge_secenekleri(sektor, c, duzen):
     (simge çizmeyen düzende yalnız ["yok"]). Logo ya da simgesiz içerikte hep [""]."""
     if sektor not in YARI_SIMGESIZ or c.simge in ("logo", "monogram", "yok"):
         return [""]
+    if duzen == "serit" and c.simge == "direk":          # berberde şerit düzeni direği çizer: simgeli de olur
+        return ["", "yok"]
     return ["yok"] if duzen in SIMGESIZ_DUZEN else ["", "yok"]
 
 

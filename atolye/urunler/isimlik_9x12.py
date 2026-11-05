@@ -3,8 +3,8 @@
 Tasarımlar atolye/tasarim/isimlik9.py'deki 10 düzenden müşterinin bilgileriyle kurulur (ad, iş türü, hizmetler,
 telefon, sektör simgesi ya da logo). Katalogda her düzenden bir tasarım (yenilemede en çok iki), zemin, vurgu rengi
 ve yazı tipi öğrenmeye göre (beğenilenler öne çıkar, %30 keşif); bu müşteriye gösterilenler yeni katalogda tekrar
-edilmez. Her tasarım baskıya uygunluk denetiminden geçer; geçemeyen gösterilmez. Lastik sektöründe katalogun yarısı
-standart (simgesiz), yarısı lastik izi simgeli (5 + 5) ve "Lastik izi" düzeni (gösterilmediyse) hep bulunur.
+edilmez. Her tasarım baskıya uygunluk denetiminden geçer; geçemeyen gösterilmez. Simgesi olan sektörlerde katalogun
+yarısı standart (simgesiz), yarısı simgeli (5 + 5); lastikte "Lastik izi" düzeni (gösterilmediyse) hep bulunur.
 
 Seçilen kodla:
   cikti/isimlik_<ad>_<kod>_x2d.3mf   tablada iki takım (panel + sehpa), Bambu standart 0,20 mm, ütüleme ve destek
@@ -139,7 +139,7 @@ def _icerik(is_, b):
 
 def _adaylar(b, c, renkler):
     """[(imza, özellikler, (düzen, gövde, vurgu, vurgu2, yazı tipi, yazı rengi, simge))] ve renk uyarıları. simge ""
-    içeriğin simgesi, "yok" simgesiz (lastikte katalogun yarısı simgesiz: isimlik9.YARI_SIMGESIZ)."""
+    içeriğin simgesi, "yok" simgesiz (simgeli sektörlerde katalogun yarısı simgesiz: isimlik9.YARI_SIMGESIZ)."""
     from atolye.tasarim import isimlik9 as T
     from atolye.tasarim import ortak as O
     paletler, uyar = O.isimlik_paletleri(b, renkler, [O.BLACK, O.WHITE])
@@ -226,13 +226,19 @@ def katalog(is_):
         if ilk:
             sira = [ilk] + [i for i in sira if i != ilk]
     is_.ilerle(12, f"{len(adaylar)} aday sıralandı; tasarımlar kuruluyor ve denetleniyor")
-    kabul, denenen, denendi = [], 0, set()
+    kabul, denenen, denendi, gecemeyen = [], 0, set(), set()
+
+    def bicim(par):                                  # şekli belirleyen: düzen, yazı tipi, simge, koyu / açık zemin
+        return par["duzen"], par["yazi"], par.get("simge", ""), O.Palet(par["govde"], par["vurgu"]).koyu
+
     for tur, sinir in enumerate((en_cok, en_cok + 1)):  # bir düzen hiç geçemezse eksik yer ikinci turda dolar
         for imza in sira:
-            if len(kabul) >= KATALOG_ADET or denenen >= 36:
+            if len(kabul) >= KATALOG_ADET or denenen >= 60:
                 break
             par = _parametre(by[imza][2])
             if imza in denendi or sum(1 for _, _, d in kabul if d.duzen == par["duzen"]) >= sinir:
+                continue
+            if bicim(par) in gecemeyen:              # aynı şekil başka renkte de geçemez: denemeye sayılmaz
                 continue
             if yari and tur == 0 and sum(1 for _, p2, _ in kabul
                                          if p2.get("simge") == par.get("simge")) >= yarim:
@@ -242,6 +248,7 @@ def katalog(is_):
             d = _kur(c, par)
             sorun, _ = T.kontrol(d)
             if sorun:
+                gecemeyen.add(bicim(par))
                 continue
             kabul.append((imza, par, d))
             is_.ilerle(12 + 38 * len(kabul) / KATALOG_ADET, f"{len(kabul)} tasarım hazır ({denenen} denendi)")

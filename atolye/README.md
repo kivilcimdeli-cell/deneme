@@ -73,7 +73,9 @@ gerekmez; yönetici izni istemez.
   - Simge sektöre göre seçilir. Logo yüklenirse logo izlenip kabartma olur.
   - **Genel** sektörde simge yok, baş harf de konmaz; ad ve yazılar simgenin yerine kayar (blokta ortalanır).
   - İş türü en küçük boyda da tek satıra sığmıyorsa iki satır olur (OTO LASTİK / TAMİRİ).
-- **Lastik sektörü:** katalogun yarısı standart (simgesiz), yarısı simgeli: 5 + 5.
+- **Simgeli sektörler** (genel dışındaki hepsi): katalogun yarısı standart (simgesiz), yarısı simgeli: 5 + 5.
+  Logo yüklenirse hepsi logolu.
+- **Lastik sektörü:**
   - **Simge:** lastik izi. İnce Oto Lastik'in sitesindeki diş baskısının kısa bir parçası, 12° eğik: kırmızı ok
     dişleri, beyaz omuz blokları. Jant simgesi kaldırıldı (kullanıcı beğenmedi).
   - **Lastik izi düzeni** (yalnız lastikte, standartlardan biri olarak her ilk katalogda):

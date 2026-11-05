@@ -58,7 +58,16 @@ jobs:
       - name: Sürüm (indirme bağlantısı)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "atolye-$env:SURUM" dist\BOYDE_Atolye_Kurulum.exe
-          --target "${{ github.sha }}" --title "BOYDE Atölye $env:SURUM" --latest
-          --notes "Windows kurulum dosyası: BOYDE_Atolye_Kurulum.exe indirip çift tıklayın. Python ya da bat dosyası gerekmez; masaüstündeki BOYDE Atölye simgesiyle açılır. Müşteri kayıtları Belgeler\BOYDE Atolye klasöründe kalır."
+        # GitHub'ın sunucu hatasına karşı (24. derlemede yükleme HTTP 500 ile düştü) üç deneme; yarım kalan taslak
+        # her denemeden önce silinir
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $notlar = "Windows kurulum dosyası: BOYDE_Atolye_Kurulum.exe indirip çift tıklayın. Python ya da bat dosyası gerekmez; masaüstündeki BOYDE Atölye simgesiyle açılır. Müşteri kayıtları Belgeler\BOYDE Atolye klasöründe kalır."
+          for ($i = 1; $i -le 3; $i++) {
+            if ($i -gt 1) { gh release delete "atolye-$env:SURUM" --yes --cleanup-tag 2>&1 | Out-Host }
+            gh release create "atolye-$env:SURUM" dist\BOYDE_Atolye_Kurulum.exe --target "${{ github.sha }}" --title "BOYDE Atölye $env:SURUM" --latest --notes $notlar
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            Write-Host "Sürüm yüklenemedi (deneme $i); 30 sn sonra yeniden"
+            Start-Sleep -Seconds 30
+          }
+          exit 1
