@@ -2,7 +2,14 @@
 
 - **İsimlik:** QR'lı masa isimliği 9 × 12, Atölye uygulamasında yapıldı (`baski/isimlik_9x12_uzar1_m06_x2d_v2.3mf`):
   ANTALYA, OTO LASTİK TAMİRİ, 0542 831 41 07, QR (TARA).
-- **Lastik izi (v4, son):** "daha tasarımsal yap, İnce Oto Lastik'in internet sitesine yaptığımız tarzda" →
+- **Sade, ortalı (v5, müşterinin seçtiği):** "müşteri sade tasarımı istedi ama yazıları biraz ortalayalım" →
+  `baski/isimlik_9x12_uzar1_m06_x2d_v5.3mf` (önden: `baski/onden_v5.png`).
+  - v2'nin sağ sütunu: üst öbek (ANTALYA, OTO LASTİK TAMİRİ) 16,4 mm aşağı, alt öbek (HEMEN ARA, telefon) 7,7 mm
+    yukarı; aralarında 30 mm yerine 6 mm.
+  - Sütun soldaki QR + TARA bloğuyla aynı hizada: ANTALYA QR'ın üstüyle, telefon TARA'nın altıyla.
+  - QR, TARA, panel, sehpa ve baskı ayarları aynı; ağ kapalı, QR okunuyor.
+  - `python3 scripts/isimlik_ortala.py baski/…_v2.3mf baski/…_v5.3mf --ara 6`
+- **Lastik izi (v4):** "daha tasarımsal yap, İnce Oto Lastik'in internet sitesine yaptığımız tarzda" →
   `baski/isimlik_9x12_uzar1_m06_x2d_v4.3mf` (önden: `baski/onden_v4.png`).
   - İnce'nin sitesindeki lastik izi: ok biçimli dişler ve omuz blokları, 12° eğik, sağa doğru yükselir; sitede
     uçları maskeyle soluyor, burada dişler uçlara doğru küçülür.

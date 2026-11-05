@@ -176,6 +176,62 @@ def onizleme(parts, bilgi, ek, yol, s=10):
     im.save(yol)
 
 
+def yaz_3mf(z, obj_s, cfg, parts, bilgi, degisen, cikis):
+    """Değişen parçaların ağlarını ve üçgen sayılarını yazar, önizlemeleri (tabla, üstten, seçim) yeniden çizer;
+    öbür dosyalar (proje ayarları, filamentler) olduğu gibi kalır. Denetim: değişen ağlar kapalı, QR okunuyor."""
+    for no in degisen:                                 # nesne dosyası: yalnız değişen parçaların ağı
+        uuid = re.search(rf'<object id="{no}" p:UUID="([^"]+)"', obj_s).group(1)
+        obj_s = re.sub(rf'  <object id="{no}" .*?</object>\n', lambda _: mesh_xml(no, uuid, *parts[no]), obj_s,
+                       count=1, flags=re.S)
+        cfg = re.sub(rf'(<part id="{no}" .*?<mesh_stat face_count=")\d+', rf"\g<1>{len(parts[no][1])}", cfg,
+                     count=1, flags=re.S)
+    cfg = re.sub(r'<metadata face_count="\d+"/>', f'<metadata face_count="{sum(len(t) for _, t in parts.values())}"/>',
+                 cfg, count=1)
+
+    # önizlemeler (anahtarlik.write_design ile aynı)
+    items = re.findall(r'<item objectid="\d+"[^>]*transform="([^"]+)"', z.read("3D/3dmodel.model").decode())
+    inst = []
+    for tf in items:
+        m = [float(x) for x in tf.split()]
+        inst.append((m[9], m[10], float(np.degrees(np.arctan2(m[1], m[0])))))
+    shaded = [(parts[no][0], parts[no][1], renk(ad)) for no, ad, _ in bilgi]
+    world = [(placed(V, *i), T, c) for i in inst for V, T, c in shaded]
+    pick = [(placed(V, *i), T, (PICK_ID + n, 0, 0)) for n, i in enumerate(inst) for V, T, _ in shaded]
+    plate = render(world, 512, R_ISO)
+    images = {
+        "Metadata/plate_1.png": plate,
+        "Metadata/plate_1_small.png": plate.resize((128, 128), Image.LANCZOS),
+        "Metadata/plate_no_light_1.png": render(world, 512, R_ISO, light=False),
+        "Metadata/pick_1.png": render(pick, 512, R_ISO, light=False, ss=1),
+        "Metadata/top_1.png": render(world, 512, R_TOP, flat=0.7, margin=0.2),
+    }
+    with zipfile.ZipFile(cikis, "w", zipfile.ZIP_DEFLATED) as out:
+        for info in z.infolist():
+            if info.filename == "3D/Objects/object_1.model":
+                data = obj_s.encode()
+            elif info.filename == "Metadata/model_settings.config":
+                data = cfg.encode()
+            elif info.filename in images:
+                buf = io.BytesIO()
+                images[info.filename].save(buf, "PNG")
+                data = buf.getvalue()
+            else:
+                data = z.read(info.filename)
+            out.writestr(info.filename, data)
+
+    from collections import Counter
+    acik = 0
+    for no in degisen:
+        kenar = Counter(tuple(sorted(e)) for a_, b_, c_ in parts[no][1] for e in ((a_, b_), (b_, c_), (c_, a_)))
+        acik += sum(1 for v in kenar.values() if v != 2)
+    import zxingcpp
+    top = images["Metadata/top_1.png"].convert("L")
+    qr = {r.text for r in zxingcpp.read_barcodes(top.resize((top.width * 2, top.height * 2), Image.NEAREST))}
+    print(f"ağ: açık kenar {acik}; QR (üstten): {', '.join(sorted(qr)) or 'OKUNMADI'}")
+    assert acik == 0 and qr, "ağ açık ya da QR okunmadı"
+    print("yazıldı:", cikis)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("giris")
@@ -237,58 +293,7 @@ def main():
     V, T = parts[hedef]
     parts[hedef] = (np.vstack([V, Vb]), np.vstack([T, Tb + len(V)]))
 
-    # nesne dosyası: yalnız hedef parçanın ağı değişir
-    uuid = re.search(rf'<object id="{hedef}" p:UUID="([^"]+)"', obj_s).group(1)
-    yeni_obj = re.sub(rf'  <object id="{hedef}" .*?</object>\n', lambda _: mesh_xml(hedef, uuid, *parts[hedef]),
-                      obj_s, count=1, flags=re.S)
-    # ayarlar: üçgen sayıları
-    yeni_cfg = re.sub(rf'(<part id="{hedef}" .*?<mesh_stat face_count=")\d+', rf"\g<1>{len(parts[hedef][1])}", cfg,
-                      count=1, flags=re.S)
-    yeni_cfg = re.sub(r'<metadata face_count="\d+"/>',
-                      f'<metadata face_count="{sum(len(t) for _, t in parts.values())}"/>', yeni_cfg, count=1)
-
-    # önizlemeler (anahtarlik.write_design ile aynı)
-    items = re.findall(r'<item objectid="\d+"[^>]*transform="([^"]+)"', z.read("3D/3dmodel.model").decode())
-    inst = []
-    for tf in items:
-        m = [float(x) for x in tf.split()]
-        inst.append((m[9], m[10], float(np.degrees(np.arctan2(m[1], m[0])))))
-    shaded = [(parts[no][0], parts[no][1], renk(ad)) for no, ad, _ in bilgi]
-    world = [(placed(V, *i), T, c) for i in inst for V, T, c in shaded]
-    pick = [(placed(V, *i), T, (PICK_ID + n, 0, 0)) for n, i in enumerate(inst) for V, T, _ in shaded]
-    plate = render(world, 512, R_ISO)
-    images = {
-        "Metadata/plate_1.png": plate,
-        "Metadata/plate_1_small.png": plate.resize((128, 128), Image.LANCZOS),
-        "Metadata/plate_no_light_1.png": render(world, 512, R_ISO, light=False),
-        "Metadata/pick_1.png": render(pick, 512, R_ISO, light=False, ss=1),
-        "Metadata/top_1.png": render(world, 512, R_TOP, flat=0.7, margin=0.2),
-    }
-
-    with zipfile.ZipFile(a.cikis, "w", zipfile.ZIP_DEFLATED) as out:
-        for info in z.infolist():
-            if info.filename == "3D/Objects/object_1.model":
-                data = yeni_obj.encode()
-            elif info.filename == "Metadata/model_settings.config":
-                data = yeni_cfg.encode()
-            elif info.filename in images:
-                buf = io.BytesIO()
-                images[info.filename].save(buf, "PNG")
-                data = buf.getvalue()
-            else:
-                data = z.read(info.filename)
-            out.writestr(info.filename, data)
-
-    # denetim: ağ kapalı, QR okunuyor
-    from collections import Counter
-    kenar = Counter(tuple(sorted(e)) for a_, b_, c_ in parts[hedef][1] for e in ((a_, b_), (b_, c_), (c_, a_)))
-    acik = sum(1 for v in kenar.values() if v != 2)
-    import zxingcpp
-    top = images["Metadata/top_1.png"].convert("L")
-    qr = {r.text for r in zxingcpp.read_barcodes(top.resize((top.width * 2, top.height * 2), Image.NEAREST))}
-    print(f"ağ: açık kenar {acik}; QR (üstten): {', '.join(sorted(qr)) or 'OKUNMADI'}")
-    assert acik == 0 and qr, "ağ açık ya da QR okunmadı"
-    print("yazıldı:", a.cikis)
+    yaz_3mf(z, obj_s, cfg, parts, bilgi, [hedef], a.cikis)
 
 
 if __name__ == "__main__":
