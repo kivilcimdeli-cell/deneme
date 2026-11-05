@@ -1,7 +1,7 @@
 """Kurumsal isimlik 10 × 20 (kişi): 10 tasarımlık katalog → seçilen kod → X2D 3MF ve dijital kartvizit sayfası.
 
 Tasarımlar atolye/tasarim/isimlik20.py'deki 10 düzenden kişinin bilgileriyle kurulur: ad soyad, unvan, kurum,
-telefon, simge (sektör, logo ya da baş harfler). Panel 200 × 100 mm, gövde 5 mm, yazılar 2 mm kabartma, QR yüzeyle
+telefon, simge (sektör ya da logo; genelde simgesiz). Panel 200 × 100 mm, gövde 5 mm, yazılar 2 mm kabartma, QR yüzeyle
 aynı hizada; sehpa 170 mm gövde renginde (BOYDE B07 10 × 20 gibi). Uzun ad, unvan ya da kurumda ad küçülür; yine
 sığmazsa telefon isimlikten çıkar (sayfada kalır). Katalogda her düzenden bir tasarım (yenilemede en çok iki); gövde,
 renk ve yazı tipi öğrenmeye göre; bu kişiye gösterilenler tekrar edilmez; denetimden geçemeyen gösterilmez.
@@ -48,7 +48,7 @@ ALANLAR = [
      "ipucu": "İsimlikte (sığarsa) ve kartvizit sayfasında."},
     {"ad": "eposta", "etiket": "E-posta (sayfada)", "tur": "text", "ornek": "ad@kurum.com"},
     {"ad": "sektor", "etiket": "Sektör (simge ve renkler)", "tur": "select", "secenekler": _SEKTOR,
-     "varsayilan": "genel", "zorunlu": True, "ipucu": "Genel: kişinin baş harfleri."},
+     "varsayilan": "genel", "zorunlu": True, "ipucu": "Genel: simge yok, yalnız yazılar."},
     {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı", "tur": "text", "varsayilan": "KARTVİZİT"},
     {"ad": "zemin", "etiket": "Gövde rengi", "tur": "select", "varsayilan": "otomatik",
      "secenekler": [("otomatik", "Otomatik (siyah ve beyaz karışık)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")]},
@@ -121,9 +121,11 @@ def _adaylar(b, c, renkler):
     from atolye.tasarim import isimlik20 as T
     from atolye.tasarim import ortak as O
     paletler, uyar = O.isimlik_paletleri(b, renkler, [O.WHITE, O.BLACK])
-    simge = c.simge if c.simge in ("logo", "monogram") else "simge"
+    simge = c.simge if c.simge in ("logo", "monogram", "yok") else "simge"
     out = []
     for duzen, (_, _, fonts, _) in T.DUZENLER.items():
+        if duzen == "monogram" and c.simge == "yok":     # genel: baş harf yok
+            continue
         for g, y, v in paletler:
             oto = y == O.Palet(g, v).yazi                               # otomatik yazı rengi: eski imza
             for f in fonts:

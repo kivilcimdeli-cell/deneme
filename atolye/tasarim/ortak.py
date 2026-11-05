@@ -446,7 +446,7 @@ SIMGE = {
 SIMGE_AD = {"jant": "jant", "araba": "araba", "anahtar": "İngiliz anahtarı", "fincan": "fincan", "direk": "berber direği",
             "telefon": "telefon", "makas": "makas", "hilal": "hilal ve yıldız", "ev": "ev", "pirlanta": "pırlanta",
             "gozluk": "gözlük", "pati": "pati", "dambil": "dambıl", "dis": "diş", "yaprak": "yaprak",
-            "yildiz": "yıldız", "monogram": "baş harfler", "logo": "logo"}
+            "yildiz": "yıldız", "monogram": "baş harfler", "logo": "logo", "yok": "simgesiz"}
 
 
 def simge_kur(key, w, h):

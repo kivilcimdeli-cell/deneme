@@ -1,7 +1,7 @@
 """Toptan anahtarlık: müşterinin markasıyla 20 tasarımlık katalog → seçilen kod → X2D 3MF (dolu tabla ve tek deneme).
 
 Tasarımlar atolye/tasarim/anahtarlik.py'deki 8 biçimden (klasik, dikey, kare, bar, kesik köşe, kapsül, yuvarlak, bavul
-etiketi) ve 3 dizilimden (simge solda, simge üstte, yalnız ad) kurulur: ön yüz kabartma, arka yüz gömme yazı (telefon,
+etiketi) ve 3 dizilimden (simge solda, simge üstte, yalnız ad; genel sektörde simge yok, yalnız ad) kurulur: ön yüz kabartma, arka yüz gömme yazı (telefon,
 Instagram, adres...). Katalogda bir biçim en çok üç kez; gövde, renk ve yazı tipi öğrenmeye göre (beğenilenler öne
 çıkar, %30 keşif); bu müşteriye gösterilenler yeni katalogda tekrar edilmez. Ad bir biçime küçük kalıyorsa o biçim
 geri düşer, sığmıyorsa hiç gösterilmez; her tasarım baskıya uygunluk denetiminden geçer.
@@ -179,9 +179,11 @@ def katalog(is_):
     paletler, renk_uyar = _paletler(b, renkler)
     uyar += renk_uyar
     kal, adaylar = {}, []
-    simge = c.simge if c.simge in ("logo", "monogram") else "simge"
+    simge = c.simge if c.simge in ("logo", "monogram", "yok") else "simge"
     for bicim, (_, _, dizilimler) in K.BICIMLER.items():
         for dz in dizilimler:
+            if c.simge == "yok" and dz != "yazi":           # genel: simgesiz, yalnız ad
+                continue
             for f in YAZI_TIPLERI:
                 q = kal[(bicim, dz, f)] = _kalite_tahmini(c, bicim, dz, f)
                 if q < 0.45:

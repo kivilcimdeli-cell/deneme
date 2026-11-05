@@ -4,7 +4,8 @@ Yapı lastikçi isimlikleriyle aynı (scripts/uzar_isimlik_baski.py): panel 120 
 ve şekiller 2 mm kabartma, QR yüzeyle aynı hizada dolgu, 15° eğik sehpa (alt 7,5 mm sehpanın yuvasında).
 Düzenler boyde_sektor'deki örneklerden (telefoncu, berber, güzellik, kuaför, emlak, kuyumcu, optik, veteriner, spor)
 ve BOYDE B07'den (QR solda) genelleştirildi: ad uzunsa küçülür ya da iki satıra bölünür, iş türü ve hizmetler yer
-kaldıkça yazılır, simge sektöre göre (ya da müşterinin logosu, logo yoksa baş harfler).
+kaldıkça yazılır, simge sektöre göre ya da müşterinin logosu; genel sektörde simge yok (ad ve yazılar simgenin
+yerine kayar; baş harf kullanılmaz).
 
 Katalogda değişenler (öğrenmenin saydığı özellikler): düzen, zemin (siyah / beyaz), vurgu rengi, adın yazı tipi,
 simge türü. Her tasarım baskıya uygunluk denetiminden geçer (ortak.olc); geçemeyen katalogda gösterilmez.
@@ -19,7 +20,7 @@ GUVENLI = O.I.outline().offset(-3.0, J) ^ A.rect(-70, 9.5, 70, 100)    # sehpa a
 
 # sektör: (ad, simge, çağrı, vurgu renkleri — ilki en uygun)
 SEKTORLER = {
-    "genel": ("Genel (baş harfler)", "monogram", "HEMEN ARA", [ORANGE, RED, TURQ, GOLD, GREEN, BLUE]),
+    "genel": ("Genel (simgesiz)", "yok", "HEMEN ARA", [ORANGE, RED, TURQ, GOLD, GREEN, BLUE]),
     "lastik": ("Oto lastik", "jant", "HEMEN ARA", [RED, YELLOW, ORANGE, BLUE]),
     "oto": ("Oto servis, yıkama, kaporta", "araba", "HEMEN ARA", [RED, YELLOW, GOLD, TURQ, BLUE]),
     "usta": ("Usta, tamir, teknik servis", "anahtar", "HEMEN ARA", [ORANGE, YELLOW, RED, BLUE]),
@@ -46,7 +47,7 @@ class Icerik:
     telefon: str = ""
     cagri: str = "HEMEN ARA"
     qr_yazi: str = "TARA"
-    simge: str = "monogram"                      # ortak.SIMGE anahtarı, "logo" ya da "monogram"
+    simge: str = "yok"                           # ortak.SIMGE anahtarı, "logo", "monogram" ya da "yok" (simgesiz)
     logo: object = None                          # CrossSection (logo.izle), simge "logo" iken
     url: str = "https://boyde.qrsistem.workers.dev/"
 
@@ -66,8 +67,14 @@ def _koy(cs, y_ust):
 def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c", ust=None):
     """Simge (w × h) kutuya, ortası (cx, cy); hiza "l": sol kenarı cx'te. oyma: tek parça şekil döner (bant ya da
     bloktan oyulur); değilse eklenir, sınırı döner. Simgeler istenen boyda yeniden çizilir (çizgiler incelmez);
-    kutudan uzun kalırsa üstü UST'u geçmeyecek kadar aşağı iner."""
+    kutudan uzun kalırsa üstü UST'u geçmeyecek kadar aşağı iner. Simge "yok"sa (genel) hiçbir şey eklenmez: oymada
+    None, değilse simgenin üst sınırında sıfır boyutlu kutu döner (altına konan ad en üste çıkar)."""
     key = "makas" if c.simge == "direk" else c.simge           # direk uzun: yalnız şerit düzeninde
+    if key == "yok":
+        if oyma:
+            return None
+        t = (ust or UST) - 1.5
+        return (cx, t, cx, t)
     if key == "logo" and c.logo is not None:
         parts = [(O.temizle(cs), r) for cs, r in O.olcekle([(c.logo, "vurgu")], 0.0, 0.0, w, h)]
     elif key in O.SIMGE:
@@ -97,6 +104,8 @@ def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c", ust=None):
 def simge_eni(c, w, h):
     """Simge kutuya konunca eni (eklemeden): düzen adın yerini buna göre seçer."""
     key = "makas" if c.simge == "direk" else c.simge
+    if key == "yok":
+        return 0.0
     if key == "logo" and c.logo is not None:
         b = c.logo.bounds()
         return min(w, h * (b[2] - b[0]) / (b[3] - b[1]))
@@ -225,7 +234,11 @@ def l_yan_yana(d, c, p, k):
     """Simge solda üstte, yanında ad ve iş türü; çizgi, hizmetler, çağrı ve telefon; QR sağda (telefoncu). Ad
     simgenin yanına sığmazsa simge küçülür, iş türü yanına, ad altına boydan yazılır."""
     x = X0 + simge_eni(c, 18.0, 21.0) + 4.5
-    if ad_satirlari(c.marka, k, 11.0, 11.0 - x, 0.0, 6.5)[1] >= 6.5:
+    if c.simge == "yok":                                    # simgesiz: ad sol üstte, boydan
+        _, y, _ = ad_yaz(d, c, p, k, X0, 82.0, 12.5, 65.0, min_cap=6.5, cap2=9.0)
+        if c.hizmet:
+            y = satir(d, "iş türü", c.hizmet, X0, y - 3.0, 5.0, 65.0, "l", 1.6, p.vurgu)
+    elif ad_satirlari(c.marka, k, 11.0, 11.0 - x, 0.0, 6.5)[1] >= 6.5:
         ib = _simge(d, c, p, X0, 71.0, 18.0, 21.0, hiza="l")
         _, y, _ = ad_yaz(d, c, p, k, x, 81.5, 11.0, 11.0 - x, min_cap=6.5, cap2=8.0)
         if c.hizmet:
@@ -281,7 +294,10 @@ def l_zarif(d, c, p, k):
     """Simge ve zarif ad yan yana, iş türü geniş aralıklı; QR renkli çerçeveli (kuaför). Ad yanına sığmazsa simge
     küçülüp üste, ad altına boydan."""
     x = X0 + simge_eni(c, 14.0, 20.0) + 4.0
-    if ad_satirlari(c.marka, k, 15.0, 9.0 - x, 0.3, 9.0)[1] >= 9.0:
+    if c.simge == "yok":                                    # simgesiz: ad sol üstte, boydan
+        _, y, _ = ad_yaz(d, c, p, k, X0, 82.0, 15.0, 63.0, "l", 0.3, min_cap=9.0, cap2=10.0)
+        y -= 3.4
+    elif ad_satirlari(c.marka, k, 15.0, 9.0 - x, 0.3, 9.0)[1] >= 9.0:
         ib = _simge(d, c, p, X0, 72.0, 14.0, 20.0, hiza="l")
         _, y, _ = ad_yaz(d, c, p, k, x, 81.0, 15.0, 9.0 - x, "l", 0.3, min_cap=9.0, cap2=10.0)
         y = min(y, ib[1]) - 3.6
@@ -302,10 +318,10 @@ def l_bant(d, c, p, k):
     çağrı, telefon; QR sağ altta (emlak)."""
     band = A.rrect(112.0, 24.0, 4.0, 0.0, 73.0)
     icon = _simge(d, c, p, -50.0, 73.0, 16.0, 15.0, oyma=True, hiza="l")
-    x = icon.bounds()[2] + 4.0
+    x = icon.bounds()[2] + 4.0 if icon is not None else -50.0
     txt, _, _ = ad_yaz(d, c, p, k, x, 0.0, 9.0, 52.0 - x, "l", 0.6, min_cap=5.5, cap2=6.6, oyma=True, y_orta=73.0)
     d.lines["bant yazısı"] = txt
-    d.add(None, band - A.union(icon, txt).offset(0.0, J), p.vurgu)
+    d.add(None, band - A.union(*[cs for cs in (icon, txt) if cs is not None]).offset(0.0, J), p.vurgu)
     y = 57.6
     if c.hizmet:
         y = satir(d, "iş türü", c.hizmet, X0, y, 4.6, 66.0, "l", 0.8, p.vurgu) - 3.0
@@ -352,7 +368,9 @@ def l_blok(d, c, p, k):
     cx = -30.0
     block = A.rrect(48.0, 74.0, 5.0, cx, 49.0)
     icon = _simge(d, c, p, cx, 75.5, 22.0, 15.0, oyma=True)
-    txt, y, _ = ad_yaz(d, c, p, k, cx, icon.bounds()[1] - 3.4, 12.5, 40.0, "c", 0.5, min_cap=7.0, cap2=8.5,
+    yok = icon is None                               # simgesiz: ad büyür, yazılar blokta ortalanır
+    ust = icon.bounds()[1] - 3.4 if not yok else 80.0
+    txt, y, _ = ad_yaz(d, c, p, k, cx, ust, 14.0 if yok else 12.5, 40.0, "c", 0.5, min_cap=7.0, cap2=9.5,
                        oyma=True)
     cuts = [txt]
     if c.hizmet:                                     # iş türü en çok iki satır (VETERİNER / KLİNİĞİ)
@@ -361,12 +379,16 @@ def l_blok(d, c, p, k):
             cuts.append(cs)
     if c.hizmetler and y > 27.0:
         cs, _ = _koy(O.oyma(O.SATIR, O.tr_upper(c.hizmetler[0]), 4.4, cx, 0.0, "c", 0.8, 40.0, min_cap=O.MIN_BOY),
-                     22.0)
+                     y - 6.0 if yok else 22.0)
         if cs.bounds()[2] - cs.bounds()[0] <= 41.0:          # sığmayan madde bloktan taşmasın
             cuts.append(cs)
+    if yok:                                          # yazı öbeği bloğun ortasında
+        b = A.union(*cuts).bounds()
+        dy = 49.0 - (b[1] + b[3]) / 2
+        cuts = [cs.translate((0.0, dy)) for cs in cuts]
     d.gosterilen = len(cuts) - 1 - (len(O.maddeleri_diz(c.hizmet.split(), 4.4, 40.0, 2)) if c.hizmet else 0)
     d.lines["blok yazısı"] = A.union(*cuts)
-    d.add(None, block - A.union(icon, *cuts).offset(0.0, J), p.vurgu)
+    d.add(None, block - A.union(*[cs for cs in [icon] + cuts if cs is not None]).offset(0.0, J), p.vurgu)
     cagri(d, c, p, 30.0, 80.0, align="c", max_w=44.0, tr=1.4)
     qr(d, c, p, 30.0, 55.0, 38.0, yazi="")
     telefon(d, c, p, 30.0, 23.0, 4.8, "c", max_w=47.0)
@@ -432,7 +454,7 @@ def kalite(d, c):
 
 def ozellikler(d, c):
     return {"sablon": d.duzen, "zemin": O.AD[d.palet.govde], "renk": O.AD[d.palet.vurgu], "yazi": d.yazi_tipi,
-            "simge": c.simge if c.simge in ("logo", "monogram") else "simge"}
+            "simge": c.simge if c.simge in ("logo", "monogram", "yok") else "simge"}
 
 
 def ad(d):

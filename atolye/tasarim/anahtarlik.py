@@ -2,7 +2,7 @@
 
 Yapı BOYDE'nin toptan anahtarlıklarıyla aynı (scripts/boyde_anahtarlik_toptan.py):
   * gövde 3,2 mm; alt ve üst kenarda 3 katmanlık pah (ilk katman fil ayağı yapmaz)
-  * ön yüz: simge (sektör simgesi, logo ya da baş harfler) ve yazılar 0,8 mm (4 katman) KABARTMA
+  * ön yüz: simge (sektör simgesi ya da logo; genel sektörde simge yok) ve yazılar 0,8 mm (4 katman) KABARTMA
   * arka yüz: yazılar yüzeyle aynı hizada gömme renk (0,6 mm, tablaya bakan 3 katman): arkadan okunur, düz ve keskin
   * öğeler kenardan 1,5 mm, delikten 1,2 mm içeride; delik Ø5,2 mm, çevresinde en az 3,5 mm et
 Yazılar ve simge kutuya sığacak boyda yeniden dizilir (geometrik küçültme yok: harf arası ve noktalar korunur).
@@ -188,6 +188,8 @@ def _on(c, p, dizilim, yazi_tipi, kutu, uyar):
     W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
     renk = {"yazi": p.yazi, "vurgu": p.vurgu, "vurgu2": p.vurgu2 or p.vurgu}
     ad = O.ad_metni(c.marka, yazi_tipi)
+    if c.simge == "yok":                                 # genel: simgesiz, yalnız ad
+        dizilim = "yazi"
     sim, sw = None, 0.0
     if dizilim == "yan":
         sim = _simge(c, H * 0.62, min(H * 1.1, W * 0.3))

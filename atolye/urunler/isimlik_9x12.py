@@ -140,7 +140,7 @@ def _adaylar(b, c, renkler):
     from atolye.tasarim import isimlik9 as T
     from atolye.tasarim import ortak as O
     paletler, uyar = O.isimlik_paletleri(b, renkler, [O.BLACK, O.WHITE])
-    simge = c.simge if c.simge in ("logo", "monogram") else "simge"
+    simge = c.simge if c.simge in ("logo", "monogram", "yok") else "simge"
     out = []
     for duzen, (_, _, fonts) in T.DUZENLER.items():
         for g, y, v in paletler:

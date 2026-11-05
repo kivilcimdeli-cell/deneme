@@ -88,7 +88,7 @@ def _unvan(d, c, p, x, y, w, align="l", cap=5.6, tr=1.8):
 def l_klasik(d, c, p, k):
     """Solda simge, yanında ad, unvan, çizgi, kurum; altta telefon; QR sağda (avukat)."""
     ib = _simge(d, c, p, X0, 58.0, 24.0, 32.0, hiza="l", ust=UST)
-    x = ib[2] + 7.0
+    x = ib[2] + 7.0 if c.simge != "yok" else X0             # simgesiz: ad soldan
     w = 40.0 - x
     _, y, _ = ad_yaz(d, c, p, k, x, 88.0, 14.0, w, "l", 0.1, min_cap=9.0, cap2=10.5)
     y = _unvan(d, c, p, x, y - 4.0, w)
@@ -105,7 +105,7 @@ def l_blok(d, c, p, k):
     block = A.rrect(40.0, 80.0, 5.0, cx, 53.0)
     icon = _simge(d, c, p, cx, 74.0, 26.0, 24.0, oyma=True, ust=88.0)
     kelime = O.tr_upper(c.kurum).split() if c.kurum else []
-    cuts, y = [], icon.bounds()[1] - 4.0
+    cuts, y = [], (icon.bounds()[1] if icon is not None else 88.0) - 4.0
     satirlar = O.maddeleri_diz(kelime, 4.6, 32.0, 3, tr=0.8)
     for r in satirlar:
         cs = O.oyma(O.SATIR, " ".join(r), 4.6, cx, 0.0, "c", 0.8, 32.0, min_cap=O.MIN_BOY)
@@ -118,9 +118,12 @@ def l_blok(d, c, p, k):
     blokta = len(cuts) == len(satirlar) and sum(len(r) for r in satirlar) == len(kelime)
     if not blokta:
         cuts = []
+    if cuts and icon is None:                       # simgesiz: kurum bloğun ortasında
+        b = A.union(*cuts).bounds()
+        cuts = [cs.translate((0.0, 53.0 - (b[1] + b[3]) / 2)) for cs in cuts]
     if cuts:
         d.lines["blok yazısı"] = A.union(*cuts)
-    d.add(None, block - A.union(icon, *cuts).offset(0.0, J), p.vurgu)
+    d.add(None, block - A.union(*[cs for cs in [icon] + cuts if cs is not None]).offset(0.0, J), p.vurgu)
     x = -42.0
     w = 40.0 - x
     _, y, _ = ad_yaz(d, c, p, k, x, 86.0, 12.5, w, "l", 0.0, min_cap=9.0, cap2=11.0)
@@ -150,7 +153,11 @@ def l_monogram(d, c, p, k):
 def l_buyuk(d, c, p, k):
     """Üstte simge ve uzun çizgi; büyük harflerle geniş ad; unvan, kurum, telefon; QR sağda (mimar)."""
     ib = _simge(d, c, p, X0, 84.0, 22.0, 16.0, hiza="l", ust=UST)
-    d.add(None, O.bar(ib[2] + 5.0, 36.0, (ib[1] + ib[3]) / 2, 1.4), p.vurgu)
+    if c.simge == "yok":                                    # simgesiz: çizgi soldan, ad altında
+        d.add(None, O.bar(X0, 36.0, 89.0, 1.4), p.vurgu)
+        ib = (X0, 89.0, X0, 89.0)
+    else:
+        d.add(None, O.bar(ib[2] + 5.0, 36.0, (ib[1] + ib[3]) / 2, 1.4), p.vurgu)
     _, y, _ = ad_yaz(d, c, p, k, X0, ib[1] - 6.0, 13.0, 126.0, "l", 0.6, min_cap=8.0, cap2=9.5)
     y = _unvan(d, c, p, X0, y - 4.4, 126.0, cap=6.0, tr=2.4)
     y = _kurum(d, c, p, X0, y - 4.0, 126.0, cap=4.6, tr=1.0)
@@ -163,7 +170,7 @@ def l_alt_bant(d, c, p, k):
     (müdür)."""
     band = A.rrect(184.0, 21.0, 4.0, 0.0, 23.5)
     icon = _simge(d, c, p, -82.0, 23.5, 14.0, 12.0, oyma=True, hiza="l")
-    cuts = [icon]
+    cuts = [icon] if icon is not None else []
     yazilar = []
     tel_x0 = 84.0
     if c.telefon:
@@ -171,7 +178,7 @@ def l_alt_bant(d, c, p, k):
         yazilar.append(tel)
         tel_x0 = tel.bounds()[0]
     if c.kurum:
-        x = icon.bounds()[2] + 4.0
+        x = icon.bounds()[2] + 4.0 if icon is not None else -84.0
         w = tel_x0 - 6.0 - x
         rows = O.maddeleri_diz(O.tr_upper(c.kurum).split(), 4.6, w, 3, tr=1.0)
         if len(rows) > 2 or not rows:
@@ -218,12 +225,12 @@ def l_ust_bant(d, c, p, k):
     (danışman)."""
     band = A.rrect(184.0, 22.0, 4.0, 0.0, 82.0)
     icon = _simge(d, c, p, -86.0, 81.5, 16.0, 14.0, oyma=True, hiza="l")
-    x = icon.bounds()[2] + 5.0
+    x = icon.bounds()[2] + 5.0 if icon is not None else -84.0
     bant = c.kurum or c.hizmet
     yazilar = [O.oyma("mont", O.tr_upper(bant), 7.4, x, 82.0, "l", 0.8, 86.0 - x, min_cap=O.MIN_BOY)] if bant else []
     if yazilar:
         d.lines["bant yazısı"] = yazilar[0]
-    d.add(None, band - A.union(icon, *yazilar).offset(0.0, J), p.vurgu)
+    d.add(None, band - A.union(*[cs for cs in [icon] + yazilar if cs is not None]).offset(0.0, J), p.vurgu)
     _, y, _ = ad_yaz(d, c, p, k, -86.0, 64.0, 12.5, 131.0, "l", 0.2, min_cap=9.0, cap2=10.0)
     if c.kurum:
         y = _unvan(d, c, p, -86.0, y - 4.4, 131.0, cap=6.0, tr=1.0)

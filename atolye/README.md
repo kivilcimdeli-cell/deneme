@@ -66,6 +66,7 @@ gerekmez; yönetici izni istemez.
   - Ad uzunsa küçülür ya da iki satıra bölünür.
   - Hizmetler sığdığı kadar yazılır.
   - Simge sektöre göre seçilir. Logo yüklenirse logo izlenip kabartma olur.
+  - **Genel** sektörde simge yok, baş harf de konmaz; ad ve yazılar simgenin yerine kayar (blokta ortalanır).
 - **Web sayfası:** lastikçi tarzındaki 5 şablondan sıradaki kullanılır (kural `CLAUDE.md`'de).
   - Adres `https://<sayfa adı>.qrsistem.workers.dev/`. Isimlikteki QR bu adresi açar.
   - Zip, Cloudflare'de aynı adlı Worker'a elle yüklenir.
@@ -79,8 +80,8 @@ gerekmez; yönetici izni istemez.
 
 ### Kurumsal isimlik 10 × 20
 
-- **Tasarımlar:** 10 düzen (`atolye/tasarim/isimlik20.py`): ad soyad, unvan, kurum, telefon; simge sektöre göre, logo
-  ya da kişinin baş harfleri.
+- **Tasarımlar:** 10 düzen (`atolye/tasarim/isimlik20.py`): ad soyad, unvan, kurum, telefon; simge sektöre göre ya da
+  logo. Genel sektörde simge yok: baş harf konmaz, monogram düzeni katalogda çıkmaz.
 - **Renkler:** gövde, yazı, vurgu (9 × 12'deki gibi); QR her zaman siyah-beyaz.
 - **Uzun yazılar:** uzun unvan ve kurum iki satıra iner, gerekirse ad küçülür. Yine sığmazsa telefon isimlikten
   çıkar; telefon sayfada kalır, notlarda uyarı çıkar.
