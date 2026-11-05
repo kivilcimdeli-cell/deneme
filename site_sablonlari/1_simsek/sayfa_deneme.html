@@ -44,7 +44,8 @@ button{font:inherit;color:inherit}
 .logo .bolt{flex:none;height:.86em;width:auto;margin-left:.04em;fill:var(--ac);
   filter:drop-shadow(0 0 18px rgba(var(--ac-rgb),.45))}
 .logo .bolt.own{height:.6em;margin-left:.12em}
-.kind{margin-top:12px;font:800 26px/1 var(--cond);letter-spacing:.34em;color:var(--ac);white-space:nowrap}
+.kind{margin-top:12px;font:800 26px/1 var(--cond);letter-spacing:var(--kls,.34em);color:var(--ac);white-space:nowrap;
+  font-size:min(26px,calc((min(100vw,460px) - 160px) * var(--kk,1)))}
 .city{margin-top:8px;font-size:13px;line-height:1.5;letter-spacing:.42em;color:var(--muted);text-wrap:balance}
 .tread{display:block;width:calc(100% + var(--gl) + var(--gr));height:14px;
   margin:0 calc(var(--gr) * -1) 22px calc(var(--gl) * -1);fill:var(--ac)}
@@ -111,7 +112,7 @@ footer .bolt{height:14px;width:auto;fill:var(--ac);vertical-align:-2px;margin:0 
   100%{opacity:1;transform:none}}
 @keyframes flicker{0%,88%,100%{opacity:1}89%{opacity:.25}90%{opacity:1;filter:drop-shadow(0 0 30px rgba(var(--ac-rgb),.95)) brightness(1.5)}
   92%{opacity:.4}93.5%{opacity:1}}
-@keyframes spread{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:.34em}}
+@keyframes spread{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:var(--kls,.34em)}}
 @keyframes roll{to{transform:translateX(-18px)}}
 @keyframes shine{0%{transform:translateX(-130%) skewX(-20deg)}28%,100%{transform:translateX(230%) skewX(-20deg)}}
 @keyframes ring{0%,8%,100%{transform:none}1%,5%{transform:rotate(-16deg)}3%,7%{transform:rotate(16deg)}}
@@ -141,7 +142,7 @@ footer .bolt{height:14px;width:auto;fill:var(--ac);vertical-align:-2px;margin:0 
 .reveal{animation:rise .6s .7s cubic-bezier(.2,.8,.2,1) both}
 .pay::after{animation:slash .7s 1s cubic-bezier(.2,.8,.2,1) both}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-:root{--mk:0.3611}
+:root{--mk:0.3611;--kls:0.340em;--kk:0.1310}
 .list .btn:nth-child(1){animation-delay:0.40s}.list .btn:nth-child(2){animation-delay:0.48s}.list .btn:nth-child(3){animation-delay:0.56s}.list .btn:nth-child(4){animation-delay:0.64s}.list .btn:nth-child(5){animation-delay:0.72s}.list .btn:nth-child(6){animation-delay:0.80s}.list .btn:nth-child(7){animation-delay:0.88s}.list .btn:nth-child(8){animation-delay:0.96s}
 /* açılır kutular (karekod): JavaScript .on ile açar; JavaScript yoksa bağlantı (#kk) :target ile */
 .drop{display:none}.drop:target,.drop.on{display:block}

@@ -5,7 +5,9 @@ altında akan ok dişli şerit; büyük liste düğmeleri (Hemen Ara renkli), a�
 Rehbere Kaydet. Açılış: şeritler sağdan gelir, şimşek çakar, harf aralığı açılır, düğmeler sırayla yükselir;
 sürekli: şimşek arada titrer, Hemen Ara parlar ve telefon çalar.
 """
-from .ortak import e, fit, svg
+import os
+
+from .ortak import FONT_DIR, e, fit, svg
 
 NO, AD, SLUG = 1, "Şimşek", "simsek"
 KAYNAK = "Uzar Oto Lastik"
@@ -15,6 +17,7 @@ FONTS = {"barlow-black": ("BarlowCondensed-Black.ttf", "Barlow Condensed", 900, 
          "outfit": ("Outfit-SemiBold.ttf", "Outfit", 600, "normal")}
 LICENSES = ("OFL-barlowcondensed.txt", "OFL-outfit.txt")
 MARK_FONT = ("BarlowCondensed-Black.ttf", 0.01)
+KIND_FONT, KIND_LS, KIND_MIN_LS = "BarlowCondensed-ExtraBold.ttf", 0.34, 0.12
 MARK = ".logo .nm"
 FITS = ".btn b,.btn small,.iban,.kind,.city,.rows dd,.copy,.kk-open,.ghost"
 INTRO_MS = 1800
@@ -77,7 +80,8 @@ button{font:inherit;color:inherit}
 .logo .bolt{flex:none;height:.86em;width:auto;margin-left:.04em;fill:var(--ac);
   filter:drop-shadow(0 0 18px rgba(var(--ac-rgb),.45))}
 .logo .bolt.own{height:.6em;margin-left:.12em}
-.kind{margin-top:12px;font:800 26px/1 var(--cond);letter-spacing:.34em;color:var(--ac);white-space:nowrap}
+.kind{margin-top:12px;font:800 26px/1 var(--cond);letter-spacing:var(--kls,.34em);color:var(--ac);white-space:nowrap;
+  font-size:min(26px,calc((min(100vw,460px) - 160px) * var(--kk,1)))}
 .city{margin-top:8px;font-size:13px;line-height:1.5;letter-spacing:.42em;color:var(--muted);text-wrap:balance}
 .tread{display:block;width:calc(100% + var(--gl) + var(--gr));height:14px;
   margin:0 calc(var(--gr) * -1) 22px calc(var(--gl) * -1);fill:var(--ac)}
@@ -144,7 +148,7 @@ footer .bolt{height:14px;width:auto;fill:var(--ac);vertical-align:-2px;margin:0 
   100%{opacity:1;transform:none}}
 @keyframes flicker{0%,88%,100%{opacity:1}89%{opacity:.25}90%{opacity:1;filter:drop-shadow(0 0 30px rgba(var(--ac-rgb),.95)) brightness(1.5)}
   92%{opacity:.4}93.5%{opacity:1}}
-@keyframes spread{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:.34em}}
+@keyframes spread{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:var(--kls,.34em)}}
 @keyframes roll{to{transform:translateX(-18px)}}
 @keyframes shine{0%{transform:translateX(-130%) skewX(-20deg)}28%,100%{transform:translateX(230%) skewX(-20deg)}}
 @keyframes ring{0%,8%,100%{transform:none}1%,5%{transform:rotate(-16deg)}3%,7%{transform:rotate(16deg)}}
@@ -185,9 +189,26 @@ body.og{margin:0;width:1200px;height:630px;overflow:hidden}
 """
 
 
+def _kind(site):
+    """Hizmet satırı (OTO LASTİK TAMİRİ …) sağdaki eğik şeritlere girmesin: kullanılabilir genişlik ekran − 160 px
+    (360'lık ekranda 200 px). Sığmıyorsa önce harf aralığı .34em'den .12em'e kadar daralır, yetmezse yazı küçülür.
+    Döner: (harf aralığı em, font-size = genişlik × oran için oran)."""
+    from PIL import ImageFont
+    f = ImageFont.truetype(os.path.join(FONT_DIR, KIND_FONT), 1000)
+    t = site.hizmet or ""
+    if not t:
+        return KIND_LS, 1.0
+    w0, n = f.getlength(t) / 1000, len(t)              # CSS harf aralığı son harften sonra da eklenir
+    hedef = 200 / 26                                   # 360 px'lik ekranda 26 px'te sığacak genişlik (em)
+    ls = KIND_LS if w0 + KIND_LS * n <= hedef else max(KIND_MIN_LS, (hedef - w0) / n)
+    return ls, 1 / (w0 + ls * n)
+
+
 def css(site):
     delays = "".join(f".list .btn:nth-child({k + 1}){{animation-delay:{.4 + .08 * k:.2f}s}}" for k in range(8))
-    return CSS + f":root{{--mk:{fit(MARK_FONT, site, _mark_em(site)):.4f}}}\n" + delays
+    kls, kk = _kind(site)
+    return (CSS + f":root{{--mk:{fit(MARK_FONT, site, _mark_em(site)):.4f};--kls:{kls:.3f}em;--kk:{kk:.4f}}}\n"
+            + delays)
 
 
 def _name(site):

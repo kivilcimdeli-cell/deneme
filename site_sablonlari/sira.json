@@ -28,5 +28,11 @@
     "klasor": "autotufan_isimlik",
     "sablon": 5,
     "tarih": "2026-10-28"
+  },
+  {
+    "isletme": "Antalya 7/24 Oto Lastik Tamiri",
+    "klasor": "antalya_lastik_isimlik",
+    "sablon": 1,
+    "tarih": "2026-11-05"
   }
 ]

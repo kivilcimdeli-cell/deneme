@@ -1,0 +1,16 @@
+{
+  "isletme": "Antalya 7/24 Oto Lastik Tamiri",
+  "marka": "ANTALYA",
+  "hizmet": "OTO LASTİK TAMİRİ",
+  "etiket": "7/24 · YOL YARDIM",
+  "telefon": "+90 542 831 41 07",
+  "whatsapp": "+90 542 831 41 07",
+  "whatsapp_mesaj": "Merhaba, lastik için yardım istiyorum.",
+  "instagram": "https://www.instagram.com/07antalyaotolastiktamiri/",
+  "google": "https://www.google.com/search?q=ANTALYA+7%2F24+OTO+LAST%C4%B0K+TAM%C4%B0R%C4%B0+YOL+YARDIM&oq=ANTALYA+7%2F24+OTO+LAST%C4%B0K+TAM%C4%B0R%C4%B0+YOL+YARDIM&gs_lcrp=EgZjaHJvbWUyBggAEEUYOdIBBzc4MGowajSoAgKwAgE&client=ms-android-samsung-trvo1&sourceid=chrome-mobile&source=chrome.ob&ie=UTF-8#sv=CAESzQEKuQEStgEKd0FERGJXZVlkekJCNDNlVTd6a2Z6bHlEbDBDcHB2UVdJT0Vvak1BUW51dkhFU0tlNTFOeEhsZ1NHUG05TV82a3NSc1l0SnZrMHh1RHlTUmdDc3dzSmtPZlhoZm41bXRtU2pZblpXUVo4cDJFYURCWFBDRG5sZktBEhdJV2pzYXU3VE51LWRpLWdQOWZPQzZBWRoiQUhOMEU3R2pTSXBFdWtfckRaY0MtWXI3bkw2MlZaQUJJZxIEODA1MRoBMyoAMAA4AUAAGAAgsvj8-Q9KAhAB",
+  "iban": "TR18 0001 0000 5860 4032 1550 01",
+  "iban_alici": "YUSUF UZAR",
+  "banka": "Ziraat Bankası",
+  "aciklama": "Lastikle ilgili her konuda 7/24 yanınızdayız. Tek dokunuşla arayın, yazın.",
+  "sayfa_url": "https://uzar1.qrsistem.workers.dev/"
+}
