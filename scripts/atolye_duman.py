@@ -21,8 +21,8 @@ PORT = 8790
 ADRES = f"http://127.0.0.1:{PORT}/api/"
 TEL = "0546 475 45 08"
 ORNEK = {
-    "isimlik_9x12": {"isletme": "Deneme Oto Yıkama", "hizmet": "OTO YIKAMA", "sektor": "genel", "telefon": TEL,
-                     "hizmetler": "İç dış yıkama, Pasta cila", "site_adi": "denemeoto"},
+    "isimlik_9x12": {"isletme": "Deneme Oto Lastik", "hizmet": "OTO LASTİK TAMİRİ", "sektor": "lastik", "telefon": TEL,
+                     "hizmetler": "Lastik tamiri, Yol yardım", "site_adi": "denemelastik"},   # 5 simgesiz + 5 simgeli
     "kurumsal_10x20": {"ad_soyad": "Deniz Yılmaz", "unvan": "Mali Müşavir", "kurum": "Deneme Danışmanlık",
                        "telefon": TEL, "sektor": "genel", "site_adi": "denizyilmaz"},
     "bayrakli": {"ad_soyad": "Deniz Yılmaz"},

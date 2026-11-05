@@ -9,6 +9,9 @@ yerine kayar; baş harf kullanılmaz).
 
 Katalogda değişenler (öğrenmenin saydığı özellikler): düzen, zemin (siyah / beyaz), vurgu rengi, adın yazı tipi,
 simge türü. Her tasarım baskıya uygunluk denetiminden geçer (ortak.olc); geçemeyen katalogda gösterilmez.
+
+Lastik sektörü: simge lastik izi (İnce Oto Lastik'in sitesindeki diş baskısı; jantın yerine), katalogun yarısı
+simgesiz (YARI_SIMGESIZ) ve yalnız lastikte "Lastik izi" düzeni (eğik, uçları solan diş bandı; SEKTOR_DUZENI).
 """
 from dataclasses import dataclass, field
 
@@ -21,7 +24,7 @@ GUVENLI = O.I.outline().offset(-3.0, J) ^ A.rect(-70, 9.5, 70, 100)    # sehpa a
 # sektör: (ad, simge, çağrı, vurgu renkleri — ilki en uygun)
 SEKTORLER = {
     "genel": ("Genel (simgesiz)", "yok", "HEMEN ARA", [ORANGE, RED, TURQ, GOLD, GREEN, BLUE]),
-    "lastik": ("Oto lastik", "jant", "HEMEN ARA", [RED, YELLOW, ORANGE, BLUE]),
+    "lastik": ("Oto lastik", "iz", "HEMEN ARA", [RED, YELLOW, ORANGE, BLUE]),
     "oto": ("Oto servis, yıkama, kaporta", "araba", "HEMEN ARA", [RED, YELLOW, GOLD, TURQ, BLUE]),
     "usta": ("Usta, tamir, teknik servis", "anahtar", "HEMEN ARA", [ORANGE, YELLOW, RED, BLUE]),
     "telefon": ("Telefoncu", "telefon", "HEMEN ARA", [TURQ, ORANGE, RED, BLUE]),
@@ -237,18 +240,18 @@ def l_yan_yana(d, c, p, k):
     if c.simge == "yok":                                    # simgesiz: ad sol üstte, boydan
         _, y, _ = ad_yaz(d, c, p, k, X0, 82.0, 12.5, 65.0, min_cap=6.5, cap2=9.0)
         if c.hizmet:
-            y = satir(d, "iş türü", c.hizmet, X0, y - 3.0, 5.0, 65.0, "l", 1.6, p.vurgu)
+            y = is_turu(d, c.hizmet, X0, y - 3.0, 5.0, 65.0, "l", 1.6, p.vurgu)
     elif ad_satirlari(c.marka, k, 11.0, 11.0 - x, 0.0, 6.5)[1] >= 6.5:
         ib = _simge(d, c, p, X0, 71.0, 18.0, 21.0, hiza="l")
         _, y, _ = ad_yaz(d, c, p, k, x, 81.5, 11.0, 11.0 - x, min_cap=6.5, cap2=8.0)
         if c.hizmet:
-            y = satir(d, "iş türü", c.hizmet, x, y - 3.0, 5.0, 11.0 - x, "l", 1.6, p.vurgu)
+            y = is_turu(d, c.hizmet, x, y - 3.0, 5.0, 11.0 - x, "l", 1.6, p.vurgu)
         y = min(y, ib[1])
     else:
         ib = _simge(d, c, p, X0, 79.5, 16.0, 13.0, hiza="l")
         x = ib[2] + 4.0
         if c.hizmet:
-            satir(d, "iş türü", c.hizmet, x, (ib[1] + ib[3]) / 2 + 2.6, 5.0, 11.0 - x, "l", 1.6, p.vurgu)
+            is_turu(d, c.hizmet, x, (ib[1] + ib[3]) / 2 + 2.6, 5.0, 11.0 - x, "l", 1.6, p.vurgu)
         _, y, _ = ad_yaz(d, c, p, k, X0, ib[1] - 3.4, 11.0, 65.0, min_cap=6.5, cap2=8.0)
     y -= 3.6
     d.add(None, O.bar(X0, -26.0, y - 0.8, 1.6), p.vurgu)
@@ -270,7 +273,7 @@ def l_serit(d, c, p, k):
     w = 12.0 - x
     _, y, _ = ad_yaz(d, c, p, k, x, 82.0, 19.0, w, min_cap=10.0, cap2=13.0)
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, x, y - 3.6, 5.2, w, "l", 2.6, p.vurgu)
+        y = is_turu(d, c.hizmet, x, y - 3.6, 5.2, w, "l", 2.6, p.vurgu)
     hizmetler(d, c, p, x, y - 3.4, w, y_alt=33.8)
     cagri(d, c, p, x, 29.0, max_w=w, tr=1.4)
     telefon(d, c, p, x, 20.0, 4.8, max_w=w)
@@ -283,7 +286,7 @@ def l_ortali(d, c, p, k):
     ib = _simge(d, c, p, cx, 78.5, 22.0, 13.0)
     _, y, _ = ad_yaz(d, c, p, k, cx, ib[1] - 3.0, 14.0, w, "c", 0.2, min_cap=8.0, cap2=9.5)
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, cx, y - 3.2, 4.6, w, "c", 1.0, p.vurgu)
+        y = is_turu(d, c.hizmet, cx, y - 3.2, 4.6, w, "c", 1.0, p.vurgu)
     d.add(None, O.bar(cx - 6.0, cx + 6.0, y - 3.0, 1.3), p.vurgu)
     hizmetler(d, c, p, cx, y - 3.65 - 3.0, w, "c", y_alt=24.0)
     telefon(d, c, p, cx, 19.0, 5.0, "c", max_w=w)
@@ -306,7 +309,7 @@ def l_zarif(d, c, p, k):
         _, y, _ = ad_yaz(d, c, p, k, X0, ib[1] - 3.2, 15.0, 63.0, "l", 0.3, min_cap=9.0, cap2=10.0)
         y -= 3.4
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, X0, y, 5.2, 62.0, "l", 3.2, p.vurgu) - 3.4
+        y = is_turu(d, c.hizmet, X0, y, 5.2, 62.0, "l", 3.2, p.vurgu) - 3.4
     hizmetler(d, c, p, X0, y, 62.0, y_alt=31.8)
     cagri(d, c, p, X0, 27.0, tr=1.4)
     telefon(d, c, p, X0, 18.4, 5.2)
@@ -324,7 +327,7 @@ def l_bant(d, c, p, k):
     d.add(None, band - A.union(*[cs for cs in (icon, txt) if cs is not None]).offset(0.0, J), p.vurgu)
     y = 57.6
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, X0, y, 4.6, 66.0, "l", 0.8, p.vurgu) - 3.0
+        y = is_turu(d, c.hizmet, X0, y, 4.6, 66.0, "l", 0.8, p.vurgu) - 3.0
     hizmetler(d, c, p, X0, y, 66.0, y_alt=34.4)
     cagri(d, c, p, X0, 29.6)
     telefon(d, c, p, X0, 20.4, 5.4)
@@ -357,7 +360,7 @@ def l_cerceve(d, c, p, k):
     ib = _simge(d, c, p, X0, 78.5, 28.0, 13.0, hiza="l")
     _, y, _ = ad_yaz(d, c, p, k, X0, ib[1] - 3.0, 17.0, 60.0, "l", 0.4, min_cap=9.0, cap2=10.5)
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, X0, y - 3.4, 6.0, 60.0, "l", 2.6, p.vurgu)
+        y = is_turu(d, c.hizmet, X0, y - 3.4, 6.0, 60.0, "l", 2.6, p.vurgu)
     hizmetler(d, c, p, X0, y - 3.4, 62.0, y_alt=24.8)
     telefon(d, c, p, X0, 19.5, 5.2)
     qr(d, c, p, 33.0, 50.0, 34.0, cerceve=True, tr=1.6)
@@ -399,7 +402,7 @@ def l_egik(d, c, p, k):
     ib = _simge(d, c, p, X0, 80.0, 26.0, 11.0, hiza="l")
     _, y, _ = ad_yaz(d, c, p, k, X0, ib[1] - 3.0, 17.0, 64.0, "l", 0.3, min_cap=9.0, cap2=11.0)
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, X0, y - 3.4, 4.6, 62.0, "l", 1.6, p.vurgu)
+        y = is_turu(d, c.hizmet, X0, y - 3.4, 4.6, 62.0, "l", 1.6, p.vurgu)
     hizmetler(d, c, p, X0, y - 3.2, 62.0, y_alt=32.8)
     cagri(d, c, p, X0, 28.0)
     telefon(d, c, p, X0, 19.0, 5.2)
@@ -413,10 +416,79 @@ def l_qr_solda(d, c, p, k):
     ib = _simge(d, c, p, cx, 79.0, 24.0, 14.0)
     _, y, _ = ad_yaz(d, c, p, k, cx, ib[1] - 3.0, 9.0, w, "c", 0.3, min_cap=6.0, cap2=7.0)
     if c.hizmet:
-        y = satir(d, "iş türü", c.hizmet, cx, y - 3.0, 4.6, w, "c", 1.2, p.vurgu)
+        y = is_turu(d, c.hizmet, cx, y - 3.0, 4.6, w, "c", 1.2, p.vurgu)
     hizmetler(d, c, p, cx, y - 3.4, w, "c", n_max=3, y_alt=29.8)
     cagri(d, c, p, cx, 25.0, align="c", max_w=w)
     telefon(d, c, p, cx, 16.5, 4.8, "c", max_w=w)
+
+
+def lastik_izi(d, p, cx, w, y_ust, y_alt, rol="yazi"):
+    """İnce Oto Lastik'in sitesindeki eğik lastik izi bandı (ortak.iz_bant): y_ust (üstteki yazının alt kenarı) ile
+    y_alt (alttaki yazının üst kenarı) arasında, sütunun (cx, w) ortasında. Bant 12° eğik, uçları soluk (dişler
+    küçülür); yazılara 2 mm'den, QR'a 3 mm'den yakın ya da güvenli alanın dışına düşen diş konmaz. Döner konan öğe
+    sayısı; sığmazsa 0 (hiçbir şey eklenmez)."""
+    boy = min(18.0, (y_ust - y_alt) - 12.0)
+    if boy < 11.0:
+        return 0
+    engel = A.union(*[cs for cs, _ in d.raised]).offset(2.0, J)
+    if "QR" in d.lines:
+        engel = engel + d.lines["QR"].offset(3.0, J)
+    ogeler = [cs for cs, _, _ in O.iz_bant(cx, (y_ust + y_alt) / 2, boy, cx - w / 2 - 19.0, cx + w / 2 + 17.0,
+                                         min_cizgi=1.35)   # soluk dişler de 1,2 mm denetiminden geçsin
+              if (cs - GUVENLI).area() < 0.01 and (cs ^ engel).area() < 0.01]
+    if len(ogeler) < 9:
+        return 0
+    d.add(None, A.union(*ogeler), p.renk(rol))
+    return len(ogeler)
+
+
+def is_turu_satirlari(s, cap, w, tr):
+    """İş türü bir ya da iki satır: tek satırda boy %90'ın altına inecekse kelimelerden en iyi ikiye bölünüş (iki
+    satırın küçüğü en büyük olan; OTO LASTİK / TAMİRİ)."""
+    if len(s.split()) < 2 or O.sigdir(O.SATIR, s, cap, w, tr)[0] >= cap * 0.9:
+        return [s]
+    return list(_iki_satir(s, cap, w, tr))
+
+
+def _iki_satir(s, cap, w, tr):
+    """Kelimelerden ikiye bölünüş: iki satırın küçük boyu en büyük olan; eşitse satır uzunlukları dengeli olan
+    (OTO LASTİK / TAMİRİ, OTO / LASTİK TAMİRİ değil)."""
+    kel = s.split()
+    bolus = [(" ".join(kel[:i]), " ".join(kel[i:])) for i in range(1, len(kel))]
+    return max(bolus, key=lambda ab: (round(min(O.sigdir(O.SATIR, t, cap, w, tr)[0] for t in ab), 1),
+                                      -abs(len(ab[0]) - len(ab[1]))))
+
+
+def is_turu(d, s, x, y_ust, cap, max_w, align, tr, renk, ara=1.4):
+    """İş türü satırı (satir gibi). En küçük boyda da tek satıra sığmayan çok kelimeli iş türü iki satır olur
+    (OTO LASTİK TAMİRİ → OTO LASTİK / TAMİRİ; eskiden kenara ya da QR'a taşıp tasarım elenirdi). Döner son satırın
+    alt kenarı."""
+    cc, tt = O.sigdir(O.SATIR, s, cap, max_w, tr)
+    if len(s.split()) < 2 or O.genislik(O.SATIR, s, cc, tt) <= max_w * 1.01:
+        return satir(d, "iş türü", s, x, y_ust, cap, max_w, align, tr, renk)
+    a, b = _iki_satir(s, cap, max_w, tr)
+    y = satir(d, "iş türü", a, x, y_ust, cap, max_w, align, tr, renk)
+    return satir(d, "iş türü 2", b, x, y - ara, cap, max_w, align, tr, renk)
+
+
+def l_lastik_izi(d, c, p, k):
+    """QR solda; sağda ortalı sütun: ad, iş türü (en çok iki satır), araya İnce Oto Lastik'in sitesindeki eğik lastik
+    izi bandı, altta çağrı ve telefon (lastikçi, Antalya 7/24 Oto Lastik Tamiri'nin isimliğinden). Simgesiz: bant
+    simgenin yerini tutar; hizmetler yazılmaz (yerinde bant)."""
+    qr(d, c, p, -33.0, 48.0, 38.0)
+    cx, w = 27.0, 52.0
+    _, y, _ = ad_yaz(d, c, p, k, cx, 84.5, 9.5, w, "c", 0.3, min_cap=6.0, cap2=7.0)
+    if c.hizmet:
+        for i, r in enumerate(is_turu_satirlari(c.hizmet, 5.2, w, 1.2)):
+            y = satir(d, "iş türü" if i == 0 else "iş türü 2", r, cx, y - (2.6 if i == 0 else 1.4), 5.2, w, "c", 1.2,
+                      p.vurgu)
+    cagri(d, c, p, cx, 22.5, align="c", max_w=w, tr=1.6)          # çağrı ve telefon aşağıda: bant için yer
+    telefon(d, c, p, cx, 14.2, 5.0, "c", max_w=w)
+    alt = max((d.lines[n].bounds()[3] for n in ("çağrı", "telefon") if n in d.lines), default=12.0)
+    if not lastik_izi(d, p, cx, w, y, alt):
+        d.zayif.append("lastik izi sığmadı")
+        d.ad_oran *= 0.5
+    d.gosterilen = len(c.hizmetler)                        # hizmetlerin yerinde bant (bilerek yazılmaz)
 
 
 # anahtar: (ad, kurucu, adın yazı tipleri — ilki en uygun)
@@ -431,7 +503,27 @@ DUZENLER = {
     "blok": ("Renk blok", l_blok, ["righteous", "outfit", "bebas"]),
     "egik": ("Eğik", l_egik, ["sairai", "poppins_i"]),
     "qr_solda": ("QR solda", l_qr_solda, ["outfit", "manrope", "lexend", "oswald"]),
+    "lastik_izi": ("Lastik izi", l_lastik_izi, ["sairai", "outfit", "oswald"]),
 }
+# yalnız bazı sektörlerde gösterilen düzenler (öbürleri her sektörde)
+SEKTOR_DUZENI = {"lastik_izi": {"lastik"}}
+# katalogun yarısı simgesiz (standart), yarısı sektör simgeli olan sektörler: lastikte hepsi simgeli çıkıyordu
+YARI_SIMGESIZ = {"lastik"}
+SIMGESIZ_DUZEN = {"lastik_izi", "serit"}               # simge çizmeyen düzenler: yalnız simgesiz sayılır
+ONE_CIKAN = {"lastik": "lastik_izi"}                   # sektörün katalogunda (gösterilmediyse) hep bulunan düzen
+
+
+def duzenler(sektor):
+    """Sektörde kullanılan düzenler: {anahtar: (ad, kurucu, yazı tipleri)}."""
+    return {k: v for k, v in DUZENLER.items() if k not in SEKTOR_DUZENI or sektor in SEKTOR_DUZENI[k]}
+
+
+def simge_secenekleri(sektor, c, duzen):
+    """Düzenin katalogdaki simge seçenekleri: [""] (içeriğin simgesi) ya da yarı simgesiz sektörde ["", "yok"]
+    (simge çizmeyen düzende yalnız ["yok"]). Logo ya da simgesiz içerikte hep [""]."""
+    if sektor not in YARI_SIMGESIZ or c.simge in ("logo", "monogram", "yok"):
+        return [""]
+    return ["yok"] if duzen in SIMGESIZ_DUZEN else ["", "yok"]
 
 
 # ---------------------------------------------------------------- tasarım, kontrol, katılar, görünüş

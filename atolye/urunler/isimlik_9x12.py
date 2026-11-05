@@ -3,7 +3,8 @@
 Tasarımlar atolye/tasarim/isimlik9.py'deki 10 düzenden müşterinin bilgileriyle kurulur (ad, iş türü, hizmetler,
 telefon, sektör simgesi ya da logo). Katalogda her düzenden bir tasarım (yenilemede en çok iki), zemin, vurgu rengi
 ve yazı tipi öğrenmeye göre (beğenilenler öne çıkar, %30 keşif); bu müşteriye gösterilenler yeni katalogda tekrar
-edilmez. Her tasarım baskıya uygunluk denetiminden geçer; geçemeyen gösterilmez.
+edilmez. Her tasarım baskıya uygunluk denetiminden geçer; geçemeyen gösterilmez. Lastik sektöründe katalogun yarısı
+standart (simgesiz), yarısı lastik izi simgeli (5 + 5) ve "Lastik izi" düzeni (gösterilmediyse) hep bulunur.
 
 Seçilen kodla:
   cikti/isimlik_<ad>_<kod>_x2d.3mf   tablada iki takım (panel + sehpa), Bambu standart 0,20 mm, ütüleme ve destek
@@ -137,31 +138,42 @@ def _icerik(is_, b):
 
 
 def _adaylar(b, c, renkler):
-    """[(imza, özellikler, (düzen, gövde, vurgu, vurgu2, yazı tipi, yazı rengi))] ve renk uyarıları."""
+    """[(imza, özellikler, (düzen, gövde, vurgu, vurgu2, yazı tipi, yazı rengi, simge))] ve renk uyarıları. simge ""
+    içeriğin simgesi, "yok" simgesiz (lastikte katalogun yarısı simgesiz: isimlik9.YARI_SIMGESIZ)."""
     from atolye.tasarim import isimlik9 as T
     from atolye.tasarim import ortak as O
     paletler, uyar = O.isimlik_paletleri(b, renkler, [O.BLACK, O.WHITE])
+    sektor = b.get("sektor") or "genel"
     simge = c.simge if c.simge in ("logo", "monogram", "yok") else "simge"
     out = []
-    for duzen, (_, _, fonts) in T.DUZENLER.items():
-        for g, y, v in paletler:
-            v2 = (O.BLUE if v != O.BLUE else O.RED) if c.simge == "direk" and duzen == "serit" else 0
-            oto = y == O.Palet(g, v).yazi                               # otomatik yazı rengi: eski imza
-            for f in fonts:
-                oz = {"sablon": duzen, "zemin": O.AD[g], "metin": O.AD[y], "renk": O.AD[v], "yazi": f, "simge": simge}
-                out.append((f"{duzen}|{O.AD[g]}|{O.AD[v]}|{f}" + ("" if oto else f"|{O.AD[y]}"), oz,
-                            (duzen, g, v, v2, f, y)))
+    for duzen, (_, _, fonts) in T.duzenler(sektor).items():
+        for sv in T.simge_secenekleri(sektor, c, duzen):
+            for g, y, v in paletler:
+                v2 = (O.BLUE if v != O.BLUE else O.RED) if c.simge == "direk" and duzen == "serit" else 0
+                oto = y == O.Palet(g, v).yazi                           # otomatik yazı rengi: eski imza
+                for f in fonts:
+                    oz = {"sablon": duzen, "zemin": O.AD[g], "metin": O.AD[y], "renk": O.AD[v], "yazi": f,
+                          "simge": sv or simge}
+                    out.append((f"{duzen}|{O.AD[g]}|{O.AD[v]}|{f}" + ("" if oto else f"|{O.AD[y]}") +
+                                ("|simgesiz" if sv else ""), oz, (duzen, g, v, v2, f, y, sv)))
     return out, uyar
 
 
 def _parametre(p):
-    duzen, g, v, v2, f, y = p
-    return {"duzen": duzen, "govde": g, "vurgu": v, "vurgu2": v2, "yazi": f, "metin": y}
+    duzen, g, v, v2, f, y = p[:6]
+    par = {"duzen": duzen, "govde": g, "vurgu": v, "vurgu2": v2, "yazi": f, "metin": y}
+    if len(p) > 6 and p[6]:
+        par["simge"] = p[6]                          # "yok": bu tasarım simgesiz (sektör simgeli olsa da)
+    return par
 
 
 def _kur(c, par):
+    import dataclasses
+
     from atolye.tasarim import isimlik9 as T
     from atolye.tasarim import ortak as O
+    if par.get("simge"):
+        c = dataclasses.replace(c, simge=par["simge"])
     return T.tasarla(par["duzen"], c, O.Palet(par["govde"], par["vurgu"], par.get("vurgu2", 0), par.get("metin", 0)),
                      par["yazi"])
 
@@ -181,32 +193,50 @@ def katalog(is_):
     uyar += renk_uyar
     by = {a[0]: a for a in adaylar}
     en_cok = 1 if is_.no == 1 else 2                 # ilk katalogda her düzenden bir tasarım
+    sektor = b.get("sektor") or "genel"
+    yari = sektor in T.YARI_SIMGESIZ and c.simge not in ("logo", "monogram", "yok")
+    yarim = KATALOG_ADET // 2                        # yarı simgesiz sektörde: 5 simgesiz (standart), 5 simgeli
 
     # ön eleme: her düzen × yazı tipi bir kez kurulur (denetimsiz, hızlı); ad küçük kalan ya da hizmetleri sığmayan
     # eşleşmeler geri düşer (ağırlık kalite³), çok kötüler hiç gösterilmez
     is_.ilerle(4, "Düzenler bu bilgilere göre deneniyor")
     kal = {}
-    for duzen, (_, _, fonts) in T.DUZENLER.items():
-        for f in fonts:
-            kal[(duzen, f)] = T.kalite(T.tasarla(duzen, c, O.Palet(O.BLACK, O.GOLD), f), c)
-    eniyi = {dz: max(q for (d2, _), q in kal.items() if d2 == dz) for dz in T.DUZENLER}
-    adaylar = [a for a in adaylar if kal[(a[2][0], a[2][4])] >= max(0.45, 0.8 * eniyi[a[2][0]])]
+    for duzen, (_, _, fonts) in T.duzenler(sektor).items():
+        for sv in T.simge_secenekleri(sektor, c, duzen):
+            for f in fonts:
+                kal[(duzen, f, sv)] = T.kalite(_kur(c, {"duzen": duzen, "govde": O.BLACK, "vurgu": O.GOLD, "yazi": f,
+                                                        "simge": sv}), c)
+    eniyi = {(dz, sv): max(q for (d2, _, s2), q in kal.items() if (d2, s2) == (dz, sv)) for dz, _, sv in kal}
+
+    def k_(a):
+        return kal[(a[2][0], a[2][4], a[2][6])]
+
+    adaylar = [a for a in adaylar if k_(a) >= max(0.45, 0.8 * eniyi[(a[2][0], a[2][6])])]
 
     def uygun(secilen, aday):
-        return sum(1 for _, oz in secilen if oz["sablon"] == aday[1]["sablon"]) < en_cok
+        if sum(1 for _, oz in secilen if oz["sablon"] == aday[1]["sablon"]) >= en_cok:
+            return False
+        return not yari or sum(1 for _, oz in secilen if (oz["simge"] == "yok") == (aday[1]["simge"] == "yok")) < yarim
 
     sira = ogrenme.sec(KOD, [(i, oz) for i, oz, _ in adaylar], len(adaylar), haric=is_.haric,
-                       tohum=random.randrange(1 << 30), uygun=uygun,
-                       agirlik=lambda imza: kal[(by[imza][2][0], by[imza][2][4])] ** 3)
+                       tohum=random.randrange(1 << 30), uygun=uygun, agirlik=lambda imza: k_(by[imza]) ** 3)
+    one = T.ONE_CIKAN.get(sektor)                    # sektörün öne çıkan düzeni (lastikte lastik izi) katalogda olsun
+    if one and not any(i.split("|")[0] == one for i in is_.haric):
+        ilk = next((i for i in sira if by[i][2][0] == one), None)
+        if ilk:
+            sira = [ilk] + [i for i in sira if i != ilk]
     is_.ilerle(12, f"{len(adaylar)} aday sıralandı; tasarımlar kuruluyor ve denetleniyor")
     kabul, denenen, denendi = [], 0, set()
-    for sinir in (en_cok, en_cok + 1):                 # bir düzen hiç geçemezse eksik yer ikinci turda dolar
+    for tur, sinir in enumerate((en_cok, en_cok + 1)):  # bir düzen hiç geçemezse eksik yer ikinci turda dolar
         for imza in sira:
             if len(kabul) >= KATALOG_ADET or denenen >= 36:
                 break
             par = _parametre(by[imza][2])
             if imza in denendi or sum(1 for _, _, d in kabul if d.duzen == par["duzen"]) >= sinir:
                 continue
+            if yari and tur == 0 and sum(1 for _, p2, _ in kabul
+                                         if p2.get("simge") == par.get("simge")) >= yarim:
+                continue                             # ilk turda yarısı simgesiz, yarısı simgeli
             denendi.add(imza)
             denenen += 1
             d = _kur(c, par)

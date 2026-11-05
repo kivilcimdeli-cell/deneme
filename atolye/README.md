@@ -72,6 +72,15 @@ gerekmez; yönetici izni istemez.
   - Hizmetler sığdığı kadar yazılır.
   - Simge sektöre göre seçilir. Logo yüklenirse logo izlenip kabartma olur.
   - **Genel** sektörde simge yok, baş harf de konmaz; ad ve yazılar simgenin yerine kayar (blokta ortalanır).
+  - İş türü en küçük boyda da tek satıra sığmıyorsa iki satır olur (OTO LASTİK / TAMİRİ).
+- **Lastik sektörü:** katalogun yarısı standart (simgesiz), yarısı simgeli: 5 + 5.
+  - **Simge:** lastik izi. İnce Oto Lastik'in sitesindeki diş baskısının kısa bir parçası, 12° eğik: kırmızı ok
+    dişleri, beyaz omuz blokları. Jant simgesi kaldırıldı (kullanıcı beğenmedi).
+  - **Lastik izi düzeni** (yalnız lastikte, standartlardan biri olarak her ilk katalogda):
+    - QR solda; sağda ad, iş türü, araya İnce'nin sitesindeki gibi eğik, uçları solan lastik izi bandı, sonra çağrı ve
+      telefon.
+    - Antalya 7/24 Oto Lastik Tamiri'nin isimliğinden.
+    - Bant yazılara 2 mm'den, QR'a 3 mm'den yakın diş koymaz; hizmetler yazılmaz (yerinde bant).
 - **Web sayfası:** lastikçi tarzındaki 5 şablondan sıradaki kullanılır (kural `CLAUDE.md`'de).
   - Adres `https://<sayfa adı>.qrsistem.workers.dev/`. Isimlikteki QR bu adresi açar.
   - Zip, Cloudflare'de aynı adlı Worker'a elle yüklenir.

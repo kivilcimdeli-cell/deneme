@@ -378,10 +378,83 @@ def bar(x0, x1, y, h):
 
 # ---------------------------------------------------------------- simgeler: [(şekil, rol)], rol yazi / vurgu / vurgu2
 
-def _jant(R=12.0):
-    holes = A.union(A.circle(R * 0.11), *[A.circle(R * 0.093, R * 0.32 * math.cos(a), R * 0.32 * math.sin(a))
-                                          for a in np.radians(np.arange(5) * 72 + 90)])
-    return [(A.circle(R) - A.circle(R * 0.66), "yazi"), (A.circle(R * 0.56) - holes, "vurgu")]
+# lastik izi: İnce Oto Lastik'in sitesindeki diş baskısı (scripts/ince_sayfa.py, tread("band")). Karo 40 × 120 birim
+# (y aşağı): ortada gidiş yönüne (sağa) bakan ok biçimli diş, üstünde ve altında omuz blokları. Sitedeki gibi 12° eğik.
+IZ_ACI = 12.0
+IZ_KARO_W, IZ_KARO_H = 40.0, 120.0
+IZ_MASKE = (0.14, 0.34, 0.74, 0.92)                    # sitedeki bant maskesi: belir → tam → kaybol (eksen boyunca)
+
+
+def _iz_karo(k, t=None, hs=None, g=None, ow=None):
+    """Bir karonun öğeleri, eksen koordinatında (s gidiş yönü, n yukarı; karo ortası 0, 0): [(noktalar, tür)].
+    k: mm/birim. t: dişin yatay kalınlığı, hs: omuz bloğunun yüksekliği, g: omuz ile diş arası (mm; verilmezse
+    karodaki oranlar). Küçük simgede çizgiler incelmesin diye t, hs, g, ow alt sınırla büyütülür."""
+    t = 12 * k if t is None else t
+    hs = 12 * k if hs is None else hs
+    g = 8 * k if g is None else g
+    dy, dx = 36 * k, 15 * k                            # dişin yarı boyu ve ucunun öne çıkışı
+    x0 = -20 * k + 5 * k
+    dis = [(x0, dy), (x0 + t, dy), (x0 + t + dx, 0), (x0 + t, -dy), (x0, -dy), (x0 + dx, 0)]
+    ow = 18 * k if ow is None else ow
+    r = min(2 * k, hs / 2 - 0.01)
+    ox = x0 + 4 * k + ow / 2
+    omuz = []
+    for yc in (dy + g + hs / 2, -(dy + g + hs / 2)):
+        omuz.append(([(ox + ow / 2 * sx, yc + hs / 2 * sy) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))], r))
+    return [(dis, "dis")] + [(p, "omuz", r) for p, r in omuz]
+
+
+def _iz_sekil(noktalar, r=0.0):
+    cs = m3.CrossSection([np.array(noktalar, float)], m3.FillRule.Positive)
+    if cs.area() == 0:
+        cs = m3.CrossSection([np.array(noktalar[::-1], float)], m3.FillRule.Positive)
+    return cs.offset(-r, J).offset(r, J) if r > 0 else cs
+
+
+def iz_bant(cx, cy, boy, bas, son, aci=IZ_ACI, min_cizgi=1.2):
+    """Eğik lastik izi bandı: (cx, cy)'den geçen, `aci` derece yükselen eksen boyunca, x'te bas..son arası. Her öğe
+    eksendeki yerine göre sitedeki maskeyle küçülür (uçlar soluk); çizgisi `min_cizgi`nin altına inecek kadar
+    küçülen öğe konmaz. Döner [(şekil, tür, ölçek)]; tür "dis" ya da "omuz"."""
+    k = boy / IZ_KARO_H
+    a = math.radians(aci)
+    ca, sa = math.cos(a), math.sin(a)
+    s0, s1 = (bas - cx) / ca, (son - cx) / ca
+    fmin = min_cizgi / (min(11.08, 12.0) * k)          # dişin dik kalınlığı 12 · sin 67,4° = 11,08 birim
+    out = []
+    p = IZ_KARO_W * k
+    b0, b1, b2, b3 = IZ_MASKE
+    for i in range(int(math.floor(s0 / p)) - 1, int(math.ceil(s1 / p)) + 2):
+        for el in _iz_karo(k):
+            pts, tur, r = el[0], el[1], (el[2] if len(el) > 2 else 0.0)
+            P = np.array(pts) + (i * p, 0.0)
+            c = P.mean(0)
+            t = (c[0] - s0) / (s1 - s0)
+            f = 0.0 if t <= b0 or t >= b3 else min(1.0, (t - b0) / (b1 - b0), (b3 - t) / (b3 - b2))
+            if f < fmin:
+                continue
+            P = c + (P - c) * f
+            xy = [(cx + s * ca - n * sa, cy + s * sa + n * ca) for s, n in P]
+            out.append((_iz_sekil(xy, r * f).offset(-0.62, J).offset(0.62, J), tur, f))   # sivri uçlar körelir
+    return out
+
+
+def _iz_simge(boy):
+    """Lastik izi simgesi (jantın yerine): sitedeki bandın kısa bir parçası, 3 karo, 12° eğik; dişler vurgu, omuz
+    blokları yazı renginde. Küçük simgede (11 mm) diş 1,6 mm'nin, omuz bloğu 1,6 × 2,2 mm'nin, aralar 1 mm'nin
+    altına inmez (1,2 mm'den ince alan denetimi)."""
+    k = boy / (IZ_KARO_H - 8)                          # karonun dolu kısmı (omuzdan omuza) 112 birim
+    t, hs, g, ow = max(12 * k, 1.75), max(12 * k, 1.6), max(8 * k, 1.0), max(18 * k, 2.2)
+    p = max(IZ_KARO_W * k, t + 1.4)                    # ardışık dişler arası en az 1,3 mm
+    a = math.radians(IZ_ACI)
+    ca, sa = math.cos(a), math.sin(a)
+    out = {"dis": [], "omuz": []}
+    for i in (-1, 0, 1):
+        for el in _iz_karo(k, t, hs, g, ow):
+            pts, tur, r = el[0], el[1], (el[2] if len(el) > 2 else 0.0)
+            xy = [((s + i * p) * ca - n * sa, (s + i * p) * sa + n * ca) for s, n in pts]
+            out[tur].append(_iz_sekil(xy, r))
+    kor = lambda cs: cs.offset(-0.62, J).offset(0.62, J)  # noqa: E731  sivri uç ve köşe 1,2 mm denetiminden geçsin
+    return [(kor(A.union(*out["dis"])), "vurgu"), (kor(A.union(*out["omuz"])), "yazi")]
 
 
 def _araba(length=40.0):
@@ -426,7 +499,7 @@ def _olcekli(fn, dogal_boy):
 
 # simge: boy (mm) → [(şekil, rol)], ortası yaklaşık (0, 0). Çizgi kalınlıkları sabit çizilenler boyla yeniden kurulur.
 SIMGE = {
-    "jant": lambda boy: _jant(boy / 2),
+    "iz": _iz_simge,
     "araba": lambda boy: _araba(boy / 0.325),
     "anahtar": _olcekli(_anahtar, 25.0),
     "fincan": _olcekli(_fincan, 26.1),
@@ -443,7 +516,7 @@ SIMGE = {
     "yaprak": lambda boy: [(S.ic_leaf(0, 0, boy / 0.973), "vurgu")],
     "yildiz": lambda boy: [(S.ic_star5(0, 0, boy / 1.81), "vurgu")],
 }
-SIMGE_AD = {"jant": "jant", "araba": "araba", "anahtar": "İngiliz anahtarı", "fincan": "fincan", "direk": "berber direği",
+SIMGE_AD = {"iz": "lastik izi", "araba": "araba", "anahtar": "İngiliz anahtarı", "fincan": "fincan", "direk": "berber direği",
             "telefon": "telefon", "makas": "makas", "hilal": "hilal ve yıldız", "ev": "ev", "pirlanta": "pırlanta",
             "gozluk": "gözlük", "pati": "pati", "dambil": "dambıl", "dis": "diş", "yaprak": "yaprak",
             "yildiz": "yıldız", "monogram": "baş harfler", "logo": "logo", "yok": "simgesiz"}
