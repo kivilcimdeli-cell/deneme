@@ -1,8 +1,9 @@
 """Kişiye özel plakalı anahtarlık (Türk plakası biçiminde): plaka, alttaki yazı ve TR bandının rengi girilir; X2D 3MF
 hazır. Katalog yok (tasarım sabit; Shopier'deki ürün, scripts/boyde_plakali_anahtarlik.py).
 
-70 × 22 × 3 mm: siyah çerçeve ve alt şerit, beyaz plaka zemini, kırmızı ya da mavi TR bandı (beyaz TR); plaka yazısı
-1,3 mm, alttaki yazı 1 mm kabartma. Arka yüz tamamen siyah (zeminin ve bandın altında 0,4 mm siyah taban). Plaka büyük harfe çevrilir ve 34 ABC 123 biçimine getirilir (boşluksuz yazılsa da);
+70 × 22 × 3,2 mm: siyah çerçeve ve alt şerit, beyaz plaka zemini, kırmızı ya da mavi TR bandı (beyaz TR); plaka yazısı
+1,3 mm, alttaki yazı 1 mm kabartma. Arka yüz tamamen siyah (zeminin ve bandın altında 0,4 mm siyah taban); beyaz 1,2 mm,
+bant 1,4 mm kalın (renkler dolgun ve tok görünsün). Plaka büyük harfe çevrilir ve 34 ABC 123 biçimine getirilir (boşluksuz yazılsa da);
 alışılmış biçimde değilse yazıldığı gibi basılır, uyarı verilir. Uzun yazı şeride sığacak kadar küçülür; çok küçülüp
 ince kalırsa (0,7 mm'den ince yerler) uyarı verilir.
 
@@ -130,7 +131,7 @@ def _onizleme(t, plaka, yazi, bant_ad, path):
     y += on.height + 30
     dr.text(((1400 - arka.width) // 2, y), "Arka yüz (düz, siyah)", fill=(85, 87, 92), font=ImageFont.truetype(f2, 20))
     canvas.paste(arka, ((1400 - arka.width) // 2, y + 40), arka)
-    dr.text((50, canvas.height - 50), f"70 × 22 × 3 mm · {bant_ad} TR bandı · plaka ve yazı kabartma · BOYDE LABS",
+    dr.text((50, canvas.height - 50), f"70 × 22 × 3,2 mm · {bant_ad} TR bandı · plaka ve yazı kabartma · BOYDE LABS",
             fill=(85, 87, 92), font=ImageFont.truetype(f2, 22))
     canvas.save(path)
 
@@ -185,8 +186,8 @@ def uret(is_, secilen=None):
     is_.ilerle(72, "Önizlemeler çiziliyor")
     satirlar = [f"{plaka} – PLAKALI ANAHTARLIK · X2D " + ("DOLU TABLA" if len(yerler) == tabla_basi else
                                                           f"TABLA ({len(yerler)} ADET)"),
-                (f"70 × 22 × 3 mm · siyah çerçeve ve alt şerit 2 mm · beyaz plaka zemini · {bant_ad} TR bandı · "
-                 "plaka 1,3 mm, alttaki yazı 1 mm kabartma · arka yüz siyah"),
+                (f"70 × 22 × 3,2 mm · siyah çerçeve ve alt şerit 2,2 mm · beyaz plaka zemini 1,2 mm · {bant_ad} TR bandı "
+                 "1,4 mm · plaka 1,3 mm, alttaki yazı 1 mm kabartma · arka yüz siyah"),
                 (f"Tabla başına {tabla_basi} adet · {adet} adet için {tabla} tabla "
                  f"(son tablada {adet - (tabla - 1) * tabla_basi} adet yeter; fazlası yedek)" if adet > tabla_basi
                  else f"Dosyada {len(yerler)} adet (sipariş: {adet}) · dolu tablaya {tabla_basi} adet sığar"),

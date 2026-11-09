@@ -6,15 +6,16 @@ TR bandı mavi (örnekteki gibi) ya da kırmızı ("kırmızı versiyonunda yap 
 beyaz. Delik bandın sol üstünde (örnekte kesici
 gövde olarak duruyor; birleştirince STL'e çıkmamış).
 
-Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz ve tamamen siyah):
-  0–2,0    siyah    çerçeve (2 mm) ve alt şerit (adın zemini)
+Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz ve tamamen siyah; toplam 3,2 mm):
+  0–2,2    siyah    çerçeve ve alt şerit (adın zemini)
   0–0,4    siyah    plaka zemininin ve bandın altı: arka yüz siyah (kullanıcı: "arka plakalarını da siyah yapalım,
                     hem beyaz görünüyor hem mavi"; eskiden zemin ve bant tabladan başlıyordu)
-  0,4–1,2  beyaz    plaka zemini (4 katman: siyahın üstünde grileşmesin; çerçevenin 0,8 mm içinde)
-  0,4–1,4  kırmızı  TR bandı (ya da mavi)
-  1,2–2,5  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
-  1,4–2,1  beyaz    TR
-  2,0–3,0  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm; küçülünce ince
+  0,4–1,6  beyaz    plaka zemini (6 katman; kullanıcı: "mavi ve beyazın son katman dolgusunu artır, daha dolgun
+                    görünsün": beyaz 0,8'den 1,2 mm'ye, siyahın üstünde tok; çerçevenin 0,6 mm içinde)
+  0,4–1,8  kırmızı  TR bandı (ya da mavi; 7 katman, 1,4 mm)
+  1,6–2,9  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
+  1,8–2,5  beyaz    TR
+  2,2–3,2  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm; küçülünce ince
                     kalan adlar şeritte kayar)
 Örnek yazılar uydurma (gerçek plaka ya da kişi değil); görsellerde markamız BOYDE LABS.
 
@@ -52,7 +53,7 @@ IC = (2.05, 1.6, 67.95, 20.45)                    # çerçevenin içi
 SERIT_UST = 7.8                                   # alt şeridin üstü (adın zemini)
 BANT_SAG = 12.1                                   # TR bandının sağ kenarı
 DELIK, DELIK_R = (5.0, 17.8), 1.75                # Ø3,5; üstte 2,45, solda 3,25 mm et
-Z_GOVDE, Z_ZEMIN, Z_BANT = 2.0, 1.2, 1.4
+Z_GOVDE, Z_ZEMIN, Z_BANT = 2.2, 1.6, 1.8               # beyaz 1,2 mm, bant 1,4 mm: renkler dolgun ve tok
 Z_TABAN = 0.4                                     # arka yüz siyah: zeminin ve bandın altında 2 katman siyah
 PLAKA_H, TR_H, AD_H = 1.3, 0.7, 1.0
 ORNEK = [("p01", "34 BYD 34", "BOYDE LABS", "kirmizi"), ("p02", "06 BYD 06", "ADINIZ SOYADINIZ", "mavi"),
