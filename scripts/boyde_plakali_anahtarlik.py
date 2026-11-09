@@ -6,12 +6,14 @@ TR bandı mavi (örnekteki gibi) ya da kırmızı ("kırmızı versiyonunda yap 
 beyaz. Delik bandın sol üstünde (örnekte kesici
 gövde olarak duruyor; birleştirince STL'e çıkmamış).
 
-Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz):
+Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz ve tamamen siyah):
   0–2,0    siyah    çerçeve (2 mm) ve alt şerit (adın zemini)
-  0–1,0    beyaz    plaka zemini (çerçevenin 1 mm içinde)
-  0–1,2    kırmızı  TR bandı (ya da mavi)
-  1,0–2,3  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
-  1,2–1,9  beyaz    TR
+  0–0,4    siyah    plaka zemininin ve bandın altı: arka yüz siyah (kullanıcı: "arka plakalarını da siyah yapalım,
+                    hem beyaz görünüyor hem mavi"; eskiden zemin ve bant tabladan başlıyordu)
+  0,4–1,2  beyaz    plaka zemini (4 katman: siyahın üstünde grileşmesin; çerçevenin 0,8 mm içinde)
+  0,4–1,4  kırmızı  TR bandı (ya da mavi)
+  1,2–2,5  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
+  1,4–2,1  beyaz    TR
   2,0–3,0  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm; küçülünce ince
                     kalan adlar şeritte kayar)
 Örnek yazılar uydurma (gerçek plaka ya da kişi değil); görsellerde markamız BOYDE LABS.
@@ -50,7 +52,8 @@ IC = (2.05, 1.6, 67.95, 20.45)                    # çerçevenin içi
 SERIT_UST = 7.8                                   # alt şeridin üstü (adın zemini)
 BANT_SAG = 12.1                                   # TR bandının sağ kenarı
 DELIK, DELIK_R = (5.0, 17.8), 1.75                # Ø3,5; üstte 2,45, solda 3,25 mm et
-Z_GOVDE, Z_ZEMIN, Z_BANT = 2.0, 1.0, 1.2
+Z_GOVDE, Z_ZEMIN, Z_BANT = 2.0, 1.2, 1.4
+Z_TABAN = 0.4                                     # arka yüz siyah: zeminin ve bandın altında 2 katman siyah
 PLAKA_H, TR_H, AD_H = 1.3, 0.7, 1.0
 ORNEK = [("p01", "34 BYD 34", "BOYDE LABS", "kirmizi"), ("p02", "06 BYD 06", "ADINIZ SOYADINIZ", "mavi"),
          ("p03", "35 BYD 35", "İSİM SOYİSİM", "kirmizi")]
@@ -88,8 +91,9 @@ def tasarla(plaka, ad, bant_rengi="kirmizi"):
 
     def kat(cs, z0, z1):
         return cs.extrude(z1 - z0).translate((0, 0, z0))
-    parcalar = [("govde", kat(siyah, 0, Z_GOVDE), SIYAH), ("zemin", kat(zemin - delik, 0, Z_ZEMIN), BEYAZ),
-                ("bant", kat(bant - delik, 0, Z_BANT), BANT[bant_rengi]),
+    parcalar = [("govde", kat(siyah, 0, Z_GOVDE) + kat(ust - delik, 0, Z_TABAN), SIYAH),
+                ("zemin", kat(zemin - delik, Z_TABAN, Z_ZEMIN), BEYAZ),
+                ("bant", kat(bant - delik, Z_TABAN, Z_BANT), BANT[bant_rengi]),
                 ("plaka", kat(plaka_cs, Z_ZEMIN, Z_ZEMIN + PLAKA_H), SIYAH),
                 ("tr", kat(tr_cs, Z_BANT, Z_BANT + TR_H), BEYAZ)]
     if ad.strip():
