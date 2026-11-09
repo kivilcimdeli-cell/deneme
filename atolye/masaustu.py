@@ -46,6 +46,11 @@ def pencere():
         webbrowser.open(ADRES)
         return None
     os.makedirs(PROFIL, exist_ok=True)
+    try:                                                 # Bellek sayfasında pencere açıkken silinemeyen önbellek
+        from .bellek import acilista
+        acilista()
+    except Exception:                                    # noqa: BLE001
+        pass
     return subprocess.Popen([exe, f"--app={ADRES}", f"--user-data-dir={PROFIL}", "--no-first-run",
                              "--no-default-browser-check", *pencere_boyu()])
 

@@ -11,6 +11,7 @@ Yapı:
   isci.py     alt süreç: ürün eklentisinin katalog / üret işlevini çağırır
   kayit.py    müşteri kayıtları (atolye_veri/musteriler/<kimlik>/musteri.json), çıktılar aynı klasörde
   ogrenme.py  tercihler: gösterilen ve seçilen tasarımların özellikleri; ağırlıklı seçim
+  bellek.py   Bellek sayfası: silinen müşteriler, iş günlükleri, pencere önbelleği, geçici dosyalar temizlenir
   urunler/    ürün eklentileri (yeni ürün = yeni dosya; urunler/__init__.py'deki listeye eklenir)
   tasarim/    ürünlerin ortak parametrik tasarım parçaları
   arayuz/     index.html, app.js, stil.css

@@ -24,6 +24,13 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
   tasarım varsa, **Kaydet ve yeniden üret** düğmeleri hem formun sonunda hem panelin altında.
 - **Form:** alan grupları katlanır kartlarda; ilki, zorunlu alanı olan ve dolu olanlar açık, öbürleri kapalı.
 - **Pencere:** ekranın görev çubuğu dışındaki alanına sığar, büyütülmüş açılır.
+- **Bellek** (sol menü): veri klasörünün boyu ve zamanla biriken gereksizler, her biri boyuyla, seçilip temizlenir.
+  - Silinen müşteriler (`silinenler/`): kalıcı silinir, ayrıca onay ister; varsayılan seçili değil.
+  - İş günlükleri (`gunluk.txt`): her müşteride son 200 satır kalır.
+  - Pencere önbelleği: açıkken kilitli olanlar bir sonraki açılışta silinir.
+  - Geçici dosyalar (`*.tmp`, `*.part`).
+  - Bitmiş iş kayıtları (hafıza; İşler sayfası).
+  - Müşteri kayıtlarına, kataloglara, baskı dosyalarına ve sayfalara dokunulmaz (`atolye/bellek.py`).
 - **Görünüm:** renkler marka paletinden; yazı tipleri uygulamayla gelir (Space Grotesk, Figtree; internet gerekmez).
 
 ## Kurulum (Windows)
@@ -191,7 +198,8 @@ kayıtları ve çıktılar `musteriler/<tarih_ad>/` altındadır (müşteri sayf
 - `cikti/` (3MF ve önizlemeler)
 - `web/` (site)
 
-Veri klasörü kişisel bilgi içerir ve git'e girmez. Yedeği elle alınır.
+Veri klasörü kişisel bilgi içerir ve git'e girmez. Yedeği elle alınır. Biriken gereksizler uygulamanın Bellek
+sayfasından temizlenir.
 
 **Ortam değişkenleri** (isteğe bağlı):
 

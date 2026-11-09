@@ -59,6 +59,20 @@ def mesgul():
     return any(j["durum"] in ("bekliyor", "calisiyor") for j in _ISLER.values())
 
 
+def bitmisler():
+    return [no for no, j in _ISLER.items() if j["durum"] in ("bitti", "hata")]
+
+
+def bitmisleri_temizle():
+    """Bitmiş ve hatalı işlerin hafızadaki kayıtlarını siler (Bellek sayfası); süren ve bekleyenler kalır. Döner
+    silinen iş sayısı. Günlükleri müşteri klasöründeki gunluk.txt'te kalır."""
+    with _KILIT:
+        nolar = bitmisler()
+        for no in nolar:
+            _ISLER.pop(no, None)
+    return len(nolar)
+
+
 def hepsi():
     return [_ozet(j) for j in sorted(_ISLER.values(), key=lambda j: -j["no"])][:50]
 

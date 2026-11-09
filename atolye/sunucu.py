@@ -16,6 +16,8 @@
   GET  /api/durum                     Claude Code bulunuyor mu, sürüm, veri klasörü
   GET  /yazi/<dosya>.ttf              arayüzün yazı tipleri (scripts/fonts)
   GET  /api/ogrenme/<urun>            öğrenilen tercihler
+  GET  /api/bellek                     veri klasörünün boyu ve temizlenebilecekler (bellek.py)
+  POST /api/bellek/temizle             {secim: [silinenler, gunlukler, onbellek, gecici, isler]} → boşalan yer
   GET  /dosya/<k>/<yol>               müşteri klasöründeki bir dosya (katalog, 3MF, önizleme)
 """
 import base64
@@ -191,6 +193,13 @@ class Panel(BaseHTTPRequestHandler):
             return isler.durum(p[1]) or {}
         if yontem == "GET" and len(p) == 2 and p[0] == "ogrenme":
             return ogrenme.ozet(p[1])
+        if yontem == "GET" and p == ["bellek"]:
+            from . import bellek
+            return bellek.durum()
+        if yontem == "POST" and p == ["bellek", "temizle"]:
+            from . import bellek
+            secim = [s for s in (self._govde().get("secim") or []) if isinstance(s, str)]
+            return bellek.temizle(secim)
         if yontem == "POST" and p == ["musteri"]:
             g = self._govde()
             u = urunler.bul(g["urun"])

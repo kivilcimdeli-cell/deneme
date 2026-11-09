@@ -14,6 +14,7 @@ const YOL = {
   klasor: "M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2h7.5A2.5 2.5 0 0 1 21 9.5v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5Z",
   kalem: "M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z",
   cop: "M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13",
+  bellek: "M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4",
   indir: "M12 4v11M7 10l5 5 5-5M5 20h14",
   ac: "M14 4h6v6M20 4l-9 9M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10",
   ara: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4",
@@ -97,6 +98,7 @@ async function git() {
     if (yol === "musteri") return musteriSayfasi(decodeURIComponent(arg));
     if (yol === "musteriler") return musteriler();
     if (yol === "isler") return isler();
+    if (yol === "bellek") return bellekSayfasi();
     return anaSayfa();
   } catch (e) {
     sayfa.innerHTML = `<div class="uyari hata-kutu">${esc(e.message)}</div>`;
@@ -264,17 +266,16 @@ function cekmeceAc(k, m, u) {
   const son = m.secimler.at(-1) || {};
   const sonKod = son.kod || "";
   const yeniden = u.katalog_adet ? !!sonKod : m.ciktilar.length > 0;   // üretilmiş bir tasarım varsa
-  const uretDugme = (form) => yeniden ? `<button type="submit"${form ? ' form="duzen-form"' : ""} data-uret="1">
+  const uretDugme = () => yeniden ? `<button type="submit" form="duzen-form" data-uret="1">
     ${ikon("kup")}Kaydet ve yeniden üret${sonKod ? ` (${esc(sonKod)})` : ""}</button>` : "";
   c.innerHTML = `<div class="cekmece">
     <div class="cekmece-bas"><div><p class="soluk kucuk">${esc(m.ad)} · ${esc(u.ad)}</p><h2>Bilgileri düzenle</h2></div>
       <button class="ince simge-dugme" id="cekmece-kapat" title="Kapat (Esc)">${ikon("kapat")}</button></div>
-    <form id="duzen-form">${formHtml(u, m.bilgiler)}
-      <div class="form-sonu"><button class="vurgu" type="submit">${ikon("tik")}Kaydet</button>${uretDugme(false)}</div></form>
+    <form id="duzen-form">${formHtml(u, m.bilgiler)}</form>
     <div class="cekmece-alt"><button class="vurgu" type="submit" form="duzen-form">${ikon("tik")}Kaydet</button>
-      ${uretDugme(true)}<button class="ince" id="cekmece-vazgec">Vazgeç</button>
+      ${uretDugme()}<button class="ince" id="cekmece-vazgec">Vazgeç</button>
       <span class="soluk kucuk cekmece-ipucu">${yeniden
-        ? "Yeniden üretince 3MF ve sayfa yeni bilgilerle yenilenir." : "Sonraki katalog ve üretimde kullanılır."}</span></div></div>`;
+        ? "Yeniden üretince dosyalar yeni bilgilerle yenilenir." : "Sonraki katalog ve üretimde kullanılır."}</span></div></div>`;
   c.hidden = false;
   c.onclick = e => { if (e.target === c) cekmeceKapat(); };
   $("#cekmece-kapat").onclick = $("#cekmece-vazgec").onclick = cekmeceKapat;
@@ -501,6 +502,53 @@ async function isler() {
         ${ikon("sag")}</a>`).join("")}</div>`
     : `<div class="kart bos">${ikon("isler")}<p>Bu oturumda iş yok. Katalog ya da baskı dosyası üretince burada görünür.</p></div>`);
   if (rows.some(j => j.durum === "calisiyor" || j.durum === "bekliyor")) zamanlayici = setTimeout(isler, 2000);
+}
+
+// ------------------------------------------------------------------ bellek ve temizlik
+function boyutYaz(b) {
+  const tr = (v, n) => v.toFixed(n).replace(".", ",");
+  return b >= 1e9 ? `${tr(b / 1e9, 2)} GB` : b >= 1e6 ? `${tr(b / 1e6, b >= 1e8 ? 0 : 1)} MB` : `${Math.round(b / 1e3)} KB`;
+}
+
+async function bellekSayfasi(sonuc) {
+  const d = await api("bellek");
+  const ozet = k => k.anahtar === "isler" ? `${k.adet} kayıt` : `${boyutYaz(k.bayt)}${k.adet ? ` · ${k.adet}` : ""}`;
+  const bos = k => k.anahtar === "isler" ? !k.adet : k.bayt < 1e3;
+  sayfa.innerHTML = baslik("Bellek", "Uygulamanın zamanla biriktirdiği, işe yaramayan dosya ve kayıtlar. Müşteri kayıtlarına, " +
+      "kataloglara, baskı dosyalarına ve sayfalara dokunulmaz.") + `
+    <div class="kart bellek-ozet">
+      <div><p class="soluk kucuk">Veri klasörü</p><b>${boyutYaz(d.veri_bayt)}</b></div>
+      <div><p class="soluk kucuk">Müşteriler</p><b>${d.musteri} · ${boyutYaz(d.musteri_bayt)}</b></div>
+      <p class="soluk kucuk bellek-yol">${esc(d.veri)}</p></div>
+    ${sonuc ? `<div class="bilgi-kutu">${ikon("tik")}${esc(sonuc)}</div>` : ""}
+    <form class="kart bellek-liste" id="bellek-form">${d.kalemler.map(k => `
+      <label class="bellek-satir ${bos(k) ? "temiz" : ""}">
+        <input type="checkbox" name="secim" value="${k.anahtar}" ${!bos(k) && !k.uyari ? "checked" : ""} ${bos(k) ? "disabled" : ""}>
+        <span><b>${esc(k.ad)}</b><br><span class="soluk kucuk">${esc(k.aciklama)}</span>
+          ${k.uyari && !bos(k) ? `<br><span class="kucuk uyari-yazi">${esc(k.uyari)}</span>` : ""}</span>
+        <span class="bellek-boyut">${bos(k) ? "temiz" : ozet(k)}</span></label>`).join("")}
+      <div class="bellek-alt"><button class="vurgu" type="submit">${ikon("cop")}Seçilenleri temizle</button>
+        <span class="soluk kucuk">Sistem belleği (RAM): ağır işler ayrı süreçte çalışır, bitince bellek kendiliğinden boşalır.</span></div>
+    </form>`;
+  $("#bellek-form").onsubmit = async e => {
+    e.preventDefault();
+    const secim = $$("#bellek-form input:checked").map(i => i.value);
+    if (!secim.length) return bildir("Temizlenecek bir şey seçilmedi", true);
+    if (secim.includes("silinenler") &&
+        !confirm("Silinen müşterilerin klasörleri kalıcı olarak silinecek, geri alınamaz. Devam edilsin mi?")) return;
+    const dugme = e.submitter;
+    if (dugme) dugme.disabled = true;
+    try {
+      const r = await api("bellek/temizle", {secim});
+      const is = r.bosalan.isler ? ` · ${r.bosalan.isler} iş kaydı silindi` : "";
+      const metin = `${boyutYaz(r.toplam)} boşaldı${is}.` + (r.notlar.length ? " " + r.notlar.join(" ") : "");
+      bildir(metin);
+      bellekSayfasi(metin);
+    } catch (err) {
+      bildir(err.message, true);
+      if (dugme) dugme.disabled = false;
+    }
+  };
 }
 
 async function rozet() {
