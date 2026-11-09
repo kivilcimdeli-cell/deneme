@@ -16,8 +16,16 @@ Katalogsuz ürünlerde (Türk bayraklı isimlik) bilgiler girilince doğrudan 3M
 **Arayüz** (`atolye/arayuz/`):
 
 - **Sol menü:** Yeni sipariş, Müşteriler, İşler (süren iş sayısı), son müşteriler; altta Claude durumu ve sürüm.
-- **Bölümler:** ürünler Yeni sipariş sayfasında başlıklar altında (Masa isimlikleri, Güzellik koleksiyonu,
-  Anahtarlıklar; eklentideki `KATEGORI`), Müşteriler sayfasında aynı bölümlerle süzülür.
+- **Kategoriler:** Yeni sipariş sayfasında iki kart: İsimlikler ve Anahtarlıklar (`urunler.KATEGORILER`).
+  - Karta tıklayınca kategorinin ürünleri alt başlıklarıyla açılır (İşletme isimlikleri, Kişi isimlikleri, Güzellik
+    koleksiyonu; eklentideki `KATEGORI` ve `ALT`). Ürün seçilince form gelir.
+  - Müşteriler sayfası aynı kategorilerle süzülür.
+  - Yeni ürün eklentisi `KATEGORI` ile kendiliğinden yerine oturur. Yeni kategori `KATEGORILER`e eklenir.
+- **Form:** her bölümde önce doldurulması gereken alanlar görünür.
+  - Boş bırakılınca kendiliğinden dolan ya da nadiren değişen alanlar kapalı "Diğer ayarlar" kutusundadır
+    (`urunler.ILERI` ya da alanda `"ileri": True`): büyük yazılacak ad, çağrı ve QR yazısı, renkler, WhatsApp,
+    harita, web sitesi, tanıtım, sayfa adresi, şablon.
+  - Dolu bir ayar varsa kutu açık gelir.
 - **Müşteri sayfası:** adımlar (Bilgiler → Katalog → Seçim → Baskı dosyaları), kataloglar sekmeli, altta yapışık
   üretim çubuğu (kod, renk değişikliği); sağda çıktılar (Baskı dosyaları, Web sayfası, Claude'un yaptıkları),
   Claude'a özel istek, geçmiş. **Bilgileri düzenle** sağdan açılan panelde (Esc kapatır): **Kaydet** ve, üretilmiş

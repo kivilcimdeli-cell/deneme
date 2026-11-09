@@ -346,3 +346,15 @@ details.bilgi-not summary { cursor: pointer; font-weight: 600; }
 .bellek-alt { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 16px 24px 12px; }
 .bilgi-kutu { display: flex; gap: 8px; align-items: center; padding: 12px 16px; margin-bottom: 16px; border-radius: 12px;
   background: rgba(31, 138, 76, .1); color: var(--ok, #1f8a4c); font-weight: 600; }
+
+/* ana sayfa: kategori kartları; formda "Diğer ayarlar" */
+.kategoriler { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.kategori-kart { padding: 26px 26px 22px; }
+.kategori-kart h2 { font-size: 22px; }
+.kategori-kart p { margin-top: 6px; }
+.alanlar > details.ileri { grid-column: 1 / -1; border-top: 1px dashed var(--kenar); padding-top: 14px; }
+details.ileri > summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; font-weight: 700; }
+details.ileri > summary::-webkit-details-marker { display: none; }
+details.ileri > summary .ac-kapa { color: var(--gray); transition: transform .15s; }
+details.ileri[open] > summary .ac-kapa { transform: rotate(90deg); }
+details.ileri[open] > summary { margin-bottom: 16px; }

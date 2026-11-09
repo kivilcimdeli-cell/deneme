@@ -19,7 +19,8 @@ import re
 from .guzellik_9x12 import RENK_ALANLARI, SAYFA_ALANLARI, _DAL
 
 KOD = "guzellik_10x20"
-KATEGORI = "guzellik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
+KATEGORI = "isimlik"                     # ana sayfadaki kategorisi (urunler.KATEGORILER)
+ALT = "Güzellik koleksiyonu"                  # kategori sayfasındaki alt başlığı
 AD = "Güzellik isimliği 10 × 20"
 SIMGE = "💅"
 ACIKLAMA = ("Saç tasarımcısı, nail artist, estetisyen için 200 × 100 mm kişiye özel isimlik: el yazısı ad, unvan, "

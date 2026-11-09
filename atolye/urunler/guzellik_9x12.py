@@ -18,7 +18,8 @@ import os
 import re
 
 KOD = "guzellik_9x12"
-KATEGORI = "guzellik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
+KATEGORI = "isimlik"                     # ana sayfadaki kategorisi (urunler.KATEGORILER)
+ALT = "Güzellik koleksiyonu"                  # kategori sayfasındaki alt başlığı
 AD = "Güzellik isimliği 9 × 12"
 SIMGE = "🌸"
 ACIKLAMA = ("Kuaför, güzellik salonu, tırnak, kirpik, cilt bakım için 120 × 90 mm QR'lı isimlik: el yazısı ad, çiçek "

@@ -19,7 +19,8 @@ import os
 import re
 
 KOD = "plakali"
-KATEGORI = "anahtarlik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
+KATEGORI = "anahtarlik"                     # ana sayfadaki kategorisi (urunler.KATEGORILER)
+ALT = ""                  # kategori sayfasındaki alt başlığı
 AD = "Plakalı anahtarlık"
 SIMGE = "🚘"
 ACIKLAMA = ("Kişiye özel Türk plakası: plaka ve altında ad ya da söz kabartma, kırmızı ya da mavi TR bandı "

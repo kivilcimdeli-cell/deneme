@@ -20,7 +20,8 @@ import os
 import re
 
 KOD = "isimlik_9x12"
-KATEGORI = "isimlik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
+KATEGORI = "isimlik"                     # ana sayfadaki kategorisi (urunler.KATEGORILER)
+ALT = "İşletme isimlikleri"                  # kategori sayfasındaki alt başlığı
 AD = "QR'lı masa isimliği 9 × 12"
 SIMGE = "🔳"
 ACIKLAMA = ("120 × 90 mm, 1 cm gövde, 2 mm kabartma yazı, sehpalı; QR işletmenin sayfasını açar. 10 tasarımlık "

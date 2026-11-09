@@ -37,11 +37,11 @@ const YOL = {
   cicekkart: "M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5ZM7.15 9.80a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M5.06 11.32a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M5.86 13.78a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M8.44 13.78a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M9.24 11.32a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0M7.80 12.00a0.7 0.7 0 1 0 1.4 0a0.7 0.7 0 1 0 -1.4 0M13.5 10h4.5M13.5 13.5h3",
 };
 // ürün bölümleri (eklentideki KATEGORI): Yeni sipariş sayfasında başlıklar, Müşteriler'de süzgeç
-const KATEGORILER = [
-  ["isimlik", "Masa isimlikleri", "QR'lı işletme isimliği, kurumsal kişi isimliği, bayraklı isimlik"],
-  ["guzellik", "Güzellik koleksiyonu", "Kuaför, güzellik, tırnak, kirpik: çiçekli, el yazılı isimlikler"],
-  ["anahtarlik", "Anahtarlıklar", "Markalı toptan anahtarlık, plakalı anahtarlık"],
-  ["diger", "Diğer", ""]];
+// ana sayfadaki kategoriler (sunucudan: urunler.KATEGORILER); tanımsız kategorideki ürünler "Diğer"de
+let KATS = [];
+const kategoriler = () => [...KATS, {kod: "diger", ad: "Diğer", aciklama: "", ikon: "kup"}]
+  .filter(k => URUNLER.some(u => (KATS.some(x => x.kod === u.kategori) ? u.kategori : "diger") === k.kod));
+const urunKat = u => (KATS.some(x => x.kod === u.kategori) ? u.kategori : "diger");
 const URUN_IKON = {isimlik_9x12: "qr", kurumsal_10x20: "kart", bayrakli: "bayrak", anahtarlik: "anahtar",
   plakali: "plaka", guzellik_9x12: "cicek", guzellik_10x20: "cicekkart"};
 const ikon = (ad, cls = "") => `<span class="ikon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -84,17 +84,19 @@ async function git() {
   clearTimeout(zamanlayici);
   cekmeceKapat();
   const [, yol = "", arg = ""] = location.hash.split("/");
-  const menu = yol === "musteri" ? "musteriler" : yol === "yeni" ? "" : yol;
+  const menu = yol === "musteri" ? "musteriler" : yol === "yeni" || yol === "kategori" ? "" : yol;
   $$("#menu a").forEach(a => a.classList.toggle("etkin", a.dataset.yol === menu));
   try {
     if (!URUNLER.length) {
       sayfa.innerHTML = yukleniyor("Yükleniyor… (ilk açılışta birkaç saniye sürer)");
-      [URUNLER, DURUM] = await Promise.all([api("urunler"), api("durum").catch(() => ({}))]);
+      [URUNLER, DURUM, KATS] = await Promise.all([api("urunler"), api("durum").catch(() => ({})),
+        api("kategoriler").catch(() => [])]);
       $$("[data-ikon]").forEach(el => (el.outerHTML = ikon(el.dataset.ikon)));
       yanAlt();
     }
     yanSon(yol === "musteri" ? decodeURIComponent(arg) : "");
     if (yol === "yeni") return yeniSiparis(decodeURIComponent(arg));
+    if (yol === "kategori") return kategoriSayfasi(decodeURIComponent(arg));
     if (yol === "musteri") return musteriSayfasi(decodeURIComponent(arg));
     if (yol === "musteriler") return musteriler();
     if (yol === "isler") return isler();
@@ -143,22 +145,33 @@ async function anaSayfa() {
   const d = new Date(), ay = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   const ozet = [["kisiler", rows.length, "müşteri"], ["saat", rows.filter(r => (r.guncelleme || "").startsWith(ay)).length,
     "bu ay çalışılan"], ["kup", rows.filter(r => r.cikti).length, "baskı dosyası hazır"]];
-  sayfa.innerHTML = baslik("Yeni sipariş", "Ürünü seçin. Müşteri bilgilerinden sonra katalog ya da baskı dosyası hazırlanır.") + `
+  sayfa.innerHTML = baslik("Yeni sipariş", "Kategoriyi seçin, sonra ürünü. Müşteri bilgilerinden sonra katalog ya da baskı dosyası hazırlanır.") + `
     <div class="ozet">${ozet.map(([i, n, t]) => `<div class="kart">${ikon(i)}<div><b>${n}</b><span>${t}</span></div></div>`).join("")}</div>
-    ${KATEGORILER.map(([kk, kad, kalt]) => {
-      const us = URUNLER.filter(u => (u.kategori || "diger") === kk);
-      return us.length ? `<section class="bolum kategori"><div class="kategori-bas"><h2>${esc(kad)}</h2>
-        ${kalt ? `<span class="soluk kucuk">${esc(kalt)}</span>` : ""}</div>
-        <div class="urunler">${us.map(u => `
-        <a class="kart urun" href="#/yeni/${u.kod}">
-          <span class="urun-ikon">${ikon(URUN_IKON[u.kod])}</span><h2>${esc(u.ad)}</h2>
-          <p>${esc(u.aciklama)}</p>
-          <span class="urun-alt"><span class="cip">${u.katalog_adet ? `${u.katalog_adet} tasarımlık katalog` : "Doğrudan 3MF"}</span>
-            ${ikon("ok", "ok")}</span></a>`).join("")}</div></section>` : "";
-    }).join("")}
+    <div class="bolum kategoriler">${kategoriler().map(k => {
+      const us = URUNLER.filter(u => urunKat(u) === k.kod);
+      return `<a class="kart urun kategori-kart" href="#/kategori/${k.kod}">
+        <span class="urun-ikon">${ikon(k.ikon || "kup")}</span>
+        <div><h2>${esc(k.ad)}</h2><p>${esc(k.aciklama || us.map(u => u.ad).join(", "))}</p></div>
+        <span class="urun-alt"><span class="cip">${us.length} ürün</span>${ikon("ok", "ok")}</span></a>`;
+    }).join("")}</div>
     <div class="bolum"><div class="kart-baslik"><h2>Son müşteriler</h2>
       ${rows.length ? `<a class="dugme ince kucuk" href="#/musteriler">Hepsi ${ikon("ok")}</a>` : ""}</div>
       ${listeHtml(rows.slice(0, 5))}</div>`;
+}
+
+function kategoriSayfasi(kod) {
+  const k = kategoriler().find(x => x.kod === kod);
+  if (!k) return anaSayfa();
+  const us = URUNLER.filter(u => urunKat(u) === kod);
+  const altlar = [...new Set(us.map(u => u.alt || ""))];
+  const kart = u => `<a class="kart urun" href="#/yeni/${u.kod}">
+      <span class="urun-ikon">${ikon(URUN_IKON[u.kod] || "kup")}</span><h2>${esc(u.ad)}</h2>
+      <p>${esc(u.aciklama)}</p>
+      <span class="urun-alt"><span class="cip">${u.katalog_adet ? `${u.katalog_adet} tasarımlık katalog` : "Doğrudan 3MF"}</span>
+        ${ikon("ok", "ok")}</span></a>`;
+  sayfa.innerHTML = iz(["Yeni sipariş", "#/"], [k.ad]) + baslik(esc(k.ad), "Ürünü seçin; ardından müşterinin bilgilerini doldurursunuz.") +
+    altlar.map(a => `<section class="bolum kategori">${a ? `<div class="kategori-bas"><h2>${esc(a)}</h2></div>` : ""}
+      <div class="urunler">${us.filter(u => (u.alt || "") === a).map(kart).join("")}</div></section>`).join("");
 }
 
 let SUZGEC = "";
@@ -166,13 +179,12 @@ async function musteriler() {
   const rows = await api("musteriler");
   sayfa.innerHTML = baslik("Müşteriler", `${rows.length} kayıt · ${esc(DURUM.veri || "")}`) + `
     <div class="arac-cubugu"><div class="arama">${ikon("ara")}<input id="ara" placeholder="Ad ya da ürün ara…"></div>
-      <div class="suzgec">${[["", "Tümü"], ...KATEGORILER.filter(([kk]) => URUNLER.some(u => (u.kategori || "diger") === kk))
-        .map(([kk, kad]) => [kk, kad])].map(([k, a]) =>
+      <div class="suzgec">${[["", "Tümü"], ...kategoriler().map(k => [k.kod, k.ad])].map(([k, a]) =>
         `<button data-urun="${k}" class="${SUZGEC === k ? "etkin" : ""}">${esc(a)}</button>`).join("")}</div></div>
     <div id="liste"></div>`;
   const ciz = () => {
     const q = $("#ara").value.toLocaleLowerCase("tr");
-    const kat = kod => (URUNLER.find(u => u.kod === kod) || {}).kategori || "diger";
+    const kat = kod => { const u = URUNLER.find(x => x.kod === kod); return u ? urunKat(u) : "diger"; };
     $("#liste").innerHTML = listeHtml(rows.filter(r => (!SUZGEC || kat(r.urun) === SUZGEC) &&
       (r.ad + " " + urunAdi(r.urun)).toLocaleLowerCase("tr").includes(q)), rows.length ? "Aramaya uyan müşteri yok." : "Henüz müşteri yok.");
   };
@@ -201,20 +213,28 @@ function alanHtml(a, deger) {
     ${a.ipucu ? `<span class="ipucu">${esc(a.ipucu)}</span>` : ""}</label>`;
 }
 
-function formHtml(u, bilgiler = {}) {          // alan grupları ayrı kartlarda; ilki açık, öbürleri katlanır
+function formHtml(u, bilgiler = {}) {
+  // alan grupları ayrı kartlarda; ilki açık, öbürleri katlanır. "ileri" alanlar (boş bırakılınca kendiliğinden
+  // dolanlar: renkler, WhatsApp, sayfa adresi…) grubun içinde kapalı "Diğer ayarlar" kutusunda
   const bolumler = [];
   for (const a of u.alanlar) {
     if (!bolumler.length || (a.grup && a.grup !== bolumler.at(-1).ad))
-      bolumler.push({ad: a.grup || "Bilgiler", h: "", ac: false, dolu: 0});
+      bolumler.push({ad: a.grup || "Bilgiler", ana: "", ileri: "", nIleri: 0, nAna: 0, ac: false, dolu: 0, ileriDolu: 0});
     const b = bolumler.at(-1);
-    b.h += alanHtml(a, bilgiler[a.ad]);
+    const dolu = bilgiler[a.ad] && String(bilgiler[a.ad]) !== String(a.varsayilan ?? "");
+    if (a.ileri) { b.ileri += alanHtml(a, bilgiler[a.ad]); b.nIleri += 1; if (dolu) b.ileriDolu += 1; }
+    else { b.ana += alanHtml(a, bilgiler[a.ad]); b.nAna += 1; }
     if (a.zorunlu) b.ac = true;                     // zorunlu alanı olan bölüm kapanmaz (form doğrulaması görünsün)
-    if (bilgiler[a.ad] && String(bilgiler[a.ad]) !== String(a.varsayilan ?? "")) b.dolu += 1;
+    if (dolu) b.dolu += 1;
   }
+  const ileri = b => !b.nIleri ? "" : !b.nAna ? b.ileri : `<details class="ileri" ${b.ileriDolu ? "open" : ""}>
+      <summary>${ikon("sag", "ac-kapa")}Diğer ayarlar <span class="soluk kucuk">· ${b.nIleri} alan · boş bırakılırsa
+        kendiliğinden${b.ileriDolu ? ` · ${b.ileriDolu} dolu` : ""}</span></summary>
+      <div class="alanlar">${b.ileri}</div></details>`;
   return bolumler.map((b, i) => `<details class="kart form-bolum" ${i === 0 || b.ac || b.dolu ? "open" : ""}>
     <summary><h3>${esc(b.ad)}</h3><span class="soluk kucuk">${b.dolu ? `${b.dolu} alan dolu`
       : i ? "isteğe bağlı · açmak için tıklayın" : ""}</span>${ikon("sag", "ac-kapa")}</summary>
-    <div class="alanlar">${b.h}</div></details>`).join("");
+    <div class="alanlar">${b.nAna ? b.ana : ""}${ileri(b)}</div></details>`).join("");
 }
 
 function formOku(form, u) {
@@ -238,12 +258,14 @@ async function dosyalariYukle(k, dosyalar) {
 function yeniSiparis(kod) {
   const u = URUNLER.find(x => x.kod === kod);
   if (!u) return anaSayfa();
-  sayfa.innerHTML = iz(["Yeni sipariş", "#/"], [u.ad]) +
+  const k = kategoriler().find(x => x.kod === urunKat(u));
+  sayfa.innerHTML = iz(["Yeni sipariş", "#/"], ...(k ? [[k.ad, `#/kategori/${k.kod}`]] : []), [u.ad]) +
     baslik("Müşteri bilgileri", esc(u.aciklama), `<span class="cip koyu">${ikon(URUN_IKON[u.kod])}${esc(u.ad)}</span>`) + `
     <form id="form" class="yigin">${formHtml(u)}
       <div class="eylem-cubugu"><button class="vurgu" type="submit">${ikon(u.katalog_adet ? "katalog" : "kup")}
         ${u.katalog_adet ? `Kaydet ve ${u.katalog_adet} tasarımlık katalog üret` : "Kaydet ve 3MF üret"}</button>
-        <a class="dugme ince" href="#/">Vazgeç</a><span class="soluk"><span class="zorunlu"></span> zorunlu alan</span></div></form>`;
+        <a class="dugme ince" href="${k ? `#/kategori/${k.kod}` : "#/"}">Vazgeç</a>
+        <span class="soluk"><span class="zorunlu"></span> zorunlu alan</span></div></form>`;
   $("#form").onsubmit = async e => {
     e.preventDefault();
     const btn = e.submitter; btn.disabled = true;

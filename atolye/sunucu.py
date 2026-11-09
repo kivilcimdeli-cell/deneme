@@ -2,6 +2,7 @@
 
   GET  /                              arayüz
   GET  /api/urunler                   ürünler ve form alanları
+  GET  /api/kategoriler               ana sayfadaki kategoriler (urunler.KATEGORILER)
   GET  /api/musteriler                müşteriler (son güncellenen önce)
   POST /api/musteri                   {urun, bilgiler} → yeni müşteri
   GET  /api/musteri/<k>               müşteri, katalogları, çıktıları, işleri
@@ -182,6 +183,8 @@ class Panel(BaseHTTPRequestHandler):
     def _api(self, yontem, p):
         if yontem == "GET" and p == ["urunler"]:
             return [urunler.tanim(m) for m in urunler.hepsi()]
+        if yontem == "GET" and p == ["kategoriler"]:
+            return urunler.KATEGORILER
         if yontem == "GET" and p == ["musteriler"]:
             return kayit.liste()
         if yontem == "GET" and p == ["durum"]:

@@ -15,7 +15,8 @@ Seçilen kodla (müşteri klasöründe, cikti/):
 import os
 
 KOD = "anahtarlik"
-KATEGORI = "anahtarlik"                     # arayüzde ürünün bölümü (Yeni sipariş, Müşteriler süzgeci)
+KATEGORI = "anahtarlik"                     # ana sayfadaki kategorisi (urunler.KATEGORILER)
+ALT = ""                  # kategori sayfasındaki alt başlığı
 AD = "Toptan anahtarlık"
 SIMGE = "🔑"
 ACIKLAMA = ("Müşterinin markasıyla arkalı önlü anahtarlık: ön yüz kabartma, arka yüz gömme yazı. 20 tasarımlık "
