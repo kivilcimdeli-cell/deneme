@@ -337,9 +337,24 @@ def _arka_qr(k, p, entry):
         k.uyarilar.append(f"QR bu biçime sığmadı (kare {m:.2f} mm < {O.Q.MIN_MODULE} mm)")
         k.qr_sigmadi = True
         return []
-    light, dark, _ = O.Q.shapes(entry, m, 0.0, 0.0)
+    _, dark, side = O.Q.shapes(entry, m, 0.0, 0.0)
+    dark = _yuvarlak_bulucular(dark, entry.n, m)
+    karo = A.rrect(side, side, 3.0 * m)                 # yuvarlak köşe yalnız sessiz bölgeyi keser (veri dışında)
     k.qr, k.qr_modul = entry, m
-    return [(light if p.koyu else dark, p.yazi)]
+    return [((karo - dark) if p.koyu else dark, p.yazi)]
+
+
+def _yuvarlak_bulucular(dark, n, m):
+    """Üç köşedeki bulucu kareleri yuvarlak köşeli yapar (keskin köşeli QR sert duruyordu): dış halka 2 kare, iç
+    boşluk 1 kare, orta 3 × 3 kare 0,8 kare yarıçapla; halka kalınlığı her yerde 1 kare (okuyucular tanır). Veri
+    kareleri kare kalır (0,9 mm'de yuvarlak nokta baskıda okunmayı bozar)."""
+    x0, y1 = -n * m / 2, n * m / 2
+    for r, c in ((0, 0), (0, n - 7), (n - 7, 0)):
+        cx, cy = x0 + (c + 3.5) * m, y1 - (r + 3.5) * m
+        dark = dark - A.rect(cx - 3.5 * m, cy - 3.5 * m, cx + 3.5 * m, cy + 3.5 * m)
+        halka = A.rrect(7 * m, 7 * m, 2.0 * m, cx, cy) - A.rrect(5 * m, 5 * m, 1.0 * m, cx, cy)
+        dark = dark + halka + A.rrect(3 * m, 3 * m, 0.8 * m, cx, cy)
+    return dark
 
 
 def qr_oku(k):
