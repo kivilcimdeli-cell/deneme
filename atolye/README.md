@@ -162,6 +162,9 @@ koleksiyonunun (`boyde_labs/guzellik/`) uygulamadaki karşılığı.
     (klasik, dikey, kare, kesik, yuvarlak) ve keskin zıtlıktaki gövdelere (siyah, beyaz, mavi...) konur.
   - Katalogda kaç tasarımın QR'lı olacağı "QR'lı tasarım sayısı" ile ayarlanır; önce QR'lılar dolar.
   - Her QR arka yüz görünüşünden okunarak doğrulanır (zxing); üretimde sonucu notlara yazılır.
+  - Koyu gövdede QR'ın beyaz zemini oval (köşe yarıçapı 6 kare: yay veriye değmez); üç köşe karesi yuvarlak köşeli.
+    Veri kareleri kare kalır.
+- **Gövde "Siyah ve beyaz (ikisi)":** katalogda yalnız siyah ve beyaz gövde (sade, logo vurgu renginde).
 
 ### Plakalı anahtarlık
 

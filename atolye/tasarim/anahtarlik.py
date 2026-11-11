@@ -25,6 +25,8 @@ HOLE_R = 2.6
 MIN_ON, MIN_ARKA = 0.6, 0.45
 LOGO_ZAYIF, LOGO_BOZUK = 0.08, 0.12            # logo küçülünce kaybolan ayrıntı oranı (isimlik9.logo_kaybi gibi)
 QR_KONTRAST = 7.0                              # QR'lı arka yüz: gövde ile yazı rengi arasında en az bu kontrast
+KARO_R = 6.0              # koyu gövdede QR karosunun köşe yarıçapı (kare biriminde): 2 karelik sessiz bölgede yay veriye
+                          # 6,83 karede değer; 6'da oval görünür, bulucu köşesinde ~0,3 kare boşluk kalır (okunuyor)
 
 
 class Anahtarlik:
@@ -285,13 +287,13 @@ def _on_logo(c, p, dizilim, kutu, olcu):
         return None, None, 0.0
     alt, lh, ara = None, H, 0.0
     if dizilim == "logo_alt":
-        for tr in (1.4, 1.0, 0.6):                       # sade: en küçük boyda, logoya göre küçük
-            cap = min(MIN_ALT, O.sigan(O.SATIR, c.alt, MIN_ALT, W * 0.9, tr))
+        for tr in (1.4, 1.0, 0.6, 0.4):                  # sade: en küçük boyda, logoya göre küçük
+            cap = min(MIN_ALT, O.sigan(O.SATIR, c.alt, MIN_ALT, W * 0.97, tr))
             if cap >= MIN_ALT - 1e-6:
                 break
         if cap < MIN_ALT - 1e-6:
             return None, None, 0.0
-        alt = O.yazi(O.SATIR, c.alt, cap, 0.0, 0.0, "c", tr, W * 0.9)
+        alt = O.yazi(O.SATIR, c.alt, cap, 0.0, 0.0, "c", tr, W * 0.97)
         ab = alt.bounds()
         ara = max(2.0, cap * 0.45)
         lh = H - (ab[3] - ab[1]) - ara
@@ -339,7 +341,7 @@ def _arka_qr(k, p, entry):
         return []
     _, dark, side = O.Q.shapes(entry, m, 0.0, 0.0)
     dark = _yuvarlak_bulucular(dark, entry.n, m)
-    karo = A.rrect(side, side, 3.0 * m)                 # yuvarlak köşe yalnız sessiz bölgeyi keser (veri dışında)
+    karo = A.rrect(side, side, KARO_R * m)              # oval görünüm; yay veri karelerinin dışında kalır
     k.qr, k.qr_modul = entry, m
     return [((karo - dark) if p.koyu else dark, p.yazi)]
 
@@ -351,7 +353,8 @@ def _yuvarlak_bulucular(dark, n, m):
     x0, y1 = -n * m / 2, n * m / 2
     for r, c in ((0, 0), (0, n - 7), (n - 7, 0)):
         cx, cy = x0 + (c + 3.5) * m, y1 - (r + 3.5) * m
-        dark = dark - A.rect(cx - 3.5 * m, cy - 3.5 * m, cx + 3.5 * m, cy + 3.5 * m)
+        e = 3.5 * m + 0.05                              # kareler 0,01 mm şişirilmiş: kenarda kıl kalmasın
+        dark = dark - A.rect(cx - e, cy - e, cx + e, cy + e)
         halka = A.rrect(7 * m, 7 * m, 2.0 * m, cx, cy) - A.rrect(5 * m, 5 * m, 1.0 * m, cx, cy)
         dark = dark + halka + A.rrect(3 * m, 3 * m, 0.8 * m, cx, cy)
     return dark

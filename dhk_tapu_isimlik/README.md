@@ -40,4 +40,5 @@ A01–A15'in arka yüzünde QR, A16–A20'nin arkasında "TAPU TAKİP / VE DANI�
   - Adın altında küçük yazı: TAPU TAKİP
   - Arka yüz yazıları: TAPU TAKİP, VE DANIŞMANLIK
   - QR'lı tasarım sayısı: 15
-  - Renk: altın
+  - Gövde: Siyah ve beyaz (ikisi) · Renk: altın (müşteri: siyah, sarı, beyaz; mavi istemedi)
+- **QR görünümü:** koyu gövdede beyaz zemin oval, köşe kareler yuvarlak (keskin köşeli QR beğenilmedi).

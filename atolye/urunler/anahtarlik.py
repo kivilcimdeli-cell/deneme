@@ -32,7 +32,8 @@ def _secenekler():
     from atolye.tasarim import ortak as O
     sektor = [(k, v[0]) for k, v in T.SEKTORLER.items()]
     renkler = (O.RED, O.ORANGE, O.YELLOW, O.GOLD, O.TURQ, O.BLUE, O.NAVY, O.GREEN, O.PINK, O.PURPLE, O.GRAY)
-    zemin = [("otomatik", "Otomatik (katalogda farklı gövdeler)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")] + [
+    zemin = [("otomatik", "Otomatik (katalogda farklı gövdeler)"), ("siyah-beyaz", "Siyah ve beyaz (ikisi)"),
+             ("siyah", "Siyah"), ("beyaz", "Beyaz")] + [
         (O.AD[c], O.AD[c].capitalize()) for c in renkler]
     yazi = [("otomatik", "Otomatik (koyu gövdede beyaz, açıkta siyah)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")] + [
         (O.AD[c], O.AD[c].capitalize()) for c in renkler]
@@ -126,7 +127,10 @@ def _paletler(b, renkler):
     uyar = []
     if zemin and yazi and O.kontrast(zemin, yazi) < O.OKUNUR:
         uyar.append(f"Yazı rengi ({O.AD[yazi]}) {O.AD[zemin]} gövdede zor okunur; yine de seçildiği gibi yapıldı.")
-    govdeler = [zemin] if zemin else [O.BLACK, O.WHITE, O.GRAY, renkler[0]]
+    if b.get("zemin") == "siyah-beyaz":                         # yalnız siyah ve beyaz gövde (sade)
+        govdeler = [O.BLACK, O.WHITE]
+    else:
+        govdeler = [zemin] if zemin else [O.BLACK, O.WHITE, O.GRAY, renkler[0]]
     out = []
     for g in govdeler:
         p = O.Palet(g, O.WHITE, yazi=yazi or 0)
@@ -258,6 +262,8 @@ def katalog(is_):
 
     # önce QR'lılar: QR yalnız arkası büyük biçimlere sığar, o biçimler QR'sızlara gitmesin
     for gecis in ([True, False] if qr_hedef else [False]):
+        if not gecis:                                  # QR'lı yetmediyse boş kalan yer QR'sızlara (toplam 20)
+            kota[False] = KATALOG_ADET - sum(1 for _, p, _ in kabul if p.get("qr"))
         for imza in sira:
             if dolu(gecis) or denenen >= (80 if qr_hedef or on_yuz != "ad" else 45):
                 break
