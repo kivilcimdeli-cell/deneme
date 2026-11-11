@@ -28,8 +28,12 @@ Yeniden üretmek için: `python3 scripts/dhk_logo.py`
 
 ## Anahtarlık (toptan)
 
-20 örnekli katalog: sade, isimsiz (ad soyadlar uzun). Ön yüzde yalnız logo; bazılarında altında küçük TAPU TAKİP.
-A01–A15'in arka yüzünde QR, A16–A20'nin arkasında "TAPU TAKİP / VE DANIŞMANLIK" yazıyor.
+20 örnekli katalog: sade, isimsiz (ad soyadlar uzun), tek seri. Müşteri ilk katalogda "bütünlük yok" dedi; seri
+hâline getirildi:
+- Biçimler: klasik, kare, kesik köşe, yuvarlak, dikey; katalogda biçim biçim gruplu.
+- Gövde: siyah ve beyaz. Logo altın.
+- Ön yüz: yalnız logo, ince altın çerçeve içinde logo ya da logo + kısa altın çizgi + TAPU TAKİP.
+- Arka yüz: 15 tasarımda QR; 5 tasarımda TAPU TAKİP / VE DANIŞMANLIK, ön yazıyla aynı yazı tipinde.
 
 - **Logo:** `logo/dhk_logo_kucuk.png`, anahtarlıkta harf boyu ~11 mm. Aynı stil; ince yerleri ve çatısı kalın, yoksa
   0,8 mm kabartmada D'nin gövdesi kopuyordu.

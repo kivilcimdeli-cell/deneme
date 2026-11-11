@@ -158,7 +158,7 @@ def _kalite_tahmini(c, bicim, dizilim, yazi_tipi):
     W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
     if dizilim in K.LOGO_DIZILIMLER:
         x0, y0, x1, y1 = c.logo.bounds()
-        h = H - (6.0 if dizilim == "logo_alt" else 0.0)
+        h = H - {"logo_alt": 10.0, "logo_cerceve": 4.2}.get(dizilim, 0.0)
         return min(1.0, min(W, h * (x1 - x0) / (y1 - y0)) / 34.0)
     aw = W - (min(H * 1.1, W * 0.3) + 2.4 if dizilim == "yan" else 0.0)
     pay = {"yazi": 0.56, "yan": 0.46, "ust": 0.3}[dizilim] * H * (0.82 if c.alt else 1.0)
@@ -220,6 +220,8 @@ def katalog(is_):
         qr_hedef = KATALOG_ADET if str(b.get("qr_adet") or "").strip() == "" else int(float(b["qr_adet"]))
         qr_hedef = max(0, min(KATALOG_ADET, qr_hedef))
     for bicim, (_, _, dizilimler) in K.BICIMLER.items():
+        if on_yuz == "logo" and bicim not in K.SERI_BICIMLER:    # yalnız logo: tek seri, logonun yakıştığı biçimler
+            continue
         dzler = (dizilimler if on_yuz in ("ad", "ikisi") else []) + (K.LOGO_DIZILIMLER if on_yuz != "ad" else [])
         for dz in dzler:
             if c.simge == "yok" and dz != "yazi":           # genel: simgesiz, yalnız ad
@@ -242,7 +244,7 @@ def katalog(is_):
     if not adaylar:
         raise SystemExit("Ad hiçbir biçime okunur boyda sığmadı: 'Ön yüzdeki ad' alanına daha kısa bir ad yazın.")
     by = {a[0]: a for a in adaylar}
-    bicim_sinir = 4 if on_yuz == "logo" else 3          # yalnız logoda logo küçük biçimlere sığmaz: biçim az kalır
+    bicim_sinir = 5 if on_yuz == "logo" else 3          # yalnız logoda seri 5 biçim: 20 tasarım için biçim başına 5
 
     def uygun(secilen, aday):
         oz = aday[1]
@@ -261,10 +263,12 @@ def katalog(is_):
         return sum(1 for _, p, _ in kabul if p.get("qr", False) == qr) >= kota[qr]
 
     # önce QR'lılar: QR yalnız arkası büyük biçimlere sığar, o biçimler QR'sızlara gitmesin
+    # QR'lılar önce arka yazısının sığmadığı biçimlere: yazılı arkalara geniş biçimlerde yer kalsın
+    arka_tam = {bc: K.arka_sigar(bc, arka, on_yuz == "logo") for bc in K.BICIMLER} if arka else {}
     for gecis in ([True, False] if qr_hedef else [False]):
         if not gecis:                                  # QR'lı yetmediyse boş kalan yer QR'sızlara (toplam 20)
             kota[False] = KATALOG_ADET - sum(1 for _, p, _ in kabul if p.get("qr"))
-        for imza in sira:
+        for imza in (sorted(sira, key=lambda i: arka_tam.get(by[i][2]["bicim"], True)) if gecis else sira):
             if dolu(gecis) or denenen >= (80 if qr_hedef or on_yuz != "ad" else 45):
                 break
             par = by[imza][2]
@@ -293,7 +297,11 @@ def katalog(is_):
     if nqr < qr_hedef:
         uyar.append(f"QR'lı tasarım {nqr} çıktı ({qr_hedef} istenmişti): QR yalnız arkası yeterince büyük biçimlere "
                     "ve siyah-beyaz gibi keskin zıtlıktaki renklere sığıyor.")
-    kabul.sort(key=lambda t: not t[1].get("qr"))     # QR'lılar önce
+    if on_yuz == "logo":                             # seri: katalogda biçim biçim gruplu (derli toplu dursun)
+        kabul.sort(key=lambda t: (K.SERI_BICIMLER.index(t[1]["bicim"]), not t[1].get("qr"),
+                                  K.LOGO_DIZILIMLER.index(t[1]["dizilim"]), t[1]["govde"] != O.BLACK))
+    else:
+        kabul.sort(key=lambda t: not t[1].get("qr"))     # QR'lılar önce
     if not kabul:
         raise SystemExit("Bu bilgilerle baskıya uygun anahtarlık çıkmadı: daha kısa bir ad deneyin.")
     bas = len(is_.haric) + 1

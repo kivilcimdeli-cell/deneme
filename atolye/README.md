@@ -165,6 +165,13 @@ koleksiyonunun (`boyde_labs/guzellik/`) uygulamadaki karşılığı.
   - Koyu gövdede QR'ın beyaz zemini oval (köşe yarıçapı 6 kare: yay veriye değmez); üç köşe karesi yuvarlak köşeli.
     Veri kareleri kare kalır.
 - **Gövde "Siyah ve beyaz (ikisi)":** katalogda yalnız siyah ve beyaz gövde (sade, logo vurgu renginde).
+- **Yalnız logoda tek seri:** tasarımlar bir aile gibi durur.
+  - Biçimler: klasik, kare, kesik köşe, yuvarlak, dikey. Bar, kapsül ve bavul etiketinde logo küçük kalıyordu.
+  - Çeşitler: yalnız logo; ince altın çerçeve içinde logo (çerçeve dış çizgiyi izler); logo, kısa altın çizgi ve
+    altında harf aralıklı alt yazı (isimlikteki "Logo ortada" gibi).
+  - Alt yazı ve arka yazı aynı yazı tipinde ve aynı harf aralığında.
+  - QR'lılar önce arka yazısının sığmadığı biçimlere düşer, yazılı arkalar geniş biçimlerde kalır.
+  - Katalog biçim biçim gruplu dizilir.
 
 ### Plakalı anahtarlık
 
