@@ -16,7 +16,8 @@ yandan kalınlaştırılmışı, küt ve kalın duruyordu):
 "Büyük logo", "Logo üstte", "Logo ortada" düzenleri logoyu bu boyda basar (atolye/tasarim/isimlik20.py).
 
 Çıktı: dhk_tapu_isimlik/logo/dhk_logo.png (beyaz zeminde siyah, uygulamanın logo izleyicisi için, uzun kenar 1800 piksel)
-ve dhk_logo_altin.png (önizleme: siyah zeminde altın).
+ve dhk_logo_altin.png (önizleme: siyah zeminde altın). dhk_logo_kucuk(_altin).png: anahtarlık için küçük boy (harf boyu
+~11 mm; ince yerler ve çatı kalın, stil aynı: KUCUK).
 Kullanım: python3 scripts/dhk_logo.py
 """
 import os
@@ -114,7 +115,11 @@ def logo():
     return m
 
 
-def main():
+# Küçük boy (anahtarlık: harf boyu ~11 mm, kabartmada en ince yer 1,0 mm): aynı stil, ince yerleri ve çatısı kalın.
+KUCUK = {"INCELT": 0.03, "INCE": 0.10, "CIZGI": 0.105, "KOL": 0.09, "ARA": 0.075}
+
+
+def main(ad="dhk_logo"):
     os.makedirs(OUT, exist_ok=True)
     m = logo()
     ys, xs = np.nonzero(m)
@@ -124,12 +129,14 @@ def main():
     pad = 60
     beyaz = np.full((m.shape[0] + 2 * pad, m.shape[1] + 2 * pad), 255, np.uint8)
     beyaz[pad:-pad, pad:-pad] = 255 - m
-    Image.fromarray(beyaz).save(os.path.join(OUT, "dhk_logo.png"))
+    Image.fromarray(beyaz).save(os.path.join(OUT, f"{ad}.png"))
     altin = Image.new("RGB", (beyaz.shape[1], beyaz.shape[0]), (18, 18, 20))
     altin.paste(Image.new("RGB", altin.size, (214, 176, 98)), (0, 0), Image.fromarray(255 - beyaz))
-    altin.save(os.path.join(OUT, "dhk_logo_altin.png"))
-    print("yazıldı:", os.path.join(OUT, "dhk_logo.png"), beyaz.shape[::-1])
+    altin.save(os.path.join(OUT, f"{ad}_altin.png"))
+    print("yazıldı:", os.path.join(OUT, f"{ad}.png"), beyaz.shape[::-1])
 
 
 if __name__ == "__main__":
-    main()
+    main()                                               # isimlik: dhk_logo.png
+    globals().update(KUCUK)
+    main("dhk_logo_kucuk")                               # anahtarlık: dhk_logo_kucuk.png

@@ -153,6 +153,15 @@ koleksiyonunun (`boyde_labs/guzellik/`) uygulamadaki karşılığı.
 - **Sığmayan yazı:** alt yazı ve arka satırlar önce harf aralığını daraltır, sonra iki satıra iner ("0546 475" /
   "45 08"). Yine sığmayan yazılmaz, müşteri notlarında uyarı çıkar; arka yazısı eksik kalan tasarım katalogda ancak
   tam olanlar yetmezse gösterilir.
+- **Yalnız logo (ön yüz):** ad yazılmaz. Logo kutuya en büyük basılır, istenirse altında küçük alt yazı olur.
+  - Seçenekler: "Ad ve simge", "Yalnız logo", "İkisi karışık".
+  - Logo küçülünce kopan harf (parça sayısı değişir) ya da ayrıntının %12'sinden fazlası kaybolursa tasarım elenir.
+- **Arka yüzde QR:** sayfa adı, tam adres ya da TEL:... verilebilir. QR'lı tasarımda arka yüzde yalnız QR olur.
+  - Basım: tabla yüzünde gömme, kare en az 0,9 mm.
+  - Kısa sayfa adresi büyük harfle kodlanır (25 × 25, 26 mm). Bu yüzden QR yalnız arkası yeterince büyük biçimlere
+    (klasik, dikey, kare, kesik, yuvarlak) ve keskin zıtlıktaki gövdelere (siyah, beyaz, mavi...) konur.
+  - Katalogda kaç tasarımın QR'lı olacağı "QR'lı tasarım sayısı" ile ayarlanır; önce QR'lılar dolar.
+  - Her QR arka yüz görünüşünden okunarak doğrulanır (zxing); üretimde sonucu notlara yazılır.
 
 ### Plakalı anahtarlık
 

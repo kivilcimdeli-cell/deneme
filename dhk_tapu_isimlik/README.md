@@ -25,3 +25,19 @@ uygulamaya logoyu büyük basan üç düzen eklendi; küçük kutulu düzenleri 
 - Logo ortada
 
 Yeniden üretmek için: `python3 scripts/dhk_logo.py`
+
+## Anahtarlık (toptan)
+
+20 örnekli katalog: sade, isimsiz (ad soyadlar uzun). Ön yüzde yalnız logo; bazılarında altında küçük TAPU TAKİP.
+A01–A15'in arka yüzünde QR, A16–A20'nin arkasında "TAPU TAKİP / VE DANIŞMANLIK" yazıyor.
+
+- **Logo:** `logo/dhk_logo_kucuk.png`, anahtarlıkta harf boyu ~11 mm. Aynı stil; ince yerleri ve çatısı kalın, yoksa
+  0,8 mm kabartmada D'nin gövdesi kopuyordu.
+- **QR:** bilgi gelince `qr_adres` güncellenir. Şimdilik geçici sayfa adı var. Kısa sayfa adresi anahtarlığa sığar;
+  uzun bağlantı (ör. harita) sığmaz.
+- **Formdaki ayarlar:**
+  - Ön yüz: Yalnız logo
+  - Adın altında küçük yazı: TAPU TAKİP
+  - Arka yüz yazıları: TAPU TAKİP, VE DANIŞMANLIK
+  - QR'lı tasarım sayısı: 15
+  - Renk: altın

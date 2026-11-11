@@ -5,6 +5,8 @@ etiketi) ve 3 dizilimden (simge solda, simge üstte, yalnız ad; genel sektörde
 Instagram, adres...). Katalogda bir biçim en çok üç kez; gövde, renk ve yazı tipi öğrenmeye göre (beğenilenler öne
 çıkar, %30 keşif); bu müşteriye gösterilenler yeni katalogda tekrar edilmez. Ad bir biçime küçük kalıyorsa o biçim
 geri düşer, sığmıyorsa hiç gösterilmez; her tasarım baskıya uygunluk denetiminden geçer.
+Ön yüz "yalnız logo" seçilirse ad yazılmaz (logo büyük, istenirse altında alt yazı); arka yüzde QR istenirse
+(qr_adres) katalogdaki qr_adet tasarımın arkasında yalnız QR olur (önce QR'lılar dolar, her QR okunarak doğrulanır).
 
 Seçilen kodla (müşteri klasöründe, cikti/):
   anahtarlik_<ad>_<kod>_tabla.3mf    dolu tabla (iki nozulun ortak alanında ızgara, kule sol arkada)
@@ -45,7 +47,12 @@ except Exception:                                      # noqa: BLE001 (tasarım 
 
 ALANLAR = [
     {"ad": "marka", "etiket": "Ön yüzdeki ad (marka)", "tur": "text", "zorunlu": True, "grup": "Anahtarlık",
-     "ornek": "KARDEŞLER", "ipucu": "Kısa ad büyük yazılır; uzun adlar dar yazı tipleriyle ya da iki satırla sığar."},
+     "ornek": "KARDEŞLER", "ipucu": "Kısa ad büyük yazılır; uzun adlar dar yazı tipleriyle ya da iki satırla sığar. "
+                                     "Ön yüz 'yalnız logo' ise yazılmaz (kayıt adı olur)."},
+    {"ad": "on_yuz", "etiket": "Ön yüz", "tur": "select", "varsayilan": "ad",
+     "secenekler": [("ad", "Ad ve simge (ya da logo)"), ("logo", "Yalnız logo (ad yazılmaz; logo gerekir)"),
+                    ("ikisi", "İkisi karışık")],
+     "ipucu": "Yalnız logoda 'Adın altında küçük yazı' doluysa bazı tasarımlarda logonun altına küçük yazılır."},
     {"ad": "alt", "etiket": "Adın altında küçük yazı", "tur": "text", "ornek": "OTO YIKAMA",
      "ipucu": "İsteğe bağlı; sığmayan biçimlerde yazılmaz."},
     {"ad": "sektor", "etiket": "Sektör (simge ve renkler)", "tur": "select", "secenekler": _SEKTOR,
@@ -55,6 +62,11 @@ ALANLAR = [
     {"ad": "arka", "etiket": "Arka yüz yazıları", "tur": "textarea",
      "ornek": "0532 123 45 67\n@kullaniciadi\nKepez · Antalya",
      "ipucu": "Satır satır, en çok 3. Biçime sığmayan satır yazılmaz (uyarı verilir)."},
+    {"ad": "qr_adres", "etiket": "Arka yüzde QR (adres)", "tur": "text", "ornek": "mehmetkaya",
+     "ipucu": "Sayfa adı, tam adres ya da TEL:+90...; boşsa QR yok. QR'lı tasarımlarda arka yüzde yalnız QR olur "
+              "(QR'ın sığdığı biçimlerde: kare en az 0,9 mm)."},
+    {"ad": "qr_adet", "etiket": "Katalogda QR'lı tasarım sayısı", "tur": "sayi", "min": 0, "ileri": True,
+     "ipucu": "Boşsa hepsi QR'lı (sığdığı kadar); gerisi arka yüz yazılı."},
     {"ad": "adet", "etiket": "Sipariş adedi", "tur": "sayi", "zorunlu": True, "varsayilan": "100", "min": 1},
     {"ad": "zemin", "etiket": "1. renk: gövde", "tur": "select", "secenekler": _ZEMIN, "varsayilan": "otomatik",
      "grup": "Renkler (3 renk)"},
@@ -74,8 +86,8 @@ def ad(b):
 
 
 class _Icerik:
-    def __init__(self, marka, alt, simge, logo):
-        self.marka, self.alt, self.simge, self.logo = marka, alt, simge, logo
+    def __init__(self, marka, alt, simge, logo, qr=None):
+        self.marka, self.alt, self.simge, self.logo, self.qr = marka, alt, simge, logo, qr
 
 
 def _icerik(is_, b):
@@ -93,7 +105,14 @@ def _icerik(is_, b):
             uyar.append(f"Logo okunamadı, sektör simgesi kullanıldı: {e}")
     alt = O.tr_upper(" ".join((b.get("alt") or "").split()))
     arka = [" ".join(x.split()) for x in (b.get("arka") or "").splitlines() if x.strip()][:3]
-    return _Icerik(ad(b), alt, simge, logo), renkler, arka, uyar
+    qr = None
+    if (b.get("qr_adres") or "").strip():
+        from atolye.tasarim import anahtarlik as K
+        try:
+            qr = K.qr_girdisi(b["qr_adres"])
+        except Exception as e:                       # noqa: BLE001
+            uyar.append(f"QR yapılamadı ({e}); QR'sız tasarımlar yapıldı.")
+    return _Icerik(ad(b), alt, simge, logo, qr), renkler, arka, uyar
 
 
 def _paletler(b, renkler):
@@ -128,11 +147,15 @@ def _paletler(b, renkler):
 
 
 def _kalite_tahmini(c, bicim, dizilim, yazi_tipi):
-    """Adın bu biçimde alacağı boy, kurmadan (yalnız harf genişlikleri): 0..1."""
+    """Adın bu biçimde alacağı boy, kurmadan (yalnız harf genişlikleri): 0..1. Yalnız logoda logonun eni (34 mm: 1)."""
     from atolye.tasarim import anahtarlik as K
     from atolye.tasarim import ortak as O
     _, _, kutu, _ = K.BICIMLER[bicim][1]()
     W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
+    if dizilim in K.LOGO_DIZILIMLER:
+        x0, y0, x1, y1 = c.logo.bounds()
+        h = H - (6.0 if dizilim == "logo_alt" else 0.0)
+        return min(1.0, min(W, h * (x1 - x0) / (y1 - y0)) / 34.0)
     aw = W - (min(H * 1.1, W * 0.3) + 2.4 if dizilim == "yan" else 0.0)
     pay = {"yazi": 0.56, "yan": 0.46, "ust": 0.3}[dizilim] * H * (0.82 if c.alt else 1.0)
     _, cap = K._ad_satirlari(O.ad_metni(c.marka, yazi_tipi), yazi_tipi, pay, aw)
@@ -143,15 +166,17 @@ def _kur(c, arka, par):
     from atolye.tasarim import anahtarlik as K
     from atolye.tasarim import ortak as O
     return K.tasarla(par["bicim"], par["dizilim"], c, O.Palet(par["govde"], par["vurgu"], yazi=par.get("metin", 0)),
-                     par["yazi"], arka)
+                     par["yazi"], arka, qr=c.qr if par.get("qr") else None)
 
 
 def _ad_kart(par):
     from atolye.tasarim import anahtarlik as K
     from atolye.tasarim import ortak as O
     yazi = O.Palet(par["govde"], par["vurgu"], yazi=par.get("metin", 0)).yazi
-    return (f"{K.BICIMLER[par['bicim']][0]} · {O.AD[par['govde']]}, {O.AD[yazi]}, {O.AD[par['vurgu']]} · "
-            f"{O.YAZI_AD.get(par['yazi'], par['yazi'])}")
+    on = (K.DIZILIMLER[par["dizilim"]] if par["dizilim"] in K.LOGO_DIZILIMLER
+          else O.YAZI_AD.get(par["yazi"], par["yazi"]))
+    return (f"{K.BICIMLER[par['bicim']][0]} · {O.AD[par['govde']]}, {O.AD[yazi]}, {O.AD[par['vurgu']]} · {on}" +
+            (" · arkada QR" if par.get("qr") else ""))
 
 
 def _resim(k, boy=520):
@@ -182,52 +207,87 @@ def katalog(is_):
     uyar += renk_uyar
     kal, adaylar = {}, []
     simge = c.simge if c.simge in ("logo", "monogram", "yok") else "simge"
+    on_yuz = b.get("on_yuz") or "ad"
+    if on_yuz != "ad" and c.logo is None:
+        uyar.append("Yalnız logolu ön yüz için logo yüklenmedi: adlı tasarımlar yapıldı.")
+        on_yuz = "ad"
+    qr_hedef = 0
+    if c.qr is not None:
+        qr_hedef = KATALOG_ADET if str(b.get("qr_adet") or "").strip() == "" else int(float(b["qr_adet"]))
+        qr_hedef = max(0, min(KATALOG_ADET, qr_hedef))
     for bicim, (_, _, dizilimler) in K.BICIMLER.items():
-        for dz in dizilimler:
+        dzler = (dizilimler if on_yuz in ("ad", "ikisi") else []) + (K.LOGO_DIZILIMLER if on_yuz != "ad" else [])
+        for dz in dzler:
             if c.simge == "yok" and dz != "yazi":           # genel: simgesiz, yalnız ad
                 continue
-            for f in YAZI_TIPLERI:
+            logolu = dz in K.LOGO_DIZILIMLER                # ad yazılmaz: yazı tipi seçilmez
+            for f in (YAZI_TIPLERI[:1] if logolu else YAZI_TIPLERI):
                 q = kal[(bicim, dz, f)] = _kalite_tahmini(c, bicim, dz, f)
                 if q < 0.45:
                     continue
                 for g, y, v in paletler:
-                    oz = {"bicim": bicim, "dizilim": dz, "zemin": O.AD[g], "metin": O.AD[y], "renk": O.AD[v],
-                          "yazi": f, "simge": simge}
-                    par = {"bicim": bicim, "dizilim": dz, "govde": g, "vurgu": v, "metin": y, "yazi": f}
-                    oto = y == O.Palet(g, v).yazi                       # otomatik yazı rengi: eski imza
-                    adaylar.append((f"{bicim}|{dz}|{O.AD[g]}|{O.AD[v]}|{f}" + ("" if oto else f"|{O.AD[y]}"), oz, par))
+                    for qr in ([False, True] if qr_hedef else [False]):
+                        if qr and O.kontrast(g, y) < K.QR_KONTRAST:     # QR yalnız siyah-beyaz gibi keskin zıtlıkta
+                            continue
+                        oz = {"bicim": bicim, "dizilim": dz, "zemin": O.AD[g], "metin": O.AD[y], "renk": O.AD[v],
+                              "yazi": "logo" if logolu else f, "simge": simge, "qr": "var" if qr else "yok"}
+                        par = {"bicim": bicim, "dizilim": dz, "govde": g, "vurgu": v, "metin": y, "yazi": f, "qr": qr}
+                        oto = y == O.Palet(g, v).yazi                   # otomatik yazı rengi: eski imza
+                        adaylar.append((f"{bicim}|{dz}|{O.AD[g]}|{O.AD[v]}|{f}" + ("" if oto else f"|{O.AD[y]}") +
+                                        ("|qr" if qr else ""), oz, par))
     if not adaylar:
         raise SystemExit("Ad hiçbir biçime okunur boyda sığmadı: 'Ön yüzdeki ad' alanına daha kısa bir ad yazın.")
     by = {a[0]: a for a in adaylar}
+    bicim_sinir = 4 if on_yuz == "logo" else 3          # yalnız logoda logo küçük biçimlere sığmaz: biçim az kalır
 
     def uygun(secilen, aday):
         oz = aday[1]
-        return (sum(1 for _, o in secilen if o["bicim"] == oz["bicim"]) < 3 and
-                sum(1 for _, o in secilen if (o["bicim"], o["dizilim"]) == (oz["bicim"], oz["dizilim"])) < 2)
+        return (sum(1 for _, o in secilen if o["bicim"] == oz["bicim"]) < bicim_sinir and
+                sum(1 for _, o in secilen if (o["bicim"], o["dizilim"], o.get("qr")) ==
+                    (oz["bicim"], oz["dizilim"], oz.get("qr"))) < 2)
 
     sira = ogrenme.sec(KOD, [(i, oz) for i, oz, _ in adaylar], len(adaylar), haric=is_.haric,
                        tohum=random.randrange(1 << 30), uygun=uygun,
                        agirlik=lambda imza: kal[(by[imza][2]["bicim"], by[imza][2]["dizilim"], by[imza][2]["yazi"])] ** 3)
     is_.ilerle(8, f"{len(adaylar)} aday sıralandı; tasarımlar kuruluyor ve denetleniyor")
     kabul, eksik, denenen = [], [], 0          # eksik: arka yüz satırlarından biri sığmamış (yedek)
-    for imza in sira:
-        if len(kabul) >= KATALOG_ADET or denenen >= 45:
-            break
-        par = by[imza][2]
-        if sum(1 for _, p, _ in kabul if p["bicim"] == par["bicim"]) >= 3:
-            continue
-        denenen += 1
-        k = _kur(c, arka, par)
-        if not k.kalite or K.kontrol(k):
-            continue
-        if any(w.startswith("arka yüze") for w in k.uyarilar):
-            eksik.append((imza, par, k))
-            continue
-        kabul.append((imza, par, k))
-        is_.ilerle(8 + 42 * len(kabul) / KATALOG_ADET, f"{len(kabul)} tasarım hazır ({denenen} denendi)")
+    kota = {True: qr_hedef, False: KATALOG_ADET - qr_hedef}   # QR'lı ve QR'sız kaç tasarım
+
+    def dolu(qr):
+        return sum(1 for _, p, _ in kabul if p.get("qr", False) == qr) >= kota[qr]
+
+    # önce QR'lılar: QR yalnız arkası büyük biçimlere sığar, o biçimler QR'sızlara gitmesin
+    for gecis in ([True, False] if qr_hedef else [False]):
+        for imza in sira:
+            if dolu(gecis) or denenen >= (80 if qr_hedef or on_yuz != "ad" else 45):
+                break
+            par = by[imza][2]
+            if par.get("qr", False) != gecis:
+                continue
+            if sum(1 for _, p, _ in kabul if p["bicim"] == par["bicim"]) >= bicim_sinir:
+                continue
+            denenen += 1
+            k = _kur(c, arka, par)
+            if not k.kalite or K.kontrol(k):
+                continue
+            if k.qr is not None and K.qr_oku(k) not in (None, k.qr.content):   # arka yüz görünüşünden okunmadı
+                continue
+            if any(w.startswith("arka yüze") for w in k.uyarilar):
+                eksik.append((imza, par, k))
+                continue
+            kabul.append((imza, par, k))
+            is_.ilerle(8 + 42 * len(kabul) / KATALOG_ADET, f"{len(kabul)} tasarım hazır ({denenen} denendi)")
     for e in eksik:                            # tam tasarım yetmediyse arka yazısı eksik olanlar (uyarıyla)
-        if len(kabul) < KATALOG_ADET and sum(1 for _, p, _ in kabul if p["bicim"] == e[1]["bicim"]) < 3:
+        if (not dolu(e[1].get("qr", False)) and
+                sum(1 for _, p, _ in kabul if p["bicim"] == e[1]["bicim"]) < bicim_sinir):
             kabul.append(e)
+    if len(kabul) < KATALOG_ADET and qr_hedef < KATALOG_ADET:
+        uyar.append(f"{len(kabul)} tasarım çıktı: QR'sız tasarımlara uygun biçim yetmedi.")
+    nqr = sum(1 for _, p, _ in kabul if p.get("qr"))
+    if nqr < qr_hedef:
+        uyar.append(f"QR'lı tasarım {nqr} çıktı ({qr_hedef} istenmişti): QR yalnız arkası yeterince büyük biçimlere "
+                    "ve siyah-beyaz gibi keskin zıtlıktaki renklere sığıyor.")
+    kabul.sort(key=lambda t: not t[1].get("qr"))     # QR'lılar önce
     if not kabul:
         raise SystemExit("Bu bilgilerle baskıya uygun anahtarlık çıkmadı: daha kısa bir ad deneyin.")
     bas = len(is_.haric) + 1
@@ -244,11 +304,13 @@ def katalog(is_):
         sayfa.append((kod, _ad_kart(par), im))
     is_.ilerle(93, "Katalog sayfaları yapılıyor")
     giris = (f"{ad(b)} için arkalı önlü anahtarlık önerileri: her kartta solda ön yüz (kabartma), sağda arka yüz "
-             "(gömme yazı). Renkler ve yazılar değiştirilebilir.")
+             f"(gömme {'yazı ya da QR' if qr_hedef else 'yazı'}). Renkler ve yazılar değiştirilebilir.")
     bilgi = ("Ürün", ["3,2 mm gövde, kenarları pahlı; ön yüzde yazı ve simge 0,8 mm kabartma.",
-                      "Arka yüzde yazılar yüzeyle aynı hizada, renkli ve keskin (silinmez).",
-                      "Anahtarlık halkası ve zinciriyle teslim edilir.",
-                      "Logonuz eklenebilir; toptan siparişte adet arttıkça fiyat düşer."])
+                      "Arka yüzde yazılar yüzeyle aynı hizada, renkli ve keskin (silinmez)."] +
+             (["QR'lılarda arka yüzde QR: yüzeyle aynı hizada, tabla yüzünde basıldığı için keskin; telefonla "
+               "okutunca açılır."] if qr_hedef else []) +
+             ["Anahtarlık halkası ve zinciriyle teslim edilir.",
+              "Logonuz eklenebilir; toptan siparişte adet arttıkça fiyat düşer."])
     pdf, jpgs = KT.yap(klasor, "Toptan anahtarlık", ad(b), is_.no, sayfa, giris, bilgi, sutun=2, satir=5,
                        alt_not="Beğendiğiniz tasarımın kodunu (ör. A07) yazmanız yeterli.")
     for t in tasarimlar:
@@ -337,6 +399,10 @@ def uret(is_, secilen):
     sorun = K.kontrol(k) if k.kalite else ["ad bu biçime sığmadı"]
     if sorun:
         uyar.append("Baskıya uygunluk: " + "; ".join(sorun))
+    if k.qr is not None:
+        oku = K.qr_oku(k)
+        uyar.append(f"QR ({k.qr.shown}): " + ("denetlenemedi (zxing yok)" if oku is None else
+                                              "arka yüzden okunuyor" if oku == k.qr.content else "OKUNAMADI"))
     uyar += k.uyarilar
     adi = slug(ad(b), 24).replace("-", "_")
     out = is_.yol("cikti", "x")[:-2]
@@ -359,7 +425,7 @@ def uret(is_, secilen):
     is_.ilerle(75, "Önizlemeler çiziliyor")
     satirlar = [f"{ad(b).upper()} – ANAHTARLIK {kod} · X2D DOLU TABLA",
                 f"{K.BICIMLER[k.bicim][0]} mm · gövde {O.AD[pal.govde]} 3,2 mm · ön kabartma 0,8 mm "
-                f"({O.AD[pal.yazi]}, {O.AD[pal.vurgu]}) · arka gömme yazı {O.AD[pal.yazi]}",
+                f"({O.AD[pal.yazi]}, {O.AD[pal.vurgu]}) · arka gömme {'QR' if k.qr else 'yazı'} {O.AD[pal.yazi]}",
                 f"Tabla başına {len(yerler)} adet · {adet} adet için {tabla} tabla "
                 f"(son tablada {adet - (tabla - 1) * len(yerler)} adet yeter; fazlası yedek)",
                 f"AMS: {renk} · ana nozul: {O.AD[pal.govde]}, {O.AD[pal.vurgu]} · yardımcı nozul: {O.AD[pal.yazi]}",
@@ -375,7 +441,8 @@ def uret(is_, secilen):
     f = os.path.join(A.FONT_DIR, "SpaceGrotesk_700Bold.ttf")
     dr.text((50, 30), "ANAHTARLIK · ÖN VE ARKA YÜZ", fill=(255, 90, 31), font=ImageFont.truetype(f, 24))
     dr.text((50, 64), f"{ad(b)} · {kod}", fill=(18, 19, 22), font=ImageFont.truetype(f, 40))
-    dr.text((50, canvas.height - 50), f"{K.BICIMLER[k.bicim][0]} mm · ön yüz kabartma, arka yüz gömme yazı · BOYDE LABS",
+    dr.text((50, canvas.height - 50), f"{K.BICIMLER[k.bicim][0]} mm · ön yüz kabartma, arka yüz gömme "
+            f"{'QR' if k.qr else 'yazı'} · BOYDE LABS",
             fill=(85, 87, 92), font=ImageFont.truetype(os.path.join(A.FONT_DIR, "SpaceGrotesk_500Medium.ttf"), 22))
     canvas.save(os.path.join(out, "onizleme.png"))
     uyar.append(f"Tabla başına {len(yerler)} adet; {adet} adet için {tabla} tabla basılır")
