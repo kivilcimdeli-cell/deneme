@@ -269,26 +269,35 @@ Görsellerdeki anahtarlıklar kendi markamızla (BOYDE LABS) örnektir; sizinkil
 ## 6 · Kişiye özel plakalı anahtarlık
 
 Türk plakası biçiminde: kırmızı ya da mavi TR bandı, beyaz plaka zemini, siyah çerçeve; plaka ve altındaki ad (ya da kısa söz)
-kabartma. Görsellerdeki plakalar ve yazılar örnektir. Görseller: `boyde_labs/anahtarlik_plaka/shopier/` (01 kapak, 02 renk
-seçenekleri … 09 nasıl sipariş verilir), `python3 scripts/boyde_plakali_anahtarlik.py --shopier`.
+kabartma; arka yüz düz ve tamamen siyah. Görsellerdeki plakalar ve yazılar örnektir. Görseller:
+`boyde_labs/anahtarlik_plaka/shopier/` (01 kapak, 02 renk seçenekleri … 09 nasıl sipariş verilir),
+`python3 scripts/boyde_plakali_anahtarlik.py --shopier`.
+
+Güncelleme (kullanıcı: "kişiye özel plakalı anahtarlık için açıklama metni ve başlık yazar mısın"): arka yüz siyah, beyaz
+ve bant kalınlaştı (renkler tok), kalınlık 3,2 mm; toplu sipariş satırı eklendi.
 
 **Ürün adı**
 
 ```
-Kişiye Özel Plakalı Anahtarlık · Plaka ve İsim Kabartmalı 3D Baskı · Zincirli Halka · BOYDE LABS
+Kişiye Özel Plakalı Anahtarlık · Plaka ve İsim Kabartmalı · Kırmızı ya da Mavi TR · Zincirli Halka · BOYDE LABS
 ```
+
+Kısa seçenekler: `Kişiye Özel Plakalı Anahtarlık · Plaka ve İsim Yazılı · BOYDE LABS` ya da
+`Plakalı Anahtarlık · Aracınızın Plakası ve Adınız Kabartmalı · Hediyelik`.
 
 **Açıklama**
 
 ```
 KİŞİYE ÖZEL PLAKALI ANAHTARLIK
-Aracınızın plakası, altında adınız ya da kısa bir söz: Türk plakası görünümünde, kabartmalı anahtarlık. Kendi atölyemizde 3D baskıyla üretiyoruz. Araç sahiplerine, yeni araç alanlara, sevgiliye ve arkadaşa hediye olarak.
+Aracınızın plakası, altında adınız ya da kısa bir söz: Türk plakası görünümünde, kabartmalı anahtarlık. Kendi atölyemizde 3D baskıyla, size özel üretiyoruz. Araç sahiplerine, yeni araç alanlara, ehliyetini yeni alanlara, sevgiliye ve arkadaşa güzel bir hediye.
 
 ÖZELLİKLER
-• Plaka yazısı 1,3 mm, alttaki yazı 1 mm kabartma; elle hissedilir
-• TR bandı kırmızı ya da mavi (siz seçin); beyaz plaka zemini, siyah çerçeve
-• Ad soyad, lakap ya da kısa bir söz; Türkçe karakterlerle (İ, Ş, Ğ…)
-• Ölçü: 70 × 22 × 3 mm; hafif, 3D baskı PLA, arka yüz düz
+• Plaka yazısı 1,3 mm, alttaki yazı 1 mm kabartma; elle hissedilir, silinmez
+• TR bandı kırmızı ya da mavi (siz seçin); bembeyaz plaka zemini, siyah çerçeve
+• Renkler tok ve canlı: beyaz ve bant kalın katmanla basılır
+• Arka yüz düz ve tamamen siyah; iki yüzü de şık durur
+• Ad soyad, lakap ya da kısa bir söz; Türkçe karakterlerle (İ, Ş, Ğ, Ç…)
+• Ölçü: 70 × 22 × 3,2 mm; hafif ve sağlam (PLA)
 • Zincirli halka takımıyla gelir (çelik halka, kısa zincir, ara halka)
 
 SİPARİŞ NOTUNA YAZIN
@@ -299,6 +308,7 @@ SİPARİŞ NOTUNA YAZIN
 FİYAT
 • 1 adet: … TL
 • 2 adet ve üzeri: … TL / adet
+• Toplu sipariş (oto galeri, araç kiralama, dernek, şirket hediyesi): adet ve isim listesiyle WhatsApp'tan yazın, size özel fiyat verelim.
 
 NASIL SİPARİŞ VERİLİR
 1. Plakanızı, yazınızı ve bant rengini (kırmızı/mavi) sipariş notuna yazın.

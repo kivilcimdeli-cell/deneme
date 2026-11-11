@@ -13,12 +13,16 @@ zemini, solda TR bandı. TR bandı **mavi** (örnekteki gibi) ya da **kırmızı
 
 | Katman (z, mm) | Renk | Ne |
 | --- | --- | --- |
-| 0–2,0 | siyah | çerçeve ve alt şerit |
-| 0–1,0 | beyaz | plaka zemini |
-| 0–1,2 | kırmızı ya da mavi | TR bandı (`tasarla(plaka, ad, "kirmizi"/"mavi")`) |
-| 1,0–2,3 | siyah | plaka yazısı, 1,3 mm kabartma (Saira SemiBold, DIN benzeri; büyük harf boyu ~6,5 mm) |
-| 1,2–1,9 | beyaz | TR |
-| 2,0–3,0 | beyaz | ad ya da söz, 1 mm kabartma (Outfit ExtraBold) |
+| 0–2,2 | siyah | çerçeve ve alt şerit |
+| 0–0,4 | siyah | zeminin ve bandın altı: arka yüz tamamen siyah |
+| 0,4–1,6 | beyaz | plaka zemini (1,2 mm, 6 katman: tok beyaz) |
+| 0,4–1,8 | kırmızı ya da mavi | TR bandı (`tasarla(plaka, ad, "kirmizi"/"mavi")`; 1,4 mm) |
+| 1,6–2,9 | siyah | plaka yazısı, 1,3 mm kabartma (Saira SemiBold, DIN benzeri; büyük harf boyu ~6,5 mm) |
+| 1,8–2,5 | beyaz | TR |
+| 2,2–3,2 | beyaz | ad ya da söz, 1 mm kabartma (Outfit ExtraBold) |
+
+Toplam 3,2 mm. Arka yüz siyah ve renkler kalın ("arka plakalarını da siyah yapalım", "mavi ve beyazın son katman
+dolgusunu artır"): Shopier görselleri bu değişiklikten önce üretildi, arka yüzleri eski (beyaz ve bant rengi).
 
 - **Delik:** Ø3,5 mm, TR bandının sol üstünde (üstte 2,45, solda 3,25 mm et). Kullanıcının örneğinde kesici gövdeydi,
   birleştirince STL'e çıkmamıştı.
