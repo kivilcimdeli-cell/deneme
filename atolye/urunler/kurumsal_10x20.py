@@ -51,7 +51,7 @@ ALANLAR = [
     {"ad": "eposta", "etiket": "E-posta (sayfada)", "tur": "text", "ornek": "ad@kurum.com"},
     {"ad": "sektor", "etiket": "Sektör (simge ve renkler)", "tur": "select", "secenekler": _SEKTOR,
      "varsayilan": "genel", "zorunlu": True, "ipucu": "Genel: simge yok, yalnız yazılar."},
-    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı", "tur": "text", "varsayilan": "KARTVİZİT"},
+    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı (kaldırmak için: yok)", "tur": "text", "varsayilan": "KARTVİZİT"},
     {"ad": "zemin", "etiket": "Gövde rengi", "tur": "select", "varsayilan": "otomatik",
      "secenekler": [("otomatik", "Otomatik (siyah ve beyaz karışık)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")]},
     {"ad": "yazi_renk", "etiket": "Yazı rengi (ad, unvan, kurum, telefon)", "tur": "select", "secenekler": _YAZI,
@@ -113,7 +113,7 @@ def _icerik(is_, b):
     if b.get("site_adi") and adi != b["site_adi"].strip().lower():
         uyar.append(f"Sayfa adı '{adi}' olarak düzeltildi (yalnız a-z ve rakam, en çok {site.EN_UZUN} harf)")
     c = T.Icerik20(marka=ad(b), hizmet=" ".join((b.get("unvan") or "").split()), hizmetler=[],
-                   telefon=O.telefon_yazisi(b["telefon"]), cagri="", qr_yazi=(b.get("qr_yazi") or "KARTVİZİT").strip(),
+                   telefon=O.telefon_yazisi(b["telefon"]), cagri="", qr_yazi=O.qr_yazisi(b, "KARTVİZİT"),
                    simge=simge, logo=logo, url=site.sayfa_url(adi), kurum=" ".join((b.get("kurum") or "").split()))
     navy = [O.NAVY, O.GOLD]                            # kurumsal: lacivert ve altın her sektörde aday
     return c, list(dict.fromkeys(renkler + navy)), adi, uyar
@@ -127,6 +127,8 @@ def _adaylar(b, c, renkler):
     out = []
     for duzen, (_, _, fonts, _) in T.DUZENLER.items():
         if duzen == "monogram" and c.simge == "yok":     # genel: baş harf yok
+            continue
+        if duzen in T.LOGO_DUZENLERI and c.simge != "logo":   # büyük logo düzenleri yalnız logo yüklenince
             continue
         for g, y, v in paletler:
             oto = y == O.Palet(g, v).yazi                               # otomatik yazı rengi: eski imza
@@ -164,19 +166,24 @@ def katalog(is_):
     sira = ogrenme.sec(KOD, [(i, oz) for i, oz, _ in adaylar], len(adaylar), haric=is_.haric,
                        tohum=random.randrange(1 << 30), uygun=uygun)
     is_.ilerle(5, f"{len(adaylar)} aday sıralandı; tasarımlar kuruluyor ve denetleniyor")
-    kabul, yedek, denenen, denendi = [], [], 0, set()
-    for sinir in (en_cok, en_cok + 1):                 # bir düzen hiç geçemezse eksik yer ikinci turda dolar
+    kabul, yedek, denenen, denendi, bozuk = [], [], 0, set(), {}
+    # bir düzen hiç geçemezse eksik yer sonraki turlarda dolar (ince ayrıntılı logo küçük kutulu düzenleri eler:
+    # o zaman logoyu büyük basan düzenler birkaç renk ve yazı tipiyle kataloğu doldurur)
+    for sinir in (en_cok, en_cok + 1, en_cok + 3):
         for imza in sira:
-            if len(kabul) + len(yedek) >= KATALOG_ADET or denenen >= 30:
+            if len(kabul) + len(yedek) >= KATALOG_ADET or denenen >= 60:
                 break
             par = by[imza][2]
             if imza in denendi or sum(1 for _, _, d in kabul + yedek if d.duzen == par["duzen"]) >= sinir:
+                continue
+            if bozuk.get(par["duzen"], 0) >= 3:        # üç kez geçemeyen düzen (logo kutusu küçük gibi) denenmez
                 continue
             denendi.add(imza)
             denenen += 1
             d = _kur(c, par)
             sorun, _ = T.kontrol(d)
             if sorun:
+                bozuk[par["duzen"]] = bozuk.get(par["duzen"], 0) + 1
                 continue
             (yedek if d.zayif or T.kalite(d) < 0.7 else kabul).append((imza, par, d))
             is_.ilerle(5 + 50 * (len(kabul) + len(yedek)) / KATALOG_ADET,

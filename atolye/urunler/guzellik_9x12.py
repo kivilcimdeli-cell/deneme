@@ -90,7 +90,7 @@ ALANLAR = [
      "ipucu": "İsimlikte ve sayfada (Hemen Ara)."},
     {"ad": "hizmetler", "etiket": "Hizmetler", "tur": "textarea", "ornek": "Kesim, Fön, Boya, Gelin saçı",
      "ipucu": "Virgülle ya da satır satır. İsimliğe sığanlar yazılır (genelde 1–3 madde)."},
-    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı", "tur": "text", "varsayilan": "RANDEVU"},
+    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı (kaldırmak için: yok)", "tur": "text", "varsayilan": "RANDEVU"},
 ] + RENK_ALANLARI + SAYFA_ALANLARI + [
     {"ad": "yetkili", "etiket": "Yetkili", "tur": "text", "grup": "Kayıt (isimliğe ve sayfaya yazılmaz)"},
     {"ad": "yetkili_tel", "etiket": "Yetkilinin telefonu", "tur": "tel"},
@@ -128,7 +128,7 @@ def _icerik(is_, b):
     maddeler = [GZ.buyuk_harf(x.strip(" .")) for x in re.split(r"[,;\n·•]+", b.get("hizmetler") or "") if x.strip(" .")]
     adi = sayfa_adi(b, marka, uyar)
     c = T.Icerik(marka=marka, hizmet=hizmet, hizmetler=maddeler, telefon=O.telefon_yazisi(b["telefon"]), cagri="",
-                 qr_yazi=(b.get("qr_yazi") or "RANDEVU").strip(),
+                 qr_yazi=O.qr_yazisi(b, "RANDEVU"),
                  simge=GZ.DALLAR.get(b.get("dal"), GZ.DALLAR["genel"])[1], url=site.sayfa_url(adi))
     return c, adi, uyar
 

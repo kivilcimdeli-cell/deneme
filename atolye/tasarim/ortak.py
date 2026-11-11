@@ -372,6 +372,12 @@ def telefon_yazisi(s):
         return " ".join(s.split())
 
 
+def qr_yazisi(b, varsayilan):
+    """QR'ın altındaki yazı: boşsa ürünün varsayılanı; "yok" ya da "-" yazılırsa yazı konmaz (QR tek başına)."""
+    s = (b.get("qr_yazi") or varsayilan).strip()
+    return "" if s.lower() in ("yok", "-") else s
+
+
 def bar(x0, x1, y, h):
     return S.bar(x0, x1, y, h)
 

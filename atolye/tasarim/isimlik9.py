@@ -80,7 +80,11 @@ def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c", ust=None):
         t = (ust or UST) - 1.5
         return (cx, t, cx, t)
     if key == "logo" and c.logo is not None:
-        parts = [(O.temizle(cs), r) for cs, r in O.olcekle([(c.logo, "vurgu")], 0.0, 0.0, w, h)]
+        ham = O.olcekle([(c.logo, "vurgu")], 0.0, 0.0, w, h)
+        parts = [(O.temizle(cs), r) for cs, r in ham]
+        logo_kaybi(d, ham, parts)
+        if sum(cs.area() for cs, _ in parts) < 1e-6:           # küçük kutuda logo bütünüyle silindi: boş şekil
+            parts = ham                                          # sınırsız kalmasın; kontrol (kayıp %100) reddeder
     elif key in O.SIMGE:
         parts = O.simge_kur(key, w, h)
     else:
@@ -103,6 +107,27 @@ def _simge(d, c, p, cx, cy, w, h, oyma=False, hiza="c", ust=None):
     for cs, rol in parts:
         d.add(None, cs, p.renk(rol))
     return A.union(*[cs for cs, _ in parts]).bounds()
+
+
+LOGO_ZAYIF, LOGO_BOZUK = 0.08, 0.12                    # küçülünce kaybolan ayrıntı oranı
+
+
+def logo_kaybi(d, ham, temiz):
+    """Logo kutusuna küçülünce baskıya gelmeyen incelikler (temizle) ne kadar değiştirdi: ham ile temiz şeklin farkının
+    ham alana oranı. %8'i geçerse tasarım zayıf (katalogda yedek), %12'yi geçerse kontrol reddeder (logo küçük kutuda
+    kırık görünüyordu: DHK Tapu Takip'te harfler ve çatı kayboldu; %15'te bile D'nin bir çizgisi gitti)."""
+    alan = sum(a.area() for a, _ in ham)
+    fark = sum((a - b).area() + (b - a).area() for (a, _), (b, _) in zip(ham, temiz))
+    k = fark / max(alan, 1e-6)
+    d.logo_kayip = max(getattr(d, "logo_kayip", 0.0), k)
+    if k > LOGO_ZAYIF:
+        d.zayif.append(f"logo küçük kaldı (ayrıntının %{100 * k:.0f}'i kayboldu)")
+
+
+def logo_sorunu(d):
+    """kontrol için: logo bu düzende kırık çıkıyorsa sorun metni."""
+    k = getattr(d, "logo_kayip", 0.0)
+    return [f"logo kırık: ayrıntının %{100 * k:.0f}'i kayboldu"] if k > LOGO_BOZUK else []
 
 
 def simge_eni(c, w, h):
@@ -569,7 +594,8 @@ def ad(d):
 
 def kontrol(d):
     """Baskıya uygunluk: (sorunlar, ölçüler)."""
-    return O.olc(d, GUVENLI)
+    sorun, olcu = O.olc(d, GUVENLI)
+    return sorun + logo_sorunu(d), olcu
 
 
 def katilar(d):

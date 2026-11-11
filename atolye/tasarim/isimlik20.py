@@ -272,6 +272,57 @@ def l_ortali(d, c, p, k):
     qr(d, c, p, 66.0, 56.0, 40.0)
 
 
+# ---------------------------------------------------------------- büyük logo düzenleri (yalnız logo yüklenince)
+# Ayrıntılı kurum logosu (ince serifli harfler, ince çatı çizgisi...) 2 cm'lik simge kutusunda baskıda kaybolur; logo
+# kaybı denetimi o düzenleri eler (isimlik9.logo_kaybi). Bu üç düzen logoyu ~45 mm basar (DHK Tapu Takip: orijinal
+# logonun ince harfleri ancak bu boyda basılıyor).
+
+def l_logo_sol(d, c, p, k):
+    """Solda büyük logo, ince dik çizgi; yanında ad, unvan, kurum, telefon; QR sağda."""
+    ib = _simge(d, c, p, X0 + 2.0, 58.0, 46.0, 40.0, hiza="l", ust=UST)
+    xc = ib[2] + 5.0
+    d.add(None, A.rrect(1.4, 64.0, 0.7, xc, 54.0), p.vurgu)
+    x = xc + 5.0
+    w = 40.0 - x
+    _, y, _ = ad_yaz(d, c, p, k, x, 86.0, 12.0, w, "l", 0.0, min_cap=8.0, cap2=9.5)
+    y = _unvan(d, c, p, x, y - 4.2, w, cap=5.2, tr=1.0)
+    if c.kurum:                                             # dar sütun: kurum üç satıra kadar
+        _satirlar(d, "kurum", O.tr_upper(c.kurum), x, y - 4.0, w, "l", 4.6, 0.8, p.yazi, n=3)
+    telefon(d, c, p, x, 22.0, 5.6, max_w=w)
+    qr(d, c, p, 66.0, 56.0, 38.0)
+
+
+def l_logo_ust(d, c, p, k):
+    """Sol üstte büyük logo, yanında kurum (logo ile kurum adı yan yana, kurum logolarındaki gibi); altında boydan
+    çizgi, ad, unvan, telefon; QR sağda."""
+    ib = _simge(d, c, p, X0 + 2.0, 77.0, 44.0, 32.0, hiza="l", ust=UST - 1.0)
+    if c.kurum:
+        x = ib[2] + 6.0
+        w = 40.0 - x
+        n = max(1, len(O.maddeleri_diz(O.tr_upper(c.kurum).split(), 5.0, w, 3, tr=1.4)))
+        _kurum(d, c, p, x, (ib[1] + ib[3]) / 2 + (n * 5.0 + (n - 1) * 1.8) / 2, w, cap=5.0, tr=1.4)
+    y = ib[1] - 4.5
+    d.add(None, O.bar(X0 + 2.0, 40.0, y, 1.4), p.vurgu)
+    _, y, _ = ad_yaz(d, c, p, k, X0 + 2.0, y - 4.5, 12.0, 126.0, "l", 0.0, min_cap=8.5, cap2=9.0)
+    _unvan(d, c, p, X0 + 2.0, y - 3.8, 126.0, cap=5.4, tr=1.4)
+    telefon(d, c, p, X0 + 2.0, 20.0, 5.6, max_w=126.0)
+    qr(d, c, p, 66.0, 56.0, 38.0)
+
+
+def l_logo_orta(d, c, p, k):
+    """Solda ortalı sütun: üstte büyük logo, ad, unvan, kısa çizgi, kurum, telefon; QR sağda."""
+    cx, w = -24.0, 124.0
+    ib = _simge(d, c, p, cx, 78.0, 60.0, 29.0, ust=UST - 1.0)
+    _, y, _ = ad_yaz(d, c, p, k, cx, ib[1] - 3.6, 11.0, w, "c", 0.1, min_cap=8.0, cap2=8.5)
+    y = _unvan(d, c, p, cx, y - 3.6, w, "c", cap=5.0, tr=1.6)
+    d.add(None, O.bar(cx - 8.0, cx + 8.0, y - 3.2, 1.4), p.vurgu)
+    _kurum(d, c, p, cx, y - 6.6, w, "c", cap=4.6, tr=1.0)
+    telefon(d, c, p, cx, 17.0, 5.0, "c", max_w=w)
+    qr(d, c, p, 66.0, 56.0, 38.0)
+
+
+LOGO_DUZENLERI = ("logo_sol", "logo_ust", "logo_orta")      # simge ya da baş harfle anlamsız: yalnız logo varsa
+
 # anahtar: (ad, kurucu, adın yazı tipleri, ad büyük harfle mi)
 DUZENLER = {
     "klasik": ("Klasik", l_klasik, ["lora", "mont6", "playfair"], False),
@@ -284,6 +335,9 @@ DUZENLER = {
     "ust_bant": ("Üst bant", l_ust_bant, ["mont", "outfit", "sora"], False),
     "zarif": ("Zarif", l_zarif, ["playfair", "lora", "cinzel"], False),
     "qr_solda": ("QR solda", l_qr_solda, ["outfit", "mont6", "sora"], False),
+    "logo_sol": ("Büyük logo", l_logo_sol, ["playfair", "mont6", "lora"], False),
+    "logo_ust": ("Logo üstte", l_logo_ust, ["mont6", "playfair", "outfit"], False),
+    "logo_orta": ("Logo ortada", l_logo_orta, ["playfair", "lora", "mont6"], False),
 }
 
 
@@ -316,7 +370,9 @@ def kalite(d):
 
 
 def kontrol(d):
-    return O.olc(d, guvenli())
+    from .isimlik9 import logo_sorunu
+    sorun, olcu = O.olc(d, guvenli())
+    return sorun + logo_sorunu(d), olcu
 
 
 def ad(d):

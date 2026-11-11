@@ -40,7 +40,7 @@ ALANLAR = [
     {"ad": "eposta", "etiket": "E-posta (sayfada)", "tur": "text", "ornek": "ad@salon.com"},
     {"ad": "dal", "etiket": "Dal (simge)", "tur": "select", "secenekler": _DAL, "varsayilan": "kuafor",
      "zorunlu": True},
-    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı", "tur": "text", "varsayilan": "RANDEVU"},
+    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı (kaldırmak için: yok)", "tur": "text", "varsayilan": "RANDEVU"},
 ] + RENK_ALANLARI + [dict(a, grup="Kartvizit sayfası") if a.get("grup") == "Randevu sayfası" else
                      dict(a, ornek="aylinersoy", ipucu=a["ipucu"].replace("isimlikteki addan", "ad soyaddan"))
                      if a["ad"] == "site_adi" else a for a in SAYFA_ALANLARI] + [
@@ -63,7 +63,7 @@ def _icerik(is_, b):
     uyar = []
     adi = sayfa_adi(b, ad(b), uyar)
     c = T.Icerik20(marka=ad(b), hizmet=" ".join((b.get("unvan") or "").split()), hizmetler=[],
-                   telefon=O.telefon_yazisi(b["telefon"]), cagri="", qr_yazi=(b.get("qr_yazi") or "RANDEVU").strip(),
+                   telefon=O.telefon_yazisi(b["telefon"]), cagri="", qr_yazi=O.qr_yazisi(b, "RANDEVU"),
                    simge=GZ.DALLAR.get(b.get("dal"), GZ.DALLAR["genel"])[1], url=site.sayfa_url(adi),
                    kurum=" ".join((b.get("kurum") or "").split()))
     return c, adi, uyar

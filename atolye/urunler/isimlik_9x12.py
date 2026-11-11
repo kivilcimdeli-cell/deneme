@@ -60,7 +60,7 @@ ALANLAR = [
      "ipucu": "Virgülle ya da satır satır. İsimliğe sığanlar yazılır (genelde 2–4 madde)."},
     {"ad": "cagri", "etiket": "Çağrı yazısı", "tur": "text", "ornek": "HEMEN ARA",
      "ipucu": "Boşsa sektöre göre: HEMEN ARA, RANDEVU ya da SİPARİŞ."},
-    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı", "tur": "text", "varsayilan": "TARA"},
+    {"ad": "qr_yazi", "etiket": "QR'ın altındaki yazı (kaldırmak için: yok)", "tur": "text", "varsayilan": "TARA"},
     {"ad": "zemin", "etiket": "Gövde rengi", "tur": "select", "varsayilan": "otomatik",
      "secenekler": [("otomatik", "Otomatik (siyah ve beyaz karışık)"), ("siyah", "Siyah"), ("beyaz", "Beyaz")]},
     {"ad": "yazi_renk", "etiket": "Yazı rengi (ad, hizmetler, telefon)", "tur": "select", "secenekler": _YAZI,
@@ -133,7 +133,7 @@ def _icerik(is_, b):
     if b.get("site_adi") and adi != b["site_adi"].strip().lower():
         uyar.append(f"Sayfa adı '{adi}' olarak düzeltildi (yalnız a-z ve rakam, en çok {site.EN_UZUN} harf)")
     c = T.Icerik(marka=marka, hizmet=hizmet, hizmetler=maddeler, telefon=O.telefon_yazisi(b["telefon"]),
-                 cagri=(b.get("cagri") or cagri).strip(), qr_yazi=(b.get("qr_yazi") or "TARA").strip(), simge=simge,
+                 cagri=(b.get("cagri") or cagri).strip(), qr_yazi=O.qr_yazisi(b, "TARA"), simge=simge,
                  logo=logo, url=site.sayfa_url(adi))
     return c, renkler, adi, uyar
 
