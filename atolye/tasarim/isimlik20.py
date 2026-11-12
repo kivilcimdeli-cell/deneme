@@ -425,7 +425,32 @@ def l_ikili_ust(d, c, p, k):
     qr(d, c, p, 66.0, 56.0, 36.0)
 
 
-IKILI_DUZENLER = ("ikili_orta", "ikili_sol", "ikili_ust")    # yalnız ikinci kişi yazılınca (ve yalnız onlar)
+def l_ikili_qr_sol(d, c, p, k):
+    """QR solda; sağında ortada logo, altında kurum ve kısa altın çizgi, iki kişi liste gibi ("ortada"nın aynası)."""
+    qr(d, c, p, -66.0, 56.0, 36.0)
+    cx = 26.0
+    ib = _simge(d, c, p, cx, 79.0, 60.0, 30.0, ust=UST - 1.0)
+    y = _kurum(d, c, p, cx, ib[1] - 3.2, 128.0, "c", cap=4.6, tr=1.0)
+    d.add(None, O.bar(cx - 10.0, cx + 10.0, y - 3.6, 1.4), p.vurgu)
+    _, cc = _liste(d, c, p, k, -40.0, 90.0, y - 9.0, ara=8.0)      # QR'ın hemen yanından sağ kenara
+    _iki_oran(d, cc)
+
+
+def l_ikili_cerceve(d, c, p, k):
+    """Boydan ince altın çerçeve; içinde solda logo, yanında kurum, altında iki kişi liste gibi; QR sağda."""
+    d.add(None, A.rrect(186.0, 80.0, 5.0, 0.0, 53.0) - A.rrect(183.2, 77.2, 3.6, 0.0, 53.0), p.vurgu)
+    ib = _simge(d, c, p, -84.0, 76.0, 44.0, 28.0, hiza="l", ust=89.0)
+    if c.kurum:
+        x = ib[2] + 6.0
+        w = 38.0 - x
+        n = max(1, len(O.maddeleri_diz(O.tr_upper(c.kurum).split(), 4.6, w, 3, tr=1.6)))
+        _kurum(d, c, p, x, (ib[1] + ib[3]) / 2 + (n * 4.6 + (n - 1) * 1.8) / 2, w, cap=4.6, tr=1.6)
+    _, cc = _liste(d, c, p, k, -84.0, 38.0, ib[1] - 7.0, cap=6.0, ara=8.0)
+    _iki_oran(d, cc)
+    qr(d, c, p, 64.0, 56.0, 34.0)
+
+
+IKILI_DUZENLER = ("ikili_orta", "ikili_sol", "ikili_ust", "ikili_qr_sol", "ikili_cerceve")   # yalnız iki kişide
 
 # anahtar: (ad, kurucu, adın yazı tipleri, ad büyük harfle mi)
 DUZENLER = {
@@ -446,6 +471,8 @@ DUZENLER = {
     "ikili_orta": ("İki kişi · ortada", l_ikili_orta, ["lora", "mont6", "manrope"], False),
     "ikili_sol": ("İki kişi · logo solda", l_ikili_sol, ["lora", "mont6", "manrope"], False),
     "ikili_ust": ("İki kişi · logo üstte", l_ikili_ust, ["lora", "mont6", "manrope"], False),
+    "ikili_qr_sol": ("İki kişi · QR solda", l_ikili_qr_sol, ["mont6", "lora", "manrope"], False),
+    "ikili_cerceve": ("İki kişi · çerçeveli", l_ikili_cerceve, ["lora", "mont6", "manrope"], False),
 }
 
 

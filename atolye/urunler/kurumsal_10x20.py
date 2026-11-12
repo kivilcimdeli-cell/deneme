@@ -187,6 +187,9 @@ def katalog(is_):
                 continue
             if bozuk.get(par["duzen"], 0) >= 3:        # üç kez geçemeyen düzen (logo kutusu küçük gibi) denenmez
                 continue
+            if sinir < en_cok + 3 and any(d.duzen == par["duzen"] and p0["govde"] == par["govde"]
+                                          for _, p0, d in kabul + yedek):
+                continue                               # aynı düzen aynı gövdede yalnız yazı tipi farkıyla tekrar etmesin
             denendi.add(imza)
             denenen += 1
             d = _kur(c, par)

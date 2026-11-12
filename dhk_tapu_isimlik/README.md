@@ -3,7 +3,7 @@
 Önce iki danışmana birer isimlik düşünüldü (iki ayrı 10'luk katalog). Sonra müşteri iki adı **tek isimlikte**
 istedi, daha sade (soyad Kaptan). Son katalog uygulamanın iki kişilik düzenleriyle üretildi, 10 örnek:
 
-- Düzenler: ortada, logo solda, logo üstte.
+- Düzenler: ortada, logo solda, logo üstte, QR solda, çerçeveli (her biri bir siyah, bir beyaz gövdede).
 - İçerik: logo, iki ad ve telefon, küçük kurum satırı, tek QR. Unvan yazılmaz.
 
 - **Kurum:** DHK Tapu Takip ve Danışmanlık · **Unvan:** Tapu Danışmanı · **Renk:** altın (siyah ve beyaz zemin)
