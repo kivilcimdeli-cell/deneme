@@ -1,7 +1,10 @@
 # DHK Tapu Takip ve Danışmanlık: 10 × 20 kurumsal isimlik
 
-İki danışmana birer isimlik yapılacak (aynı tasarım, ayrı isim ve telefon). Her biri için 10 örnekli katalog
-Atölye uygulamasıyla üretildi; iki katalogda K01–K10 kodları aynı tasarımı gösterir.
+Önce iki danışmana birer isimlik düşünüldü (iki ayrı 10'luk katalog). Sonra müşteri iki adı **tek isimlikte**
+istedi, daha sade (soyad Kaptan). Son katalog uygulamanın iki kişilik düzenleriyle üretildi, 10 örnek:
+
+- Düzenler: ortada, logo solda, logo üstte.
+- İçerik: logo, iki ad ve telefon, küçük kurum satırı, tek QR. Unvan yazılmaz.
 
 - **Kurum:** DHK Tapu Takip ve Danışmanlık · **Unvan:** Tapu Danışmanı · **Renk:** altın (siyah ve beyaz zemin)
 - **QR altı yazı:** yok (müşteri KARTVİZİT yazısını istemedi; alana `yok` yazılır)

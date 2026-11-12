@@ -48,6 +48,9 @@ ALANLAR = [
     {"ad": "kurum", "etiket": "Kurum / şirket", "tur": "text", "ornek": "Kaya Hukuk Bürosu"},
     {"ad": "telefon", "etiket": "Telefon", "tur": "tel", "zorunlu": True, "ornek": "0532 123 45 67",
      "ipucu": "İsimlikte (sığarsa) ve kartvizit sayfasında."},
+    {"ad": "ad_soyad2", "etiket": "İkinci kişi (aynı isimlikte, isteğe bağlı)", "tur": "text", "ornek": "Ayşe Kaya",
+     "ipucu": "Yazılırsa iki ad tek isimlikte: sade iki kişilik tasarımlar (unvan yazılmaz)."},
+    {"ad": "telefon2", "etiket": "İkinci kişinin telefonu", "tur": "tel", "ornek": "0532 765 43 21"},
     {"ad": "eposta", "etiket": "E-posta (sayfada)", "tur": "text", "ornek": "ad@kurum.com"},
     {"ad": "sektor", "etiket": "Sektör (simge ve renkler)", "tur": "select", "secenekler": _SEKTOR,
      "varsayilan": "genel", "zorunlu": True, "ipucu": "Genel: simge yok, yalnız yazılar."},
@@ -85,7 +88,9 @@ ALANLAR = [
 
 
 def ad(b):
-    return " ".join(b["ad_soyad"].split())
+    """Kayıt ve katalog adı: iki kişilikte "A & B"."""
+    ad2 = " ".join((b.get("ad_soyad2") or "").split())
+    return " ".join(b["ad_soyad"].split()) + (f" & {ad2}" if ad2 else "")
 
 
 def _icerik(is_, b):
@@ -112,9 +117,11 @@ def _icerik(is_, b):
     adi = site.sayfa_adi(b.get("site_adi") or ad(b))
     if b.get("site_adi") and adi != b["site_adi"].strip().lower():
         uyar.append(f"Sayfa adı '{adi}' olarak düzeltildi (yalnız a-z ve rakam, en çok {site.EN_UZUN} harf)")
-    c = T.Icerik20(marka=ad(b), hizmet=" ".join((b.get("unvan") or "").split()), hizmetler=[],
-                   telefon=O.telefon_yazisi(b["telefon"]), cagri="", qr_yazi=O.qr_yazisi(b, "KARTVİZİT"),
-                   simge=simge, logo=logo, url=site.sayfa_url(adi), kurum=" ".join((b.get("kurum") or "").split()))
+    ad2 = " ".join((b.get("ad_soyad2") or "").split())
+    c = T.Icerik20(marka=" ".join(b["ad_soyad"].split()), hizmet=" ".join((b.get("unvan") or "").split()),
+                   hizmetler=[], telefon=O.telefon_yazisi(b["telefon"]), cagri="", qr_yazi=O.qr_yazisi(b, "KARTVİZİT"),
+                   simge=simge, logo=logo, url=site.sayfa_url(adi), kurum=" ".join((b.get("kurum") or "").split()),
+                   marka2=ad2, telefon2=O.telefon_yazisi(b["telefon2"]) if ad2 and b.get("telefon2") else "")
     navy = [O.NAVY, O.GOLD]                            # kurumsal: lacivert ve altın her sektörde aday
     return c, list(dict.fromkeys(renkler + navy)), adi, uyar
 
@@ -129,6 +136,8 @@ def _adaylar(b, c, renkler):
         if duzen == "monogram" and c.simge == "yok":     # genel: baş harf yok
             continue
         if duzen in T.LOGO_DUZENLERI and c.simge != "logo":   # büyük logo düzenleri yalnız logo yüklenince
+            continue
+        if (duzen in T.IKILI_DUZENLER) != bool(c.marka2):       # iki ad yazıldıysa yalnız iki kişilik düzenler
             continue
         for g, y, v in paletler:
             oto = y == O.Palet(g, v).yazi                               # otomatik yazı rengi: eski imza

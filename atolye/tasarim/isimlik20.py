@@ -34,6 +34,8 @@ class Icerik20(Icerik):
     kurum: str = ""
     buyuk: object = False                             # ad: kişi adı gibi (Mehmet Kaya); True: büyük harf
     olcek: float = 1.0                                # adın boy çarpanı (yazılar sığmazsa küçülür)
+    marka2: str = ""                                  # aynı isimlikte ikinci kişi (iki kişilik düzenler)
+    telefon2: str = ""
 
 
 def guvenli():
@@ -323,6 +325,108 @@ def l_logo_orta(d, c, p, k):
 
 LOGO_DUZENLERI = ("logo_sol", "logo_ust", "logo_orta")      # simge ya da baş harfle anlamsız: yalnız logo varsa
 
+
+# ---------------------------------------------------------------- iki kişilik sade düzenler (aynı isimlikte iki ad)
+# Ortak isimlik (aynı masada iki danışman): logo, iki ad, iki telefon, küçük kurum satırı, tek QR. Unvan yazılmaz
+# (sade). Logo ince ayrıntılıysa ~40 mm basılır (isimlik logosu bu boyda temiz).
+
+def _kisi(d, c, p, k, n, x, y, w, align="l", cap=6.6, tel_cap=4.8):
+    """n. kişinin adı (düzenin yazı tipinde) ve altında telefonu; üstü y. Döner (alt kenar, adın boyu)."""
+    ad = c.marka if n == 1 else c.marka2
+    tel = c.telefon if n == 1 else c.telefon2
+    ad = O.tr_upper(ad) if c.buyuk else ad
+    cc, tt = O.sigdir(k, ad, cap * getattr(c, "olcek", 1.0), w, 0.0)
+    cs = O.yazi(k, ad, cc, x, 0.0, align, tt, w, min_cap=O.MIN_BOY)
+    b = cs.bounds()
+    d.add(f"ad {n}", cs.translate((0.0, y - b[3])), p.yazi)
+    alt = y - (b[3] - b[1])
+    if tel:
+        alt = satir(d, f"telefon {n}", tel, x, alt - 2.6, tel_cap, w, align, 0.6, p.vurgu)
+    return alt, cc
+
+
+def _liste(d, c, p, k, x0, x1, y, cap=5.6, tel_cap=4.6, ara=6.0):
+    """İki kişi alt alta, liste gibi: ad solda (düzenin yazı tipinde), telefonu aynı satırda sağa yaslı (vurgu
+    renginde). Satırlar arası ince çizgi yok (sade). Döner (son satırın altı, en küçük ad boyu)."""
+    caps = []
+    for n in (1, 2):
+        ad = c.marka if n == 1 else c.marka2
+        tel = c.telefon if n == 1 else c.telefon2
+        ad = O.tr_upper(ad) if c.buyuk else ad
+        tw = 0.0
+        if tel:
+            tc, ttr = O.sigdir(O.SATIR, tel, tel_cap, 46.0, 0.6)
+            t = O.yazi(O.SATIR, tel, tc, x1, 0.0, "r", ttr, 46.0, min_cap=O.MIN_BOY)
+            tb = t.bounds()
+            tw = tb[2] - tb[0] + 6.0
+        cc, tt = O.sigdir(k, ad, cap * getattr(c, "olcek", 1.0), x1 - x0 - tw, 0.0)
+        cs = O.yazi(k, ad, cc, x0, 0.0, "l", tt, x1 - x0 - tw, min_cap=O.MIN_BOY)
+        b = cs.bounds()
+        cs = cs.translate((0.0, y - b[3]))
+        d.add(f"ad {n}", cs, p.yazi)
+        if tel:                                          # telefon adın büyük harflerinin ortasında
+            orta = y - (b[3] - b[1]) + cc / 2 + max(0.0, -b[1])
+            d.add(f"telefon {n}", t.translate((0.0, orta - (tb[1] + tb[3]) / 2)), p.vurgu)
+        caps.append(cc)
+        y = y - (b[3] - b[1]) - ara
+    return y + ara, min(caps)
+
+
+def _iki_oran(d, *caps):
+    d.ad_oran = min(1.0, min(caps) / 5.2)                # iki ad da okunur boyda mı (kalite)
+
+
+def l_ikili_orta(d, c, p, k):
+    """Üstte ortada logo, altında harf aralıklı küçük kurum ve kısa altın çizgi; altında iki kişi liste gibi (ad
+    solda, telefon sağda); QR sağda."""
+    cx, w = -24.0, 124.0
+    ib = _simge(d, c, p, cx, 77.0, 62.0, 34.0, ust=UST - 1.0)
+    y = _kurum(d, c, p, cx, ib[1] - 3.2, w, "c", cap=4.6, tr=1.6)
+    d.add(None, O.bar(cx - 10.0, cx + 10.0, y - 3.6, 1.4), p.vurgu)
+    _, cc = _liste(d, c, p, k, cx - 60.0, cx + 60.0, y - 9.0, ara=8.0)
+    _iki_oran(d, cc)
+    qr(d, c, p, 66.0, 56.0, 36.0)
+
+
+def l_ikili_sol(d, c, p, k):
+    """Solda büyük logo, ince dik altın çizgi; sağında alt alta iki ad ve telefonları, en altta küçük kurum; QR
+    sağda."""
+    ib = _simge(d, c, p, X0 + 2.0, 56.0, 46.0, 40.0, hiza="l", ust=UST - 2.0)
+    xc = ib[2] + 6.0
+    d.add(None, A.rrect(1.4, 66.0, 0.7, xc, 54.0), p.vurgu)
+    x = xc + 6.0
+    w = 42.0 - x
+    a1, c1 = _kisi(d, c, p, k, 1, x, 85.0, w)
+    a2, c2 = _kisi(d, c, p, k, 2, x, a1 - 6.4, w)
+    if c.kurum:                                         # iki dengeli satır ("VE" tek başına kalmasın)
+        kel = O.tr_upper(c.kurum).split()
+        satirlar_ = min(([" ".join(kel[:i]), " ".join(kel[i:])] for i in range(1, len(kel))),
+                        key=lambda t: max(len(t[0]), len(t[1])), default=[" ".join(kel)])
+        y = a2 - 6.0
+        for i, metin in enumerate(satirlar_):
+            y = satir(d, "kurum" + (f" {i + 1}" if i else ""), metin, x, y, 4.6, w, "l", 1.0, p.yazi) - 1.8
+    _iki_oran(d, c1, c2)
+    qr(d, c, p, 66.0, 56.0, 36.0)
+
+
+def l_ikili_ust(d, c, p, k):
+    """Sol üstte logo, yanında kurum; boydan ince altın çizgi; altında iki kişi liste gibi (ad solda, telefon
+    sağda); QR sağda."""
+    ib = _simge(d, c, p, X0 + 2.0, 78.0, 46.0, 32.0, hiza="l", ust=UST - 1.0)
+    if c.kurum:
+        x = ib[2] + 6.0
+        w = 40.0 - x
+        n = max(1, len(O.maddeleri_diz(O.tr_upper(c.kurum).split(), 4.6, w, 3, tr=1.6)))
+        _kurum(d, c, p, x, (ib[1] + ib[3]) / 2 + (n * 4.6 + (n - 1) * 1.8) / 2, w, cap=4.6, tr=1.6)
+    y = ib[1] - 4.6
+    d.add(None, O.bar(X0 + 2.0, 40.0, y, 1.4), p.vurgu)
+    _, cc = _liste(d, c, p, k, X0 + 2.0, 40.0, y - 7.4, cap=6.4, ara=9.0)
+    _iki_oran(d, cc)
+    qr(d, c, p, 66.0, 56.0, 36.0)
+
+
+IKILI_DUZENLER = ("ikili_orta", "ikili_sol", "ikili_ust")    # yalnız ikinci kişi yazılınca (ve yalnız onlar)
+
 # anahtar: (ad, kurucu, adın yazı tipleri, ad büyük harfle mi)
 DUZENLER = {
     "klasik": ("Klasik", l_klasik, ["lora", "mont6", "playfair"], False),
@@ -338,6 +442,10 @@ DUZENLER = {
     "logo_sol": ("Büyük logo", l_logo_sol, ["playfair", "mont6", "lora"], False),
     "logo_ust": ("Logo üstte", l_logo_ust, ["mont6", "playfair", "outfit"], False),
     "logo_orta": ("Logo ortada", l_logo_orta, ["playfair", "lora", "mont6"], False),
+    # iki uzun ad küçük boyda: harf içi geniş, sade yazı tipleri (Playfair bu boyda baskıda kapanıyor)
+    "ikili_orta": ("İki kişi · ortada", l_ikili_orta, ["lora", "mont6", "manrope"], False),
+    "ikili_sol": ("İki kişi · logo solda", l_ikili_sol, ["lora", "mont6", "manrope"], False),
+    "ikili_ust": ("İki kişi · logo üstte", l_ikili_ust, ["lora", "mont6", "manrope"], False),
 }
 
 
@@ -353,7 +461,8 @@ def tasarla(duzen, c, palet, yazi_tipi):
         d.ad_oran, d.gosterilen = 1.0, 0
         d.qr_entry = d.qr_side = None
         cc = Icerik20(**{**c.__dict__, "buyuk": DUZENLER[duzen][3], "olcek": olcek,
-                         "telefon": c.telefon if tel else "", "kurum": c.kurum if kurum else ""})
+                         "telefon": c.telefon if tel else "", "telefon2": c.telefon2 if tel else "",
+                         "kurum": c.kurum if kurum else ""})
         DUZENLER[duzen][1](d, cc, palet, yazi_tipi)
         if not O.sikisik(d, g):
             break

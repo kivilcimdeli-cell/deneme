@@ -118,6 +118,14 @@ gerekmez; yönetici izni istemez.
   çıkar; telefon sayfada kalır, notlarda uyarı çıkar.
 - **Kartvizit sayfası:** aynı 5 şablonla, kişinin kartviziti olarak yapılır. E-posta bağlantısı eklenir; **Rehbere
   kaydet** kişiyi kurumuyla ekler.
+- **Büyük logo düzenleri:** "Büyük logo", "Logo üstte", "Logo ortada" yalnız logo yüklenince gelir; ince ayrıntılı
+  logoyu ~45 mm basar. Küçük kutulu düzenleri logo kaybı denetimi eler.
+- **İki kişi tek isimlikte:** "İkinci kişi" ve telefonu yazılınca katalog yalnız iki kişilik sade düzenlerden çıkar.
+  - Düzenler: ortada, logo solda, logo üstte. Logo, iki ad, iki telefon, küçük kurum satırı ve tek QR var; unvan
+    yazılmaz.
+  - Adlar liste gibi dizilir: ad solda, telefon aynı satırda sağda (vurgu renginde). "Logo solda"da alt alta.
+  - Yazı tipleri Lora, Montserrat, Manrope: uzun iki ad küçük boyda kalıyor, Playfair bu boyda baskıda kapanıyor.
+  - Kayıt ve katalog adı "A & B". Kartvizit sayfası şimdilik birinci kişiyle yapılır.
 
 ### Güzellik isimlikleri (9 × 12 ve 10 × 20)
 
