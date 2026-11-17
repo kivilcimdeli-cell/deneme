@@ -2,7 +2,7 @@
 
 Kullanıcı: fotoğrafsız, sade, büyük yazılar, tek bir anlatım: "Her katman size özel"; yazılım da yazılsın. Önceki
 sürümde her karede ayrı yazı vardı, kareler yalnız alttaki katmanlarla birleşiyordu ("çok birleşik değil"). Şimdi tek
-bir tuval: büyük cümle iki satır hâlinde karelerin arasından geçer, katmanlar boydan boya akar, nozul 3. karede.
+bir tuval: solda üstte büyük BOYDE LABS logosu (ızgarada okunsun), büyük cümle iki satır hâlinde karelerin arasından geçer, katmanlar boydan boya akar, nozul 3. karede.
 
 Izgara: Instagram yüklerken kare (1:1) kırpıyor, ızgara onun ortasından 3:4 alıyor; her karenin ortadaki 810 × 1080'i
 görünür (x 135–945, y 180–1260). Tuval, ızgarada görünen üç bölge kesintisiz yan yana gelecek biçimde çizilir
@@ -57,14 +57,14 @@ def tuval():
     h1 = f"font-size:{BOY}px;line-height:1;font-weight:700;letter-spacing:-.04em;white-space:nowrap"
     return f"""<div style="position:relative;width:{CW}px;height:{CH}px;overflow:hidden;background:{INK};color:{PAPER}">
       {lay}
-      <div style="position:absolute;left:{X0 + 40}px;top:{Y0 + 40}px">{K.logo("koyu", 420, 44)}</div>
-      <p style="position:absolute;right:{CW - X1 + 40}px;top:{Y0 + 46}px;font-size:24px;font-weight:700;
+      <div style="position:absolute;left:{X0 + 40}px;top:{Y0 + 44}px">{K.logo("koyu", 760, 104)}</div>
+      <p style="position:absolute;right:{CW - X1 + 40}px;top:{Y0 + 80}px;font-size:26px;font-weight:700;
         letter-spacing:.16em;color:rgba(244,241,234,.6)">SHOPIER · DM · {K.TEL}</p>
-      <h1 class="u" style="position:absolute;left:{X0 + 30}px;top:{Y0 + 170}px;{h1};color:{SATIR1[1]}">{SATIR1[0]}</h1>
-      <h1 class="u" style="position:absolute;right:{CW - X1 + 30}px;top:{Y0 + 170 + BOY * 1.02:.0f}px;{h1};
+      <h1 class="u" style="position:absolute;left:{X0 + 30}px;top:{Y0 + 200}px;{h1};color:{SATIR1[1]}">{SATIR1[0]}</h1>
+      <h1 class="u" style="position:absolute;right:{CW - X1 + 30}px;top:{Y0 + 200 + BOY * 1.02:.0f}px;{h1};
         color:{SATIR2[1]}">{SATIR2[0]}</h1>
-      <p style="position:absolute;left:{X0 + 40}px;top:{Y0 + 170 + BOY * 2.02 + 40:.0f}px;font-size:34px;
-        letter-spacing:.02em;color:rgba(244,241,234,.78)">İsimlik · anahtarlık · promosyon · yazılım
+      <p style="position:absolute;left:{X0 + 40}px;top:{Y0 + 200 + BOY * 2.02 + 34:.0f}px;font-size:34px;
+        letter-spacing:.02em;color:rgba(244,241,234,.78)"><b style="color:{PAPER};letter-spacing:.08em">BOYDE LABS</b>&nbsp; İsimlik · anahtarlık · promosyon · yazılım
         <span style="color:rgba(244,241,234,.45)">— tasarımdan 3D baskıya, kendi atölyemizde.</span></p>
     </div>"""
 
