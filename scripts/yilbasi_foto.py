@@ -5,11 +5,11 @@ zincir, ara halka. Ara halka figürün tepesindeki halkanın deliğinden (önden
 halkanın teline oturur. Halkalar kafa rengine boyalı (yilbasi_model.boya).
 
 Görünüşler (boyde_labs/yilbasi_anahtarlik/foto/):
-  <anahtar>_halka   tek figür asılı, hafif dönük (3/4): tombulluğu görünsün
+  <anahtar>_halka   tek figür asılı; kamera hafif yandan (figüre ~32°), ana ışık yandan (derinlik)
   <anahtar>_iki     iki adet asılı: solda önü, sağda arkası (tam 3D)
   kapak             üç figür asılı (Noel Baba, ren geyiği, kardan adam)
   dizi              altı figür yan yana asılı
-  set               altı figür masada ayakta, zikzak sıra (set kapağı)
+  set               altı figür zincirli halkalarıyla asılı, zikzak derinlikte (set kapağı)
 Kullanım: python3 scripts/yilbasi_foto.py [anahtarlar|kapak|dizi] [--ornek N] [--deneme]
 """
 import math
@@ -57,8 +57,10 @@ def as_(key, yaw, top=(0.0, 0.0, 0.0)):
     return [(V, Fc, rgb, False) for _, V, Fc, rgb, _ in parts], M, wires
 
 
-def sira(sets, gap):
-    """Asılı takımları yan yana dizer (aralarında gap mm); çelik halkaların tepesi aynı yükseklikte."""
+def sira(sets, gap, dys=None):
+    """Asılı takımları yan yana dizer (aralarında gap mm); çelik halkaların tepesi aynı yükseklikte. dys: her takımın
+    derinlik kaydırması (mm, kameradan uzağa +): önlü arkalı dizilince grup derinlikli durur."""
+    dys = dys or [0.0] * len(sets)
     spans = []
     for parts, M, wires in sets:
         q = np.vstack([AF.world(parts, M)] + [V for V, _ in wires])[:, 0]
@@ -69,31 +71,37 @@ def sira(sets, gap):
         x += hi - lo + gap
     xs = np.array(xs) - (x - gap) / 2
     groups = []
-    for k, ((parts, M, wires), dx) in enumerate(zip(sets, xs)):
+    for k, ((parts, M, wires), dx, dy) in enumerate(zip(sets, xs, dys)):
         M = M.copy()
         M[0, 3] += dx
-        groups += [AF.put(parts, M, f"figur{k}"), AF.put_wires(wires, f"halka{k}", (dx, 0, 0))]
+        M[1, 3] += dy
+        groups += [AF.put(parts, M, f"anahtarlik{k}"), AF.put_wires(wires, f"halka{k}", (dx, dy, 0))]
     return AF.lift_all(np.vstack(groups), 0.02)
 
 
-def cek(sets, gap, path, samples, size, fill, el=6.0, fstop=8.0):
+def cek(sets, gap, path, samples, size, fill, az=16.0, el=10.0, fstop=8.0, dys=None):
+    """Derinlikli çekim: kamera hafif yandan ve yukarıdan; ana ışık yandan (figürde ışık-gölge geçişi, düz durmasın),
+    dolgu zayıf, arkadan kenar ışığı. Fon aynı beyaz stüdyo."""
     sc = AF.studio(False, samples, size)
-    pts = sira(sets, gap)
-    AF.shoot(sc, pts, 0, el, fill, fstop, path, False)
+    pts = sira(sets, gap, dys)
+    cam = F.camera(sc, 85)
+    a, e = math.radians(az), math.radians(el)
+    d = np.array([math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)])
+    cam["dir"] = d.tolist()
+    res = sc.render
+    F.frame(cam, pts, res.resolution_x / res.resolution_y, fill)
+    cam.data.dof.aperture_fstop = fstop
+    F.lights(sc, pts.mean(0), d, "yan", 1.25)
+    F.shoot(sc, path, F.BEYAZ)
+    AF.saturate(path)
 
 
 def set_cek(samples, size, path):
-    """Set kapağı: altı figür masada ayakta, zikzak tek sıra (arkadakiler öndekilerin arasından görünür)."""
-    sc = AF.studio(False, samples, size)
-    dizilis = [("kardan_adam", -67, 14, 18), ("ren_geyigi", -40, -12, 12), ("noel_baba", -13, 14, 4),
-               ("atkili_ayicik", 13, -12, -4), ("cam_agaci", 40, 14, -10), ("kutup_ayisi", 67, -12, -16)]
-    groups = []
-    for k, (key, x, y, yaw) in enumerate(dizilis):
-        a = math.radians(yaw)
-        rot = np.array([[math.cos(a), -math.sin(a), 0], [math.sin(a), math.cos(a), 0], [0, 0, 1]])
-        groups.append(AF.put(parcalar(key), np.c_[rot, [x, y, 0.0]], f"figur{k}"))
-    pts = np.vstack(groups)
-    AF.shoot(sc, pts, 8, 18, 0.9, 6.3, path, False)
+    """Set kapağı: altı figür zincirli halkalarıyla asılı, zikzak derinlikte (önlü arkalı), hafif dönük; kamera yandan."""
+    sira_ = [("kardan_adam", 4), ("ren_geyigi", -22), ("noel_baba", 2), ("atkili_ayicik", -20),
+             ("cam_agaci", 0), ("kutup_ayisi", -24)]
+    sets = [as_(k, yaw) for k, yaw in sira_]
+    cek(sets, 7.0, path, samples, size, 0.94, az=12, el=11, fstop=8.0, dys=[12, -12, 12, -12, 12, -12])
 
 
 def main(args):
@@ -105,8 +113,9 @@ def main(args):
     every = not keys
     for key in YM.KEYS:
         if every or key in keys:
-            cek([as_(key, -24)], 0, os.path.join(FOTO, f"{key}_halka.jpg"), samples, sq, 0.92, fstop=5.6)
-            cek([as_(key, -10), as_(key, 200)], 14.0, os.path.join(FOTO, f"{key}_iki.jpg"), samples, sq, 0.92)
+            cek([as_(key, -16)], 0, os.path.join(FOTO, f"{key}_halka.jpg"), samples, sq, 0.92, fstop=5.6)
+            cek([as_(key, -12), as_(key, 200)], 14.0, os.path.join(FOTO, f"{key}_iki.jpg"), samples, sq, 0.92,
+                dys=[-6.0, 6.0])
             print(key, "tamam", flush=True)
     if every or "kapak" in keys:
         cek([as_("ren_geyigi", -18), as_("noel_baba", -6), as_("kardan_adam", 14)], 10.0,

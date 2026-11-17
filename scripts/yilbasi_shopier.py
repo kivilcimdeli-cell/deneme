@@ -34,13 +34,15 @@ OZELLIK = [("6'lı set", "Noel Baba, ren geyiği, atkılı ayıcık, kutup ayıs
            ("Renkler baskıdan gelir", "Çok renkli 3D baskı; boya yok, renkler filamentin kendisi."),
            ("Avuç içi boyutunda", "Her biri yaklaşık 4–5 cm boy, 2,3 cm kalınlık; hafif PLA."),
            ("Zincirli halka takımı", "Her figürde çelik halka, kısa zincir ve ara halka takılı gelir.")]
-ADIM = [("01", "Seti sepete ekleyin", "Ödemeyi Shopier'dan güvenle yapın; birden çok set de alabilirsiniz."),
+ADIM = [("01", "Seti sepete ekleyin", "1 adet = 6 figürün hepsi. Ödeme Shopier'dan güvenle; birden çok set de olur."),
         ("02", "Basıyoruz", "Altı figürü kendi atölyemizde basıp halka takımlarını takıyoruz."),
         ("03", "Kargoya veriyoruz", "Setiniz özenle paketlenip yola çıkıyor.")]
 ACIKLAMA = """Yılbaşı Anahtarlık Seti (6'lı) – Tam 3D Figür
 
 Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam ve çam ağacı bir arada! Altı sevimli yılbaşı
 figürü, her biri zincirli halka takımıyla.
+
+Ürün set olarak satılır: 1 adet sipariş = 6 figürün hepsi (figürler tek tek satılmaz).
 
 Sette neler var?
 • 6 adet 3D baskı figür anahtarlık: Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam, çam ağacı
@@ -80,8 +82,7 @@ def framed(P, photo, chip, t1, t2, path):
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden">
       <img src="{foto(photo)}" style="position:absolute;inset:0;width:100%;height:100%;display:block">
       <div style="position:absolute;left:44px;top:40px">{K.logo("acik", 260, 58)}</div>
-      <span style="position:absolute;right:44px;top:44px;font-size:15px;font-weight:700;letter-spacing:.2em;
-        color:{INK};opacity:.75">{ETIKET}</span>
+      {rozet()}
       <div style="position:absolute;left:28px;right:28px;bottom:28px;display:flex;align-items:center;gap:22px;
         padding:18px 26px 18px 18px;border-radius:26px;background:rgba(255,255,255,.62);
         backdrop-filter:blur(22px) saturate(1.3);box-shadow:inset 0 0 0 1.5px rgba(18,19,22,.08);color:{INK}">
@@ -104,6 +105,12 @@ def on_gorunus(key, path):
     a = np.asarray(im)[:, :, 3]
     ys, xs = np.nonzero(a > 8)
     im.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)).save(path)
+
+
+def rozet(right=44, top=40):
+    """Her sayfada sağ üstte: 6'LI SET (ürün set olarak satılır)."""
+    return (f'<span style="position:absolute;right:{right}px;top:{top}px;padding:12px 22px;border-radius:99px;'
+            f'background:{ORANGE};color:#fff;font-size:24px;font-weight:800;letter-spacing:.06em">6\'LI SET</span>')
 
 
 def kirp(key):
@@ -133,14 +140,14 @@ def shopier(P):
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:#fff">
       <img src="{foto('set')}" style="width:1200px;height:1200px;display:block">
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 330, 66)}</div>
-      <span style="position:absolute;right:64px;top:64px;padding:12px 22px;border-radius:99px;background:{ORANGE};
-        color:#fff;font-size:26px;font-weight:700">6'lı set</span>
+      {rozet(64, 60)}
       <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK}">
         <p class="k">TAM 3D · RENKLİ BASKI · ZİNCİRLİ HALKA</p>
         <h1 class="u" style="margin-top:14px;font-size:72px;line-height:1.02;letter-spacing:-.02em">Yılbaşı<br>
           anahtarlık seti</h1>
-        <p style="margin-top:18px;font-size:28px;line-height:1.35;color:#3b3d42">Noel Baba, ren geyiği, ayıcık, kutup
-          ayısı, kardan adam ve çam ağacı; altısı bir arada.</p></div></div>""", name(1, "kapak"))
+        <p style="margin-top:18px;font-size:28px;line-height:1.35;color:#3b3d42">Set olarak satılır: <b>6 figür + 6
+          zincirli halka takımı</b>. Noel Baba, ren geyiği, ayıcık, kutup ayısı, kardan adam ve çam ağacı.</p>
+        </div></div>""", name(1, "kapak"))
 
     # 02 sette neler var: 3 × 2 figür
     cells = "".join(f"""<div style="position:relative;border-radius:22px;overflow:hidden;background:#f3f3f1">
@@ -149,10 +156,13 @@ def shopier(P):
           color:{INK};font-size:19px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.08)"><b style="color:{ORANGE}">
           {i + 1}</b>&nbsp;{YM.AD[k]}</span></div>""" for i, k in enumerate(YM.KEYS))
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{PAPER};color:{INK}">{head()}
+      {rozet(56, 48)}
       <div style="position:absolute;left:56px;right:56px;top:140px">
         <p class="k">SETTE NELER VAR</p>
-        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">6 figür, 6 halka takımı.</h2></div>
-      <div style="position:absolute;left:56px;right:56px;top:300px;bottom:56px;display:grid;
+        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">6 figür, 6 halka takımı.</h2>
+        <p style="margin-top:12px;font-size:24px;color:#55575c">Tek tek değil, altısı birlikte set olarak satılır.</p>
+      </div>
+      <div style="position:absolute;left:56px;right:56px;top:330px;bottom:56px;display:grid;
         grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:18px">{cells}</div></div>""",
          name(2, "sette_neler_var"))
 
@@ -162,9 +172,9 @@ def shopier(P):
       <img src="{foto('dizi', 1600)}" style="position:absolute;left:-60px;top:50%;width:1320px;
         transform:translateY(-44%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,
         transparent 100%)">
-      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
+      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>{rozet(64, 56)}
       <div style="position:absolute;left:64px;right:64px;top:150px;color:{INK}">
-        <p class="k">ALTISI BİR ARADA</p>
+        <p class="k">ALTISI BİR ARADA · SET</p>
         <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">Her birine<br>zincirli halka takılı.</h2>
       </div>
       <p style="position:absolute;left:64px;right:64px;bottom:64px;font-size:26px;color:#3b3d42">Çelik halka, kısa
@@ -172,16 +182,16 @@ def shopier(P):
 
     # 04 önü ve arkası
     framed(P, "noel_baba_iki", "3D", "Önü de arkası da tombul",
-           "Tam 3D figür: arkası da yuvarlak, her yönden sevimli (soldaki önü, sağdaki arkası)", name(4, "onu_arkasi"))
+           "Setteki altı figür de tam 3D: arkası da yuvarlak (soldaki önü, sağdaki arkası)", name(4, "onu_arkasi"))
 
     # 05 süs olarak da: çubukta asılı altı figür
     fon = fon_rengi(CEKIM)
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:{fon}">
       <img src="{K.uri(CEKIM, 2000)}" style="position:absolute;left:-205px;top:236px;width:1500px;
         -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%)">
-      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
+      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>{rozet(64, 56)}
       <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK}">
-        <p class="k">HEDİYELİK</p>
+        <p class="k">HEDİYELİK SET</p>
         <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">Anahtarlığa takın,<br>ağaca asın,
           hediye edin.</h2></div></div>""", name(5, "susleme"))
 
@@ -221,11 +231,11 @@ def shopier(P):
       </div>""" for a, b, c in ADIM)
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};color:{PAPER};padding:64px;
       background-image:{BM.stripes_bg(PAPER, .035, 30)}">
-      <p class="k">NASIL SİPARİŞ VERİLİR</p>
+      <p class="k">NASIL SİPARİŞ VERİLİR</p>{rozet(64, 56)}
       <h2 class="u" style="margin-top:12px;font-size:48px;line-height:1.1">Sepete ekleyin;<br>gerisi bizde.</h2>
       <div style="margin-top:34px">{rows}</div>
       <img src="{foto('set', 1600)}" style="margin-top:18px;width:100%;height:290px;object-fit:cover;
-        object-position:50% 52%;border-radius:22px;display:block">
+        object-position:50% 40%;border-radius:22px;display:block">
       <div style="position:absolute;left:64px;bottom:50px">{K.logo("koyu", 300, 60)}</div>
       <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{K.TEL}</p></div>""",
          name(7, "nasil_siparis"))
