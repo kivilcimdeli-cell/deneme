@@ -97,9 +97,13 @@ def shopier(P):
     chips = "".join(f'<span class="chip" style="background:#fff;color:{INK};font-size:19px;padding:8px 14px;'
                     f'box-shadow:inset 0 0 0 1.5px rgba(18,19,22,.12)"><b style="color:{ORANGE}">{i + 1:02d}</b>'
                     f'&nbsp;{YM.AD[k]}</span>' for i, k in enumerate(YM.KEYS))
-    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:#f6f6f4">
+    from PIL import Image
+    im = np.asarray(Image.open(os.path.join(FOTO, "dizi.jpg")).convert("RGB"), float)
+    fon = "#%02x%02x%02x" % tuple(int(v) for v in np.r_[im[:12], im[-12:]].reshape(-1, 3).mean(0))  # kenarların rengi
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:{fon}">
       <img src="{foto('dizi', 1600)}" style="position:absolute;left:-60px;top:50%;width:1320px;
-        transform:translateY(-46%)">
+        transform:translateY(-46%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,
+        transparent 100%)">
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
       <div style="position:absolute;left:64px;right:64px;top:150px;color:{INK}">
         <p class="k">6 MODEL</p>

@@ -3,9 +3,10 @@
 Kaynak: boyde_labs/yilbasi_anahtarlik/3mf/<anahtar>.3mf (seçilen 6 figür, X2D tam tabla). Figürler ayakta (z yukarı),
 ön yüz -y; tepede asma halkası (delik ekseni y, yani önden arkaya).
 
-Kullanıcı: "halka kısımlarını altın yapma, hepsinin kafa rengiyle aynı yap". 3MF'lerde halka altın parçanın içinde;
+Kullanıcı önce "halka kısımlarını altın yapma, hepsinin kafa rengiyle aynı yap" dedi; sonra Noel Baba ve kardan
+adamda beyaz (ponpon), ren geyiğinde ve çam ağacında altın (boynuz, yıldız) istedi. 3MF'lerde halka altın parçanın içinde;
 burada halka bölgesindeki yüzler (deliğin çevresinde, xz düzleminde halka yarıçapı içinde) altından ayrılıp HALKA
-rengine boyanır. Ren geyiğinde boynuzlar altın kalır. Çam ağacının halkası yıldızla uyumlu altın kalır (kullanıcı).
+rengine boyanır. Ren geyiğinin ve çam ağacının halkası altın kalır.
 """
 import json
 import os
@@ -19,8 +20,8 @@ SRC = os.path.join(KOK, "boyde_labs", "yilbasi_anahtarlik", "3mf")
 KEYS = ["noel_baba", "ren_geyigi", "atkili_ayicik", "kutup_ayisi", "kardan_adam", "cam_agaci"]
 AD = {"noel_baba": "Noel Baba", "ren_geyigi": "Ren geyiği", "atkili_ayicik": "Atkılı ayıcık",
       "cam_agaci": "Çam ağacı", "kardan_adam": "Kardan adam", "kutup_ayisi": "Kutup ayısı"}
-HALKA = {"noel_baba": "red", "ren_geyigi": "brown", "atkili_ayicik": "brown", "kutup_ayisi": "white",
-         "kardan_adam": "red", "cam_agaci": None}     # halka: kafanın (şapka, bere, kafa) rengi; çamda yıldızla altın
+HALKA = {"noel_baba": "white", "ren_geyigi": None, "atkili_ayicik": "brown", "kutup_ayisi": "white",
+         "kardan_adam": "white", "cam_agaci": None}   # halka rengi (kullanıcı); None: altın kalır
 RENK_TR = {"red": "kırmızı", "brown": "kahverengi", "green": "yeşil", "gold": "altın", "white": "beyaz",
            "black": "siyah", "bej": "bej"}
 
