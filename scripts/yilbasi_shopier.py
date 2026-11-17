@@ -177,8 +177,8 @@ def shopier(P):
     # 05 süs olarak da: çubukta asılı altı figür
     fon = fon_rengi(CEKIM)
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:{fon}">
-      <img src="{K.uri(CEKIM, 2000)}" style="position:absolute;left:50%;top:56%;width:2300px;
-        transform:translate(-50%,-50%)">
+      <img src="{K.uri(CEKIM, 2000)}" style="position:absolute;left:-205px;top:236px;width:1500px;
+        -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%)">
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
       <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK}">
         <p class="k">HEDİYELİK</p>
