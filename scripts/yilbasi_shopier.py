@@ -118,7 +118,15 @@ def kirp(key):
     from PIL import Image
     import io
     import base64
-    im = Image.open(os.path.join(FOTO, f"{key}_halka.jpg")).convert("RGB").crop((300, 300, 900, 900))
+    im = Image.open(os.path.join(FOTO, f"{key}_halka.jpg")).convert("RGB")
+    a = np.asarray(im, float)
+    fon = np.median(np.r_[a[:20].reshape(-1, 3), a[:, :20].reshape(-1, 3)], 0)
+    fark = np.abs(a - fon).max(2) > 28                      # figür (ve zincirin altı): fondan ayrılan pikseller
+    fark[: int(a.shape[0] * 0.3)] = False                   # çelik halka kırpmaya girmesin
+    ys, xs = np.nonzero(fark)
+    cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+    r = max(xs.max() - xs.min(), ys.max() - ys.min()) * 0.5 * 1.45
+    im = im.crop((int(cx - r), int(cy - r * 1.05), int(cx + r), int(cy + r * 0.95)))
     buf = io.BytesIO()
     im.save(buf, "JPEG", quality=90)
     return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
