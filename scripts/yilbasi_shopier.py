@@ -121,8 +121,12 @@ def kirp(key):
     im = Image.open(os.path.join(FOTO, f"{key}_halka.jpg")).convert("RGB")
     a = np.asarray(im, float)
     fon = np.median(np.r_[a[:20].reshape(-1, 3), a[:, :20].reshape(-1, 3)], 0)
-    fark = np.abs(a - fon).max(2) > 28                      # figür (ve zincirin altı): fondan ayrılan pikseller
-    fark[: int(a.shape[0] * 0.3)] = False                   # çelik halka kırpmaya girmesin
+    fark = np.abs(a - fon).max(2) > 45                      # figür (ve zincirin altı): fondan belirgin ayrılan
+    h, w = fark.shape                                       # (kenarlar vinyetle koyu: eşik yüksek, kenarlar dışarıda)
+    fark[: int(h * 0.3)] = False                            # çelik halka kırpmaya girmesin
+    fark[int(h * 0.75):] = False                            # yerdeki gölge
+    fark[:, : int(w * 0.12)] = False
+    fark[:, int(w * 0.88):] = False
     ys, xs = np.nonzero(fark)
     cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
     r = max(xs.max() - xs.min(), ys.max() - ys.min()) * 0.5 * 1.45
