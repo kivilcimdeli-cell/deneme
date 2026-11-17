@@ -7,7 +7,7 @@ yana (üç ayrı gönderi, ızgara bulmacası) birleşir. Ekran görüntüsünde
 onun ortasından 3:4 almış: her karenin ortadaki 810 × 1080'i görünüyor. Bu yüzden yazılar, logo ve nozul her karenin
 GUVENLI alanında (x 135–945, y 180–1260); 3:4 yüklense de kare kırpılsa da ızgarada kesilmez. Katmanlar boydan boya:
   1. kare: Her katman / size özel. · Merhaba, biz BOYDE LABS.
-  2. kare: İsimlik, / anahtarlık, / promosyon. · Logonuzla, yazınızla; işletmenize özel.
+  2. kare: İsimlik, / anahtarlık, / promosyon, / yazılım. · Baskıdan web sitesine; işletmenize özel.
   3. kare: Tasarımdan / 3D baskıya. · Kendi atölyemizde. · Shopier, DM, telefon · nozul
 Izgarada en yeni gönderi solda: önce 3. kare, sonra 2., en son 1. kare paylaşılır.
 
@@ -66,8 +66,8 @@ def panorama():
       <div style="position:absolute;left:{SOL}px;top:{GY0 + 28}px">{K.logo("koyu", 420, 44)}</div>
       {blok(0, [("Her", PAPER), ("katman", PAPER), ("size", ORANGE), ("özel.", ORANGE)],
             "Merhaba, biz BOYDE LABS.", 128)}
-      {blok(KARE, [("İsimlik,", PAPER), ("anahtarlık,", PAPER), ("promosyon.", PAPER)],
-            "Logonuzla, yazınızla;<br>işletmenize özel.", 96)}
+      {blok(KARE, [("İsimlik,", PAPER), ("anahtarlık,", PAPER), ("promosyon,", PAPER), ("yazılım.", PAPER)],
+            "Baskıdan web sitesine;<br>işletmenize özel.", 96)}
       {blok(2 * KARE, [("Tasarımdan", PAPER), ("3D baskıya.", PAPER)], "Kendi atölyemizde.", 96,
             f'''<p style="margin-top:30px;font-size:26px;line-height:1.6;color:rgba(244,241,234,.6)">Shopier · DM<br>
             <b style="color:{PAPER};font-size:32px">{K.TEL}</b></p>''')}
