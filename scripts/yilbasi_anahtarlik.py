@@ -1,9 +1,12 @@
 """BOYDE yılbaşı anahtarlıkları: tombul, tatlı 3D figürler (15 model), desteksiz; tepede halka.
 
 Fotoğraftaki örgü yılbaşı figürleri (geyik, Noel Baba, çam, kardan adam...) tarzında, az ayrıntılı ve sevimli.
-Desteksiz basım için figürler sırtı düz, önü tombul: tablaya sırt üstü yatar, her parça tabladan başlar ve yukarı doğru
-yuvarlanarak incelir (tombul kubbe: hiçbir katman alttakinden taşmaz). Göz, burun, düğme gibi ayrıntılar alttaki
-yüzeyi 0,8 mm kabarık izler. Halka tepede, sırtla aynı düzlemde (3 mm kalın, Ø4 mm delik).
+Tam 3D: önü ve arkası tombul (arka önün %60'ı kalınlığında), ayakta durarak basılır; altta küçük düz taban, halka tepede
+dik (delik önden arkaya, Ø4). Göz, burun, düğme gibi ayrıntılar önde, yüzeyi 0,8 mm kabarık izler.
+
+Desteksiz: figür önce serbest çizilir (önden tombul katmanlar, arkası aynası), sonra ayakta duracak hâle döndürülüp
+0,2 mm katmanlara ayrılır; her katman alttakinden en çok EGIM × 0,2 mm taşabilir (≈48°), taşan yer kesilir. Böylece
+şapka kenarı, kol, halka deliği tepesi gibi alt yüzeyler kendiliğinden 48°'lik eğime döner: destek gerekmez.
 
 Renkler: altın, yeşil, kırmızı, beyaz, kahverengi (karamel); gözler koyu kahve (moka), Noel Baba'nın yüzü açık kahve
 (latte). Her model en çok 5 renk.
@@ -121,6 +124,8 @@ class Figur:
     def tombul(self, ad, cs, h, renk, r=None):
         self._al(cs)
         self.parcalar.append((ad, tombul(cs, h, r), renk))
+        self.arka = [(n, m - _sutun(cs), c) for n, m, c in getattr(self, "arka", [])]
+        self.arka.append((ad, tombul(cs, h, r), renk))      # arka yüz: yalnız tombul parçalar (ayrıntısız)
         return self
 
     def kapla(self, ad, cs, renk, t=0.8):
@@ -146,14 +151,66 @@ class Figur:
         y = ust + dis - gom
         return ("halka", ((C(dis, x, y) - C(ic, x, y)) - iz).extrude(kal), renk)
 
-    def katilar(self):
-        """Renk başına birleşik katılar (3MF: renk başına bir parça), halka dahil."""
+    def katilar_duz(self):
+        """Sırtı düz (yalnız ön yüz) renk başına katılar; halka dahil (eski biçim)."""
         out = {}
         h = self._halka_parca()
         for _, m, c in self.parcalar + ([h] if h else []):
             if m.volume() > 1e-3:
                 out[c] = out[c] + m if c in out else m
         return [(f"{O.AD[c]}", m, c) for c, m in out.items()]
+
+
+ARKA_OLCEK = 0.6          # arka yüz önün bu kadarı kalın (cebe sığsın)
+TABAN = 2.6               # ayakta dururken alttan kesilen (oturacağı düz taban)
+DZ, EGIM = 0.2, 1.1       # katman ve katman başına en çok taşma (1,1 × 0,2 mm ≈ 48°)
+
+
+def _uc_boyut_ham(f):
+    """Önü tombul + arkası ayna (basık); halka orta düzlemde. Renk → Manifold (yatık, z = kalınlık)."""
+    out = {}
+    for _, m, c in f.parcalar:
+        out[c] = out[c] + m if c in out else m
+    for _, m, c in getattr(f, "arka", []):
+        a = m.mirror((0, 0, 1)).scale((1.0, 1.0, ARKA_OLCEK))
+        out[c] = out[c] + a if c in out else a
+    if f._halka:
+        x, renk, dis, ic, kal, gom = f._halka
+        iz = f.birlik().project()
+        ust = (iz ^ RR(2.0, 200.0, 0.0, x, 0.0)).bounds()[3]
+        y = ust + dis - gom
+        govde = m3.Manifold.batch_boolean(list(out.values()), m3.OpType.Add)
+        kalin = 3.4
+        halka = (C(dis, x, y) - C(ic, x, y)).extrude(kalin).translate((0, 0, -kalin / 2 - 0.6)) - govde
+        out[renk] = out[renk] + halka if renk in out else halka
+    return out
+
+
+def uc_boyut(f):
+    """Ayakta, desteksiz basılacak tam 3D figür: [(ad, Manifold, renk)] (z yukarı, ön yüz -y)."""
+    ham = {c: m.rotate((90.0, 0.0, 0.0)) for c, m in _uc_boyut_ham(f).items()}
+    z0 = min(m.bounding_box()[2] for m in ham.values())
+    z1 = max(m.bounding_box()[5] for m in ham.values())
+    ham = {c: m.translate((0, 0, -z0 - TABAN)) for c, m in ham.items()}
+    yukseklik = z1 - z0 - TABAN
+    katlar = {c: [] for c in ham}
+    onceki = None
+    n = int(math.ceil(yukseklik / DZ))
+    for i in range(n):
+        z = i * DZ
+        izin = onceki.simplify(0.02).offset(EGIM * DZ, m3.JoinType.Miter) if onceki is not None else None
+        toplam = []
+        for c, m in ham.items():
+            cs = m.slice(z + DZ / 2)
+            if izin is not None:
+                cs = cs ^ izin
+            if cs.area() > 0.01:
+                katlar[c].append(cs.extrude(DZ).translate((0, 0, z)))
+                toplam.append(cs)
+        if not toplam:
+            break
+        onceki = A.union(*toplam)
+    return [(O.AD[c], m3.Manifold.batch_boolean(v, m3.OpType.Add), c) for c, v in katlar.items() if v]
 
 
 def goz(f, x, y, r=1.25, renk=MOKA):
@@ -369,11 +426,12 @@ MODELLER = [y01_noel_baba, y02_kardan_adam, y03_geyik, y04_cam_agaci, y05_kurabi
 
 # ---------------------------------------------------------------- görünüş ve katalog
 
-def gorunus(f, boy=600):
-    """Önden (biraz yandan, tombulluğu görünsün) RGBA."""
+def gorunus(f, boy=600, katilar=None, azim=-28.0, elev=-72.0):
+    """Ayakta duran figür, önden biraz yandan ve yukarıdan (tombulluğu görünsün): RGBA."""
     from cift_tarafli_isimlik import render, rotation
-    mesh = [(*A.mesh_arrays(m), O.TON[c]) for _, m, c in f.katilar()]
-    return render(mesh, boy, rotation(-14, 26), margin=0.04)
+    katilar = katilar if katilar is not None else uc_boyut(f)
+    mesh = [(*A.mesh_arrays(m), O.TON[c]) for _, m, c in katilar]
+    return render(mesh, boy, rotation(azim, elev), margin=0.04)
 
 
 def main():
@@ -382,26 +440,28 @@ def main():
     sayfa = []
     for fn in MODELLER:
         f = fn()
-        im = gorunus(f)
+        k = uc_boyut(f)
+        im = gorunus(f, katilar=k)
         im.save(os.path.join(OUT, f"{f.kod}.png"))
-        renkler = ", ".join(O.AD[c] for _, _, c in f.katilar())
-        x0, y0, z0, x1, y1, z1 = _sinir(f)
+        renkler = ", ".join(O.AD[c] for _, _, c in k)
+        x0, y0, z0, x1, y1, z1 = _sinir(f, k)
         ad = f"{f.ad} · {x1 - x0:.0f} × {y1 - y0:.0f} × {z1 - z0:.0f} mm · {renkler}"
         sayfa.append((f.kod, ad, im))
         print(f.kod, ad)
-    giris = ("BOYDE yılbaşı anahtarlıkları: tombul, sevimli 3D figürler. Sırtı düz, önü tombul; desteksiz basılır. "
-             "Halka tepede. Renkler: altın, yeşil, kırmızı, beyaz, kahverengi.")
-    bilgi = ("Ürün", ["Yaklaşık 4,5–5 cm, en kalın yeri ~1 cm; anahtarlık halkası ve zinciriyle.",
+    giris = ("BOYDE yılbaşı anahtarlıkları: tombul, sevimli tam 3D figürler. Önü de arkası da yuvarlak; "
+             "ayakta desteksiz basılır. Halka tepede. Renkler: altın, yeşil, kırmızı, beyaz, kahverengi.")
+    bilgi = ("Ürün", ["Yaklaşık 3–5 cm boy, 1,2–1,7 cm kalınlık; anahtarlık halkası ve zinciriyle.",
                       "Çok renkli tek parça baskı (Bambu Lab X2D): boya yok, renkler filamentten.",
-                      "Destek gerekmez: sırt üstü basılır, temiz ve hızlı.",
+                      "Destek gerekmez: figür ayakta basılır, altta küçük düz taban.",
                       "Beğendiğiniz 5 modeli seçin, X2D baskı dosyaları hazırlansın."])
     pdf, jpgs = KT.yap(OUT, "Yılbaşı anahtarlık", "15 model", 1, sayfa, giris, bilgi, sutun=3, satir=3,
                        alt_not="Beğendiğiniz modelin kodunu (ör. Y04) yazmanız yeterli.")
     print("PDF", pdf, jpgs)
 
 
-def _sinir(f):
-    return m3.Manifold.batch_boolean([m for _, m, _ in f.katilar()], m3.OpType.Add).bounding_box()
+def _sinir(f, katilar=None):
+    katilar = katilar if katilar is not None else uc_boyut(f)
+    return m3.Manifold.batch_boolean([m for _, m, _ in katilar], m3.OpType.Add).bounding_box()
 
 
 if __name__ == "__main__":
