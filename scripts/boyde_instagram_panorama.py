@@ -2,10 +2,12 @@
 
 Logodaki katmanlar üç karenin altından boydan boya geçer (Shopier "hakkında" görselindeki gibi); en üstteki turuncu
 katman 3. karede nozulun altında biter. Kaydırdıkça katmanlar kareden kareye devam eder.
-  1. kare: Merhaba, biz BOYDE LABS · Katman katman, size özel.
-  2. kare: Neler yapıyoruz? (QR'lı masa isimliği, kurumsal isimlik, logolu anahtarlık, plakalı anahtarlık)
-  3. kare: Tasarımdan 3D baskıya, kendi atölyemizde · sipariş (Shopier, DM, telefon) · nozul
-Her kare 1080 × 1350 (Instagram 4:5). Ürün fotoğrafları mevcut çekimlerden (boyde_labs/*/fotograf).
+Kullanıcı: fotoğrafsız, sade, büyük yazılar, tek bir anlatım; "Her katman size özel". Tek cümle üç kareye yayılır,
+kelimeler aynı hizada (kaydırdıkça cümle tamamlanır), her karede altında tek kısa satır:
+  1. kare: "Her katman" · Merhaba, biz BOYDE LABS.
+  2. kare: "size" · İsimlik, anahtarlık, promosyon; logonuzla, yazınızla.
+  3. kare: "özel." (turuncu, turuncu katmanla) · Tasarımdan 3D baskıya, kendi atölyemizde. · nozul
+Her kare 1080 × 1350 (Instagram 4:5).
 
 Kullanım: python3 scripts/boyde_instagram_panorama.py
 Çıktı: boyde_labs/instagram/tanitim_panorama/{panorama.jpg, kare_1..3.jpg}
@@ -22,11 +24,8 @@ LABS = os.path.join(ROOT, "boyde_labs")
 OUT = os.path.join(LABS, "instagram", "tanitim_panorama")
 W, H, KARE = 3240, 1350, 1080
 INK, PAPER, ORANGE, CHAR = BM.INK, BM.PAPER, BM.ORANGE, BM.CHAR
-URUNLER = [("QR'lı masa isimliği", "urunler/fotograf/kapak_9x12.jpg", "50% 50%"),
-           ("Kurumsal isimlik", "urunler/fotograf/kapak_10x20.jpg", "50% 52%"),
-           ("Logolu anahtarlık", "anahtarlik_esnaf/fotograf/kapak.jpg", "50% 42%"),
-           ("Plakalı anahtarlık", "anahtarlik_plaka/fotograf/kapak.jpg", "50% 50%")]
-DAHA = ["İşletmenize özel web sitesi", "Promosyon ürünleri", "Hediyelik figürler"]
+BUYUK = 196                                         # büyük kelimelerin punto boyu (px)
+SATIR = 640                                         # cümlenin satır tabanı (px): üç karede aynı hiza
 
 
 def katmanlar():
@@ -50,48 +49,25 @@ def katmanlar():
 
 
 def panorama():
-    lay, nozul_top = katmanlar()
-    kart = "".join(f"""<div style="position:relative;border-radius:26px;overflow:hidden;background:{CHAR}">
-        <img src="{K.uri(os.path.join(LABS, f), 900)}" style="width:100%;height:100%;object-fit:cover;
-          object-position:{pos};display:block">
-        <span style="position:absolute;left:16px;bottom:16px;padding:10px 18px;border-radius:99px;background:{INK};
-          color:{PAPER};font-size:22px;font-weight:700">{ad}</span></div>""" for ad, f, pos in URUNLER)
-    daha = "".join(f'<span style="padding:10px 18px;border-radius:99px;border:2px solid rgba(244,241,234,.22);'
-                   f'font-size:22px">{d}</span>' for d in DAHA)
-    k2, k3 = KARE, 2 * KARE
+    lay, _ = katmanlar()
+
+    def kelime(x, metin, alt, renk=PAPER, ust=""):
+        """Büyük kelime (tabanı SATIR'da) ve altında tek kısa satır."""
+        ust = (f'<span style="display:block">{ust}</span>') if ust else ""
+        return f"""<div style="position:absolute;left:{x + 80}px;bottom:{H - SATIR}px">
+          <h1 class="u" style="font-size:{BUYUK}px;line-height:.98;font-weight:700;letter-spacing:-.035em;
+            color:{renk}">{ust}{metin}</h1></div>
+          <p style="position:absolute;left:{x + 86}px;top:{SATIR + 44}px;width:880px;font-size:32px;line-height:1.4;
+            color:rgba(244,241,234,.72)">{alt}</p>"""
+
     return f"""<div style="position:relative;width:{W}px;height:{H}px;overflow:hidden;background:{INK};color:{PAPER}">
       {lay}
-      <!-- 1. kare -->
-      <div style="position:absolute;left:80px;top:76px">{K.logo("koyu", 696, 58)}</div>
-      <div style="position:absolute;left:80px;top:290px;width:900px">
-        <p style="font-size:26px;font-weight:700;letter-spacing:.2em;color:{ORANGE}">MERHABA, BİZ BOYDE LABS</p>
-        <h1 class="u" style="margin-top:30px;font-size:100px;line-height:1.02;font-weight:700;letter-spacing:-.02em">
-          Katman<br>katman,<br><span style="color:{ORANGE}">size özel.</span></h1>
-        <p style="margin-top:38px;font-size:32px;line-height:1.4;color:rgba(244,241,234,.78)">İşletmenize özel
-          isimlik, anahtarlık ve daha fazlası; tasarımdan 3D baskıya.</p>
-        <p style="margin-top:34px;font-size:26px;font-weight:700;color:rgba(244,241,234,.6)">Kaydırın
-          <span style="color:{ORANGE}">→</span></p></div>
-      <!-- 2. kare -->
-      <div style="position:absolute;left:{k2 + 80}px;top:96px;width:920px">
-        <p style="font-size:26px;font-weight:700;letter-spacing:.2em;color:{ORANGE}">NELER YAPIYORUZ?</p>
-        <h2 class="u" style="margin-top:18px;font-size:58px;line-height:1.06;font-weight:700;letter-spacing:-.02em">
-          Logonuz, yazınız,<br>sizin tasarımınız.</h2></div>
-      <div style="position:absolute;left:{k2 + 80}px;top:340px;width:920px;height:560px;display:grid;
-        grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:20px">{kart}</div>
-      <div style="position:absolute;left:{k2 + 80}px;top:928px;width:920px;display:flex;flex-wrap:wrap;gap:10px;
-        color:rgba(244,241,234,.86)">{daha}</div>
-      <!-- 3. kare -->
-      <div style="position:absolute;left:{k3 + 80}px;top:96px;width:920px">
-        <p style="font-size:26px;font-weight:700;letter-spacing:.2em;color:{ORANGE}">KENDİ ATÖLYEMİZDE</p>
-        <h2 class="u" style="margin-top:18px;font-size:64px;line-height:1.06;font-weight:700;letter-spacing:-.02em">
-          Tasarımdan<br>3D baskıya,<br>tek elden.</h2>
-        <p style="margin-top:30px;font-size:30px;line-height:1.45;color:rgba(244,241,234,.78);max-width:640px">
-          Size özel tasarımlar hazırlıyoruz; beğendiğinizi basıp kargoya veriyoruz.</p></div>
-      <div style="position:absolute;left:{k3 + 80}px;top:{nozul_top + 20:.0f}px">
-        <span style="display:inline-block;padding:16px 28px;border-radius:99px;background:{ORANGE};color:#fff;
-          font-size:28px;font-weight:700">Shopier'da →</span>
-        <p style="margin-top:22px;font-size:26px;line-height:1.5;color:rgba(244,241,234,.8)">DM'den yazın ya da arayın<br>
-          <b style="color:{PAPER};font-size:30px">{K.TEL}</b></p></div>
+      <div style="position:absolute;left:80px;top:76px">{K.logo("koyu", 520, 46)}</div>
+      {kelime(0, "katman", "Merhaba, biz BOYDE LABS.", ust="Her")}
+      {kelime(KARE, "size", "İsimlik, anahtarlık, promosyon;<br>logonuzla, yazınızla.")}
+      {kelime(2 * KARE, "özel.", "Tasarımdan 3D baskıya,<br>kendi atölyemizde.", ORANGE)}
+      <p style="position:absolute;right:80px;top:84px;font-size:24px;font-weight:700;letter-spacing:.16em;
+        color:rgba(244,241,234,.55)">SHOPIER · DM · {K.TEL}</p>
     </div>"""
 
 
