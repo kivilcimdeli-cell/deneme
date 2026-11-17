@@ -9,6 +9,7 @@ Görünüşler (boyde_labs/yilbasi_anahtarlik/foto/):
   <anahtar>_iki     iki adet asılı: solda önü, sağda arkası (tam 3D)
   kapak             üç figür asılı (Noel Baba, ren geyiği, kardan adam)
   dizi              altı figür yan yana asılı
+  set               altı figür masada ayakta, zikzak sıra (set kapağı)
 Kullanım: python3 scripts/yilbasi_foto.py [anahtarlar|kapak|dizi] [--ornek N] [--deneme]
 """
 import math
@@ -81,6 +82,20 @@ def cek(sets, gap, path, samples, size, fill, el=6.0, fstop=8.0):
     AF.shoot(sc, pts, 0, el, fill, fstop, path, False)
 
 
+def set_cek(samples, size, path):
+    """Set kapağı: altı figür masada ayakta, zikzak tek sıra (arkadakiler öndekilerin arasından görünür)."""
+    sc = AF.studio(False, samples, size)
+    dizilis = [("kardan_adam", -67, 14, 18), ("ren_geyigi", -40, -12, 12), ("noel_baba", -13, 14, 4),
+               ("atkili_ayicik", 13, -12, -4), ("cam_agaci", 40, 14, -10), ("kutup_ayisi", 67, -12, -16)]
+    groups = []
+    for k, (key, x, y, yaw) in enumerate(dizilis):
+        a = math.radians(yaw)
+        rot = np.array([[math.cos(a), -math.sin(a), 0], [math.sin(a), math.cos(a), 0], [0, 0, 1]])
+        groups.append(AF.put(parcalar(key), np.c_[rot, [x, y, 0.0]], f"figur{k}"))
+    pts = np.vstack(groups)
+    AF.shoot(sc, pts, 8, 18, 0.9, 6.3, path, False)
+
+
 def main(args):
     samples = int(args[args.index("--ornek") + 1]) if "--ornek" in args else 48
     small = "--deneme" in args
@@ -96,6 +111,8 @@ def main(args):
     if every or "kapak" in keys:
         cek([as_("ren_geyigi", -18), as_("noel_baba", -6), as_("kardan_adam", 14)], 10.0,
             os.path.join(FOTO, "kapak.jpg"), samples, (600, 600) if small else (1600, 1600), 0.8)
+    if every or "set" in keys:
+        set_cek(samples, (600, 600) if small else (1600, 1600), os.path.join(FOTO, "set.jpg"))
     if every or "dizi" in keys:
         yaw = (-16, 12, -8, 10, -12, 14)
         cek([as_(k, yaw[i]) for i, k in enumerate(YM.KEYS)], 10.0, os.path.join(FOTO, "dizi.jpg"), samples,

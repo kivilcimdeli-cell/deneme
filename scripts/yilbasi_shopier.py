@@ -1,12 +1,17 @@
-"""BOYDE LABS – yılbaşı anahtarlıklarının Shopier görselleri (1200 × 1200 JPG). Görsel dil esnaf anahtarlıklarınınki
-(boyde_anahtarlik_esnaf_shopier: logo, buzlu cam şerit, turuncu kod).
+"""BOYDE LABS – yılbaşı anahtarlık SETİ'nin Shopier görselleri (1200 × 1200 JPG) ve ürün açıklaması. Görsel dil esnaf
+anahtarlıklarınınki (logo, buzlu cam şerit, turuncu vurgu).
 
-Önce fotoğraflar: python3 scripts/yilbasi_foto.py (Blender). Sonra: python3 scripts/yilbasi_shopier.py
+Kullanıcı: altı figür set olarak satılacak (tek tek değil). Set: 6 anahtarlık (Noel Baba, ren geyiği, atkılı ayıcık,
+kutup ayısı, kardan adam, çam ağacı) + 6 zincirli halka takımı.
+
+Önce fotoğraflar: python3 scripts/yilbasi_foto.py (Blender; "set" grup çekimi dahil). Sonra:
+python3 scripts/yilbasi_shopier.py
 
 Yükleme sırasıyla:
-  01 kapak (üç figür zincirli halkada) · 02 altı model yan yana · 03–08 modeller tek tek, halka takımıyla ·
-  09–14 modeller önü ve arkası (tam 3D) · 15 ölçü ve özellikler · 16 nasıl sipariş verilir
-Çıktı: boyde_labs/yilbasi_anahtarlik/shopier/*.jpg
+  01 kapak (altısı masada) · 02 sette neler var (6 figür, adlarıyla) · 03 altısı zincirli halkada ·
+  04 önü ve arkası (tam 3D) · 05 süs olarak da (çubukta asılı altı figür) · 06 ölçü ve özellikler ·
+  07 nasıl sipariş verilir
+Çıktı: boyde_labs/yilbasi_anahtarlik/shopier/*.jpg ve aciklama.txt
 """
 import os
 import shutil
@@ -22,15 +27,39 @@ import yilbasi_model as YM  # noqa: E402
 INK, PAPER, ORANGE, GRAY = K.INK, K.PAPER, K.ORANGE, K.GRAY
 FOTO = os.path.join(YM.KOK, "boyde_labs", "yilbasi_anahtarlik", "foto")
 OUT = os.path.join(YM.KOK, "boyde_labs", "yilbasi_anahtarlik", "shopier")
-ETIKET = "YILBAŞI ANAHTARLIK"
-OZELLIK = [("Tam 3D figür", "Önü de arkası da yuvarlak; her yönden sevimli, elde tombul."),
-           ("Renkler baskıdan gelir", "Çok renkli 3D baskı; boya yok, solmaz, kazınmaz."),
-           ("Avuç içi boyutunda", "Yaklaşık 4–5 cm boy, 2,3 cm kalınlık; hafif PLA."),
-           ("Zincirli halka takımı", "Çelik halka, kısa zincir ve ara halka takılı gelir."),
-           ("Hediyelik", "Yılbaşı hediyesi, çam süsü ya da çanta süsü olarak.")]
-ADIM = [("01", "Modelinizi seçin", "Noel Baba, ren geyiği, ayıcık, kutup ayısı, kardan adam ya da çam ağacı."),
-        ("02", "Adedi yazın", "Birden çok alımda modelleri karışık seçebilirsiniz; sipariş notuna yazmanız yeterli."),
-        ("03", "Basıp gönderiyoruz", "Kendi atölyemizde basıp halka takımını takıyor, kargoya veriyoruz.")]
+ETIKET = "YILBAŞI ANAHTARLIK SETİ"
+CEKIM = os.path.join(YM.KOK, "boyde_labs", "instagram", "yilbasi", "_cekim.jpg")   # çubukta asılı altı figür
+OZELLIK = [("6'lı set", "Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam ve çam ağacı."),
+           ("Tam 3D figür", "Önü de arkası da yuvarlak; her yönden sevimli, elde tombul."),
+           ("Renkler baskıdan gelir", "Çok renkli 3D baskı; boya yok, renkler filamentin kendisi."),
+           ("Avuç içi boyutunda", "Her biri yaklaşık 4–5 cm boy, 2,3 cm kalınlık; hafif PLA."),
+           ("Zincirli halka takımı", "Her figürde çelik halka, kısa zincir ve ara halka takılı gelir.")]
+ADIM = [("01", "Seti sepete ekleyin", "Ödemeyi Shopier'dan güvenle yapın; birden çok set de alabilirsiniz."),
+        ("02", "Basıyoruz", "Altı figürü kendi atölyemizde basıp halka takımlarını takıyoruz."),
+        ("03", "Kargoya veriyoruz", "Setiniz özenle paketlenip yola çıkıyor.")]
+ACIKLAMA = """Yılbaşı Anahtarlık Seti (6'lı) – Tam 3D Figür
+
+Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam ve çam ağacı bir arada! Altı sevimli yılbaşı
+figürü, her biri zincirli halka takımıyla.
+
+Sette neler var?
+• 6 adet 3D baskı figür anahtarlık: Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam, çam ağacı
+• 6 adet zincirli halka takımı (çelik halka, kısa zincir, ara halka); figürlere takılı gelir
+
+Özellikler
+• Tam 3D: önü de arkası da yuvarlak, her yönden sevimli
+• Çok renkli 3D baskı: boya yok, renkler filamentin kendisi
+• Boyut: her figür yaklaşık 4–5 cm boy, 2,3 cm kalınlık
+• Malzeme: PLA; hafif ve sağlam
+• Anahtarlık, çanta süsü ya da yılbaşı ağacı süsü olarak kullanılabilir
+
+Yılbaşı hediyesi, sevdiklerinize küçük bir sürpriz ya da ofiste çekilişlik hediye için ideal.
+
+Kendi atölyemizde tasarlayıp basıyoruz. Baskı ürünü olduğu için yüzeyde ince katman izleri görülebilir; bu, 3D
+baskının doğal dokusudur.
+
+Sorularınız için Shopier mesaj ya da Instagram @boydelabs üzerinden yazabilirsiniz.
+BOYDE LABS · Her katman size özel."""
 
 
 def foto(name, maxw=1200):
@@ -77,51 +106,86 @@ def on_gorunus(key, path):
     im.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)).save(path)
 
 
+def kirp(key):
+    """Asılı fotoğraftan figür ve zincirin altı (kare)."""
+    from PIL import Image
+    import io
+    import base64
+    im = Image.open(os.path.join(FOTO, f"{key}_halka.jpg")).convert("RGB").crop((300, 300, 900, 900))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=90)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def fon_rengi(path):
+    from PIL import Image
+    im = np.asarray(Image.open(path).convert("RGB"), float)
+    return "#%02x%02x%02x" % tuple(int(v) for v in np.r_[im[:12], im[-12:]].reshape(-1, 3).mean(0))
+
+
 def shopier(P):
     shutil.rmtree(OUT, ignore_errors=True)
     os.makedirs(OUT)
     name = lambda i, s: os.path.join(OUT, f"{i:02d}_{s}.jpg")              # noqa: E731
+    head = lambda: f'<div style="position:absolute;left:56px;top:48px">{K.logo("acik", 260, 54)}</div>'  # noqa: E731
 
-    # 01 kapak
+    # 01 kapak: altısı masada
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:#fff">
-      <img src="{foto('kapak')}" style="width:1200px;height:1200px;display:block">
+      <img src="{foto('set')}" style="width:1200px;height:1200px;display:block">
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 330, 66)}</div>
+      <span style="position:absolute;right:64px;top:64px;padding:12px 22px;border-radius:99px;background:{ORANGE};
+        color:#fff;font-size:26px;font-weight:700">6'lı set</span>
       <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK}">
         <p class="k">TAM 3D · RENKLİ BASKI · ZİNCİRLİ HALKA</p>
-        <h1 class="u" style="margin-top:14px;font-size:76px;line-height:1.02;letter-spacing:-.02em">Yılbaşı<br>
-          anahtarlık</h1>
-        <p style="margin-top:18px;font-size:30px;line-height:1.35;color:#3b3d42">Noel Baba, ren geyiği, kardan adam ve
-          dostları; önü de arkası da tombul.</p></div></div>""", name(1, "kapak"))
+        <h1 class="u" style="margin-top:14px;font-size:72px;line-height:1.02;letter-spacing:-.02em">Yılbaşı<br>
+          anahtarlık seti</h1>
+        <p style="margin-top:18px;font-size:28px;line-height:1.35;color:#3b3d42">Noel Baba, ren geyiği, ayıcık, kutup
+          ayısı, kardan adam ve çam ağacı; altısı bir arada.</p></div></div>""", name(1, "kapak"))
 
-    # 02 altı model
-    chips = "".join(f'<span class="chip" style="background:#fff;color:{INK};font-size:19px;padding:8px 14px;'
-                    f'box-shadow:inset 0 0 0 1.5px rgba(18,19,22,.12)"><b style="color:{ORANGE}">{i + 1:02d}</b>'
-                    f'&nbsp;{YM.AD[k]}</span>' for i, k in enumerate(YM.KEYS))
-    from PIL import Image
-    im = np.asarray(Image.open(os.path.join(FOTO, "dizi.jpg")).convert("RGB"), float)
-    fon = "#%02x%02x%02x" % tuple(int(v) for v in np.r_[im[:12], im[-12:]].reshape(-1, 3).mean(0))  # kenarların rengi
+    # 02 sette neler var: 3 × 2 figür
+    cells = "".join(f"""<div style="position:relative;border-radius:22px;overflow:hidden;background:#f3f3f1">
+        <img src="{kirp(k)}" style="width:100%;height:100%;object-fit:cover;display:block">
+        <span style="position:absolute;left:12px;bottom:12px;padding:8px 14px;border-radius:99px;background:#fff;
+          color:{INK};font-size:19px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.08)"><b style="color:{ORANGE}">
+          {i + 1}</b>&nbsp;{YM.AD[k]}</span></div>""" for i, k in enumerate(YM.KEYS))
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{PAPER};color:{INK}">{head()}
+      <div style="position:absolute;left:56px;right:56px;top:140px">
+        <p class="k">SETTE NELER VAR</p>
+        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">6 figür, 6 halka takımı.</h2></div>
+      <div style="position:absolute;left:56px;right:56px;top:300px;bottom:56px;display:grid;
+        grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:18px">{cells}</div></div>""",
+         name(2, "sette_neler_var"))
+
+    # 03 altısı zincirli halkada
+    fon = fon_rengi(os.path.join(FOTO, "dizi.jpg"))
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:{fon}">
       <img src="{foto('dizi', 1600)}" style="position:absolute;left:-60px;top:50%;width:1320px;
-        transform:translateY(-46%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,
+        transform:translateY(-44%);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,
         transparent 100%)">
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
       <div style="position:absolute;left:64px;right:64px;top:150px;color:{INK}">
-        <p class="k">6 MODEL</p>
-        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">Hangisi sizin<br>yılbaşınız?</h2></div>
-      <div style="position:absolute;left:64px;right:64px;bottom:60px;display:flex;flex-wrap:wrap;gap:10px">{chips}
-      </div></div>""", name(2, "alti_model"))
+        <p class="k">ALTISI BİR ARADA</p>
+        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">Her birine<br>zincirli halka takılı.</h2>
+      </div>
+      <p style="position:absolute;left:64px;right:64px;bottom:64px;font-size:26px;color:#3b3d42">Çelik halka, kısa
+        zincir ve ara halka; anahtarınıza takmaya hazır.</p></div>""", name(3, "zincirli_halka"))
 
-    # 03–08 tek tek, 09–14 önü ve arkası
-    for i, k in enumerate(YM.KEYS):
-        w, d, h = olcu(k)
-        framed(P, f"{k}_halka", f"{i + 1:02d}", f"{YM.AD[k]} · yılbaşı anahtarlığı",
-               f"{h:.0f} × {w:.0f} × {d:.0f} mm · {renkler(k)} · zincirli halka takımıyla",
-               name(3 + i, f"{k}_halka"))
-    for i, k in enumerate(YM.KEYS):
-        framed(P, f"{k}_iki", f"{i + 1:02d}", f"{YM.AD[k]} · önü ve arkası",
-               "Tam 3D figür: arkası da yuvarlak, her yönden sevimli", name(9 + i, f"{k}_onu_arkasi"))
+    # 04 önü ve arkası
+    framed(P, "noel_baba_iki", "3D", "Önü de arkası da tombul",
+           "Tam 3D figür: arkası da yuvarlak, her yönden sevimli (soldaki önü, sağdaki arkası)", name(4, "onu_arkasi"))
 
-    # 15 ölçü ve özellikler: önden görünüşler gerçek oranlarıyla
+    # 05 süs olarak da: çubukta asılı altı figür
+    fon = fon_rengi(CEKIM)
+    K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;overflow:hidden;background:{fon}">
+      <img src="{K.uri(CEKIM, 2000)}" style="position:absolute;left:50%;top:56%;width:2300px;
+        transform:translate(-50%,-50%)">
+      <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 260, 52)}</div>
+      <div style="position:absolute;left:64px;right:64px;bottom:64px;color:{INK}">
+        <p class="k">HEDİYELİK</p>
+        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">Anahtarlığa takın,<br>ağaca asın,
+          hediye edin.</h2></div></div>""", name(5, "susleme"))
+
+    # 06 ölçü ve özellikler: önden görünüşler gerçek oranlarıyla
     tmp = os.path.join(OUT, "_on")
     os.makedirs(tmp)
     px = 4.6
@@ -146,11 +210,11 @@ def shopier(P):
       <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:flex-end">{cells}</div>
       <p style="margin-top:10px;font-size:15px;color:{GRAY}">Önden görünüş, gerçek oranlarıyla (boy × en; kalınlık
         ~23 mm). Halka takımı hariç.</p>
-      <ul style="margin-top:34px;list-style:none;display:grid;gap:16px;font-size:24px;line-height:1.35">{feats}</ul>
-      </div>""", name(15, "olcu_ozellik"))
+      <ul style="margin-top:30px;list-style:none;display:grid;gap:14px;font-size:23px;line-height:1.35">{feats}</ul>
+      </div>""", name(6, "olcu_ozellik"))
     shutil.rmtree(tmp)
 
-    # 16 nasıl sipariş verilir
+    # 07 nasıl sipariş verilir
     rows = "".join(f"""<div style="display:flex;gap:28px;padding:18px 0;border-top:2px solid rgba(244,241,234,.14)">
       <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a}</b><div><p style="font-size:32px;
       font-weight:700">{b}</p><p style="margin-top:8px;font-size:23px;color:rgba(244,241,234,.72)">{c}</p></div>
@@ -158,13 +222,15 @@ def shopier(P):
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};color:{PAPER};padding:64px;
       background-image:{BM.stripes_bg(PAPER, .035, 30)}">
       <p class="k">NASIL SİPARİŞ VERİLİR</p>
-      <h2 class="u" style="margin-top:12px;font-size:48px;line-height:1.1">Seçin, sepete ekleyin;<br>gerisi bizde.</h2>
+      <h2 class="u" style="margin-top:12px;font-size:48px;line-height:1.1">Sepete ekleyin;<br>gerisi bizde.</h2>
       <div style="margin-top:34px">{rows}</div>
-      <img src="{foto('dizi', 1600)}" style="margin-top:18px;width:100%;height:300px;object-fit:cover;
-        object-position:50% 62%;border-radius:22px;display:block">
+      <img src="{foto('set', 1600)}" style="margin-top:18px;width:100%;height:290px;object-fit:cover;
+        object-position:50% 52%;border-radius:22px;display:block">
       <div style="position:absolute;left:64px;bottom:50px">{K.logo("koyu", 300, 60)}</div>
       <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{K.TEL}</p></div>""",
-         name(16, "nasil_siparis"))
+         name(7, "nasil_siparis"))
+    with open(os.path.join(OUT, "aciklama.txt"), "w", encoding="utf-8") as f:
+        f.write(ACIKLAMA + "\n")
     return OUT
 
 
