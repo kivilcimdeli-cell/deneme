@@ -49,3 +49,15 @@ hâline getirildi:
   - QR'lı tasarım sayısı: 15
   - Gövde: Siyah ve beyaz (ikisi) · Renk: altın (müşteri: siyah, sarı, beyaz; mavi istemedi)
 - **QR görünümü:** koyu gövdede beyaz zemin oval, köşe kareler yuvarlak (keskin köşeli QR beğenilmedi).
+
+## Web sitesi (yayında)
+
+**https://www.dhktaputakip.com**: müşterinin hazır statik sitesi (HTML, CSS, JS), 17 Kasım 2026'da yayına alındı.
+
+- **Alan adı:** Cloudflare Registrar (qrsistem hesabı). 1 yıllık alındı, 17 Kasım 2027'ye kadar; otomatik yenileme
+  açık (yıllık ~11 $).
+- **Barındırma:** Cloudflare Pages, proje `dhktaputakip` (Direct Upload; QR sitelerinin Workers'ından ayrı).
+  - Özel alan adları: `dhktaputakip.com` ve `www.dhktaputakip.com`, SSL açık.
+- **Güncelleme:** Workers & Pages → dhktaputakip → **Create deployment** → yeni zip.
+  - Zip'te `index.html` en üstte olmalı, klasör içinde olmamalı.
+- **Erişim:** Türkiye'de bazı internet sağlayıcıları `dhktaputakip.pages.dev` adresini açmıyor; asıl adres etkilenmiyor.
