@@ -4,6 +4,8 @@ Fotoğraftaki örgü yılbaşı figürleri (geyik, Noel Baba, çam, kardan adam.
 Tam 3D: önü ve arkası tombul (arka önün %60'ı kalınlığında), ayakta durarak basılır; altta küçük düz taban, halka tepede
 dik (delik önden arkaya, Ø4). Göz, burun, düğme gibi ayrıntılar önde, yüzeyi 0,8 mm kabarık izler.
 
+Sevimlilik: iri, beyaz parıltılı gözler, kırmızı yanaklar, küçük gülücük (yuz()); tombul, kısa oranlar.
+
 Desteksiz: figür önce serbest çizilir (önden tombul katmanlar, arkası aynası), sonra ayakta duracak hâle döndürülüp
 0,2 mm katmanlara ayrılır; her katman alttakinden en çok EGIM × 0,2 mm taşabilir (≈48°), taşan yer kesilir. Böylece
 şapka kenarı, kol, halka deliği tepesi gibi alt yüzeyler kendiliğinden 48°'lik eğime döner: destek gerekmez.
@@ -106,6 +108,12 @@ def _sutun(cs):
     return cs.extrude(80.0).translate((0, 0, -1.0))
 
 
+def _hesapla(m):
+    """Boole işlemini hemen yaptırır: ayrıntı arttıkça tembel işlem ağacı şişip belleği bitirmesin."""
+    m.num_tri()
+    return m
+
+
 class Figur:
     """Parçalar sırayla eklenir; sonra gelen kendi izdüşümünü (sütununu) öncekilerden alır."""
 
@@ -116,7 +124,7 @@ class Figur:
 
     def _al(self, cs):
         s = _sutun(cs)
-        self.parcalar = [(n, m - s, c) for n, m, c in self.parcalar]
+        self.parcalar = [(n, _hesapla(m - s), c) for n, m, c in self.parcalar]
 
     def birlik(self):
         return m3.Manifold.batch_boolean([m for _, m, _ in self.parcalar], m3.OpType.Add)
@@ -130,8 +138,10 @@ class Figur:
 
     def kapla(self, ad, cs, renk, t=0.8):
         """Alttaki yüzeyi t mm kabarık izleyen ayrıntı (göz, burun, düğme, desen)."""
-        u = self.birlik()
-        d = _sutun(cs) ^ (u + u.translate((0, 0, t)))
+        k = _sutun(cs)               # her parça önce sütunla kesilir: büyük birleşim yok (bellek taşıyordu)
+        dilim = [_hesapla(k ^ m) for _, m, _ in self.parcalar]
+        dilim += [_hesapla(k ^ m.translate((0, 0, t))) for _, m, _ in self.parcalar]
+        d = _hesapla(m3.Manifold.batch_boolean([m for m in dilim if not m.is_empty()], m3.OpType.Add))
         self._al(cs)
         self.parcalar.append((ad, d, renk))
         return self
@@ -213,209 +223,225 @@ def uc_boyut(f):
     return [(O.AD[c], m3.Manifold.batch_boolean(v, m3.OpType.Add), c) for c, v in katlar.items() if v]
 
 
-def goz(f, x, y, r=1.25, renk=MOKA):
-    f.kapla("göz", C(r, x, y), renk).kapla("göz", C(r, -x, y), renk)
+def yuz(f, x, y, r=1.7, cx=0.0, yanak=RED, agiz="gulus", agiz_y=None, agiz_renk=MOKA, goz_renk=MOKA):
+    """Sevimli yüz: iri gözler (sol üstte beyaz parıltı), kırmızı yanaklar, küçük gülücük ya da "w" ağız."""
+    for s in (-1, 1):
+        f.kapla("göz", C(r, cx + s * x, y), goz_renk)
+    ri = max(0.6, 0.38 * r)
+    for s in (-1, 1):
+        f.kapla("parıltı", C(ri, cx + s * x - 0.38 * r, y + 0.38 * r), WHITE, 0.3)
+    if yanak is not None:
+        for s in (-1, 1):
+            f.kapla("yanak", E(1.5, 0.95, cx + s * (x + 1.7), y - r - 0.5), yanak, 0.4)
+    ay = agiz_y if agiz_y is not None else y - 0.9
+    if agiz == "gulus":
+        f.kapla("ağız", yay(1.5, 0.7, 205, 335, cx, ay), agiz_renk, 0.6)
+    elif agiz == "w":
+        f.kapla("ağız", yay(1.1, 0.4, 200, 340, cx - 1.05, ay) + yay(1.1, 0.4, 200, 340, cx + 1.05, ay), agiz_renk, 0.6)
     return f
 
 
-# ---------------------------------------------------------------- 15 model (y: aşağıdan yukarı; tepe ~+21)
+def _egik(rx, ry, aci, x, y):
+    return E(rx, ry).rotate(aci).translate((x, y))
+
+
+# ---------------------------------------------------------------- 15 model (y: aşağıdan yukarı)
+# Hepsinde sevimli yüz (iri, parıltılı göz + yanak + gülücük), tombul oranlar; alttan taşan yer az (desteksiz).
 
 def y01_noel_baba():
-    f = Figur("Y01", "Noel Baba", "Kırmızı şapka, beyaz ponpon ve tombul sakal")
-    f.halka(0, 24.0, WHITE)
-    f.tombul("yüz", C(11.5, 0, 2.0), 8.0, NUDE)
-    f.tombul("şapka", P([(-12.5, 6.0), (12.5, 6.0), (7.0, 17.0), (0.5, 21.5), (-7.0, 16.5)], 2.5), 9.0, RED)
-    f.tombul("şapka kenarı", RR(27.0, 5.6, 2.8, 0, 6.5), 9.6, WHITE)
-    f.tombul("ponpon", C(3.6, 1.0, 21.0), 9.2, WHITE)
-    f.tombul("sakal", birlesim(E(13.0, 9.0, 0, -6.0), C(5.5, -8.0, -1.5), C(5.5, 8.0, -1.5)) - E(6.5, 3.2, 0, 1.6),
-             9.0, WHITE)
-    f.tombul("bıyık", birlesim(E(4.2, 2.0, -3.2, -0.6), E(4.2, 2.0, 3.2, -0.6)), 9.8, WHITE)
-    goz(f, 3.6, 3.0)
-    f.kapla("burun", C(1.7, 0, 1.0), RED, 1.0)
+    f = Figur("Y01", "Noel Baba", "Kırmızı şapka, beyaz ponpon, tombul sakal, kırmızı yanaklar")
+    f.halka(1.5, 0, WHITE)
+    f.tombul("yüz", C(10.5, 0, 0), 8.0, NUDE)
+    f.tombul("şapka", P([(-11.5, 7.5), (11.5, 7.5), (6.5, 16.5), (1.0, 21.0), (-6.0, 16.0)], 2.5), 9.0, RED)
+    f.tombul("şapka kenarı", RR(25.0, 5.0, 2.5, 0, 7.8), 9.6, WHITE)
+    f.tombul("ponpon", C(3.4, 1.5, 20.5), 9.2, WHITE)
+    sakal = birlesim(E(12.5, 9.5, 0, -6.5), C(4.2, -9.0, -2.5), C(4.2, 9.0, -2.5)) - E(6.5, 4.0, 0, 1.5)
+    f.tombul("sakal", sakal, 9.0, WHITE)
+    f.tombul("bıyık", birlesim(E(3.8, 1.9, -3.0, -2.0), E(3.8, 1.9, 3.0, -2.0)), 9.8, WHITE)
+    yuz(f, 3.6, 2.4, 1.6, agiz=None)
+    f.kapla("burun", C(1.4, 0, -0.5), RED, 1.0)
     return f
 
 
 def y02_kardan_adam():
     f = Figur("Y02", "Kardan adam", "Kırmızı bere, yeşil atkı, altın havuç burun")
-    f.halka(0, 25.0, RED)
-    f.tombul("gövde", C(10.5, 0, -10.0), 8.5, WHITE)
-    f.tombul("kafa", C(8.5, 0, 5.5), 9.0, WHITE)
-    f.tombul("bere", birlesim(E(8.8, 6.0, 0, 13.0) - RR(30, 10, 0, 0, 5.0)), 9.6, RED)
-    f.tombul("bere kenarı", RR(18.5, 3.6, 1.8, 0, 12.0), 10.0, RED)
-    f.tombul("ponpon", C(3.0, 0, 20.5), 9.6, RED)
-    f.tombul("atkı", RR(18.0, 4.0, 2.0, 0, -1.6), 9.6, GREEN)
-    f.tombul("atkı ucu", RR(4.0, 9.0, 1.8, 5.0, -6.0), 9.8, GREEN)
-    goz(f, 3.0, 7.0)
-    f.kapla("burun", ucgen(2.6, 5.0, 0, 3.0, 0.5).rotate(-90).translate((-0.5, 4.3)), GOLD, 1.2)
-    for yy in (-8.0, -13.0):
+    f.halka(0, 0, RED)
+    f.tombul("gövde", C(9.5, 0, -11.0), 8.5, WHITE)
+    f.tombul("kafa", C(9.0, 0, 3.5), 9.0, WHITE)
+    f.tombul("bere", E(8.6, 6.5, 0, 11.0) - RR(30, 10, 0, 0, 6.0), 9.6, RED)
+    f.tombul("bere kenarı", RR(18.0, 3.8, 1.9, 0, 10.6), 10.0, WHITE)
+    f.tombul("ponpon", C(3.0, 0, 18.0), 9.6, WHITE)
+    f.tombul("atkı", RR(17.0, 4.0, 2.0, 0, -4.6), 9.6, GREEN)
+    f.tombul("atkı ucu", RR(4.0, 8.0, 1.8, 5.0, -8.5), 9.8, GREEN)
+    yuz(f, 3.4, 4.6, 1.7, agiz_y=0.9)
+    f.kapla("burun", ucgen(2.4, 3.6, 0, 2.0, 0.5).rotate(-90).translate((-2.0, 2.6)), GOLD, 1.2)
+    for yy in (-10.0, -14.5):
         f.kapla("düğme", C(1.3, 0, yy), MOKA)
     return f
 
 
 def y03_geyik():
-    f = Figur("Y03", "Geyik", "Altın boynuzlar, kırmızı burun")
-    f.halka(0, 25.5, KAHVE)
-    sol = birlesim(yay(9.0, 6.2, 95, 175, -3.0, 10.0),                      # kafadan dışa kıvrılan dal
-                   RR(2.8, 6.0, 1.4).rotate(20).translate((-6.6, 18.2)),     # üst çatal
-                   RR(2.8, 5.0, 1.4).rotate(-35).translate((-11.4, 14.6)))   # yan çatal
+    f = Figur("Y03", "Geyik", "Altın boynuzlar, kırmızı burun, kırmızı yanaklar")
+    f.halka(0, 0, KAHVE)
+    sol = birlesim(yay(9.0, 6.2, 95, 175, -3.0, 10.0),
+                   RR(2.8, 6.0, 1.4).rotate(20).translate((-6.6, 18.2)),
+                   RR(2.8, 5.0, 1.4).rotate(-35).translate((-11.4, 14.6)))
     f.tombul("boynuz", sol + sol.mirror((1, 0)), 6.0, GOLD)
-    f.tombul("kulak", E(4.5, 2.6, -11.0, 7.0).rotate(0) + E(4.5, 2.6, 11.0, 7.0), 7.0, KAHVE)
-    f.tombul("kafa", E(10.5, 11.0, 0, 2.0), 9.0, KAHVE)
-    f.tombul("ağız", E(6.5, 4.6, 0, -5.0), 9.8, NUDE)
-    goz(f, 4.0, 4.0)
-    f.kapla("burun", E(2.6, 2.0, 0, -3.3), RED, 1.2)
+    f.tombul("kulak", _egik(4.6, 2.5, -25, -10.5, 8.0) + _egik(4.6, 2.5, 25, 10.5, 8.0), 7.0, KAHVE)
+    f.tombul("kafa", E(10.5, 10.5, 0, 1.5), 9.0, KAHVE)
+    f.tombul("ağız", E(6.2, 4.3, 0, -5.2), 9.8, NUDE)
+    yuz(f, 4.3, 3.0, 1.8, agiz=None)
+    f.kapla("burun", E(2.4, 1.8, 0, -3.6), RED, 1.2)
+    f.kapla("ağız", yay(1.3, 0.6, 205, 335, 0, -5.4), MOKA, 0.6)
     return f
 
 
 def y04_cam_agaci():
-    f = Figur("Y04", "Çam ağacı", "Altın yıldız, kırmızı ve altın süsler, sevimli yüz")
-    f.halka(0, 26.0, GOLD)
-    f.tombul("gövde", RR(5.0, 6.0, 1.0, 0, -15.5), 4.0, KAHVE)
-    f.tombul("dal 1", ucgen(26.0, 14.0, 0, -13.0, 2.0), 7.0, GREEN)
-    f.tombul("dal 2", ucgen(21.0, 12.5, 0, -4.5, 2.0), 8.0, GREEN)
-    f.tombul("dal 3", ucgen(15.0, 11.0, 0, 3.5, 2.0), 9.0, GREEN)
-    f.tombul("yıldız", yildiz(5.4, 2.4, 0, 16.5), 8.0, GOLD)
-    goz(f, 2.8, -1.5, 1.15)
-    for x, y, c in ((-6.5, -9.0, RED), (6.0, -7.0, GOLD), (-3.5, 5.0, GOLD), (4.0, 1.8, RED), (0.5, -10.0, RED)):
-        f.kapla("süs", C(1.4, x, y), c, 1.0)
+    f = Figur("Y04", "Çam ağacı", "Altın yıldız, kırmızı ve altın süsler, gülen yüz")
+    f.halka(0, 0, GOLD)
+    agac = birlesim(ucgen(25.0, 12.0, 0, -14.0, 3.0), ucgen(20.0, 11.0, 0, -6.5, 3.0), ucgen(15.0, 10.0, 0, 0.5, 3.0))
+    f.tombul("ağaç", agac, 8.5, GREEN)
+    f.tombul("yıldız", yildiz(5.2, 2.5, 0, 12.5), 8.5, GOLD)
+    yuz(f, 3.2, -6.0, 1.6)
+    for x, y, c in ((-7.5, -11.5, RED), (7.0, -12.0, GOLD), (0.0, -12.3, RED), (-3.2, 3.0, GOLD), (3.4, 4.6, RED)):
+        f.kapla("süs", C(1.3, x, y), c, 1.0)
     return f
 
 
 def y05_kurabiye_adam():
-    f = Figur("Y05", "Zencefilli kurabiye", "Beyaz krema, kırmızı düğmeler")
-    f.halka(0, 24.0, KAHVE)
-    govde = birlesim(C(7.5, 0, 12.0), RR(13.0, 15.0, 5.0, 0, -1.0), RR(28.0, 6.5, 3.2, 0, 3.0),
-                     RR(6.5, 15.0, 3.2, -4.5, -10.0).rotate(0), RR(6.5, 15.0, 3.2, 4.5, -10.0))
+    f = Figur("Y05", "Zencefilli kurabiye", "Kollarını açmış, beyaz krema, kırmızı ve yeşil düğmeler")
+    f.halka(0, 0, KAHVE)
+    kol_s = RR(5.6, 9.5, 2.8).rotate(45).translate((-7.6, 2.0))
+    kol_d = RR(5.6, 9.5, 2.8).rotate(-45).translate((7.6, 2.0))
+    govde = birlesim(C(8.0, 0, 9.5), RR(13.0, 13.0, 5.0, 0, -3.0), kol_s, kol_d,
+                     RR(5.8, 10.0, 2.9, -3.6, -11.0), RR(5.8, 10.0, 2.9, 3.6, -11.0))
     f.tombul("kurabiye", govde.offset(0.6, J).offset(-0.6, J), 7.5, KAHVE)
-    goz(f, 2.6, 13.5, 1.15, WHITE)
-    f.kapla("gülüş", yay(3.6, 2.6, 200, 340, 0, 11.6), WHITE)
-    for x in (-11.5, 11.5):
-        f.kapla("krema", RR(1.2, 4.6, 0.6, x, 3.0), WHITE)
-    for x in (-4.5, 4.5):
-        f.kapla("krema", RR(4.6, 1.2, 0.6, x, -15.0), WHITE)
-    for y in (3.5, -1.5):
-        f.kapla("düğme", C(1.4, 0, y), RED, 1.0)
+    yuz(f, 2.9, 10.2, 1.6, agiz_renk=WHITE)
+    for s in (-1, 1):
+        f.kapla("krema", RR(4.4, 1.2, 0.6).rotate(-45 * s).translate((9.3 * s, 3.7)), WHITE)
+        f.kapla("krema", RR(4.4, 1.2, 0.6, 3.6 * s, -13.0), WHITE)
+    f.kapla("düğme", C(1.3, 0, 0.0), RED, 1.0)
+    f.kapla("düğme", C(1.3, 0, -4.5), GREEN, 1.0)
     return f
 
 
 def y06_hediye():
-    f = Figur("Y06", "Hediye kutusu", "Kırmızı kutu, altın kurdele ve fiyonk")
-    f.halka(0, 22.5, GOLD)
-    f.tombul("fiyonk", E(5.5, 3.6, -4.8, 13.0).rotate(0) + E(5.5, 3.6, 4.8, 13.0) + C(2.4, 0, 12.0), 8.5, GOLD)
-    f.tombul("kutu", RR(24.0, 20.0, 3.5, 0, -2.0), 8.0, RED)
-    f.tombul("kapak", RR(27.0, 6.0, 2.5, 0, 9.0), 8.6, RED)
-    f.kapla("kurdele", RR(4.2, 26.0, 0.8, 0, -0.5), GOLD)
-    goz(f, 5.0, -2.0)
-    f.kapla("gülüş", yay(2.4, 1.3, 205, 335, 0, -3.5), MOKA)
+    f = Figur("Y06", "Hediye kutusu", "Yeşil kutu, kırmızı kurdele ve fiyonk, gülen yüz")
+    f.halka(0, 0, RED)
+    f.tombul("fiyonk", E(5.5, 3.8, -4.8, 12.5) + E(5.5, 3.8, 4.8, 12.5), 8.5, RED)
+    f.tombul("düğüm", C(2.3, 0, 11.8), 9.4, GOLD)
+    f.tombul("kutu", RR(23.0, 17.0, 5.0, 0, -3.5), 8.0, GREEN)
+    f.tombul("kapak", RR(26.0, 5.5, 2.6, 0, 6.5), 8.6, GREEN)
+    f.kapla("kurdele", RR(4.0, 24.0, 0.8, 0, -3.0), RED)
+    yuz(f, 5.6, -3.0, 1.7, agiz_y=-3.6)
     return f
 
 
 def y07_can():
-    f = Figur("Y07", "Yılbaşı çanı", "Altın çan, kırmızı fiyonk, yeşil yapraklar")
-    f.halka(0, 24.0, GOLD)
-    can = birlesim(P([(-12.0, -10.0), (12.0, -10.0), (8.0, 4.0), (5.0, 12.0), (-5.0, 12.0), (-8.0, 4.0)], 3.0),
-                   RR(28.0, 4.5, 2.2, 0, -10.5))
+    f = Figur("Y07", "Yılbaşı çanı", "Altın çan, kırmızı fiyonk, yeşil yapraklar, gülen yüz")
+    f.halka(0, 0, GOLD)
+    can = birlesim(P([(-12.0, -11.0), (12.0, -11.0), (9.0, 2.0), (6.0, 11.0), (-6.0, 11.0), (-9.0, 2.0)], 4.0),
+                   RR(27.0, 5.0, 2.5, 0, -10.5))
     f.tombul("çan", can, 8.5, GOLD)
-    f.tombul("dil", C(3.0, 0, -14.0), 7.0, GOLD)
-    f.tombul("yaprak", E(6.0, 2.8, -5.5, 13.6) + E(6.0, 2.8, 5.5, 13.6), 7.5, GREEN)
-    f.tombul("fiyonk", E(3.6, 2.6, -3.0, 14.6) + E(3.6, 2.6, 3.0, 14.6) + C(2.0, 0, 14.3), 9.0, RED)
-    goz(f, 3.6, 0.0)
-    f.kapla("gülüş", yay(2.4, 1.3, 205, 335, 0, -1.6), MOKA)
+    f.tombul("yaprak", E(6.0, 2.8, -5.5, 12.6) + E(6.0, 2.8, 5.5, 12.6), 7.5, GREEN)
+    f.tombul("fiyonk", E(3.6, 2.6, -3.0, 13.6) + E(3.6, 2.6, 3.0, 13.6) + C(2.0, 0, 13.3), 9.0, RED)
+    yuz(f, 3.8, -1.0, 1.7)
     return f
 
 
 def y08_seker_baston():
-    f = Figur("Y08", "Şeker baston", "Beyaz-kırmızı çizgili, yeşil fiyonk")
-    f.halka(-5.0, 23.5, RED)
-    baston = birlesim(yay(9.5, 3.5, 0, 180, -2.0, 11.0), RR(6.0, 30.0, 3.0, 4.5, -4.0))
+    f = Figur("Y08", "Şeker baston", "Tombul beyaz-kırmızı çizgili baston, yeşil fiyonk")
+    f.halka(-2.5, 0, RED)
+    baston = birlesim(yay(10.0, 3.5, 0, 180, -2.5, 11.0), C(3.25, -9.25, 11.0), RR(6.5, 30.0, 3.25, 4.25, -4.0))
     f.tombul("baston", baston, 8.0, WHITE)
-    seritler = birlesim(*[RR(60.0, 2.4, 0.0, 0, y).rotate(35) for y in range(-30, 34, 5)])
+    seritler = birlesim(*[RR(60.0, 2.6, 0.0, 0, y).rotate(35) for y in range(-30, 34, 5)])
     f.kapla("çizgi", seritler ^ baston.offset(-0.3, J), RED, 0.6)
-    f.tombul("fiyonk", E(4.6, 2.8, 0.6, -2.0) + E(4.6, 2.8, 8.4, -2.0) + C(2.2, 4.5, -2.0), 9.0, GREEN)
+    f.tombul("fiyonk", E(4.6, 2.8, 0.2, -3.0) + E(4.6, 2.8, 8.3, -3.0), 9.0, GREEN)
+    f.tombul("düğüm", C(2.2, 4.25, -3.0), 9.6, RED)
     return f
 
 
 def y09_corap():
-    f = Figur("Y09", "Yılbaşı çorabı", "Kırmızı çorap, beyaz kenar, altın yıldız")
-    f.halka(-2.0, 25.0, WHITE)
-    corap = birlesim(RR(14.0, 24.0, 4.0, -2.0, 5.0), RR(22.0, 11.0, 5.5, 2.0, -8.5))
+    f = Figur("Y09", "Yılbaşı çorabı", "Kırmızı çorap, beyaz kenar, altın yıldız, gülen yüz")
+    f.halka(-2.0, 0, WHITE)
+    corap = birlesim(RR(14.0, 22.0, 5.0, -2.0, 4.0), RR(22.0, 11.0, 5.5, 2.0, -8.5))
     f.tombul("çorap", corap, 8.0, RED)
-    f.tombul("kenar", RR(18.0, 7.0, 3.0, -2.0, 18.5), 9.0, WHITE)
-    f.kapla("yıldız", yildiz(4.2, 1.9, -2.0, 5.0), GOLD, 1.0)
+    f.tombul("kenar", RR(18.0, 7.0, 3.0, -2.0, 17.0), 9.0, WHITE)
+    f.kapla("yıldız", yildiz(2.8, 1.3, -2.0, 17.0, 0.4), GOLD, 0.8)
     f.kapla("burun", (C(5.6, 13.0, -8.5) ^ corap.offset(-0.4, J)), WHITE, 0.8)
+    yuz(f, 3.3, 6.5, 1.7, cx=-2.0, yanak=None)
     return f
 
 
 def y10_top_susu():
-    f = Figur("Y10", "Yılbaşı topu", "Yeşil top, altın başlık, beyaz kar tanesi")
-    f.halka(0, 22.5, GOLD)
-    f.tombul("başlık", RR(8.0, 5.0, 1.2, 0, 15.5), 7.0, GOLD)
+    f = Figur("Y10", "Yılbaşı topu", "Yeşil top, altın başlık, gülen yüz, kar taneleri")
+    f.halka(0, 0, GOLD)
+    f.tombul("başlık", RR(8.0, 5.0, 1.2, 0, 15.0), 7.0, GOLD)
     f.tombul("top", C(13.0, 0, 0), 10.0, GREEN)
-    kol = birlesim(*[RR(1.4, 13.0, 0.7).rotate(a) for a in (0, 60, 120)])
-    uc = birlesim(*[C(1.2, 6.2 * math.cos(math.radians(a)), 6.2 * math.sin(math.radians(a))) for a in range(0, 360, 60)])
-    f.kapla("kar tanesi", (kol + uc).translate((0, -1.0)), WHITE)
-    f.kapla("parıltı", E(2.0, 1.2, -6.5, 6.0), WHITE, 0.6)
+    yuz(f, 4.2, 1.5, 1.9)
+    f.kapla("parlaklık", E(2.2, 1.3, -6.8, 7.0), WHITE, 0.6)
+    for x, y in ((-7.5, -6.0), (7.0, -6.5), (-3.0, -9.5), (3.0, -10.0), (8.5, 5.0)):
+        f.kapla("kar", C(0.9, x, y), WHITE, 0.6)
     return f
 
 
 def y11_yildiz():
-    f = Figur("Y11", "Altın yıldız", "Gülen yüzlü altın yıldız")
-    f.halka(0, 22.5, GOLD)
-    f.tombul("yıldız", yildiz(16.5, 7.5, 0, -1.0, 2.2), 8.5, GOLD)
-    goz(f, 3.2, 0.5)
-    f.kapla("gülüş", yay(2.6, 1.4, 205, 335, 0, -1.6), MOKA)
-    f.kapla("yanak", C(1.5, -6.0, -2.2) + C(1.5, 6.0, -2.2), RED, 0.6)
+    f = Figur("Y11", "Altın yıldız", "Tombul, gülen yüzlü altın yıldız")
+    f.halka(0, 0, GOLD)
+    f.tombul("yıldız", yildiz(15.5, 8.5, 0, -1.0, 3.0), 8.5, GOLD)
+    yuz(f, 3.4, 0.3, 1.7)
     return f
 
 
 def y12_ayicik():
     f = Figur("Y12", "Ayıcık", "Noel Baba şapkalı kahverengi ayıcık")
-    f.halka(4.0, 25.0, WHITE)
+    f.halka(4.0, 0, WHITE)
     f.tombul("kulak", C(4.2, -9.5, 8.0) + C(4.2, 9.5, 8.0), 7.0, KAHVE)
     f.tombul("kafa", E(11.5, 10.5, 0, 0), 9.0, KAHVE)
     f.tombul("şapka", P([(-11.0, 5.5), (11.0, 5.5), (7.0, 14.0), (3.5, 20.5), (-6.0, 13.5)], 2.0), 9.6, RED)
     f.tombul("şapka kenarı", RR(24.0, 4.6, 2.3, 0, 5.8), 10.0, WHITE)
     f.tombul("ponpon", C(3.0, 4.0, 20.0), 9.8, WHITE)
-    f.tombul("ağız", E(5.0, 3.8, 0, -4.6), 9.8, NUDE)
-    goz(f, 4.3, 0.2)
-    f.kapla("burun", E(1.9, 1.4, 0, -3.4), MOKA, 1.0)
+    f.tombul("ağız", E(4.8, 3.6, 0, -5.0), 9.8, NUDE)
+    yuz(f, 4.6, 0.0, 1.7, agiz="w", agiz_y=-5.0)
+    f.kapla("burun", E(1.8, 1.3, 0, -3.8), MOKA, 1.0)
     return f
 
 
 def y13_kurabiye_ev():
-    f = Figur("Y13", "Kurabiye ev", "Beyaz kremalı çatı, kırmızı kapı")
-    f.halka(0, 24.0, WHITE)
-    f.tombul("ev", RR(22.0, 18.0, 2.0, 0, -6.0), 7.5, KAHVE)
-    f.tombul("çatı", P([(-15.0, 2.5), (15.0, 2.5), (0, 18.0)], 2.2), 8.6, WHITE)
-    f.kapla("kapı", RR(6.0, 9.0, 2.6, 0, -10.0), RED, 1.0)
-    f.kapla("pencere", RR(4.6, 4.6, 1.0, -6.5, -3.0) + RR(4.6, 4.6, 1.0, 6.5, -3.0), GOLD, 0.8)
-    for x in (-8.0, -2.8, 2.8, 8.0):
-        f.kapla("şeker", C(1.2, x, 5.5), RED if x < 0 else GREEN, 0.8)
+    f = Figur("Y13", "Kurabiye ev", "Beyaz kremalı çatı, renkli şekerler, gülen yüz")
+    f.halka(0, 0, WHITE)
+    f.tombul("ev", RR(21.0, 17.0, 2.5, 0, -6.0), 7.5, KAHVE)
+    f.tombul("çatı", P([(-14.0, 2.0), (14.0, 2.0), (0, 16.5)], 2.5), 8.6, WHITE)
+    for i, x in enumerate((-7.5, -2.5, 2.5, 7.5)):
+        f.kapla("şeker", C(1.1, x, 4.6), RED if i % 2 == 0 else GREEN, 0.8)
+    yuz(f, 4.6, -4.0, 1.7)
+    f.kapla("kapı", RR(5.0, 6.0, 2.3, 0, -11.5), RED, 1.0)
     return f
 
 
 def y14_eldiven():
-    f = Figur("Y14", "Eldiven", "Kırmızı eldiven, beyaz kenar, yeşil çam deseni")
-    f.halka(0, 25.0, WHITE)
-    eld = birlesim(RR(17.0, 24.0, 8.0, 1.0, 4.0), E(4.0, 6.5, -9.5, 2.0).rotate(0))
+    f = Figur("Y14", "Eldiven", "Kırmızı eldiven, beyaz kenar, gülen yüz")
+    f.halka(1.0, 0, WHITE)
+    eld = birlesim(RR(16.0, 22.0, 8.0, 1.0, 5.0), _egik(3.6, 6.0, 20, -8.6, 3.0))
     f.tombul("eldiven", eld, 8.5, RED)
-    f.tombul("kenar", RR(19.0, 6.5, 3.0, 1.0, -10.5), 9.2, WHITE)
-    f.kapla("çam", ucgen(8.0, 9.0, 1.0, 0.5, 1.0), GREEN)
-    f.kapla("çam yıldızı", C(1.2, 1.0, 11.5), GOLD, 1.0)
+    f.tombul("kenar", RR(19.0, 6.5, 3.0, 1.0, -8.5), 9.2, WHITE)
+    for x in (-5.0, 1.0, 7.0):
+        f.kapla("benek", C(0.9, x, -8.5), GREEN, 0.6)
+    yuz(f, 3.3, 6.0, 1.7, cx=1.0, yanak=None)
     return f
 
 
 def y15_kutup_ayisi():
     f = Figur("Y15", "Kutup ayısı", "Yeşil bereli, kırmızı ponponlu beyaz ayı")
-    f.halka(0, 25.5, RED)
+    f.halka(0, 0, RED)
     f.tombul("kulak", C(3.8, -9.5, 7.5) + C(3.8, 9.5, 7.5), 7.0, WHITE)
     f.tombul("kafa", E(11.5, 10.5, 0, 0), 9.0, WHITE)
-    f.tombul("bere", birlesim(E(10.0, 7.5, 0, 10.0) - RR(30, 10, 0, 0, 2.0)), 9.6, GREEN)
+    f.tombul("bere", E(10.0, 7.5, 0, 10.0) - RR(30, 10, 0, 0, 2.0), 9.6, GREEN)
     f.tombul("bere kenarı", RR(21.0, 4.0, 2.0, 0, 8.0), 10.0, GREEN)
     f.tombul("ponpon", C(3.2, 0, 18.5), 9.8, RED)
-    goz(f, 4.2, 1.0)
-    f.kapla("burun", E(2.0, 1.5, 0, -3.0), MOKA, 1.0)
-    f.kapla("ağız", yay(2.2, 1.2, 205, 335, 0, -4.2), MOKA)
+    f.tombul("ağız", E(4.6, 3.4, 0, -4.8), 9.8, WHITE)
+    yuz(f, 4.6, 1.0, 1.7, agiz="w", agiz_y=-5.0)
+    f.kapla("burun", E(1.8, 1.3, 0, -3.6), MOKA, 1.0)
     return f
 
 
