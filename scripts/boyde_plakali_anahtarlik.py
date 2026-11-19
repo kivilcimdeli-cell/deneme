@@ -41,8 +41,8 @@ A, S = T.A, T.S
 J = m3.JoinType.Round
 S.FONTS.update({"saira6": "Saira-SemiBold.ttf"})
 OUT = os.path.join(A.ROOT, "boyde_labs", "anahtarlik_plaka")
-SRC = os.path.join(OUT, "kaynak")
-FOTO = os.path.join(OUT, "fotograf")
+SRC = os.environ.get("BOYDE_KAYNAK") or os.path.join(OUT, "kaynak")
+FOTO = os.environ.get("BOYDE_FOTO") or os.path.join(OUT, "fotograf")
 
 SIYAH, BEYAZ = A.BLACK, A.WHITE                   # filament renkleri (kimlik; RGB: T.U.RGB)
 BANT = {"kirmizi": A.RED, "mavi": A.BLUE}           # TR bandının rengi
@@ -61,6 +61,9 @@ ORNEK = [("p01", "34 BYD 34", "BOYDE LABS", "kirmizi"), ("p02", "06 BYD 06", "AD
 KAPAK_EK = [("p04", "16 BYD 16", "BOYDE LABS", "mavi"), ("p05", "07 BYD 07", "ADINIZ SOYADINIZ", "kirmizi"),
             ("p06", "01 BYD 01", "İSİM SOYİSİM", "mavi")]      # yalnız kapakta (altı farklı plaka)
 RENK_EK = [("p07", "34 BYD 34", "BOYDE LABS", "mavi")]       # renk seçenekleri: p01'in mavisi
+if os.environ.get("BOYDE_PLAKA_AD"):               # Trendyol: görselde marka adı olmasın, örnek ad
+    ORNEK, KAPAK_EK, RENK_EK = ([(k, p, os.environ["BOYDE_PLAKA_AD"] if a == "BOYDE LABS" else a, b)
+                                 for k, p, a, b in L] for L in (ORNEK, KAPAK_EK, RENK_EK))
 
 
 def _ortala(cs, cx, cy):

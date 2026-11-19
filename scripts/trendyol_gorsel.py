@@ -1,4 +1,4 @@
-"""Trendyol bilgi görselleri (1200 × 1800) ve ilan metinleri: isimlikler.
+"""Trendyol bilgi görselleri (1200 × 1800) ve ilan metinleri: isimlikler, plakalı anahtarlık, yılbaşı seti.
 
 Trendyol görsel kuralları (satıcı rehberleri): ilan başına en çok 8 görsel; görselde logo, web adresi, iletişim
 bilgisi, fiyat olmamalı. Bu yüzden:
@@ -77,6 +77,23 @@ ILAN = {
         "ozellik": ["200 × 100 mm, 5 mm gövde", "Adınız el yazısıyla, yazılar yüzeyle aynı hizada",
                     "Çiçek, oje, kirpik, ruj motifleri", "Sehpa dahil", "QR, dijital kartvizitinizi açar"],
         "bilgi": "ad soyad, unvan, salon adı, telefon, Instagram, sevdiğiniz renkler"},
+    "plakali_anahtarlik": {
+        "ad": "Plakalı anahtarlık", "olcu": ("70 mm", "22 mm"), "site": None,
+        "duz_yol": os.path.join(TY, "kaynak_plaka", "p01_on.png"),
+        "fotolar": [("plaka", f) for f in ("kapak", "p01_halka", "p01_iki", "renk", "p02_halka", "p03_halka",
+                                           "p02_iki")],
+        "ozellik": ["70 × 22 × 3 mm, sağlam PLA gövde", "Plaka yazısı 1,3 mm, ad soyad 1 mm kabartma",
+                    "Kırmızı ya da mavi TR bandı, beyaz plaka zemini, siyah çerçeve", "Arka yüz düz siyah",
+                    "Çelik halka, kısa zincir ve ara halka takılı gelir"],
+        "adim": [("Siparişinizi verin", "TR bandının rengini (kırmızı ya da mavi) seçin."),
+                 ("Plakanızı ve yazınızı yazın", "Sipariş detayındaki <b>“Satıcıya Sor”</b>dan: plaka ve altına "
+                  "yazılacak ad soyad ya da kısa söz."),
+                 ("Onaylayın", "Önizlemeyi hazırlayıp onayınıza sunuyoruz."),
+                 ("Üretip gönderiyoruz", "Kendi atölyemizde 3D baskıyla üretip kargoya veriyoruz.")]},
+    "yilbasi_seti": {"ad": "Yılbaşı anahtarlık seti (6'lı)", "site": None, "set": True,
+                     "fotolar": [("yilbasi", "set"), ("_kolaj", "kolaj"), ("yilbasi", "noel_baba_iki"),
+                                 ("yilbasi", "ren_geyigi_halka"), ("yilbasi", "atkili_ayicik_halka"),
+                                 ("yilbasi", "kardan_adam_halka"), ("yilbasi", "kutup_ayisi_halka")]},
 }
 
 
@@ -187,6 +204,52 @@ Ad soyad, unvan, salon adı, telefon, Instagram, sevdiğiniz renkler.""",
                        ["Kategori önerisi: Kırtasiye & Ofis > Ofis Malzemeleri > Masa İsimliği",
                         "Kargoya veriliş süresi: en az 5 iş günü",
                         "Renk özelliği: Pembe / Çok renkli · Malzeme: Plastik (PLA)"]),
+    "plakali_anahtarlik": ("Kişiye Özel Plakalı Anahtarlık Türk Plakası Ad Soyad Yazılı Zincirli Halkalı 3D Baskı", """
+KİŞİYE ÖZEL PLAKALI ANAHTARLIK · 70 × 22 mm
+
+Kendi plakanız, altında adınız ya da kısa bir sözünüz. Türk plakası görünümünde: kırmızı ya da mavi TR bandı, beyaz
+plaka zemini, siyah çerçeve. Plaka ve yazı kabartma; elle hissedilir. Araba anahtarınıza, kendinize ya da hediye
+olarak.
+
+ÖZELLİKLER
+• Ölçü: 70 × 22 × 3 mm, sağlam PLA gövde
+• Plaka yazısı 1,3 mm, ad soyad ya da söz 1 mm kabartma
+• TR bandı: kırmızı ya da mavi (seçenekten seçin)
+• Arka yüz düz siyah
+• Çelik halka, kısa zincir ve ara halka takılı gelir
+
+BİZE YAZMANIZ GEREKENLER
+Plaka (ör. 34 ABC 123) ve altına yazılacak ad soyad ya da kısa söz. Türkçe karakterler (İ, Ş, Ğ...) kullanılabilir.""",
+                           ["Kategori önerisi: Aksesuar > Anahtarlık (panelde \"anahtarlık\" diye aratın)",
+                            "Varyant: Renk = Kırmızı / Mavi (TR bandı)",
+                            "Kargoya veriliş süresi: 3–5 iş günü",
+                            "Malzeme: Plastik (PLA)"]),
+    "yilbasi_seti": ("Yılbaşı Anahtarlık Seti 6'lı Noel Baba Ren Geyiği Kardan Adam 3D Figür Zincirli Halkalı Hediyelik", """
+YILBAŞI ANAHTARLIK SETİ (6'LI) · TAM 3D FİGÜR
+
+Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam ve çam ağacı bir arada! Altı sevimli yılbaşı
+figürü, her biri zincirli halka takımıyla.
+
+Ürün set olarak satılır: 1 adet = 6 figürün hepsi (figürler tek tek satılmaz).
+
+SETTE NELER VAR?
+• 6 adet 3D baskı figür anahtarlık: Noel Baba, ren geyiği, atkılı ayıcık, kutup ayısı, kardan adam, çam ağacı
+• 6 adet zincirli halka takımı (çelik halka, kısa zincir, ara halka); figürlere takılı gelir
+
+ÖZELLİKLER
+• Tam 3D: önü de arkası da yuvarlak, her yönden sevimli
+• Çok renkli 3D baskı: boya yok, renkler filamentin kendisi
+• Boyut: her figür yaklaşık 4–5 cm boy, 2,3 cm kalınlık
+• Malzeme: PLA; hafif ve sağlam
+• Anahtarlık, çanta süsü ya da yılbaşı ağacı süsü olarak kullanılabilir
+
+Yılbaşı hediyesi, sevdiklerinize küçük bir sürpriz ya da ofiste çekilişlik hediye için ideal.
+Kendi atölyemizde tasarlayıp basıyoruz. 3D baskı ürünü olduğu için yüzeyde ince katman izleri görülebilir; bu,
+3D baskının doğal dokusudur.""",
+                     ["Kategori önerisi: Aksesuar > Anahtarlık ya da Hediyelik Eşya > Yılbaşı Hediyeleri",
+                      "Adet: 1 adet = 6'lı set (stok setten girilir)",
+                      "Kargoya veriliş süresi: 2–3 iş günü (stoktaysa 1 gün)",
+                      "Malzeme: Plastik (PLA)"]),
 }
 
 
@@ -256,17 +319,19 @@ def qr_sayfa(P, name, cfg, path, ekr):
 
 
 def olcu_siparis(P, name, cfg, path):
-    duz = K.uri(os.path.join(KAYNAK, f"{cfg['duz']}_duz.png"), 1400, "PNG")
+    duz_yol = cfg.get("duz_yol") or os.path.join(KAYNAK, f"{cfg['duz']}_duz.png")
+    duz = K.uri(duz_yol, 1400, "PNG")
     from PIL import Image
-    w0, h0 = Image.open(os.path.join(KAYNAK, f"{cfg['duz']}_duz.png")).size
+    w0, h0 = Image.open(duz_yol).size
     gw = 640 if w0 / h0 < 1.6 else 820 if w0 / h0 < 3 else 960     # 9 × 12 daha dar: alttaki yazılara yer kalsın
     gh = gw * h0 / w0
     ozellik = "".join(f'<li style="display:flex;gap:14px"><b style="color:{ORANGE}">—</b><span>{o}</span></li>'
                       for o in cfg["ozellik"])
-    adim = [("Siparişinizi verin", ""),
-            ("Bilgilerinizi yazın", f"Sipariş detayındaki <b>“Satıcıya Sor”</b>dan: {cfg['bilgi']}."),
-            ("Onaylayın", "Tasarımınızı hazırlayıp onayınıza sunuyoruz."),
-            ("Üretip gönderiyoruz", "Kendi atölyemizde 3D baskıyla üretip kargoya veriyoruz.")]
+    adim = cfg.get("adim") or [
+        ("Siparişinizi verin", ""),
+        ("Bilgilerinizi yazın", f"Sipariş detayındaki <b>“Satıcıya Sor”</b>dan: {cfg['bilgi']}."),
+        ("Onaylayın", "Tasarımınızı hazırlayıp onayınıza sunuyoruz."),
+        ("Üretip gönderiyoruz", "Kendi atölyemizde 3D baskıyla üretip kargoya veriyoruz.")]
     adim_html = "".join(f"""<div style="display:grid;grid-template-columns:76px 1fr;gap:18px;padding:20px 0;
       border-top:2px solid rgba(18,19,22,.08)"><p class="u" style="font-size:44px;font-weight:700;color:{ORANGE};
       line-height:1">{i}</p><div><p style="font-size:30px;font-weight:700">{a}</p>{f'<p style="margin-top:6px;font-size:24px;line-height:1.4;color:#55575c">{b}</p>' if b else ''}
@@ -289,20 +354,81 @@ def olcu_siparis(P, name, cfg, path):
       </div>""", W, H, path, css=K.CSS)
 
 
+def kolaj(path):
+    """Yılbaşı: altı figür yakın, 2 × 3 (yazısız); asılı fotoğraflardan figür kırpılır (yilbasi_shopier.kirp)."""
+    import base64
+    import io
+    from PIL import Image
+    import yilbasi_model as YM
+    import yilbasi_shopier as YS
+    im = Image.new("RGB", (W, H), (255, 255, 255))
+    g = 14
+    cw, ch = (W - g) // 2, (H - 2 * g) // 3
+    for i, k in enumerate(YM.KEYS):
+        kare = Image.open(io.BytesIO(base64.b64decode(YS.kirp(k).split(",", 1)[1])))
+        s = max(cw, ch) / min(kare.size)
+        kare = kare.resize((int(kare.width * s), int(kare.height * s)))
+        x0, y0 = (kare.width - cw) // 2, (kare.height - ch) // 2
+        im.paste(kare.crop((x0, y0, x0 + cw, y0 + ch)), ((i % 2) * (cw + g), (i // 2) * (ch + g)))
+    im.save(path, quality=93)
+
+
+def set_bilgi(P, path):
+    """Yılbaşı: sette neler var (altı figürün önden görünüşü, gerçek oranlarıyla, adları ve boyları) ve özellikler."""
+    import yilbasi_model as YM
+    import yilbasi_shopier as YS
+    tmp = tempfile.mkdtemp()
+    px = 7.4
+    hucre = ""
+    for k in YM.KEYS:
+        w, d, h = YS.olcu(k)
+        f = os.path.join(tmp, f"{k}.png")
+        YS.on_gorunus(k, f)
+        hucre += f"""<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px">
+          <img src="{K.uri(f, 600, 'PNG')}" style="width:{w * px:.0f}px;height:{h * px:.0f}px;display:block;
+            filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))">
+          <p style="font-size:24px;font-weight:700;text-align:center">{YM.AD[k]}<br>
+            <span style="font-weight:500;color:#55575c">{h:.0f} × {w:.0f} mm</span></p></div>"""
+    oz = ["Set olarak satılır: 6 figür + 6 zincirli halka takımı", "Tam 3D: önü de arkası da yuvarlak",
+          "Çok renkli 3D baskı; boya yok, renkler filamentin kendisi", "Her figür yaklaşık 4–5 cm, kalınlık ~23 mm",
+          "Halkalar figürlere takılı gelir"]
+    ozl = "".join(f'<li style="display:flex;gap:14px"><b style="color:{ORANGE}">—</b><span>{o}</span></li>' for o in oz)
+    P.png(f"""<div style="width:{W}px;height:{H}px;background:#fff;color:{INK};padding:80px;display:flex;
+      flex-direction:column">
+      {kicker("SETTE NELER VAR")}
+      <h1 class="u" style="margin-top:14px;font-size:52px;line-height:1.08;font-weight:700">6 figür,<br>6 halka takımı.</h1>
+      <div style="margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);row-gap:50px;align-items:end">{hucre}</div>
+      <ul style="margin-top:auto;list-style:none;display:grid;gap:12px;font-size:28px;line-height:1.35">{ozl}</ul>
+      </div>""", W, H, path, css=K.CSS)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
 def ilan(P, name, ekr):
     cfg = ILAN[name]
     out = os.path.join(TY, name)
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
-    fotos = sorted(f for f in os.listdir(os.path.join(FOTO, name)) if f.endswith(".jpg"))
-    for i, f in enumerate(fotos, 1):
-        shutil.copy(os.path.join(FOTO, name, f), os.path.join(out, f"{i:02d}_{f[2:]}"))
-    k = len(fotos)
+    if cfg.get("fotolar"):                                  # sıralı liste: (foto alt klasörü, ad)
+        for i, (kl, f) in enumerate(cfg["fotolar"], 1):
+            hedef = os.path.join(out, f"{i:02d}_{f}.jpg")
+            if kl == "_kolaj":
+                kolaj(hedef)
+            else:
+                shutil.copy(os.path.join(FOTO, kl, f"{f}.jpg"), hedef)
+        k = len(cfg["fotolar"])
+    else:
+        fotos = sorted(f for f in os.listdir(os.path.join(FOTO, name)) if f.endswith(".jpg"))
+        for i, f in enumerate(fotos, 1):
+            shutil.copy(os.path.join(FOTO, name, f), os.path.join(out, f"{i:02d}_{f[2:]}"))
+        k = len(fotos)
     if cfg["site"]:
         k += 1
         qr_sayfa(P, name, cfg, os.path.join(out, f"{k:02d}_qr_sayfa.png"), ekr)
     k += 1
-    olcu_siparis(P, name, cfg, os.path.join(out, f"{k:02d}_olcu_siparis.png"))
+    if cfg.get("set"):
+        set_bilgi(P, os.path.join(out, f"{k:02d}_sette_neler_var.png"))
+    else:
+        olcu_siparis(P, name, cfg, os.path.join(out, f"{k:02d}_olcu_siparis.png"))
     from PIL import Image
     for f in os.listdir(out):
         if f.endswith(".png"):
