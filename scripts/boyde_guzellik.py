@@ -61,7 +61,7 @@ S.FONTS.update({"pacifico": "Pacifico-Regular.ttf", "kaushan": "KaushanScript-Re
 t, bar, qr_entry = S.t, S.bar, S.qr_entry
 PHONE = S.PHONE
 OUT = os.path.join(A.ROOT, "boyde_labs", "guzellik")
-SRC = os.path.join(OUT, "kaynak")
+SRC = os.environ.get("BOYDE_KAYNAK") or os.path.join(OUT, "kaynak")
 
 
 class Tasarim(S.Design):

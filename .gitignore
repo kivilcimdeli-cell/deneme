@@ -12,3 +12,6 @@ build/
 boyde_labs/anahtarlik_*/kaynak/*.npz
 boyde_labs/guzellik/kaynak/*.npz
 boyde_labs/promosyon/kaynak/*.npz
+boyde_labs/trendyol/kaynak/*.npz
+boyde_labs/trendyol/_ekran/
+boyde_labs/trendyol/foto/

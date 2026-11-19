@@ -32,7 +32,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-TEL = "905464754508"                                  # BOYDE LABS: 0546 475 45 08
+TEL = os.environ.get("BOYDE_TEL", "905464754508")    # BOYDE LABS: 0546 475 45 08 (Trendyol örnekleri: 0500 000 00 00)
 ORNEK_AD, ORNEK_SOYAD, ORNEK_GOREV = "Ayşe", "Yılmaz", "Ön Büro Müdürü"
 
 
@@ -255,7 +255,7 @@ def urun_parcalari(key, check=True):
 
 
 OUT = os.path.join(A.ROOT, "boyde_labs", "urunler")
-SRC = os.path.join(OUT, "kaynak")                       # ara dosyalar (git'e girmez)
+SRC = os.environ.get("BOYDE_KAYNAK") or os.path.join(OUT, "kaynak")   # ara dosyalar (git'e girmez)
 
 
 def export(key):

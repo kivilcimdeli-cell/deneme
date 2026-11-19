@@ -29,7 +29,7 @@ import anahtarlik as A  # noqa: E402
 KEY = "bayrakli"
 AD = "AD SOYAD"
 OUT = os.path.join(A.ROOT, "boyde_labs", "urunler")
-SRC = os.path.join(OUT, "kaynak")
+SRC = os.environ.get("BOYDE_KAYNAK") or os.path.join(OUT, "kaynak")
 FOTO = os.path.join(OUT, "fotograf")
 SHOPIER = os.path.join(OUT, "shopier", KEY)
 RGB = {A.BLACK: (30, 31, 35), A.WHITE: (238, 238, 233), A.RED: (227, 10, 23)}   # bayrak kırmızısı #E30A17
