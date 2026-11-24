@@ -46,6 +46,7 @@ class Kart:
     def __init__(self, no, key, ad, desc, sc):
         self.no, self.key, self.ad, self.desc, self.sc = no, key, ad, desc, sc
         self.inlay, self.relief = [], []
+        self.yukseklik = {}                                     # renge göre kabartma yüksekliği (yoksa RELIEF)
 
     def dolgu(self, cs, col):
         if col != self.sc["body"]:
@@ -148,6 +149,32 @@ def d3_ust_bant(sc, no):
     return k
 
 
+def d3_ust_bant_kabartmali(sc, no):
+    """Seçilen kart (3 · Üst bant), kullanıcı: "yazıları kabartmalı yap". Logo ve GRIDA mavi bandın boşluğundan beyaz,
+    görev mavi 0,4 mm, ad soyad siyah 0,8 mm kabarır; QR düz kalır (kabartma gölgesi okumayı bozar). Kabartmada en ince yer
+    0,5 mm: logo 24 mm (HOTELS kalınlaştırılmış), GRIDA 2,6 mm Bold, görev iki satır 3,2 mm Bold (tek satır 34 mm'ye
+    sıkışınca çizgiler inceliyordu)."""
+    k = Kart(no, "ust_bant_kabartmali", "Üst bant (kabartmalı)", "Seçilen 3 numara; bütün yazılar kabartma.", sc)
+    bant = A.rrect(KW - 6.0, 18.0, 2.6, 0.0, 68.0)            # y 59..77
+    lg, yb = logo(0.0, 74.6, 24.0, "c")
+    eski, PI.DOT_LIFT = PI.DOT_LIFT, 0.45
+    try:
+        gr = t("ms7", GRIDA, 2.6, 0.0, yb - 3.7, "c", 1.9)
+        g1 = _kalin(t("ms7", "Satın Alma", 3.2, 0.0, 0.0, "c", 0.4), 0.04)
+        g2 = _kalin(t("ms7", "Müdürü", 3.2, 0.0, 0.0, "c", 0.4), 0.04)
+    finally:
+        PI.DOT_LIFT = eski
+    beyaz = lg + gr
+    k.dolgu(bant - beyaz.offset(0.0, J), BLUE)
+    k.kabart(beyaz, WHITE if sc["body"] == WHITE else WHITE)
+    y = ad(k, "ms6", 4.0, 0.0, 55.2)
+    k.yukseklik[BLACK] = 0.8                                # kullanıcı: "siyahları da daha kabart" (ad soyad 4 katman)
+    k.kabart(g1.translate((0.0, y - 5.6)), BLUE)
+    k.kabart(g2.translate((0.0, y - 10.0)), BLUE)
+    qr(k, 0.0, 17.6)
+    return k
+
+
 def d4_yan_serit(sc, no):
     k = Kart(no, "yan_serit", "Yan şerit", "Solda boydan ince mavi şerit; sağında sola yaslı logo, ad soyad, görev; "
              "altta QR.", sc)
@@ -198,7 +225,7 @@ def katilar(k):
     for cs, col in k.relief:
         rel[col] = rel.get(col, A.empty()) + (cs ^ clip)
     for col, cs in rel.items():
-        parts.append((f"Kabartma ({NAMES[col]})", cs.extrude(RELIEF).translate((0, 0, T)), col))
+        parts.append((f"Kabartma ({NAMES[col]})", cs.extrude(k.yukseklik.get(col, RELIEF)).translate((0, 0, T)), col))
     return parts
 
 

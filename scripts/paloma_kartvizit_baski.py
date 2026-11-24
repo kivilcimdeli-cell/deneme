@@ -1,8 +1,9 @@
 """PALOMA GRIDA – Süleyman Boylu'nun seçtiği kartvizit (3 · Üst bant, beyaz gövde): Bambu Lab X2D 3MF.
 
 Kart 40 × 80 mm (dikey), yüzü yukarı basılır (destek yok): beyaz gövde 1,2 mm; üst 0,4 mm (2 katman) dolgu: mavi bant
-(içinde gövdenin beyazı logo ve GRIDA), mavi görev, siyah QR kareleri; üstüne 0,4 mm (2 katman) siyah kabartma ad soyad
-(scripts/paloma_kartvizit.py, d3_ust_bant). QR kartvizit sayfasını açar (isimlikteki QR'la aynı), 30 mm, kare 0,91 mm.
+ve siyah QR kareleri (QR düz: kabartma gölgesi okumayı bozar); bütün yazılar kabartma (kullanıcı istedi): logo ve GRIDA
+bandın boşluğundan beyaz 0,4 mm, görev mavi 0,4 mm, ad soyad siyah 0,8 mm (scripts/paloma_kartvizit.py,
+d3_ust_bant_kabartmali). QR kartvizit sayfasını açar (isimlikteki QR'la aynı), 30 mm, kare 0,91 mm.
 
 Nozullar (isimlikteki gibi): beyaz ana nozulda (gövde); siyah ve mavi yardımcı nozulda (yalnız üst 4 katman).
 Bambu standart 0,20 mm · ütüleme kapalı · destek kapalı · Textured PEI · Generic PLA; mavi: logonun mavisi (#69A1BA).
@@ -37,7 +38,7 @@ class Plate:
         self.key = f"paloma_kartvizit_x2d_{adet}adet"
         self.title = f"PALOMA_GRIDA_Suleyman_Boylu_kartvizit_40x80_{adet}adet"
         self.instances = [(138.0, 100.0, 0)] if adet == 1 else ON_ADET
-        self.kart = PK.d3_ust_bant(PI.WHITE_SC, 3)
+        self.kart = PK.d3_ust_bant_kabartmali(PI.WHITE_SC, 3)
         self.parts = PK.katilar(self.kart)
         self.nozzle_map = {A.WHITE: 1, A.BLACK: 2, A.BLUE: 2}
         self.filament_profiles = {c: A.GENERIC_PLA for c in (A.WHITE, A.BLACK, A.BLUE)}
@@ -88,9 +89,9 @@ def onizleme(plates, path):
     fs = ImageFont.truetype(os.path.join(A.FONT_DIR, "Outfit-SemiBold.ttf"), 19)
     dr.text((30, 18), "PALOMA GRIDA – SÜLEYMAN BOYLU · KARTVİZİT 40 × 80 mm (3 · ÜST BANT) · X2D", font=f,
             fill=(24, 26, 30))
-    for k, line in enumerate(["Beyaz gövde 1,2 mm + üst 0,4 mm dolgu (mavi bant, görev, QR) + 0,4 mm siyah kabartma ad; "
-                              "toplam 1,6 mm",
-                              "AMS: beyaz (ana nozul, gövde) · siyah ve mavi (yardımcı nozul, yalnız üst 4 katman) · "
+    for k, line in enumerate(["Beyaz gövde 1,2 mm + 0,4 mm dolgu (mavi bant, düz QR) · kabartma: logo, GRIDA ve görev "
+                              "0,4 mm, ad soyad 0,8 mm; en kalın yer 2,0 mm",
+                              "AMS: beyaz (ana nozul, gövde ve logo) · siyah ve mavi (yardımcı nozul, yalnız üst katmanlar) · "
                               "Bambu 0,20 mm · destek yok · ütüleme yok · Textured PEI",
                               "Dosyalar: 1 adet (deneme) ve 10 adet (tam tabla, iki sıra beşer)"]):
         dr.text((30, 66 + k * 28), line, fill=(70, 74, 84), font=fs)
