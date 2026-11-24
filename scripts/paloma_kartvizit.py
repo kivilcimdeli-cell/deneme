@@ -69,12 +69,33 @@ def qr(k, cx, cy, s=QRS, zemin=None):
     return tile
 
 
-def _kalin(cs, kal):
-    """Harfler kal mm kalınlaşır; Ü'nün noktaları (küçük parçalar) tersine biraz incelir: aralarındaki boşluk açılır."""
-    return A.union(*[p.offset(kal, J) if p.area() > 1.6 else p.offset(-0.1, J) for p in cs.decompose()])
+def _kalin(cs, kal, nokta=None):
+    """Harfler kal mm kalınlaşır; Ü'nün noktaları (küçük parçalar) tersine biraz incelir: aralarındaki boşluk açılır.
+    nokta=(en, boy) verilirse noktalar o ölçüde yuvarlak köşeli kareye büyür (alt kenarı yerinde, yukarı doğru):
+    0,45 mm'lik nokta 0,4 nozulla basılmıyor, dilimleyici onu atıyor ve Ü'nün noktası gövdenin beyazı kalıyordu."""
+    out, dots = [], []
+    for p in cs.decompose():
+        if p.area() > 1.6:
+            out.append(p.offset(kal, J))
+        elif nokta:
+            b = p.bounds()
+            dots.append([(b[0] + b[2]) / 2, b[1]])
+        else:
+            out.append(p.offset(-0.1, J))
+    if dots:                                            # Ü'nün iki noktası arası ≥ 0,5 mm: büyüyünce dışa açılır
+        w, h = nokta
+        dots.sort()
+        for a, b in zip(dots, dots[1:]):
+            if b[0] - a[0] < w + 1.0:                   # aynı harfin noktaları
+                d = (w + 0.5 - (b[0] - a[0])) / 2
+                if d > 0:
+                    a[0] -= d
+                    b[0] += d
+        out += [A.rrect(w, h, min(w, h) * 0.3, cx, y0 - 0.05 + h / 2) for cx, y0 in dots]
+    return A.union(*out)
 
 
-def ad(k, font, cap, x, y_top, align="c", lead=1.5, max_w=X1 - X0):
+def ad(k, font, cap, x, y_top, align="c", lead=1.5, max_w=X1 - X0, nokta=None):
     """Ad ve soyad alt alta, kabartma. Döner: soyadın taban çizgisi."""
     # kabartmada harf arası ≥ 0,45 mm (aralık açılır), ince çizgiler 0,5 mm'ye (Lora'nın kıl çizgileri kalınlaşır)
     # Ü'nün noktaları harften daha uzak (kalınlaşınca da ≥ 0,45 mm kalsın)
@@ -82,9 +103,9 @@ def ad(k, font, cap, x, y_top, align="c", lead=1.5, max_w=X1 - X0):
     eski, PI.DOT_LIFT = PI.DOT_LIFT, 0.5
     try:
         y1 = y_top - cap
-        k.kabart(_kalin(t(font, FIRST, cap, x, y1, align, tr, max_w), kal), k.sc["fg"])
+        k.kabart(_kalin(t(font, FIRST, cap, x, y1, align, tr, max_w), kal, nokta), k.sc["fg"])
         y2 = y1 - cap * lead
-        k.kabart(_kalin(t(font, LAST, cap, x, y2, align, tr, max_w), kal), k.sc["fg"])
+        k.kabart(_kalin(t(font, LAST, cap, x, y2, align, tr, max_w), kal, nokta), k.sc["fg"])
     finally:
         PI.DOT_LIFT = eski
     return y2
@@ -149,6 +170,9 @@ def d3_ust_bant(sc, no):
     return k
 
 
+NOKTA_AD, NOKTA_G = (0.9, 0.9), (0.8, 0.9)                 # kabartmalı kartta Ü noktaları (en, boy mm)
+
+
 def d3_ust_bant_kabartmali(sc, no):
     """Seçilen kart (3 · Üst bant), kullanıcı: "yazıları kabartmalı yap". Logo ve GRIDA mavi bandın boşluğundan beyaz,
     görev mavi 0,4 mm, ad soyad siyah 0,8 mm kabarır; QR düz kalır (kabartma gölgesi okumayı bozar). Kabartmada en ince yer
@@ -161,13 +185,13 @@ def d3_ust_bant_kabartmali(sc, no):
     try:
         gr = t("ms7", GRIDA, 2.6, 0.0, yb - 3.7, "c", 1.9)
         g1 = _kalin(t("ms7", "Satın Alma", 3.2, 0.0, 0.0, "c", 0.4), 0.04)
-        g2 = _kalin(t("ms7", "Müdürü", 3.2, 0.0, 0.0, "c", 0.4), 0.04)
+        g2 = _kalin(t("ms7", "Müdürü", 3.2, 0.0, 0.0, "c", 0.4), 0.04, NOKTA_G)
     finally:
         PI.DOT_LIFT = eski
     beyaz = lg + gr
     k.dolgu(bant - beyaz.offset(0.0, J), BLUE)
     k.kabart(beyaz, WHITE if sc["body"] == WHITE else WHITE)
-    y = ad(k, "ms6", 4.0, 0.0, 55.2)
+    y = ad(k, "ms6", 4.0, 0.0, 55.2, nokta=NOKTA_AD)
     k.yukseklik[BLACK] = 0.8                                # kullanıcı: "siyahları da daha kabart" (ad soyad 4 katman)
     k.kabart(g1.translate((0.0, y - 5.6)), BLUE)
     k.kabart(g2.translate((0.0, y - 10.0)), BLUE)
