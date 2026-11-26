@@ -53,7 +53,7 @@ def kutu(key, x, y0, z_b):
     return np.array([[xa, y0 - 4, za], [xb, y0 + 4, zb]])
 
 
-def sahne(dallar, size, path, samples=64, az=6.0, el=5.0, fill=0.9, ekstra=None, fstop=7.1, odak_kaydir=0.0):
+def sahne(dallar, size, path, samples=64, az=6.0, el=5.0, fill=0.9, ekstra=None, fstop=7.1, odak_kaydir=0.0, yer=True, yer_alt=55.0, yer_sag=False):
     sc = AF.studio(False, samples, size)
     S._MAT.clear()
     pts, yerler = [], []
@@ -72,11 +72,19 @@ def sahne(dallar, size, path, samples=64, az=6.0, el=5.0, fill=0.9, ekstra=None,
             yerler.append((key, np.array([x, y0, zt - drop + S.IP_R]), sal, b))
             bos.append(x)
         S.dal_ekle(f"dal{k}", S.dal(x0, x1, z_of, y0, bos=bos, seed=4 + k))
+        S.susle(x0, x1, z_of, y0, bos, seed=7 + k)
         pts.append(np.array([[x0, y0, z_of(x0)], [x1, y0, z_of(x1) + 12]]) * F.MM)
+    icerik = np.vstack(pts)
     if ekstra is not None:
         pts.append(np.asarray(ekstra) * F.MM)
     pts = np.vstack(pts)
     zmin = pts[:, 2].min()
+    if yer:                                                  # zemin süsleri: içeriğin en altından yer_alt mm aşağıda
+        xs = icerik[:, 0] / F.MM
+        z0 = icerik[:, 2].min() / F.MM - yer_alt
+        S.zemin(xs.min(), xs.max(), z0, -3.2, sag=yer_sag)
+        pts = np.vstack([pts, np.array([[xs.min(), 60.0, z0 - 4], [xs.max(), 60.0, z0 + 34]]) * F.MM])  # kadraja
+        zmin = pts[:, 2].min()
     dz = 0.04 - zmin
     for ob in bpy.context.scene.collection.objects:
         if ob.type == "MESH" and ob.name != "fon":
@@ -142,7 +150,7 @@ def cekimler(out, samples):
                                 ("ren_geyigi", 96, 42, 3)]),
         dal_(48, (-112, 112), [("atkili_ayicik", -64, 26, 3), ("kutup_ayisi", 0, 34, -3),
                                ("zencefilli_kurabiye", 64, 26, 2)], y=26.0, egim=-5)],
-        (1600, 1600), j("kapak"), samples, fill=0.9, ekstra=[[0, 0, -92]], el=4)
+        (1600, 1600), j("kapak"), samples, fill=0.9, ekstra=[[0, 0, -92]], el=4, yer_alt=34.0, yer_sag=True)
     yield "dikey", lambda: sahne([
         dal_(250, (-95, 95), [("noel_baba", -60, 28, -3), ("cam_agaci", 0, 40, 2), ("kardan_adam", 60, 28, 3)]),
         dal_(158, (-80, 80), [("ren_geyigi", -36, 30, 3), ("atkili_ayicik", 36, 38, -3)], y=18.0, egim=-5),

@@ -1,6 +1,11 @@
 """BOYDE LABS – Yılbaşı ağaç süsü SETİ (7'li): Shopier görselleri (1200 × 1200) ve açıklaması, Trendyol fotoğrafları
 (1200 × 1800, yazısız) ve ilan metni, Instagram gönderi (1080 × 1350) ve hikaye (1080 × 1920).
 
+Kullanıcı (2. tur): "daha tasarımsal bir yılbaşı ortamı; beyaz arka plan ve yazı stillerimizden vazgeçmeyelim; ince
+yazıları kaldıralım, yalnızca manşet başlıklar olsun": görsellerde yalnız başlık, logo ve 7'Lİ SET rozeti; bilgiler
+açıklama metninde. Fotoğraflarda ışık zinciri, cam toplar, yıldızlar ve zeminde hediye kutuları (agac_susu_foto.susle,
+zemin).
+
 Kullanıcı: dikey basılan anahtarlıklar tablada devrildi; yerine düz basılan, eklemli ağaç süsleri 7'li set olarak
 satılacak; eski anahtarlık ilanları Shopier'dan ve Trendyol'dan kaldırılacak. Görsel dil önceki yılbaşı setininki
 (logo, turuncu "7'Lİ SET" rozeti, buzlu cam şerit, beyaz stüdyo).
@@ -100,13 +105,10 @@ def framed(P, photo, chip, t1, t2, path):
       <div style="position:absolute;left:44px;top:40px">{K.logo("acik", 260, 58)}</div>
       {rozet()}
       <div style="position:absolute;left:28px;right:28px;bottom:28px;display:flex;align-items:center;gap:22px;
-        padding:18px 26px 18px 18px;border-radius:26px;background:rgba(255,255,255,.62);
+        padding:26px 30px 26px 26px;border-radius:26px;background:rgba(255,255,255,.62);
         backdrop-filter:blur(22px) saturate(1.3);box-shadow:inset 0 0 0 1.5px rgba(18,19,22,.08);color:{INK}">
-        <span class="code" style="flex:none;display:grid;place-items:center;width:84px;height:84px;border-radius:18px;
-          background:{ORANGE};color:#fff;font-size:24px">{chip}</span>
-        <div style="flex:1;min-width:0">
-          <p class="u" style="font-size:28px;line-height:1.15">{t1}</p>
-          <p style="margin-top:7px;font-size:19px;color:#55575c">{t2}</p></div></div></div>""", path)
+        <span style="flex:none;width:12px;height:64px;border-radius:6px;background:{ORANGE}"></span>
+        <p class="u" style="flex:1;font-size:40px;line-height:1.1">{t1}</p></div></div>""", path)
 
 
 def shopier(P):
@@ -122,83 +124,67 @@ def shopier(P):
       <div style="position:absolute;left:64px;top:56px">{K.logo("acik", 330, 66)}</div>
       {rozet(64, 60)}
       <div style="position:absolute;left:64px;right:64px;bottom:60px;color:{INK}">
-        <p class="k">EKLEMLİ · RENKLİ 3D BASKI · ASKI İPLİ</p>
-        <h1 class="u" style="margin-top:14px;font-size:72px;line-height:1.02;letter-spacing:-.02em">Yılbaşı<br>
-          ağaç süsü seti</h1>
-        <p style="margin-top:18px;font-size:27px;line-height:1.35;color:#3b3d42">Set olarak satılır: <b>7 süs + 7 askı
-          ipi</b>. {LISTE}.</p></div></div>""", name(1, "kapak"))
+        <h1 class="u" style="font-size:80px;line-height:1.02;letter-spacing:-.02em">Yılbaşı<br>
+          ağaç süsü seti</h1></div></div>""", name(1, "kapak"))
 
     # 02 sette neler var: 4 + 3 süs, gerçek oranlarıyla
     def hucre(i, k):
         w, h = INFO[k]["boyut"]
-        s = 0.86
+        s = 0.95
         return f"""<div style="position:relative;border-radius:22px;background:#fff;display:grid;place-items:center;
           box-shadow:0 2px 10px rgba(0,0,0,.05)">
-          <img src="{kesik(k)}" style="width:{w * s:.0f}px;height:{h * s:.0f}px;margin-bottom:34px;
-            filter:drop-shadow(0 8px 12px rgba(0,0,0,.18))">
-          <span style="position:absolute;left:0;right:0;bottom:16px;text-align:center;color:{INK};font-size:19px;
-            font-weight:700"><b style="color:{ORANGE}">{i + 1}</b>&nbsp; {M.AD[k]}</span></div>"""
+          <img src="{kesik(k)}" style="width:{w * s:.0f}px;height:{h * s:.0f}px;
+            filter:drop-shadow(0 8px 12px rgba(0,0,0,.18))"></div>"""
     ust = "".join(hucre(i, k) for i, k in enumerate(SIRA[:4]))
     alt = "".join(hucre(i + 4, k) for i, k in enumerate(SIRA[4:]))
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{PAPER};color:{INK}">{head()}
       {rozet(56, 48)}
       <div style="position:absolute;left:56px;right:56px;top:140px">
-        <p class="k">SETTE NELER VAR</p>
-        <h2 class="u" style="margin-top:12px;font-size:46px;line-height:1.08">7 süs, 7 askı ipi.</h2>
-        <p style="margin-top:12px;font-size:24px;color:#55575c">Tek tek değil, yedisi birlikte set olarak satılır.</p>
+        <h2 class="u" style="font-size:60px;line-height:1.08">7 süs, tek sette.</h2>
       </div>
-      <div style="position:absolute;left:56px;right:56px;top:330px;height:380px;display:grid;
+      <div style="position:absolute;left:56px;right:56px;top:290px;height:400px;display:grid;
         grid-template-columns:repeat(4,1fr);gap:18px">{ust}</div>
-      <div style="position:absolute;left:170px;right:170px;top:728px;height:380px;display:grid;
+      <div style="position:absolute;left:170px;right:170px;top:712px;height:400px;display:grid;
         grid-template-columns:repeat(3,1fr);gap:18px">{alt}</div></div>""", name(2, "sette_neler_var"))
 
     # 03, 04, 05
-    framed(P, "uclu_1", "AS", "Dala asın, ağacınız şenlensin", "Her süsün kırmızı askı ipi takılı gelir",
-           name(3, "dala_asin"))
-    framed(P, "detay_ayicik", "3D", "Eklemli: kolları ve bacakları oynar",
-           "Tek parça basılır, eklemleri yerinde; dalda sallandıkça canlanır", name(4, "eklemli"))
-    framed(P, "uclu_2", "RGB", "Renkler boyadan değil, baskıdan",
-           "Çok renkli 3D baskı: solmaz, dökülmez, cam süs gibi kırılmaz", name(5, "renkli_baski"))
+    framed(P, "uclu_1", "", "Dala asın, ağacınız şenlensin", "", name(3, "dala_asin"))
+    framed(P, "detay_ayicik", "", "Kolları, bacakları oynar", "", name(4, "eklemli"))
+    framed(P, "uclu_2", "", "Renkler boyadan değil, baskıdan", "", name(5, "renkli_baski"))
 
     # 06 ölçü ve özellikler
-    px = 4.2
+    px = 4.6
     cells = ""
     for k in SIRA:
         w, h = INFO[k]["boyut"]
         cells += f"""<div style="display:flex;flex-direction:column;align-items:center;gap:10px">
           <img src="{kesik(k)}" style="width:{w / PPM * px:.0f}px;height:{h / PPM * px:.0f}px;display:block;
             filter:drop-shadow(0 6px 10px rgba(0,0,0,.16))">
-          <p style="font-size:14px;font-weight:700;color:#55575c;text-align:center">{M.AD[k]}<br>
-            <span style="font-weight:500">~{h / PPM / 10:.0f} cm</span></p></div>"""
+          </div>"""
     feats = "".join(f"""<li style="display:flex;gap:12px"><b style="color:{ORANGE}">—</b><span><b>{a}.</b> {b}</span>
       </li>""" for a, b in OZELLIK)
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{PAPER};padding:56px 56px;
       color:{INK}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div><p class="k">ÖLÇÜ VE ÖZELLİKLER</p>
-        <h2 class="u" style="margin-top:12px;font-size:44px;line-height:1.08">Avuç içi kadar,<br>ağacınızın neşesi.</h2>
-        </div>{K.logo("acik", 220, 44)}</div>
-      <div style="margin-top:44px;display:flex;justify-content:space-between;align-items:flex-end">{cells}</div>
-      <p style="margin-top:12px;font-size:15px;color:{GRAY}">Önden görünüş, gerçek oranlarıyla. Her biri yaklaşık
-        4 cm boy, 1 cm kalınlık.</p>
-      <ul style="margin-top:30px;list-style:none;display:grid;gap:14px;font-size:23px;line-height:1.35">{feats}</ul>
-      <img src="{foto('genis', 1800)}" style="margin-top:30px;width:100%;height:250px;object-fit:cover;
-        object-position:50% 42%;border-radius:22px;display:block"></div>""", name(6, "olcu_ozellik"))
+        <h2 class="u" style="font-size:56px;line-height:1.06">Avuç içi kadar,<br>ağacınızın neşesi.</h2>
+        {K.logo("acik", 220, 44)}</div>
+      <div style="margin-top:56px;display:flex;justify-content:space-between;align-items:flex-end">{cells}</div>
+      <img src="{foto('genis', 1800)}" style="margin-top:56px;width:100%;height:520px;object-fit:cover;
+        object-position:50% 46%;border-radius:22px;display:block"></div>""", name(6, "olcu_ozellik"))
 
     # 07 nasıl sipariş verilir
     rows = "".join(f"""<div style="display:flex;gap:28px;padding:18px 0;border-top:2px solid rgba(244,241,234,.14)">
-      <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a}</b><div><p style="font-size:32px;
-      font-weight:700">{b}</p><p style="margin-top:8px;font-size:23px;color:rgba(244,241,234,.72)">{c}</p></div>
-      </div>""" for a, b, c in ADIM)
+      <b class="u" style="font-size:44px;color:{ORANGE};width:90px">{a}</b><p class="u" style="font-size:40px;
+      line-height:1.2">{b}</p></div>""" for a, b, c in ADIM)
     K.sq(P, f"""<div style="position:relative;width:1200px;height:1200px;background:{INK};color:{PAPER};padding:64px;
       background-image:{BM.stripes_bg(PAPER, .035, 30)}">
-      <p class="k">NASIL SİPARİŞ VERİLİR</p>{rozet(64, 56)}
-      <h2 class="u" style="margin-top:12px;font-size:48px;line-height:1.1">Sepete ekleyin;<br>gerisi bizde.</h2>
+      {rozet(64, 56)}
+      <h2 class="u" style="margin-top:8px;font-size:56px;line-height:1.1">Sepete ekleyin;<br>gerisi bizde.</h2>
       <div style="margin-top:34px">{rows}</div>
-      <img src="{foto('genis', 1800)}" style="margin-top:18px;width:100%;height:290px;object-fit:cover;
+      <img src="{foto('genis', 1800)}" style="margin-top:18px;width:100%;height:360px;object-fit:cover;
         object-position:50% 45%;border-radius:22px;display:block">
       <div style="position:absolute;left:64px;bottom:50px">{K.logo("koyu", 300, 60)}</div>
-      <p style="position:absolute;right:64px;bottom:60px;font-size:26px;font-weight:700">{K.TEL}</p></div>""",
+      </div>""",
          name(7, "nasil_siparis"))
     with open(os.path.join(out, "aciklama.txt"), "w", encoding="utf-8") as f:
         f.write(ACIKLAMA + "\n")
@@ -262,10 +248,8 @@ def instagram(P):
         -webkit-mask-image:linear-gradient(180deg,#000 88%,transparent 100%)">
       <div style="position:absolute;left:56px;top:52px">{K.logo("acik", 300, 60)}</div>{rozet(56, 54, 26)}
       <div style="position:absolute;left:56px;right:56px;bottom:56px">
-        <p class="k" style="font-size:15px">YENİ · YILBAŞI KOLEKSİYONU</p>
-        <h1 class="u" style="margin-top:12px;font-size:76px;line-height:1;letter-spacing:-.02em">Ağacınıza<br>7 yeni dost.</h1>
-        <p style="margin-top:16px;font-size:27px;line-height:1.35;color:#3b3d42">Eklemli, renkli 3D baskı ağaç süsleri.
-          <b>7'li set</b>, askı ipleriyle. Sipariş: Shopier · Trendyol</p></div></div>""", 1080, 1350, tmp,
+        <h1 class="u" style="font-size:88px;line-height:1;letter-spacing:-.02em">Ağacınıza<br>7 yeni dost.</h1>
+        </div></div>""", 1080, 1350, tmp,
           css=K.CSS)
     Image.open(tmp).convert("RGB").save(os.path.join(out, "gonderi.jpg"), quality=92)
     from PIL import Image as _I
@@ -273,16 +257,12 @@ def instagram(P):
     fon = "#%02x%02x%02x" % d.resize((1, 1), _I.BOX).getpixel((0, 0))
     fon = "#%02x%02x%02x" % d.crop((0, 0, 1200, 20)).resize((1, 1), _I.BOX).getpixel((0, 0))
     P.png(f"""<div style="position:relative;width:1080px;height:1920px;overflow:hidden;background:{fon};color:{INK}">
-      <img src="{foto('dikey')}" style="position:absolute;left:0;top:300px;width:1080px;height:1620px;
+      <img src="{foto('dikey')}" style="position:absolute;left:0;top:420px;width:1000px;height:1500px;left:40px;
         -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 9%)">
       <div style="position:absolute;left:64px;top:90px">{K.logo("acik", 300, 60)}</div>{rozet(64, 96, 26)}
       <div style="position:absolute;left:64px;right:64px;top:200px">
-        <p class="k" style="font-size:16px">YILBAŞI AĞAÇ SÜSÜ SETİ</p>
-        <h1 class="u" style="margin-top:10px;font-size:78px;line-height:1;letter-spacing:-.02em">7 süs, tek sette.</h1>
-        <p style="margin-top:14px;font-size:28px;line-height:1.35;color:#3b3d42">Eklemli figürler · renkli 3D baskı ·
-          askı ipleri takılı</p></div>
-      <p style="position:absolute;left:0;right:0;bottom:56px;text-align:center;font-size:26px;font-weight:700;
-        color:{ORANGE}">Sipariş için profildeki bağlantı</p></div>""", 1080, 1920, tmp, css=K.CSS)
+        <h1 class="u" style="font-size:92px;line-height:1;letter-spacing:-.02em">7 süs,<br>tek sette.</h1></div>
+      </div>""", 1080, 1920, tmp, css=K.CSS)
     Image.open(tmp).convert("RGB").save(os.path.join(out, "hikaye.jpg"), quality=92)
     os.remove(tmp)
     return out

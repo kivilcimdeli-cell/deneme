@@ -163,6 +163,158 @@ def as_(key, x, z_t, y0, drop, yaw=0.0, salla=0.0):
 
 
 IGNE_ACIK = (74, 128, 66)
+KIRMIZI, ALTIN = (178, 22, 30), (212, 168, 82)
+
+
+def ozel(name, rgb, rough, metal=0.0, isik=0.0, coat=0.0):
+    """Cam top, altın, ışık: Principled (metal, cila); isik > 0: sıcak ışık yayar (yılbaşı ampulü)."""
+    if name not in _MAT:
+        import restoran_masalik_foto as R
+        m = bpy.data.materials.new(name)
+        m.use_nodes = True
+        bs = m.node_tree.nodes["Principled BSDF"]
+        bs.inputs["Base Color"].default_value = R.srgb(rgb)
+        bs.inputs["Roughness"].default_value = rough
+        bs.inputs["Metallic"].default_value = metal
+        bs.inputs["Coat Weight"].default_value = coat
+        if isik:
+            bs.inputs["Emission Color"].default_value = R.srgb(rgb)
+            bs.inputs["Emission Strength"].default_value = isik
+        _MAT[name] = m
+    return _MAT[name]
+
+
+def kure(c, r, n=24):
+    th, ph = np.meshgrid(np.linspace(0, np.pi, n // 2 + 1), np.linspace(0, 2 * np.pi, n, endpoint=False), indexing="ij")
+    V = np.c_[(np.sin(th) * np.cos(ph)).ravel(), (np.sin(th) * np.sin(ph)).ravel(), np.cos(th).ravel()] * r + c
+    m = n // 2 + 1
+    F = [(i * n + j, i * n + (j + 1) % n, (i + 1) * n + (j + 1) % n, (i + 1) * n + j) for i in range(m - 1)
+         for j in range(n)]
+    return V, F
+
+
+def silindir(c, r, h, n=20):
+    a = np.linspace(0, 2 * np.pi, n, endpoint=False)
+    ring = np.c_[r * np.cos(a), r * np.sin(a), np.zeros(n)]
+    V = np.vstack([ring + c, ring + c + [0, 0, h], [c, c + np.array([0, 0, h])]])
+    F = [(j, (j + 1) % n, n + (j + 1) % n, n + j) for j in range(n)]
+    F += [(2 * n, (j + 1) % n, j) for j in range(n)] + [(2 * n + 1, n + j, n + (j + 1) % n) for j in range(n)]
+    return V, F
+
+
+def yildiz(c, R, t=2.4):
+    """Beş köşeli altın yıldız (yüzü kameraya: xz düzleminde), kalınlık t."""
+    pts = []
+    for i in range(10):
+        a = math.pi / 2 + i * math.pi / 5
+        r = R if i % 2 == 0 else R * 0.45
+        pts.append((r * math.cos(a), r * math.sin(a)))
+    n = len(pts)
+    V = [(c[0] + x, c[1] - t / 2, c[2] + z) for x, z in pts] + [(c[0] + x, c[1] + t / 2, c[2] + z) for x, z in pts]
+    V += [(c[0], c[1] - t / 2 - 0.8, c[2]), (c[0], c[1] + t / 2 + 0.8, c[2])]       # hafif kabarık orta
+    F = [(2 * n, (j + 1) % n, j) for j in range(n)] + [(2 * n + 1, n + j, n + (j + 1) % n) for j in range(n)]
+    F += [(j, (j + 1) % n, n + (j + 1) % n, n + j) for j in range(n)]
+    return np.array(V), F
+
+
+def kutu(c, w, d, h, renk, kurdele):
+    """Hediye kutusu: kutu ve çapraz kurdele, tepede fiyonk düğümü (c: alt orta)."""
+    I = np.c_[np.eye(3), np.zeros(3)]
+    def kup(cc, a, b, e):
+        x, y, z = cc
+        V = np.array([[x - a / 2, y - b / 2, z], [x + a / 2, y - b / 2, z], [x + a / 2, y + b / 2, z],
+                      [x - a / 2, y + b / 2, z]] * 2, float)
+        V[4:, 2] += e
+        F = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+        return V, F
+    k = len(_MAT)
+    AF.add(f"kutu{k}", *kup(c, w, d, h), ozel(f"kutu_{renk}", renk, 0.45), I)
+    kd = ozel(f"kurdele_{kurdele}", kurdele, 0.3, 0.3 if kurdele == ALTIN else 0.0)
+    AF.add(f"kurdele{k}a", *kup(c, w + 0.4, 4.0, h + 0.3), kd, I)
+    AF.add(f"kurdele{k}b", *kup(c, 4.0, d + 0.4, h + 0.3), kd, I)
+    for sx in (-1, 1):                                          # fiyonk: iki yassı ilmek
+        V, f = kure(np.array([0.0, 0, 0]), 1.0, 20)
+        V = V * [5.5, 2.6, 2.6]
+        a = math.radians(25 * sx)
+        V = V @ np.array([[math.cos(a), 0, -math.sin(a)], [0, 1, 0], [math.sin(a), 0, math.cos(a)]]).T
+        V += np.asarray(c) + [sx * 4.8, 0, h + 2.4]
+        AF.add(f"fiyonk{k}{sx}", V, f, kd, I, smooth=True)
+    V, f = kure(np.asarray(c) + [0, 0, h + 1.8], 2.4, 16)
+    AF.add(f"dugum{k}", V, f, kd, I, smooth=True)
+
+
+def zemin(xa, xb, z0, y0, seed=11, sag=False):
+    """Zemin süsleri (figürlerin arkasında, yerde): iki hediye kutusu, yatık cam toplar, küçük çam dalı. sag: hepsi
+    sağ yarıda (sol altta başlık yazısı var)."""
+    rng = np.random.default_rng(seed)
+    I = np.c_[np.eye(3), np.zeros(3)]
+    yb = y0 + 70.0
+    if sag:
+        xa = (xa + xb) / 2 - 10
+    kutu(np.array([xa + 22, yb, z0]), 34, 30, 26, (198, 30, 38), ALTIN)
+    kutu(np.array([xa + 52, yb + 18, z0]), 26, 24, 18, (246, 244, 240), KIRMIZI)
+    kutu(np.array([xb - 26, yb + 6, z0]), 30, 28, 30, (36, 92, 58), KIRMIZI)
+    W = xb - xa
+    for i, (u, r, rk, dy) in enumerate([(0.40, 6.5, "altin_top", -4), (0.53, 7.5, "kirmizi", -12),
+                                         (0.645, 5.5, "altin_top", 2)]):
+        c = np.array([xa + u * W, yb + dy, z0 + r])
+        rgb, ro, me = (KIRMIZI, 0.12, 0.0) if rk == "kirmizi" else (ALTIN, 0.22, 0.9)
+        V, f = kure(c, r, 32)
+        AF.add(f"yer_top{i}", V, f, ozel(rk, rgb, ro, me, coat=0.8), I, smooth=True)
+    xm = (xa + xb) / 2
+    dal_ekle("yer_dal", dal(xm - 50, xm + 10, lambda x: z0 + 3.0, yb + 22, seed=seed))
+
+
+def susle(x0, x1, z_of, y0, bos, seed=7, top=True, isik=True):
+    """Dalı yılbaşına hazırlar: dalın çevresine sarılı ışık zinciri (sıcak ampuller), figürlerin arasında ve arkasında
+    kırmızı ve altın cam toplar, birkaç altın yıldız. bos: figürlerin x'leri (toplar onların arasına)."""
+    rng = np.random.default_rng(seed)
+    I = np.c_[np.eye(3), np.zeros(3)]
+    if isik:                                                     # ışık zinciri: dalın çevresinde gevşek sarmal
+        xs = np.linspace(x0 + 4, x1 - 4, 400)
+        ph = (xs - x0) / 26.0 * 2 * np.pi
+        rr = DAL_R + 3.5
+        path = np.c_[xs, y0 + rr * np.cos(ph) - 2.0, [z_of(x) for x in xs] + rr * np.sin(ph)]
+        d = np.gradient(path, axis=0)
+        d /= np.linalg.norm(d, axis=1)[:, None]
+        side = np.cross(d, [0, 0, 1.0])
+        side /= np.linalg.norm(side, axis=1)[:, None]
+        V, f = AF.tube(path, np.cross(side, d), side, 0.35, seg=6)
+        AF.add("tel", V, f, ozel("tel", (30, 52, 34), 0.5), I, smooth=True)
+        amp = [kure(path[i] + np.array([0, -0.4, 0]), 1.25, 12) for i in range(0, len(path), 15)
+               if path[i, 1] < y0 + 1.0]                         # öndeki ampuller
+        V, f = birlestir(amp)
+        AF.add("ampul", V, f, ozel("ampul", (255, 196, 120), 0.3, isik=14.0), I, smooth=True)
+    if top:
+        bos = sorted(bos)
+        aralar = [(a + b) / 2 for a, b in zip(bos, bos[1:])] + ([bos[0] - 30, bos[-1] + 30] if bos else [])
+        for k, x in enumerate(aralar):
+            if not x0 + 8 < x < x1 - 8:
+                continue
+            zt = z_of(x)
+            drop = rng.uniform(9, 20)
+            yb = y0 + rng.uniform(12, 22)
+            r = rng.uniform(6.5, 8.5)
+            c = np.array([x + rng.uniform(-4, 4), yb, zt - drop - r])
+            renk = ("kirmizi", KIRMIZI, 0.12, 0.0) if k % 2 == 0 else ("altin_top", ALTIN, 0.22, 0.9)
+            if k % 3 == 2:                                       # her üçüncü: yıldız
+                V, f = yildiz(c + [0, 0, r * 0.2], r * 1.25)
+                AF.add(f"yildiz{k}", V, f, ozel("altin", ALTIN, 0.28, 0.95), I)
+                tepe = c + [0, 0, r * 1.45]
+            else:
+                V, f = kure(c, r, 32)
+                AF.add(f"top{k}", V, f, ozel(renk[0], renk[1], renk[2], renk[3], coat=0.8), I, smooth=True)
+                V, f = silindir(c + [0, 0, r - 0.6], 1.6, 2.4)
+                AF.add(f"kapak{k}", V, f, ozel("altin", ALTIN, 0.28, 0.95), I, smooth=True)
+                tepe = c + [0, 0, r + 1.8]
+            ip = np.linspace(tepe, np.array([tepe[0], y0 + 1.0, zt]), 20)
+            dd = np.gradient(ip, axis=0)
+            dd /= np.linalg.norm(dd, axis=1)[:, None]
+            sd = np.tile([1.0, 0, 0], (20, 1))
+            V, f = AF.tube(ip, np.cross(sd, dd), sd, 0.3, seg=6)
+            AF.add(f"tel_ip{k}", V, f, ozel("altin", ALTIN, 0.28, 0.95), I, smooth=True)
+
+
 
 
 def dal_ekle(name, d):
@@ -183,6 +335,7 @@ def sahne(asililar, x0, x1, z_of, y0, samples, size):
             pts.append(AF.add(f"figur{k}_{i}", V, f, F.mat(rgb, False, layers=True), Mx))
         pts.append(AF.add(f"ip{k}", ip[0], ip[1], mat("ip", IP, 0.85), np.c_[np.eye(3), np.zeros(3)], smooth=True))
     pts.append(dal_ekle("dal", dal(x0, x1, z_of, y0, bos=[Mx[0, 3] for _, Mx, _ in asililar])))
+    susle(x0, x1, z_of, y0, [Mx[0, 3] for _, Mx, _ in asililar])
     pts = np.vstack(pts)
     return sc, AF.lift_all(pts, 0.03)
 
