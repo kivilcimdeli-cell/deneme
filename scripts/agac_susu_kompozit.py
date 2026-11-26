@@ -53,52 +53,51 @@ def kutu(key, x, y0, z_b):
     return np.array([[xa, y0 - 4, za], [xb, y0 + 4, zb]])
 
 
-def sahne(dallar, size, path, samples=64, az=6.0, el=5.0, fill=0.9, ekstra=None, fstop=7.1, odak_kaydir=0.0, yer=True, yer_alt=55.0, yer_sag=False):
+def sahne(dallar, size, path, samples=64, alt=0.0, ust=0.0, fill=0.84, fstop=2.0):
+    """Bütün görsellerde aynı düzen: önde dal(lar), iplerde ürünler; arkada flu ikinci dal, toplar ve ışıklar
+    (S.arka_plan). Kamera önden (el 4°), 85 mm, odak ürün düzleminde, f/2.8. Kadraj ürünlere göre: alt / ust, ürün
+    yüksekliğinin o oranı kadar boşluk (başlık şeridi, logo için). Ürünlerin piksel kutuları <path>.json'a yazılır."""
     sc = AF.studio(False, samples, size)
     S._MAT.clear()
-    pts, yerler = [], []
+    kutular, yerler, dal_ust = [], [], []
     for k, dl in enumerate(dallar):
         x0, x1 = dl["x"]
         z, y0, eg = dl["z"], dl["y"], dl.get("egim", 0.0)
-        z_of = (lambda z, eg, x0, x1: (lambda x: z + eg * ((x - x0) / (x1 - x0) - 0.5) - 0.0016 * (x - (x0 + x1) / 2) ** 2
-                                        * 0.5))(z, eg, x0, x1)
+        z_of = (lambda z, eg, x0, x1: (lambda x: z + eg * ((x - x0) / (x1 - x0) - 0.5) - 0.0008 * (x - (x0 + x1) / 2)
+                                        ** 2))(z, eg, x0, x1)
         bos = []
         for i, (key, x, drop, sal) in enumerate(dl["suslar"]):
             zt = z_of(x)
             V, f = ip(x, y0, zt, drop, yaw=dl.get("yaw", 12.0) * (1 if i % 2 else -1))
             AF.add(f"ip{k}_{i}", V, f, S.mat("ip", S.IP, 0.85), np.c_[np.eye(3), np.zeros(3)], smooth=True)
             b = kutu(key, x, y0, zt - drop)
-            pts += [b * F.MM]
+            kutular.append(b)
+            dal_ust.append([x, y0, zt + 7.0])
             yerler.append((key, np.array([x, y0, zt - drop + S.IP_R]), sal, b))
             bos.append(x)
         S.dal_ekle(f"dal{k}", S.dal(x0, x1, z_of, y0, bos=bos, seed=4 + k))
-        S.susle(x0, x1, z_of, y0, bos, seed=7 + k)
-        pts.append(np.array([[x0, y0, z_of(x0)], [x1, y0, z_of(x1) + 12]]) * F.MM)
-    icerik = np.vstack(pts)
-    if ekstra is not None:
-        pts.append(np.asarray(ekstra) * F.MM)
-    pts = np.vstack(pts)
-    zmin = pts[:, 2].min()
-    if yer:                                                  # zemin süsleri: içeriğin en altından yer_alt mm aşağıda
-        xs = icerik[:, 0] / F.MM
-        z0 = icerik[:, 2].min() / F.MM - yer_alt
-        S.zemin(xs.min(), xs.max(), z0, -3.2, sag=yer_sag)
-        pts = np.vstack([pts, np.array([[xs.min(), 60.0, z0 - 4], [xs.max(), 60.0, z0 + 34]]) * F.MM])  # kadraja
-        zmin = pts[:, 2].min()
-    dz = 0.04 - zmin
+    K = np.vstack(kutular)
+    lo, hi = K.min(0), K.max(0)
+    h = hi[2] - lo[2]
+    gen = hi[0] - lo[0]
+    S.arka_plan(lo[0] - 0.9 * gen - 120, hi[0] + 0.9 * gen + 120, hi[2] + 2.0, lo[2] - alt * h * 0.5,
+                derin=max(S.ARKA_Y, 1.1 * gen))
+    hedef = np.vstack([K, dal_ust, [[lo[0], -3.2, lo[2] - alt * h], [lo[0], -3.2, max(hi[2], max(
+        d[2] for d in dal_ust)) + ust * h]]]) * F.MM
+    zmin = -0.3                                              # sahne yerden yüksekte (zemin kadraja girmez)
+    dz = 0.25 - (lo[2] - alt * h) * F.MM
     for ob in bpy.context.scene.collection.objects:
         if ob.type == "MESH" and ob.name != "fon":
             ob.location.z += dz
-    pts[:, 2] += dz
+    hedef[:, 2] += dz
     cam = F.camera(sc, 85)
-    a, e = math.radians(az), math.radians(el)
-    d = np.array([math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)])
+    e = math.radians(4.0)
+    d = np.array([0.0, -math.cos(e), math.sin(e)])
     cam["dir"] = d.tolist()
     res = sc.render
-    F.frame(cam, pts, res.resolution_x / res.resolution_y, fill)
+    F.frame(cam, hedef, res.resolution_x / res.resolution_y, fill)
     cam.data.dof.aperture_fstop = fstop
-    cam.data.dof.focus_distance += odak_kaydir
-    F.lights(sc, pts.mean(0), d, "yan", 1.2)
+    F.lights(sc, hedef.mean(0), d, "yan", 1.2)
     bpy.context.view_layer.update()
     W, H = size
     konum = []
@@ -117,10 +116,14 @@ def sahne(dallar, size, path, samples=64, az=6.0, el=5.0, fill=0.9, ekstra=None,
 def yapistir(path, konum):
     """Kesikleri yerleştirir: deliğin üst kenarı ipin ucuna; ölçek gerçek boy; hafif sallanma (delik çevresinde)."""
     im = Image.open(path).convert("RGBA")
+    kutular = []
     for key, p, ppm, sal in konum:
         k = Image.open(os.path.join(KESIK, f"{key}.png"))
         s = ppm / SRC_PPM
         k = k.resize((max(1, round(k.width * s)), max(1, round(k.height * s))), Image.LANCZOS)
+        if s > 1.1:                                          # büyütülen kesik: kenarlar yumuşamasın
+            from PIL import ImageFilter as _F
+            k = k.filter(_F.UnsharpMask(radius=1.4, percent=int(min(90, 60 * s)), threshold=2))
         hx, hy, hr = INFO[key]["delik"]
         ax, ay = hx * s, (hy - hr) * s
         if sal:                                             # delik çevresinde döndür
@@ -134,45 +137,77 @@ def yapistir(path, konum):
         from PIL import ImageFilter
         golge = golge.filter(ImageFilter.GaussianBlur(ppm * 1.6))
         im.alpha_composite(golge, (int(round(float(p[0] - ax + ppm * 2.2))), int(round(float(p[1] - ay + ppm * 2.6)))))
-        im.alpha_composite(k, (int(round(float(p[0] - ax))), int(round(float(p[1] - ay)))))
+        ox, oy = int(round(float(p[0] - ax))), int(round(float(p[1] - ay)))
+        im.alpha_composite(k, (ox, oy))
+        bb = k.split()[3].getbbox()
+        kutular.append([ox + bb[0], oy + bb[1], ox + bb[2], oy + bb[3]])
     im.convert("RGB").save(path, quality=93)
+    json.dump({"urunler": kutular, "boyut": list(im.size)}, open(path[:-4] + ".json", "w"))
 
 
-def dal_(z, x, suslar, y=-3.2, egim=6.0, yaw=12.0):
+def dal_(z, x, suslar, y=-3.2, egim=4.0, yaw=12.0):
     return {"z": z, "y": y, "x": x, "egim": egim, "suslar": suslar, "yaw": yaw}
 
 
+T1 = ["noel_baba", "kardan_adam", "cam_agaci"]
+T2 = ["ren_geyigi", "atkili_ayicik", "kutup_ayisi"]
+T3 = ["kutup_ayisi", "zencefilli_kurabiye", "noel_baba"]
+IKI = ["zencefilli_kurabiye", "kardan_adam"]
+
+
+def iki_sira(ust, alt_, z=150.0, dz=84.0):
+    """4 + 3 (ya da 3 + 2...) iki sıra; alt sıra yarım aralık kayık."""
+    def sira(keys, z, kay):
+        n = len(keys)
+        xs = (np.arange(n) - (n - 1) / 2) * 44.0 + kay
+        return dal_(z, (xs[0] - 40, xs[-1] + 40), [(k, x, 26 + (8 if i % 2 else 0), (-3, 3)[i % 2])
+                                                    for i, (k, x) in enumerate(zip(keys, xs))])
+    out = [sira(ust, z, 0.0), sira(alt_, z - dz, 0.0)]
+    out[1]["y"] = 26.0
+    return out
+
+
+def uc_sira(r1, r2, r3, z=250.0, dz=86.0):
+    out = []
+    for j, keys in enumerate((r1, r2, r3)):
+        n = len(keys)
+        xs = (np.arange(n) - (n - 1) / 2) * 48.0
+        out.append(dal_(z - j * dz, (xs[0] - 44, xs[-1] + 44), [(k, x, 24 + (8 if i % 2 else 0), (-3, 3)[i % 2])
+                                                                 for i, (k, x) in enumerate(zip(keys, xs))],
+                        y=-3.2 + 22.0 * j))
+    return out
+
+
+def uclu(keys, dikey=False):
+    drops = (26, 52, 34) if dikey else (26, 36, 28)
+    return [dal_(110, (-82, 82), [(keys[0], -46, drops[0], -3), (keys[1], 0, drops[1], 2), (keys[2], 46, drops[2], 3)])]
+
+
+def ikili(keys, dikey=False):
+    drops = (26, 50) if dikey else (26, 34)
+    return [dal_(110, (-60, 60), [(keys[0], -24, drops[0], -3), (keys[1], 24, drops[1], 3)])]
+
+
 def cekimler(out, samples):
-    """Görsellerin fotoğrafları (yazısız)."""
+    """Görsellerin fotoğrafları (yazısız). Kare ve gönderi: altta başlık şeridi, üstte logo için boşluk (alt, ust)."""
     j = lambda n: os.path.join(out, n + ".jpg")  # noqa: E731
-    yield "kapak", lambda: sahne([
-        dal_(150, (-128, 128), [("noel_baba", -96, 30, -3), ("kardan_adam", -32, 42, 3), ("cam_agaci", 32, 30, -2),
-                                ("ren_geyigi", 96, 42, 3)]),
-        dal_(48, (-112, 112), [("atkili_ayicik", -64, 26, 3), ("kutup_ayisi", 0, 34, -3),
-                               ("zencefilli_kurabiye", 64, 26, 2)], y=26.0, egim=-5)],
-        (1600, 1600), j("kapak"), samples, fill=0.9, ekstra=[[0, 0, -92]], el=4, yer_alt=34.0, yer_sag=True)
-    yield "dikey", lambda: sahne([
-        dal_(250, (-95, 95), [("noel_baba", -60, 28, -3), ("cam_agaci", 0, 40, 2), ("kardan_adam", 60, 28, 3)]),
-        dal_(158, (-80, 80), [("ren_geyigi", -36, 30, 3), ("atkili_ayicik", 36, 38, -3)], y=18.0, egim=-5),
-        dal_(66, (-80, 80), [("kutup_ayisi", -36, 36, -2), ("zencefilli_kurabiye", 36, 28, 3)], y=6.0, egim=4)],
-        (1200, 1800), j("dikey"), samples, fill=0.9, el=3)
-    yield "genis", lambda: sahne([dal_(120, (-160, 160), [
-        (k, -126 + 42 * i, 30 + (12 if i % 2 else 0), (-4, 3)[i % 2]) for i, k in enumerate(M_SIRA)])],
-        (1800, 1000), j("genis"), samples, fill=0.94)
-    for ad, trio in (("uclu_1", ["noel_baba", "kardan_adam", "cam_agaci"]),
-                     ("uclu_2", ["ren_geyigi", "atkili_ayicik", "kutup_ayisi"])):
-        yield ad, (lambda trio=trio, ad=ad: sahne([dal_(110, (-80, 80), [
-            (trio[0], -46, 32, -3), (trio[1], 0, 44, 2), (trio[2], 46, 32, 3)])], (1200, 1200), j(ad), samples,
-            fill=0.9, ekstra=[[0, 0, 20]]))
-        yield ad + "_dikey", (lambda trio=trio, ad=ad: sahne([dal_(170, (-70, 70), [
-            (trio[0], -40, 30, -3), (trio[1], 0, 78, 2), (trio[2], 40, 46, 3)])], (1200, 1800), j(ad + "_dikey"),
-            samples, fill=0.9))
-    yield "ikili", lambda: sahne([dal_(110, (-62, 62), [("zencefilli_kurabiye", -24, 30, -3),
-                                                         ("kardan_adam", 24, 42, 3)])], (1200, 1200), j("ikili"),
-                                 samples, fill=0.86, ekstra=[[0, 0, 30]])
-    yield "ikili_dikey", lambda: sahne([dal_(150, (-56, 56), [("zencefilli_kurabiye", -22, 30, -3),
-                                                               ("kardan_adam", 22, 62, 3)])], (1200, 1800),
-                                       j("ikili_dikey"), samples, fill=0.9)
+    sq, ig, st, ty = (1600, 1600), (1080, 1350), (1080, 1920), (1200, 1800)
+    BAS = dict(alt=0.30, ust=0.20)                             # Shopier / gönderi: başlık şeridi ve logo payı
+    yield "kapak", lambda: sahne(iki_sira(M_SIRA[:4], M_SIRA[4:]), sq, j("kapak"), samples, **BAS)
+    yield "set_kare", lambda: sahne(iki_sira(M_SIRA[4:][::-1], M_SIRA[:4][::-1]), sq, j("set_kare"),
+                                    samples, **BAS)
+    yield "gonderi", lambda: sahne(iki_sira(M_SIRA[:4], M_SIRA[4:]), ig, j("gonderi"), samples, alt=0.34, ust=0.18)
+    yield "hikaye", lambda: sahne(uc_sira(M_SIRA[:3], M_SIRA[3:5], M_SIRA[5:]), st, j("hikaye"), samples,
+                                  alt=0.16, ust=0.12)
+    yield "dikey", lambda: sahne(uc_sira(M_SIRA[:3], M_SIRA[3:5], M_SIRA[5:]), ty, j("dikey"), samples,
+                                 alt=0.04, ust=0.04, fill=0.88)
+    for ad, keys in (("uclu_1", T1), ("uclu_2", T2), ("uclu_3", T3)):
+        yield ad, (lambda keys=keys, ad=ad: sahne(uclu(keys), sq, j(ad), samples, **BAS))
+        yield ad + "_dikey", (lambda keys=keys, ad=ad: sahne(uclu(keys, True), ty, j(ad + "_dikey"), samples,
+                                                              alt=0.08, ust=0.08, fill=0.86))
+    yield "ikili", lambda: sahne(ikili(IKI), sq, j("ikili"), samples, **BAS)
+    yield "ikili_dikey", lambda: sahne(ikili(IKI, True), ty, j("ikili_dikey"), samples, alt=0.08, ust=0.08,
+                                       fill=0.86)
 
 
 M_SIRA = ["noel_baba", "kardan_adam", "cam_agaci", "ren_geyigi", "atkili_ayicik", "kutup_ayisi", "zencefilli_kurabiye"]

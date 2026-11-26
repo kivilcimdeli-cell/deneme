@@ -7,6 +7,7 @@ deliğin içinden önden arkaya geçer (deliğin üst kenarına oturur), iki kol
 Figür baskı koordinatında yatık (yüzü +z, başı +y); dünyada ayakta: x → x, y → z, z → −y (yüzü kameraya, −y).
 Kullanım: python3 scripts/agac_susu_foto.py [deneme] [--ornek N]
 """
+import json
 import math
 import os
 import sys
@@ -265,6 +266,59 @@ def zemin(xa, xb, z0, y0, seed=11, sag=False):
     dal_ekle("yer_dal", dal(xm - 50, xm + 10, lambda x: z0 + 3.0, yb + 22, seed=seed))
 
 
+ARKA_Y = 150.0                                               # arka dalın derinliği (mm, ürün düzleminin arkası)
+
+
+def arka_plan(xa, xb, z, z_alt=None, seed=21, derin=None):
+    """Arka plan (alan derinliğiyle flu, bütün görsellerde aynı): ürünlerin arkasında (derin mm; kadraj genişledikçe
+    uzaklaşır, flu kalsın) yukarıdan sarkan kırmızı ve altın cam toplar ve yıldızlar, iki sıra sarkık ışık zinciri.
+    Asma ipleri çok ince (fluda görünmez). z: ürünlerin üstü, z_alt: altı (mm)."""
+    rng = np.random.default_rng(seed)
+    I = np.c_[np.eye(3), np.zeros(3)]
+    z_alt = z - 60.0 if z_alt is None else z_alt
+    Y = ARKA_Y if derin is None else derin
+    h = z - z_alt
+    olc = max(1.0, (xb - xa) / 500.0)                        # geniş kadrajda toplar da büyür (aynı flu boyutu)
+    zd = z + 400.0
+    k = 0
+    for x in np.arange(xa + 15, xb - 15, 31.0 * olc):
+        x = x + rng.uniform(-8, 8) * olc
+        r = rng.uniform(6.5, 9.5) * olc
+        c = np.array([x, Y + rng.uniform(-20, 25) * olc, rng.uniform(z_alt + 0.1 * h, z + 0.15 * h)])
+        tur = ("kirmizi", KIRMIZI, 0.12, 0.0) if k % 3 == 0 else (("altin_top", ALTIN, 0.22, 0.9) if k % 3 == 1
+                                                                  else None)
+        if tur is None:
+            V, f = yildiz(c, r * 1.2)
+            AF.add(f"a_yildiz{k}", V, f, ozel("altin", ALTIN, 0.28, 0.95), I)
+            tepe = c + [0, 0, r * 1.2]
+        else:
+            V, f = kure(c, r, 32)
+            AF.add(f"a_top{k}", V, f, ozel(tur[0], tur[1], tur[2], tur[3], coat=0.8), I, smooth=True)
+            V, f = silindir(c + [0, 0, r - 0.6], 1.6 * olc, 2.4 * olc)
+            AF.add(f"a_kapak{k}", V, f, ozel("altin", ALTIN, 0.28, 0.95), I, smooth=True)
+            tepe = c + [0, 0, r + 1.8 * olc]
+        ip_ = np.linspace(tepe, np.array([tepe[0], c[1], zd]), 16)
+        dd = np.gradient(ip_, axis=0)
+        dd /= np.linalg.norm(dd, axis=1)[:, None]
+        sd = np.tile([1.0, 0, 0], (16, 1))
+        V, f = AF.tube(ip_, np.cross(sd, dd), sd, 0.12, seg=5)
+        AF.add(f"a_ip{k}", V, f, ozel("altin", ALTIN, 0.28, 0.95), I, smooth=True)
+        k += 1
+    for j, (dy, sark, n) in enumerate(((-30, 0.6, 2.5), (40, 0.85, 2.0))):        # iki sıra sarkık ışık zinciri
+        xs = np.linspace(xa, xb, 400)
+        u = (xs - xa) / (xb - xa)
+        top = z + 0.25 * h
+        zz = top - (top - (z_alt + (1 - sark) * h)) * np.sin(np.pi * ((u * n + 0.3 * j) % 1)) ** 1.6
+        path = np.c_[xs, np.full_like(xs, Y + dy * olc), zz]
+        d = np.gradient(path, axis=0)
+        d /= np.linalg.norm(d, axis=1)[:, None]
+        side = np.tile([0, 1.0, 0], (len(xs), 1))
+        V, f = AF.tube(path, np.cross(side, d), side, 0.25 * olc, seg=6)
+        AF.add(f"a_tel{j}", V, f, ozel("tel", (30, 52, 34), 0.5), I, smooth=True)
+        V, f = birlestir([kure(path[i], 1.6 * olc, 12) for i in range(4, len(path), 8)])
+        AF.add(f"a_ampul{j}", V, f, ozel("ampul", (255, 196, 120), 0.3, isik=18.0), I, smooth=True)
+
+
 def susle(x0, x1, z_of, y0, bos, seed=7, top=True, isik=True):
     """Dalı yılbaşına hazırlar: dalın çevresine sarılı ışık zinciri (sıcak ampuller), figürlerin arasında ve arkasında
     kırmızı ve altın cam toplar, birkaç altın yıldız. bos: figürlerin x'leri (toplar onların arasına)."""
@@ -335,20 +389,36 @@ def sahne(asililar, x0, x1, z_of, y0, samples, size):
             pts.append(AF.add(f"figur{k}_{i}", V, f, F.mat(rgb, False, layers=True), Mx))
         pts.append(AF.add(f"ip{k}", ip[0], ip[1], mat("ip", IP, 0.85), np.c_[np.eye(3), np.zeros(3)], smooth=True))
     pts.append(dal_ekle("dal", dal(x0, x1, z_of, y0, bos=[Mx[0, 3] for _, Mx, _ in asililar])))
-    susle(x0, x1, z_of, y0, [Mx[0, 3] for _, Mx, _ in asililar])
+    zs = np.vstack(pts[:-1])[:, 2] / F.MM
+    arka_plan(x0 - 160, x1 + 160, zs.max() - 6, zs.min())
     pts = np.vstack(pts)
     return sc, AF.lift_all(pts, 0.03)
 
 
-def cek(sc, pts, path, az=8.0, el=6.0, fill=0.9, fstop=6.3, kind="yan"):
+def cek(sc, pts, path, az=0.0, el=4.0, fill=0.8, fstop=2.8, kind="yan", urun=None, ekstra=None):
+    """Bütün görsellerde aynı kamera: önden (az 0), hafif yukarıdan (el 4°), 85 mm, odak ürün düzleminde, f/2.8 (arka
+    plan flu). urun: ürünün noktaları (m); kadraj ürüne göre kurulur, piksel kutusu <path>.json'a yazılır."""
     cam = F.camera(sc, 85)
     a, e = math.radians(az), math.radians(el)
     d = np.array([math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)])
     cam["dir"] = d.tolist()
     res = sc.render
-    F.frame(cam, pts, res.resolution_x / res.resolution_y, fill)
+    hedef = pts if urun is None else urun
+    if ekstra is not None:
+        hedef = np.vstack([hedef, ekstra])
+    F.frame(cam, hedef, res.resolution_x / res.resolution_y, fill)
+    if urun is not None:
+        cam.data.dof.focus_distance = float(np.linalg.norm(np.asarray(cam.location) - urun.mean(0)))
     cam.data.dof.aperture_fstop = fstop
-    F.lights(sc, pts.mean(0), d, kind, 1.2)
+    F.lights(sc, hedef.mean(0), d, kind, 1.2)
+    bpy.context.view_layer.update()
+    if urun is not None:
+        from bpy_extras.object_utils import world_to_camera_view
+        from mathutils import Vector
+        W, H = res.resolution_x, res.resolution_y
+        uv = np.array([[(u := world_to_camera_view(sc, cam, Vector(q))).x * W, (1 - u.y) * H] for q in urun])
+        json.dump({"urunler": [[float(uv[:, 0].min()), float(uv[:, 1].min()), float(uv[:, 0].max()),
+                                float(uv[:, 1].max())]], "boyut": [W, H]}, open(path[:-4] + ".json", "w"))
     F.shoot(sc, path, F.BEYAZ)
     AF.saturate(path)
 
@@ -356,13 +426,20 @@ def cek(sc, pts, path, az=8.0, el=6.0, fill=0.9, fstop=6.3, kind="yan"):
 def main(args):
     samples = int(args[args.index("--ornek") + 1]) if "--ornek" in args else 64
     os.makedirs(FOTO, exist_ok=True)
-    if "detay" in args:                                   # ayıcık (3MF'den): yakın, hafif yandan (eklemler görünsün)
-        for ad, size, drop, fill in (("detay_ayicik", (1200, 1200), 24.0, 0.86),
-                                     ("detay_ayicik_dikey", (1200, 1800), 40.0, 0.9)):
+    if "detay" in args:                                   # ayıcık (3MF'den): yakın, alttan başlık şeridine yer
+        for ad, size, drop, fill, alt, ust in (("detay_ayicik", (1200, 1200), 22.0, 0.80, 0.30, 0.35),
+                                               ("detay_ayicik_dikey", (1200, 1800), 30.0, 0.62, 0.25, 0.45)):
             z_of = lambda x: 60.0 - 0.006 * x * x  # noqa: E731
-            sc, pts = sahne([as_("atkili_ayicik", 0.0, z_of(0.0), -3.2, drop, yaw=-24, salla=4)], -34, 34, z_of,
+            sc, pts = sahne([as_("atkili_ayicik", 0.0, z_of(0.0), -3.2, drop, yaw=-18, salla=4)], -60, 60, z_of,
                             -3.2, samples, size)
-            cek(sc, pts, os.path.join(FOTO, f"{ad}.jpg"), az=14.0, el=8.0, fill=fill, fstop=4.0)
+            bpy.context.view_layer.update()                  # lift_all'dan sonra dünya matrisleri
+            urun = np.vstack([np.array([list(ob.matrix_world @ v.co) for v in ob.data.vertices])
+                              for ob in bpy.data.objects if ob.name.startswith("figur")])
+            lo, hi = urun.min(0), urun.max(0)
+            kutu = np.array([[x, y, z] for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])])
+            hgt = hi[2] - lo[2]
+            ek = np.array([[lo[0], lo[1], lo[2] - alt * hgt], [lo[0], lo[1], hi[2] + ust * hgt]])
+            cek(sc, pts, os.path.join(FOTO, f"{ad}.jpg"), fill=fill, urun=kutu, ekstra=ek)
     if "deneme" in args:
         z_of = lambda x: 60.0 - 0.004 * x * x + 0.03 * x  # noqa: E731
         sc, pts = sahne([as_("atkili_ayicik", 0.0, z_of(0.0), -3.2, 26.0, yaw=-14, salla=3)], -45, 45, z_of, -3.2,
