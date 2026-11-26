@@ -71,29 +71,47 @@ def birlestir(parcalar):
     return np.vstack(Vs), Fs
 
 
+def _ignele(base_of, xs, rng, bos, yogun=7, Lr=(11.0, 19.0), egim=(0.15, 0.55)):
+    """base_of(x) çevresinde iğneler; iki tonda (koyu, açık uçlar). Döner: (koyu, açık) tüp listeleri."""
+    koyu, acik = [], []
+    for x in xs:
+        base = base_of(x)
+        for _ in range(yogun + int(rng.integers(-2, 3))):
+            th = rng.uniform(0, 2 * np.pi)
+            v = np.array([0.0, math.cos(th), math.sin(th)]) + np.array([rng.uniform(*egim), 0, 0])
+            if v[2] < -0.3 and any(abs(x - b) < 6.0 for b in bos) and v[1] < 0.3:
+                continue
+            v /= np.linalg.norm(v)
+            L = rng.uniform(*Lr)
+            t = np.linspace(0, 1, 6)[:, None]
+            p = base + v * DAL_R * 0.6 + t * v * L + (t ** 2) * np.array([0, 0, -0.08 * L])
+            (acik if rng.random() < 0.3 else koyu).append(tapered(p, rng.uniform(0.45, 0.6), 0.1, seg=5))
+    return koyu, acik
+
+
 def dal(x0, x1, z_of, y0, bos=(), seed=4):
-    """Çam dalı: x0..x1 boyunca dal (yükseklik z_of(x)), çevresinde iğneler. bos: iplerin x'leri (önlerinde aşağı
-    sarkan iğne az olsun). Döner: (dal tüpü, iğneler)."""
+    """Çam dalı: x0..x1 boyunca dal (yükseklik z_of(x)), yanlarında kısa yan dallar; çevresinde iki tonda iğneler.
+    bos: iplerin x'leri (önlerinde aşağı sarkan iğne olmasın). Döner: (dallar, koyu iğneler, açık iğneler)."""
     rng = np.random.default_rng(seed)
     xs = np.linspace(x0, x1, 80)
-    path = np.c_[xs, np.full_like(xs, y0), [z_of(x) for x in xs]]
-    dal_m = tapered(path, DAL_R, DAL_R * 0.75, seg=12)
-    igne = []
-    for x in np.arange(x0 + 2.0, x1 - 1.0, 0.9):
-        base = np.array([x, y0, z_of(x)])
-        for _ in range(7):
-            th = rng.uniform(0, 2 * np.pi)                          # dalın çevresinde
-            v = np.array([0.0, math.cos(th), math.sin(th)])
-            v += np.array([rng.uniform(0.15, 0.55), 0, 0])          # dalın ucuna doğru yatık
-            if v[2] < -0.3 and any(abs(x - b) < 6.0 for b in bos) and v[1] < 0.3:
-                continue                                            # ipin önünde aşağı sarkan iğne yok
-            v /= np.linalg.norm(v)
-            L = rng.uniform(13.0, 20.0)
-            bend = np.array([0, 0, -0.08]) * L                      # hafif sarkma
-            t = np.linspace(0, 1, 6)[:, None]
-            p = base + v * DAL_R * 0.6 + t * v * L + (t ** 2) * bend
-            igne.append(tapered(p, 0.55, 0.12, seg=5))
-    return dal_m, birlestir(igne)
+    wob = np.convolve(rng.normal(0, 0.5, len(xs)), np.ones(9) / 9, "same")
+    path = np.c_[xs, y0 + wob, [z_of(x) for x in xs]]
+    dallar = [tapered(path, DAL_R, DAL_R * 0.7, seg=12)]
+    koyu, acik = _ignele(lambda x: np.array([x, y0, z_of(x)]), np.arange(x0 + 2.0, x1 - 1.0, 0.9), rng, bos)
+    for xb in np.arange(x0 + 25.0, x1 - 30.0, rng.uniform(45, 60)):      # yan dallar: geriye ve yukarı
+        ang = math.radians(rng.uniform(25, 40))
+        side = rng.choice([-1.0, 1.0])
+        Lb = rng.uniform(28, 40)
+        u = np.array([math.cos(ang), side * 0.55, math.sin(ang) * 0.5])
+        u /= np.linalg.norm(u)
+        b0 = np.array([xb, y0, z_of(xb)])
+        bp = b0 + np.linspace(0, Lb, 20)[:, None] * u
+        dallar.append(tapered(bp, DAL_R * 0.6, DAL_R * 0.35, seg=8))
+        k2, a2 = _ignele(lambda x: b0 + (x - xb) / u[0] * u, np.arange(xb + 3.0, xb + Lb * u[0], 1.1), rng, bos,
+                         yogun=6, Lr=(9.0, 15.0))
+        koyu += k2
+        acik += a2
+    return birlestir(dallar), birlestir(koyu), birlestir(acik)
 
 
 def ip_yolu(t_hole, z_b, z_t, n=160):
@@ -144,6 +162,18 @@ def as_(key, x, z_t, y0, drop, yaw=0.0, salla=0.0):
     return [(V, f, rgb) for _, V, f, rgb in parts], Mx, ip
 
 
+IGNE_ACIK = (74, 128, 66)
+
+
+def dal_ekle(name, d):
+    I = np.c_[np.eye(3), np.zeros(3)]
+    (dV, dF), (kV, kF), (aV, aF) = d
+    p = AF.add(name, dV, dF, mat("dal", DAL, 0.8), I, smooth=True)
+    AF.add(name + "_igne", kV, kF, mat("igne", IGNE, 0.45), I, smooth=True)
+    AF.add(name + "_igne_acik", aV, aF, mat("igne_acik", IGNE_ACIK, 0.5), I, smooth=True)
+    return p
+
+
 def sahne(asililar, x0, x1, z_of, y0, samples, size):
     sc = AF.studio(False, samples, size)
     _MAT.clear()
@@ -152,9 +182,7 @@ def sahne(asililar, x0, x1, z_of, y0, samples, size):
         for i, (V, f, rgb) in enumerate(parts):
             pts.append(AF.add(f"figur{k}_{i}", V, f, F.mat(rgb, False, layers=True), Mx))
         pts.append(AF.add(f"ip{k}", ip[0], ip[1], mat("ip", IP, 0.85), np.c_[np.eye(3), np.zeros(3)], smooth=True))
-    dal_m, igne = dal(x0, x1, z_of, y0, bos=[Mx[0, 3] for _, Mx, _ in asililar])
-    pts.append(AF.add("dal", dal_m[0], dal_m[1], mat("dal", DAL, 0.8), np.c_[np.eye(3), np.zeros(3)], smooth=True))
-    AF.add("igne", igne[0], igne[1], mat("igne", IGNE, 0.45), np.c_[np.eye(3), np.zeros(3)], smooth=True)
+    pts.append(dal_ekle("dal", dal(x0, x1, z_of, y0, bos=[Mx[0, 3] for _, Mx, _ in asililar])))
     pts = np.vstack(pts)
     return sc, AF.lift_all(pts, 0.03)
 
@@ -175,6 +203,13 @@ def cek(sc, pts, path, az=8.0, el=6.0, fill=0.9, fstop=6.3, kind="yan"):
 def main(args):
     samples = int(args[args.index("--ornek") + 1]) if "--ornek" in args else 64
     os.makedirs(FOTO, exist_ok=True)
+    if "detay" in args:                                   # ayıcık (3MF'den): yakın, hafif yandan (eklemler görünsün)
+        for ad, size, drop, fill in (("detay_ayicik", (1200, 1200), 24.0, 0.86),
+                                     ("detay_ayicik_dikey", (1200, 1800), 40.0, 0.9)):
+            z_of = lambda x: 60.0 - 0.006 * x * x  # noqa: E731
+            sc, pts = sahne([as_("atkili_ayicik", 0.0, z_of(0.0), -3.2, drop, yaw=-24, salla=4)], -34, 34, z_of,
+                            -3.2, samples, size)
+            cek(sc, pts, os.path.join(FOTO, f"{ad}.jpg"), az=14.0, el=8.0, fill=fill, fstop=4.0)
     if "deneme" in args:
         z_of = lambda x: 60.0 - 0.004 * x * x + 0.03 * x  # noqa: E731
         sc, pts = sahne([as_("atkili_ayicik", 0.0, z_of(0.0), -3.2, 26.0, yaw=-14, salla=3)], -45, 45, z_of, -3.2,
