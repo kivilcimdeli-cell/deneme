@@ -179,12 +179,12 @@ def uc_sira(r1, r2, r3, z=250.0, dz=86.0):
 
 
 def uclu(keys, dikey=False):
-    drops = (26, 52, 34) if dikey else (26, 36, 28)
+    drops = (30, 84, 54) if dikey else (26, 36, 28)
     return [dal_(110, (-82, 82), [(keys[0], -46, drops[0], -3), (keys[1], 0, drops[1], 2), (keys[2], 46, drops[2], 3)])]
 
 
 def ikili(keys, dikey=False):
-    drops = (26, 50) if dikey else (26, 34)
+    drops = (30, 76) if dikey else (26, 34)
     return [dal_(110, (-60, 60), [(keys[0], -24, drops[0], -3), (keys[1], 24, drops[1], 3)])]
 
 

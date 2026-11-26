@@ -105,7 +105,9 @@ def sayfa(photo, baslik, W=1200, H=1200, k=1.0):
     yalnız başlık (turuncu çizgi + manşet)."""
     return f"""<div style="position:relative;width:{W}px;height:{H}px;overflow:hidden">
       <img src="{foto(photo, 1800)}" style="position:absolute;inset:0;width:100%;height:100%;display:block">
-      <div style="position:absolute;left:{44 * k:.0f}px;top:{40 * k:.0f}px">{K.logo("acik", int(260 * k), int(58 * k))}</div>
+      <div style="position:absolute;left:{30 * k:.0f}px;top:{28 * k:.0f}px;padding:{12 * k:.0f}px {16 * k:.0f}px;
+        border-radius:{18 * k:.0f}px;background:rgba(255,255,255,.66);backdrop-filter:blur(18px)">
+        {K.logo("acik", int(250 * k), int(56 * k))}</div>
       {rozet(int(44 * k), int(40 * k), int(24 * k))}
       <div style="position:absolute;left:{28 * k:.0f}px;right:{28 * k:.0f}px;bottom:{28 * k:.0f}px;height:{SERIT_H * k:.0f}px;
         display:flex;align-items:center;gap:{22 * k:.0f}px;padding:0 {32 * k:.0f}px 0 {28 * k:.0f}px;border-radius:{26 * k:.0f}px;
@@ -183,12 +185,14 @@ def test():
         x0, y0 = min(q[0] for q in kutular), min(q[1] for q in kutular)
         x1, y1 = max(q[2] for q in kutular), max(q[3] for q in kutular)
         pay = sum((c - a) * (d - b) for a, b, c, d in kutular) / (W * H)
-        en = (x1 - x0) / W
+        en = max((x1 - x0) / W, (y1 - y0) / H)                 # grubun kapladığı en büyük boyut (en ya da boy)
         boy = min(d - b for a, b, c, d in kutular) / H
-        satir.append(f"{ph:20s} ürün sayısı {len(kutular)}  ürünlerin alanı %{100 * pay:4.1f}  grubun eni %{100 * en:3.0f}"
+        if len(kutular) == 1:                                    # tek ürün: yakın çekim, boyu yeter
+            en = max(en, 1.6 * boy)
+        satir.append(f"{ph:20s} ürün sayısı {len(kutular)}  ürünlerin alanı %{100 * pay:4.1f}  grubun kapladığı %{100 * en:3.0f}"
                      f"  en küçük ürün boyu %{100 * boy:4.1f}")
-        if en < 0.55:
-            sorun.append(f"{ph}: ürün grubu dar (%{100 * en:.0f}): ürünler küçük kalıyor")
+        if en < 0.45 or boy < 0.09:
+            sorun.append(f"{ph}: ürünler küçük kalıyor (grup %{100 * en:.0f}, en küçük ürün %{100 * boy:.0f})")
     return satir, sorun
 
 
