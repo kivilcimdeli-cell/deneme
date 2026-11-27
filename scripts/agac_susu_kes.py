@@ -1,6 +1,7 @@
 """Ağaç süslerini kullanıcının görselinden keser (3MF'leri gelmeyen figürler için).
 
-Kaynak: boyde_labs/agac_susu/kaynak_set.webp (kullanıcının 7 figürlük çizimi, 2000 × 498; gri zeminde yatık, ışık sol
+Kaynak: boyde_labs/agac_susu/kaynak_set.webp (kullanıcının 7 figürlük çizimi; 2. sürüm, kullanıcı şekilleri değiştirdi,
+2000 × 381; gri zeminde yatık, ışık sol
 üstten, gölge sağ alta). Zemin (#AEACA8 civarı) ve gölgeler (aynı renk tonunda, daha koyu) atılır: renkli ya da
 zeminden belirgin açık ya da çok koyu pikseller figür. Figürün içindeki boşluklar (eklem araları) doldurulur; tepedeki
 asma deliği açık kalır. Kenar 1 piksel yumuşatılır.
@@ -20,9 +21,9 @@ import agac_susu_model as M  # noqa: E402
 
 KAYNAK = os.path.join(M.KOK, "boyde_labs", "agac_susu", "kaynak_set.webp")
 OUT = os.path.join(M.KOK, "boyde_labs", "agac_susu", "kesik")
-DELIK = {"noel_baba": (87.0, 21.7, 7.0), "kardan_adam": (96.7, 20.0, 5.5), "cam_agaci": (106.7, 21.7, 6.0),
-         "ren_geyigi": (110.5, 25.0, 7.5), "atkili_ayicik": (113.8, 25.0, 7.0), "kutup_ayisi": (106.8, 21.7, 6.0),
-         "zencefilli_kurabiye": (125.0, 25.0, 7.0)}   # asma deliği (kesikte merkez x, y, yarıçap; gözle büyütülüp okundu)
+DELIK = {"noel_baba": (89.8, 20.7, 6.5), "kardan_adam": (102.8, 20.7, 5.5), "cam_agaci": (111.2, 19.3, 6.0),
+         "ren_geyigi": (115.0, 24.0, 7.5), "atkili_ayicik": (118.3, 24.0, 7.5), "kutup_ayisi": (113.3, 24.0, 6.0),
+         "zencefilli_kurabiye": (130.0, 21.7, 7.0)}   # asma deliği (kesikte merkez x, y, yarıçap; gözle büyütülüp okundu)
 SIRA = ["noel_baba", "kardan_adam", "cam_agaci", "ren_geyigi", "atkili_ayicik", "kutup_ayisi", "zencefilli_kurabiye"]
 
 
@@ -75,7 +76,7 @@ def main():
             dolu &= ~ndi.binary_dilation(hole[3], iterations=1)
             hole = hole[:3]
         y0, y1, x0, x1 = sl[0].start - 3, sl[0].stop + 3, sl[1].start - 3, sl[1].stop + 3
-        hx, hy, hr = DELIK[key]                                   # delik saydam: ip içinden görünür
+        hx, hy, hr = DELIK.get(key, (0.0, -100.0, 1.0))          # delik saydam: ip içinden görünür
         yy, xx = np.mgrid[0:dolu.shape[0], 0:dolu.shape[1]]
         dolu &= np.hypot(xx - (hx + x0), yy - (hy + y0)) > hr * 0.85
         hole = (hx + x0, hy + y0, hr)

@@ -35,7 +35,7 @@ KOK = os.path.join(M.KOK, "boyde_labs", "agac_susu")
 FOTO, KESIK = os.path.join(KOK, "foto"), os.path.join(KOK, "kesik")
 SIRA = ["noel_baba", "kardan_adam", "cam_agaci", "ren_geyigi", "atkili_ayicik", "kutup_ayisi", "zencefilli_kurabiye"]
 INFO = json.load(open(os.path.join(KESIK, "kesik.json")))
-PPM = 279.0 / 40.2
+PPM = (INFO["atkili_ayicik"]["boyut"][1] - 6) / 40.2
 LISTE = "Noel Baba, kardan adam, çam ağacı, ren geyiği, ayıcık, kutup ayısı ve zencefilli kurabiye"
 OZELLIK = [("7'li set", LISTE + "."),
            ("Eklemli figürler", "Kolları ve bacakları oynar; dalda sallandıkça canlanır."),
@@ -82,7 +82,7 @@ AÇIKLAMA
 Adet: 7 · Malzeme: PLA (plastik) · Renk: çok renkli · Boyut: ~4 × 3 × 1 cm · Askı: kırmızı ip, takılı
 
 GÖRSEL SIRASI (trendyol/ klasörü; görsellerde yazı, logo, fiyat yok – Trendyol kuralı)
-1 set (7 süs) · 2–4 üçlüler · 5 ikili · 6 ayıcık yakın
+1 set (7 süs) · 2–4 üçlüler · 5 ikili · 6 ren geyiği ve ayıcık yakın
 """
 
 
@@ -118,10 +118,10 @@ def sayfa(photo, baslik, W=1200, H=1200, k=1.0):
 
 
 SHOPIER = [("kapak", "Yılbaşı ağaç süsü seti"), ("set_kare", "7 süs, tek sette."),
-           ("uclu_1", "Dala asın, ağacınız şenlensin"), ("detay_ayicik", "Kolları, bacakları oynar"),
+           ("uclu_1", "Dala asın, ağacınız şenlensin"), ("yakin", "Kolları, bacakları oynar"),
            ("uclu_2", "Renkler boyadan değil, baskıdan"), ("ikili", "Avuç içi kadar, ağacın neşesi"),
            ("uclu_3", "Sepete ekleyin, gerisi bizde")]
-TRENDYOL_SIRA = ["dikey", "uclu_1_dikey", "uclu_2_dikey", "uclu_3_dikey", "ikili_dikey", "detay_ayicik_dikey"]
+TRENDYOL_SIRA = ["dikey", "uclu_1_dikey", "uclu_2_dikey", "uclu_3_dikey", "ikili_dikey", "yakin_dikey"]
 INSTAGRAM = [("gonderi", "Ağacınıza 7 yeni dost.", 1080, 1350), ("hikaye", "7 süs, tek sette.", 1080, 1920)]
 
 

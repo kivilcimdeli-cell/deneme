@@ -27,7 +27,7 @@ import boyde_urun_foto as F  # noqa: E402
 
 KESIK = os.path.join(M.KOK, "boyde_labs", "agac_susu", "kesik")
 INFO = json.load(open(os.path.join(KESIK, "kesik.json")))
-SRC_PPM = 279.0 / 40.2                                     # kesik piksel / mm
+SRC_PPM = (INFO["atkili_ayicik"]["boyut"][1] - 6) / 40.2   # kesik piksel / mm (ayıcık 40,2 mm boy)
 KALIN = 6.4                                                # deliğin çevresinde süsün kalınlığı (mm, 3MF'den)
 
 
@@ -153,6 +153,7 @@ T1 = ["noel_baba", "kardan_adam", "cam_agaci"]
 T2 = ["ren_geyigi", "atkili_ayicik", "kutup_ayisi"]
 T3 = ["kutup_ayisi", "zencefilli_kurabiye", "noel_baba"]
 IKI = ["zencefilli_kurabiye", "kardan_adam"]
+YAKIN = ["ren_geyigi", "atkili_ayicik"]                        # eklemler: kollar, bacaklar
 
 
 def iki_sira(ust, alt_, z=150.0, dz=84.0):
@@ -205,6 +206,9 @@ def cekimler(out, samples):
         yield ad, (lambda keys=keys, ad=ad: sahne(uclu(keys), sq, j(ad), samples, **BAS))
         yield ad + "_dikey", (lambda keys=keys, ad=ad: sahne(uclu(keys, True), ty, j(ad + "_dikey"), samples,
                                                               alt=0.08, ust=0.08, fill=0.86))
+    yield "yakin", lambda: sahne(ikili(YAKIN), sq, j("yakin"), samples, **BAS)
+    yield "yakin_dikey", lambda: sahne(ikili(YAKIN, True), ty, j("yakin_dikey"), samples, alt=0.08, ust=0.08,
+                                       fill=0.86)
     yield "ikili", lambda: sahne(ikili(IKI), sq, j("ikili"), samples, **BAS)
     yield "ikili_dikey", lambda: sahne(ikili(IKI, True), ty, j("ikili_dikey"), samples, alt=0.08, ust=0.08,
                                        fill=0.86)
