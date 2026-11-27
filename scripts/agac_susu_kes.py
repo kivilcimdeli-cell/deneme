@@ -24,6 +24,7 @@ OUT = os.path.join(M.KOK, "boyde_labs", "agac_susu", "kesik")
 DELIK = {"noel_baba": (89.8, 20.7, 6.5), "kardan_adam": (102.8, 20.7, 5.5), "cam_agaci": (111.2, 19.3, 6.0),
          "ren_geyigi": (115.0, 24.0, 7.5), "atkili_ayicik": (118.3, 24.0, 7.5), "kutup_ayisi": (113.3, 24.0, 6.0),
          "zencefilli_kurabiye": (130.0, 21.7, 7.0)}   # asma deliği (kesikte merkez x, y, yarıçap; gözle büyütülüp okundu)
+CEVRE = 60                                                       # gölge için çevre payı (piksel)
 SIRA = ["noel_baba", "kardan_adam", "cam_agaci", "ren_geyigi", "atkili_ayicik", "kutup_ayisi", "zencefilli_kurabiye"]
 
 
@@ -84,9 +85,23 @@ def main():
         rgb = Image.fromarray(a[y0:y1, x0:x1].astype(np.uint8))
         rgb.putalpha(alpha)
         rgb.save(os.path.join(OUT, f"{key}.png"))
-        info[key] = {"boyut": [x1 - x0, y1 - y0],
+        p_ = CEVRE                                                # çevresiyle (gölgesi dahil) kırpım: masaüstü çekimi
+        ya, yb_ = max(0, y0 - p_), min(a.shape[0], y1 + p_)
+        xa, xb_ = max(0, x0 - p_), min(a.shape[1], x1 + p_)
+        # çevrede yalnız bu süsün kendi gölgesi kalsın: komşu süslere daha yakın pikseller zemin rengine
+        kend = ndi.distance_transform_edt(~fm[ya:yb_, xa:xb_])
+        diger = (lab[ya:yb_, xa:xb_] > 0) & ~fm[ya:yb_, xa:xb_]
+        dg = ndi.distance_transform_edt(~diger) if diger.any() else np.full(kend.shape, 1e9)
+        parca = a[ya:yb_, xa:xb_].copy()
+        parca[(dg <= kend) | ndi.binary_dilation(diger, iterations=3)] = bg
+        cev = Image.fromarray(np.clip(parca, 0, 255).astype(np.uint8))
+        cev.putalpha(Image.fromarray((dolu[ya:yb_, xa:xb_] * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.7)))
+        os.makedirs(os.path.join(OUT, "cevre"), exist_ok=True)
+        cev.save(os.path.join(OUT, "cevre", f"{key}.png"))
+        info[key] = {"boyut": [x1 - x0, y1 - y0], "cevre": [x0 - xa, y0 - ya],
                      "delik": None if hole is None else [float(hole[0] - x0), float(hole[1] - y0), float(hole[2])]}
         print(key, info[key])
+    info["_zemin"] = [float(v) for v in bg]
     json.dump(info, open(os.path.join(OUT, "kesik.json"), "w"), indent=1)
     # denetim: beyaz ve koyu zeminde yan yana
     W = sum(Image.open(os.path.join(OUT, f"{k}.png")).width + 10 for k in SIRA) + 10
