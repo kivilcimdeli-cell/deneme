@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>İnce Oto Lastik – 7/24 Hizmet</title>
+<meta name="description" content="İnce Oto Lastik: hemen arayın, WhatsApp&#x27;tan yazın, Instagram, Google yorumları ve ödeme bilgileri.">
+<meta name="theme-color" content="#0a0a0a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="İnce Oto Lastik – 7/24 Hizmet">
+<meta property="og:description" content="İnce Oto Lastik: hemen arayın, WhatsApp&#x27;tan yazın, Instagram, Google yorumları ve ödeme bilgileri.">
+<meta property="og:url" content="https://inceotolastik.qrsistem.workers.dev/">
+<meta property="og:image" content="https://inceotolastik.qrsistem.workers.dev/og.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230a0a0a'/><path d='M16 14h9l13 18-13 18h-9l13-18z' fill='%23e3241b'/><path d='M34 14h9l13 18-13 18h-9l13-18z' fill='%23f5f5f2'/></svg>">
+<style>
+@font-face{font-family:"Saira Condensed";font-style:italic;font-weight:900;font-display:swap;src:url(fonts/display.woff) format("woff")}
+@font-face{font-family:"Saira Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/cond.woff) format("woff")}
+@font-face{font-family:"Saira";font-weight:500;font-display:swap;src:url(fonts/text.woff) format("woff")}
+@font-face{font-family:"Saira";font-weight:600;font-display:swap;src:url(fonts/text-sb.woff) format("woff")}
+/* tek sütun, siyah; başlıkta logonun arkasından çapraz diş bandı, altında Hemen Ara, üç kutucuk, IBAN kartı */
+:root{color-scheme:dark;--bg:#0a0a0a;--card:#141415;--card2:#1b1b1d;--line:#28282b;--line2:#3a3a3e;
+  --text:#f5f5f2;--muted:#9d9da4;--dim:#67676d;--red:#e3241b;--ok:#1f9d55;--white:#fff;--star:#f5b400;
+  --display:"Saira Condensed","Saira","Arial Narrow",sans-serif;
+  --ui:"Saira",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --tread-red:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='30'><path d='M3 3h6l8 12-8 12H3l8-12z' fill='%23000'/></svg>");--tread-band:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='120'><g fill='%23202023'><path d='M5 24h12l15 36-15 36H5l15-36z'/><rect x='9' y='4' width='18' height='12' rx='2'/><rect x='9' y='104' width='18' height='12' rx='2'/></g></svg>");--tread-light:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='120'><g fill='%23ffffff'><path d='M5 24h12l15 36-15 36H5l15-36z'/><rect x='9' y='4' width='18' height='12' rx='2'/><rect x='9' y='104' width='18' height='12' rx='2'/></g></svg>");--roll:0px}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:500 16px/1.45 var(--ui);min-height:100vh;overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom)}
+.wrap{--gl:max(16px,env(safe-area-inset-left,0px));--gr:max(16px,env(safe-area-inset-right,0px));
+  max-width:480px;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr);padding-block:0 92px}
+a{color:inherit;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.bleed{margin-left:calc(var(--gl) * -1);margin-right:calc(var(--gr) * -1)}
+/* ---- başlık ---- */
+.hero{position:relative;overflow:hidden;isolation:isolate;padding:44px var(--gr) 34px var(--gl);
+  background:radial-gradient(80% 60% at 100% 0%,rgba(227,36,27,.22),transparent 65%),var(--bg)}
+.band{position:absolute;z-index:-1;left:-40%;right:-40%;top:118px;height:150px;transform:rotate(-12deg);
+  overflow:hidden;background:#111112;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 -1px 0 rgba(255,255,255,.05);
+  -webkit-mask-image:linear-gradient(90deg,transparent 14%,#000 34%,#000 74%,transparent 92%);
+  mask-image:linear-gradient(90deg,transparent 14%,#000 34%,#000 74%,transparent 92%)}
+.band i{position:absolute;inset:0 -400px;background:var(--tread-band) 0 0/auto 100% repeat-x;
+  background-position:calc(var(--roll) * -1) 0}
+.tag{display:inline-flex;align-items:center;gap:9px;font:700 italic 15px/1 var(--display);letter-spacing:.14em}
+.live{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 rgba(227,36,27,.7)}
+.mark{display:flex;margin:14px 0 0 -.03em;font:900 italic min(200px,49vw)/.8 var(--display);letter-spacing:-.01em;
+  filter:drop-shadow(0 14px 22px rgba(0,0,0,.6))}
+.mark .l{display:block;padding:.1em .02em 0;background:linear-gradient(180deg,#fff 30%,#c9c9c9);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{display:flex;align-items:center;gap:14px;margin-top:12px}
+.sub span{font:900 italic 34px/1 var(--display);letter-spacing:.03em;color:var(--red)}
+.sub::after{content:"";flex:1;height:3px;background:linear-gradient(90deg,var(--red),transparent);transform:skewX(-20deg)}
+.lead{margin-top:10px;color:var(--muted);font-size:16px}
+/* ---- Hemen Ara ---- */
+.call{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;margin-top:6px;
+  padding:20px 18px 20px 22px;border-radius:16px;text-decoration:none;color:#fff;
+  background:linear-gradient(115deg,#ec2b21,#b3130e);box-shadow:0 22px 44px -24px rgba(227,36,27,.9);
+  transition:transform .15s}
+.call::before{content:"";position:absolute;inset:-2px;z-index:-1;background:var(--tread-red) 0 0/22px 30px;opacity:.2;
+  -webkit-mask-image:linear-gradient(100deg,transparent 30%,#000 90%);mask-image:linear-gradient(100deg,transparent 30%,#000 90%)}
+.call::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transform:translateX(-140%) skewX(-20deg)}
+.call:active{transform:scale(.985)}
+.call .t{flex:1;min-width:0}
+.call small{display:block;font:700 italic 15px/1 var(--display);letter-spacing:.16em;color:rgba(255,255,255,.85)}
+.call b{display:block;margin-top:6px;font:900 italic clamp(30px,9.4vw,40px)/1 var(--display);letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.call .ib{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 7px rgba(255,255,255,.14)}
+.call .ib .ic{width:24px;height:24px;fill:var(--red)}
+/* ---- kutucuklar ---- */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.tile{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;
+  gap:18px;min-height:112px;padding:14px 12px 13px;border-radius:14px;background:var(--card);border:1px solid var(--line);
+  text-decoration:none;transition:transform .15s,border-color .15s}
+.tile::after{content:"";position:absolute;z-index:-1;right:-12px;bottom:-22px;width:64px;height:120px;
+  background:var(--tread-light) 0 0/auto 60px;opacity:.06;transform:rotate(-12deg)}
+.tile:active{transform:scale(.97);border-color:var(--line2)}
+.tile .ic{width:24px;height:24px;fill:var(--text)}
+.tile .go{position:absolute;top:12px;right:11px;width:16px;height:16px;fill:none;stroke:var(--dim);stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.tile b{display:block;font:700 italic 18px/1 var(--display);letter-spacing:.03em;text-transform:uppercase}
+.tile small{display:block;margin-top:4px;font-size:12px;line-height:1.2;color:var(--muted);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.stars{display:flex;gap:1px;margin-top:5px}
+.stars svg{width:12px;height:12px;fill:var(--star)}
+/* ---- ödeme ---- */
+.sec{display:flex;align-items:center;gap:12px;margin:34px 0 14px;font:900 italic 22px/1 var(--display);
+  letter-spacing:.05em}
+.sec::before{content:"";width:14px;height:22px;background:var(--red);transform:skewX(-16deg)}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.card{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;gap:22px;
+  padding:20px 20px 18px;border-radius:18px;container-type:inline-size;
+  background:radial-gradient(120% 90% at 0% 0%,rgba(227,36,27,.16),transparent 55%),
+             linear-gradient(140deg,#1f1f22,#121214 60%,#0c0c0d);
+  border:1px solid var(--line2);box-shadow:0 30px 50px -32px #000,inset 0 1px 0 rgba(255,255,255,.07)}
+.card::before{content:"";position:absolute;z-index:-1;top:-60px;right:-36px;width:92px;height:340px;
+  background:var(--tread-light) 0 0/auto 92px;background-position:0 calc(var(--roll) * -.4);opacity:.07;
+  transform:rotate(-24deg)}
+.card::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%);transform:translateX(-120%)}
+.card .top{display:flex;justify-content:space-between;align-items:center}
+.card .bank{font:600 16px/1 var(--ui)}
+.card .kind{font:700 italic 13px/1 var(--display);letter-spacing:.2em;color:var(--muted)}
+.iban{font:600 18px/1.1 var(--ui);font-size:min(20px,5cqi);letter-spacing:.025em;word-spacing:.06em;
+  font-variant-numeric:tabular-nums;white-space:nowrap;user-select:all;-webkit-user-select:all}
+.card .who small{display:block;font:700 italic 11px/1 var(--display);letter-spacing:.22em;color:var(--dim)}
+.card .who b{display:block;margin-top:6px;font:900 italic 21px/1 var(--display);letter-spacing:.04em}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:54px;border-radius:13px;
+  font:700 italic 17px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  text-decoration:none;transition:transform .15s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:19px;height:19px}
+.copy{border:0;background:var(--white);color:#0a0a0a}
+.copy .ic{fill:#0a0a0a}
+.copy.ok{background:var(--ok);color:#fff}
+.copy.ok .ic{fill:#fff}
+.ghost{border:1px solid var(--line2);background:transparent;color:var(--text)}
+.ghost .ic{fill:var(--text)}
+.ghost[aria-expanded="true"]{background:var(--card2)}
+.kk{margin-top:12px;padding:18px 16px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);
+  text-align:center}
+.kk .qr{display:inline-block;padding:12px;border-radius:12px;background:var(--white)}
+.kk img{display:block;width:min(230px,62vw);height:auto;image-rendering:pixelated}
+.kk p{margin:12px 4px 8px;font-size:14px;color:var(--muted)}
+.kk p b{color:var(--text);font-weight:600}
+.kk a{color:var(--text);font-weight:600;text-underline-offset:3px}
+.save{margin-top:12px}
+/* ---- altbilgi ---- */
+footer{margin-top:38px}
+.strip{height:26px;background:var(--tread-light) 0 0/auto 100% repeat-x;opacity:.08;
+  background-position:calc(var(--roll) * -.6) 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
+footer p{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:16px;color:var(--dim);
+  font-size:13px}
+footer b{font:900 italic 17px/1 var(--display);letter-spacing:.05em;color:var(--text)}
+footer b span{color:var(--red)}
+/* ---- kayan ara düğmesi, bildirim ---- */
+.fab{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));
+  bottom:calc(18px + env(safe-area-inset-bottom,0px));display:grid;place-items:center;width:58px;height:58px;
+  border-radius:50%;background:var(--red);box-shadow:0 14px 30px -8px rgba(227,36,27,.75),0 0 0 6px rgba(227,36,27,.18);
+  transform:scale(0);transition:transform .35s cubic-bezier(.3,1.5,.5,1);text-decoration:none}
+.fab.show{transform:scale(1)}
+.fab .ic{width:26px;height:26px;fill:#fff}
+.toast{position:fixed;z-index:30;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translate(-50%,40px);
+  width:max-content;max-width:calc(100vw - 32px);text-align:center;background:var(--card2);color:var(--text);
+  border:1px solid var(--line2);border-left:4px solid var(--red);padding:12px 18px;border-radius:12px;font-weight:600;
+  box-shadow:0 14px 34px rgba(0,0,0,.6);transition:transform .25s,opacity .25s;opacity:0;pointer-events:none}
+.toast.show{transform:translate(-50%,0);opacity:1}
+/* ---- animasyonlar ---- */
+@keyframes bandin{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes rollin{from{transform:translateX(-360px)}to{transform:none}}
+@keyframes letter{from{opacity:0;transform:translateY(46%)}to{opacity:1;transform:none}}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 -10% 0 0)}}
+@keyframes grow{from{transform:scaleX(0) skewX(-20deg)}to{transform:skewX(-20deg)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes treadin{from{background-position:-220px 0}to{background-position:0 0}}
+@keyframes shine{0%,70%{transform:translateX(-140%) skewX(-20deg)}100%{transform:translateX(300%) skewX(-20deg)}}
+@keyframes ring{0%,84%,100%{transform:none}86%,90%,94%{transform:rotate(-15deg)}88%,92%,96%{transform:rotate(15deg)}}
+@keyframes ringonce{0%,100%{transform:none}15%,45%,75%{transform:rotate(-15deg)}30%,60%,90%{transform:rotate(15deg)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(227,36,27,.7)}75%,100%{box-shadow:0 0 0 10px rgba(227,36,27,0)}}
+@keyframes sweep{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+@keyframes flash{0%{color:var(--red)}100%{color:var(--text)}}
+@keyframes open{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+.band{animation:bandin 1.1s .05s cubic-bezier(.5,0,.2,1) both}
+.band i{animation:rollin 1.7s .05s cubic-bezier(.1,.6,.2,1) both}
+.tag{animation:fade .5s .25s both}
+.live{animation:pulse 2s 1.5s infinite}
+.mark .l{animation:letter .75s cubic-bezier(.2,1.25,.35,1) both}
+.mark .l:nth-child(1){animation-delay:.35s}.mark .l:nth-child(2){animation-delay:.43s}
+.mark .l:nth-child(3){animation-delay:.51s}.mark .l:nth-child(4){animation-delay:.59s}
+.sub span{animation:wipe .6s .8s cubic-bezier(.6,0,.2,1) both}
+.sub::after{transform-origin:left;animation:grow .7s .95s cubic-bezier(.2,.8,.2,1) both}
+.lead{animation:fade .6s 1.05s both}
+.call{animation:rise .6s 1.05s cubic-bezier(.2,.8,.2,1) both}
+.call::before{animation:treadin 1.6s 1.05s cubic-bezier(.1,.6,.2,1) both}
+.call::after{animation:shine 6s 2.6s infinite}
+.call .ib .ic{animation:ringonce .8s 1.8s,ring 6s 2.6s infinite}
+.tile{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.tile:nth-child(1){animation-delay:1.2s}.tile:nth-child(2){animation-delay:1.28s}.tile:nth-child(3){animation-delay:1.36s}
+.card.in::after{animation:sweep 1.1s .15s cubic-bezier(.4,0,.2,1)}
+.card.in .iban{animation:flash 1.2s .3s}
+.strip.in{animation:treadin 1.4s cubic-bezier(.1,.6,.2,1)}
+.iban.flash{animation:flash .9s ease-out}
+.kk:not([hidden]){animation:open .35s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero bleed">
+  <div class="band" aria-hidden="true"><i></i></div>
+  <p class="tag"><span class="live"></span>7/24 HİZMET</p>
+  <h1 class="mark" aria-label="İnce"><span class="l">İ</span><span class="l">N</span><span class="l">C</span><span class="l">E</span></h1>
+  <p class="sub"><span>OTO LASTİK</span></p>
+  <p class="lead">Günün her saati hizmetinizdeyiz.</p>
+</header>
+<main>
+<a class="call" href="tel:+905458533070"><span class="t"><small>HEMEN ARA</small><b>0545 853 30 70</b></span>
+  <span class="ib"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></span></a>
+<nav class="tiles" aria-label="Bağlantılar">
+  <a class="tile" href="https://wa.me/905458533070?text=Merhaba%2C%20bilgi%20almak%20istiyorum."><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg><span><b>WhatsApp</b><small>Mesaj gönderin</small></span></a>
+  <a class="tile" href="https://www.instagram.com/enesssahin.7/"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg><span><b>Instagram</b><small>@enesssahin.7</small></span></a>
+  <a class="tile" href="https://share.google/FF3ByvsaKIMya5yos"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg><span><b>Google</b><span class="stars" aria-label="5 yıldız"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg></span></span></a>
+</nav>
+<section aria-labelledby="odeme">
+  <h2 class="sec" id="odeme">ÖDEME BİLGİLERİ</h2>
+  <div class="card">
+    <div class="top"><span class="bank">DenizBank</span><span class="kind">IBAN</span></div>
+    <div class="iban">TR93 0013 4000 0093 2652 9000 44</div>
+    <div class="who"><small>ALICI</small><b>HAFİSE İNCE</b></div>
+  </div>
+  <div class="acts">
+    <button class="btn copy" type="button" data-copy="TR930013400000932652900044"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span>Kopyala</span></button>
+    <button class="btn ghost" type="button" id="kk-btn" aria-expanded="false" aria-controls="kk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 19h2v2h-2zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z"/></svg>Karekod</button>
+  </div>
+  <div class="kk" id="kk" hidden>
+    <span class="qr"><img src="karekod.png" width="732" height="732" alt="DenizBank karekodu – HAFİSE İNCE"></span>
+    <p>Karekodu kaydedin, banka uygulamanızda <b>Karekod ile Öde</b>, ardından <b>Galeriden seç</b>.</p>
+    <a href="karekod.png" download="ince-karekod.png">Karekodu kaydet</a>
+  </div>
+</section>
+<a class="btn ghost save" href="ince.vcf" download="İnce Oto Lastik.vcf"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Rehbere kaydet</a>
+</main>
+<footer>
+  <div class="strip bleed" aria-hidden="true"></div>
+  <p><b>İNCE <span>OTO LASTİK</span></b><span>7/24 hizmet</span></p>
+</footer>
+</div>
+<a class="fab" href="tel:+905458533070" aria-label="Hemen ara"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>
+<div class="toast" role="status" aria-live="polite"></div>
+<script>
+const toast=document.querySelector('.toast');let tt;
+function say(m){toast.textContent=m;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),2200)}
+async function copy(t){
+  try{await navigator.clipboard.writeText(t);return true}catch(e){}
+  const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.position='fixed';a.style.opacity='0';
+  document.body.appendChild(a);a.select();a.setSelectionRange(0,99);let ok=false;try{ok=document.execCommand('copy')}catch(e){}
+  a.remove();return ok}
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{
+  const ok=await copy(b.dataset.copy);const l=b.querySelector('span');const o=l.textContent;
+  if(ok){b.classList.add('ok');l.textContent='KOPYALANDI';say('IBAN kopyalandı – banka uygulamanıza yapıştırın');
+    const ib=document.querySelector('.iban');ib.classList.remove('flash');void ib.offsetWidth;ib.classList.add('flash')}
+  else say('Kopyalanamadı: IBAN yazısına basılı tutun');
+  setTimeout(()=>{b.classList.remove('ok');l.textContent=o},2000)}));
+document.querySelectorAll('[data-tel]').forEach(a=>a.addEventListener('click',()=>{
+  copy(a.dataset.tel).then(ok=>{if(ok)say('Numara kopyalandı: '+a.dataset.tel)})}));
+
+(()=>{const R=document.documentElement,still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(document.hidden){const as=document.getAnimations();as.forEach(a=>a.pause());
+  addEventListener('visibilitychange',()=>{if(!document.hidden)as.forEach(a=>a.play())},{once:true})}
+if(!still){let f=0;addEventListener('scroll',()=>{if(!f)f=requestAnimationFrame(()=>{
+  R.style.setProperty('--roll',(scrollY*.8).toFixed(1)+'px');f=0})},{passive:true})}
+if('IntersectionObserver' in window){
+  const seen=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');
+    seen.unobserve(e.target)}}),{threshold:.45});
+  document.querySelectorAll('.card,.strip').forEach(el=>seen.observe(el));
+  const fab=document.querySelector('.fab'),call=document.querySelector('.call');
+  new IntersectionObserver(([e])=>fab.classList.toggle('show',!e.isIntersecting&&e.boundingClientRect.top<0)).observe(call)}
+const kb=document.getElementById('kk-btn'),kk=document.getElementById('kk');
+kb.addEventListener('click',()=>{const o=kk.hidden;kk.hidden=!o;kb.setAttribute('aria-expanded',o);
+  if(o)kk.scrollIntoView({behavior:still?'auto':'smooth',block:'nearest'})})})();
+</script>
+</body>
+</html>

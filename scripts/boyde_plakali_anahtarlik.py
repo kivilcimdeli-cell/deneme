@@ -1,0 +1,266 @@
+"""BOYDE LABS – kişiye özel plakalı anahtarlık: Türk plakası biçiminde; plaka ve ad soyad kabartma; Shopier görselleri.
+
+Kullanıcının örneği (Bambu Studio, Birleştir.stl, 70 × 22 × 3 mm): siyah çerçeve ve alt şerit, beyaz plaka zemini, solda
+TR bandı; plaka yazısı 1,3 mm (Anek Latin SemiBold, 10 mm), ad 1 mm (Arial, 6 mm) kabartma. Ölçüler STL'den alındı.
+TR bandı mavi (örnekteki gibi) ya da kırmızı ("kırmızı versiyonunda yap TR yazısını", "mavisini neden yapmadın"), TR
+beyaz. Delik bandın sol üstünde (örnekte kesici
+gövde olarak duruyor; birleştirince STL'e çıkmamış).
+
+Katmanlar (baskı yönünde, z mm; arka yüz tablada, düz ve tamamen siyah; toplam 3,2 mm):
+  0–2,2    siyah    çerçeve ve alt şerit (adın zemini)
+  0–0,4    siyah    plaka zemininin ve bandın altı: arka yüz siyah (kullanıcı: "arka plakalarını da siyah yapalım,
+                    hem beyaz görünüyor hem mavi"; eskiden zemin ve bant tabladan başlıyordu)
+  0,4–1,6  beyaz    plaka zemini (6 katman; kullanıcı: "mavi ve beyazın son katman dolgusunu artır, daha dolgun
+                    görünsün": beyaz 0,8'den 1,2 mm'ye, siyahın üstünde tok; çerçevenin 0,6 mm içinde)
+  0,4–1,8  kırmızı  TR bandı (ya da mavi; 7 katman, 1,4 mm)
+  1,6–2,9  siyah    plaka yazısı (1,3 mm; DIN benzeri Saira SemiBold)
+  1,8–2,5  beyaz    TR
+  2,2–3,2  beyaz    ad soyad (Outfit ExtraBold: küçük boyda da harf içi ve İ noktası ≥ 0,7 mm; küçülünce ince
+                    kalan adlar şeritte kayar)
+Örnek yazılar uydurma (gerçek plaka ya da kişi değil); görsellerde markamız BOYDE LABS.
+
+Çıktı : boyde_labs/anahtarlik_plaka/kaynak/<model>.npz (git'e girmez), <model>_on.png, <model>_arka.png
+        boyde_labs/anahtarlik_plaka/fotograf/*.jpg (Blender; --foto)
+        boyde_labs/anahtarlik_plaka/shopier/*.jpg (1200 × 1200; --shopier)
+Kullanım:
+  python3 scripts/boyde_plakali_anahtarlik.py              # modeller, ön ve arka görünüş, ölçüler
+  python3 scripts/boyde_plakali_anahtarlik.py --foto       # fotoğraflar (bpy 4.2)
+  python3 scripts/boyde_plakali_anahtarlik.py --shopier    # Shopier görselleri
+"""
+import json
+import os
+import sys
+
+import manifold3d as m3
+import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import boyde_anahtarlik_toptan as T  # noqa: E402
+
+A, S = T.A, T.S
+J = m3.JoinType.Round
+S.FONTS.update({"saira6": "Saira-SemiBold.ttf"})
+OUT = os.path.join(A.ROOT, "boyde_labs", "anahtarlik_plaka")
+SRC = os.environ.get("BOYDE_KAYNAK") or os.path.join(OUT, "kaynak")
+FOTO = os.environ.get("BOYDE_FOTO") or os.path.join(OUT, "fotograf")
+
+SIYAH, BEYAZ = A.BLACK, A.WHITE                   # filament renkleri (kimlik; RGB: T.U.RGB)
+BANT = {"kirmizi": A.RED, "mavi": A.BLUE}           # TR bandının rengi
+BANT_AD = {"kirmizi": "kırmızı", "mavi": "mavi"}
+RGB = T.U.RGB
+W, H, R = 70.0, 22.0, 3.6                         # dış ölçü ve köşe
+IC = (2.05, 1.6, 67.95, 20.45)                    # çerçevenin içi
+SERIT_UST = 7.8                                   # alt şeridin üstü (adın zemini)
+BANT_SAG = 12.1                                   # TR bandının sağ kenarı
+DELIK, DELIK_R = (5.0, 17.8), 1.75                # Ø3,5; üstte 2,45, solda 3,25 mm et
+Z_GOVDE, Z_ZEMIN, Z_BANT = 2.2, 1.6, 1.8               # beyaz 1,2 mm, bant 1,4 mm: renkler dolgun ve tok
+Z_TABAN = 0.4                                     # arka yüz siyah: zeminin ve bandın altında 2 katman siyah
+PLAKA_H, TR_H, AD_H = 1.3, 0.7, 1.0
+ORNEK = [("p01", "34 BYD 34", "BOYDE LABS", "kirmizi"), ("p02", "06 BYD 06", "ADINIZ SOYADINIZ", "mavi"),
+         ("p03", "35 BYD 35", "İSİM SOYİSİM", "kirmizi")]
+KAPAK_EK = [("p04", "16 BYD 16", "BOYDE LABS", "mavi"), ("p05", "07 BYD 07", "ADINIZ SOYADINIZ", "kirmizi"),
+            ("p06", "01 BYD 01", "İSİM SOYİSİM", "mavi")]      # yalnız kapakta (altı farklı plaka)
+RENK_EK = [("p07", "34 BYD 34", "BOYDE LABS", "mavi")]       # renk seçenekleri: p01'in mavisi
+if os.environ.get("BOYDE_PLAKA_AD"):               # Trendyol: görselde marka adı olmasın, örnek ad
+    ORNEK, KAPAK_EK, RENK_EK = ([(k, p, os.environ["BOYDE_PLAKA_AD"] if a == "BOYDE LABS" else a, b)
+                                 for k, p, a, b in L] for L in (ORNEK, KAPAK_EK, RENK_EK))
+
+
+def _ortala(cs, cx, cy):
+    b = cs.bounds()
+    return cs.translate((cx - (b[0] + b[2]) / 2, cy - (b[1] + b[3]) / 2))
+
+
+def _yazi(font, s, cap, cx, cy, max_w, tr=0.3):
+    return _ortala(S.t(font, s, cap, 0.0, 0.0, "c", tr, max_w), cx, cy)
+
+
+def tasarla(plaka, ad, bant_rengi="kirmizi"):
+    """bant_rengi: "kirmizi" ya da "mavi"; ad boş olabilir (alt şerit düz kalır). Döner [(ad, Manifold, renk)]
+    (baskı yönünde; renk filament kimliği) ve ölçüler: plaka ve ad yazısının boyu, kırpılan ve ince kalan alan.
+    Atölye'nin plakalı anahtarlık ürünü de bunu kullanır (atolye/urunler/plakali.py)."""
+    dis = A.rrect(W, H, R, W / 2, H / 2)
+    ic = A.rrect(IC[2] - IC[0], IC[3] - IC[1], 2.3, (IC[0] + IC[2]) / 2, (IC[1] + IC[3]) / 2)
+    delik = A.circle(DELIK_R, *DELIK)
+    ust = ic ^ A.rect(IC[0], SERIT_UST, IC[2], IC[3] + 1)                   # plaka alanı (bant dahil)
+    bant = ust ^ A.rect(IC[0] - 1, SERIT_UST, BANT_SAG, IC[3] + 1)
+    zemin = ust - bant
+    siyah = dis - ust - delik
+
+    plaka_cs = _yazi("saira6", plaka.upper(), 6.5, (BANT_SAG + IC[2]) / 2, (SERIT_UST + IC[3]) / 2,
+                     IC[2] - BANT_SAG - 5.0, 0.4)
+    tr_cs = _yazi("saira6", "TR", 4.0, (IC[0] + BANT_SAG) / 2, 10.9, BANT_SAG - IC[0] - 2.0, 0.3)
+    ad_cs = _ad(ad) if ad.strip() else m3.CrossSection()
+    kirp = (plaka_cs - zemin.offset(-0.8, J)).area() + (ad_cs - (siyah - ust).offset(-0.6, J)).area()
+
+    def kat(cs, z0, z1):
+        return cs.extrude(z1 - z0).translate((0, 0, z0))
+    parcalar = [("govde", kat(siyah, 0, Z_GOVDE) + kat(ust - delik, 0, Z_TABAN), SIYAH),
+                ("zemin", kat(zemin - delik, Z_TABAN, Z_ZEMIN), BEYAZ),
+                ("bant", kat(bant - delik, Z_TABAN, Z_BANT), BANT[bant_rengi]),
+                ("plaka", kat(plaka_cs, Z_ZEMIN, Z_ZEMIN + PLAKA_H), SIYAH),
+                ("tr", kat(tr_cs, Z_BANT, Z_BANT + TR_H), BEYAZ)]
+    if ad.strip():
+        parcalar.append(("ad", kat(ad_cs, Z_GOVDE, Z_GOVDE + AD_H), BEYAZ))
+    olcu = {"plaka_boy": plaka_cs.bounds()[3] - plaka_cs.bounds()[1],
+            "ad_boy": ad_cs.bounds()[3] - ad_cs.bounds()[1] if ad.strip() else 0.0,
+            "kirpilan": kirp, "ince": (_ince(ad_cs) if ad.strip() else 0.0) + _ince(plaka_cs)}
+    return parcalar, olcu
+
+
+def _ad(ad):
+    """Alttaki yazı: siyah şeridin ortasında, Outfit ExtraBold 4,3 mm; şeride (kenarlardan 1,3 mm pay) sığmazsa küçülür.
+    Küçülünce ince kalırsa (İ noktası, Ş çengeli taşan adlar) yazı küçülmek yerine şeridin boş yanına (alt çerçeveye
+    ya da plakaya 0,6 mm kalana dek) kayar; uzun ad ince kalırsa harf arası daraltılır. En az ince kalan seçilir."""
+    orta, boy = (IC[1] + SERIT_UST) / 2, SERIT_UST - IC[1] - 1.3          # şeridin ortası, yazıya kalan boy
+    alt, ust = 0.8, SERIT_UST - 0.6                                        # kaydırınca işaretlerle birlikte en çok
+    en = IC[2] - IC[0] - 4.0
+
+    def yerlestir(tr, sinir):
+        cap = 4.3
+        for _ in range(5):
+            cs = _yazi("outfit", ad, cap, W / 2, orta, en, tr)
+            b = cs.bounds()
+            if b[3] - b[1] <= boy:
+                return cs
+            if b[3] - b[1] <= sinir:                                       # şeride kaydırarak sığar
+                return cs.translate((0, min(0.0, ust - b[3]) + max(0.0, alt - b[1])))
+            cap *= sinir / (b[3] - b[1]) * 0.99
+        return cs
+    sec = None
+    for tr, sinir in ((0.6, boy), (0.6, ust - alt), (0.3, ust - alt)):
+        cs = yerlestir(tr, sinir)
+        ince = _ince(cs)
+        if sec is None or ince < sec[1] - 0.05:
+            sec = (cs, ince)
+        if ince == 0:
+            break
+    return sec[0]
+
+
+def _ince(cs, en=0.7):
+    """Kabartma yazıda en'den ince kalan alan (mm²; 0,15 mm²'den küçük harf köşesi kırıntıları sayılmaz: 0 olmalı)."""
+    return sum(p.area() for p in (cs - cs.offset(-en / 2, J).offset(en / 2, J)).decompose() if p.area() > 0.15)
+
+
+def yon():
+    """Asılınca yukarı bakan yön: ağırlık merkezinden (gövdenin ortası) deliğe."""
+    d = np.array(DELIK) - np.array([W / 2, H / 2])
+    return [float(v) for v in d / np.linalg.norm(d)]
+
+
+def kaydet(anahtar, parcalar):
+    """npz: anahtarlık fotoğraf betiğinin (boyde_anahtarlik_foto) okuduğu biçim."""
+    arr = {}
+    for i, (_, man, _) in enumerate(parcalar):
+        V, F = A.mesh_arrays(man)
+        arr[f"v{i}"], arr[f"f{i}"] = V.astype(np.float32), F.astype(np.int32)
+    meta = {"parcalar": [{"renk": list(RGB[c]), "metal": False} for _, _, c in parcalar], "delik": list(DELIK),
+            "delik_r": DELIK_R, "kenar_yonu": yon(), "merkez": [W / 2, H / 2], "kalinlik": Z_GOVDE,
+            "toplam": Z_GOVDE + AD_H}
+    np.savez_compressed(os.path.join(SRC, f"{anahtar}.npz"), meta=json.dumps(meta), **arr)
+
+
+def gorunus(anahtar, parcalar):
+    from cift_tarafli_isimlik import render, rotation
+    mesh = [(*A.mesh_arrays(man), RGB[c]) for _, man, c in parcalar]
+    for ad, rot in (("on", A.R_TOP), ("arka", rotation(180, 180))):
+        im = render(mesh, 1400, rot, margin=0.0, ambient=0.62)
+        im.crop(im.getbbox()).save(os.path.join(SRC, f"{anahtar}_{ad}.png"), optimize=True)
+
+
+def export():
+    os.makedirs(SRC, exist_ok=True)
+    for anahtar, plaka, ad, bant in ORNEK + KAPAK_EK + RENK_EK:
+        parcalar, o = tasarla(plaka, ad, bant)
+        kaydet(anahtar, parcalar)
+        gorunus(anahtar, parcalar)
+        print(f"{anahtar} {plaka:10s} {ad:18s} {BANT_AD[bant]:8s} plaka {o['plaka_boy']:.1f} mm, ad {o['ad_boy']:.1f} mm  "
+              f"ince<0.7: {o['ince']:.2f} mm²  kırpılan: {o['kirpilan']:.2f} mm²", flush=True)
+
+
+# ---------------------------------------------------------------- fotoğraf
+
+def bagla():
+    """Anahtarlık fotoğraf betiğini (yükleme, sahne, halka takımı) bu klasöre ve örneklere çevirir."""
+    T.OUT, T.SRC, T.FOTO, T.KEYS = OUT, SRC, FOTO, [o[0] for o in ORNEK]
+
+
+def masa(dizilis, yol, samples, size, adim=8.0, kaydir=-0.1, takim=()):
+    """Masada dizili plakalar: dizilis sıra sıra [(model, ters mi, açı)]; takim: boş halka takımları [(x, y, açı)]
+    (dizinin ortasına göre, mm). kaydir: mercek kaydırma (parçalar kadrajda yukarı; Shopier'de alta yazı gelir)."""
+    import boyde_anahtarlik_foto as AF
+    sc = AF.studio(False, samples, size)
+    yuk = {a: AF.load(a) for a in {a for sira in dizilis for a, _, _ in sira}}
+    siralar = []
+    for sira in dizilis:
+        ogeler = []
+        for a, ters, aci in sira:
+            meta, parts = yuk[a]
+            M = AF.flat(meta, aci, 0, 0, ters)
+            q = AF.world(parts, M)
+            ogeler.append((a, M, q[:, :2].min(0), q[:, :2].max(0)))
+        siralar.append(ogeler)
+    boylar = [max(hi[1] - lo[1] for _, _, lo, hi in s) for s in siralar]
+    y = (sum(boylar) + adim * (len(siralar) - 1)) / 2
+    pts = []
+    for s, h in zip(siralar, boylar):
+        x = -(sum(hi[0] - lo[0] for _, _, lo, hi in s) + adim * (len(s) - 1)) / 2
+        for a, M, lo, hi in s:
+            M = M.copy()
+            M[0, 3] += x - lo[0]
+            M[1, 3] += y - h / 2 - (lo[1] + hi[1]) / 2
+            pts.append(AF.put(yuk[a][1], M, f"{a}_{len(pts)}"))
+            x += hi[0] - lo[0] + adim
+        y -= h + adim
+    for i, (x, y, aci) in enumerate(takim):
+        pts.append(AF.put_wires(AF.loose_set(x, y, aci), f"takim{i}"))
+    yap = AF.F.camera
+
+    def kamera(sc, lens=85):
+        cam = yap(sc, lens)
+        cam.data.shift_y = kaydir
+        return cam
+    AF.F.camera = kamera
+    try:
+        AF.shoot(sc, np.vstack(pts), -12, 42, 0.94, 6.3, os.path.join(FOTO, yol), False, lens=70)
+    finally:
+        AF.F.camera = yap
+
+
+def fotograflar(args):
+    """Her örnek: masada önlü arkalı (iki) ve halka takımında asılı (halka; delik sol üstte, plaka dik asılır);
+    kapak: altı farklı plaka önden (kırmızı ve mavi); uc: üç örnek alt alta; renk: aynı plaka kırmızı ve mavi."""
+    import boyde_anahtarlik_foto as AF
+    samples = 32
+    if "--ornek" in args:
+        samples = int(args[args.index("--ornek") + 1])
+    kucuk = "--deneme" in args
+    if kucuk:
+        AF.F.SIZE = (500, 500)
+    os.makedirs(FOTO, exist_ok=True)
+    secili = [a for a in args if not a.startswith("-") and not a.isdigit()]
+    for a, *_ in ORNEK:
+        if not secili or a in secili:
+            AF.model_shots(a, samples)
+    if not secili or "kapak" in secili:
+        masa([[("p01", False, -4), ("p04", False, 3)], [("p02", False, 3), ("p05", False, -3)],
+              [("p03", False, -2), ("p06", False, 4)]], "kapak.jpg", samples, (600, 600) if kucuk else (1600, 1600))
+    if not secili or "uc" in secili:
+        masa([[("p01", False, -3)], [("p02", False, 2)], [("p03", False, -2)]], "uc.jpg", samples,
+             (600, 600) if kucuk else (1600, 1600), adim=7.0, kaydir=0.0)
+    if not secili or "renk" in secili:
+        masa([[("p01", False, -3)], [("p07", False, 2)]], "renk.jpg", samples,
+             (600, 600) if kucuk else (1600, 1600), adim=9.0, kaydir=0.0)
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    bagla()
+    if "--foto" in args:
+        fotograflar([a for a in args if a != "--foto"])
+    elif "--shopier" in args:
+        import boyde_plakali_shopier as PS
+        PS.main()
+    else:
+        export()

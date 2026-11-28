@@ -1,0 +1,65 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Forno Rosso · Menü</title><style>
+@font-face{font-family:Jost;src:url(../fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#F8F2E8;color:#3A1418}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:22px 20px 6px}
+.hd b{font-family:Playfair;font-weight:900;font-size:30px;color:#8E2230;line-height:1}
+.hd b small{display:block;font-family:Jost;font-weight:500;font-size:11px;letter-spacing:.32em;color:#6A4C3C;
+  margin-top:6px;text-transform:uppercase}
+.hd>span{background:#8E2230;color:#FFF4E2;border-radius:14px;padding:7px 12px;text-align:center;font-size:10.5px;
+  letter-spacing:.2em}
+.hd>span b{display:block;font-family:Playfair;font-size:22px;color:#FFF4E2;letter-spacing:0}
+.hc{margin:14px 18px 0;border-radius:30px;overflow:hidden;position:relative;height:300px;
+  box-shadow:0 18px 40px rgba(90,30,30,.18)}
+.hc img{width:100%;height:100%;object-fit:cover}
+.hc .bd{position:absolute;left:14px;top:14px;background:#FFF4E2;color:#8E2230;border-radius:999px;padding:7px 13px;
+  font-size:12px;font-weight:600}
+.hc .tx{position:absolute;left:0;right:0;bottom:0;padding:40px 18px 16px;color:#fff;
+  background:linear-gradient(transparent,rgba(40,12,12,.8))}
+.hc .tx b{font-family:Playfair;font-weight:900;font-size:24px;display:block}
+.hc .tx span{font-size:13px;opacity:.92}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 18px 0}
+.tiles a{background:#FFFCF6;border:1px solid #EADCC8;border-radius:24px;padding:16px;min-height:104px;display:flex;
+  flex-direction:column;justify-content:space-between}
+.tiles a svg{width:28px;height:28px;color:#8E2230}
+.tiles a b{font-weight:600;font-size:16px}
+.tiles a small{display:block;color:#8B6E66;font-size:12px}
+.tiles a.p{background:#8E2230;color:#FFF4E2;border-color:#8E2230}
+.tiles a.p svg{color:#FFF4E2}.tiles a.p small{color:#F3D6C0}
+.rt{margin:14px 18px 20px;display:flex;align-items:center;gap:12px;font-size:12.5px;color:#8B6E66}
+.rt b{font-family:Playfair;font-weight:900;font-size:26px;color:#3A1418}.rt i{font-style:normal;color:#E2A93B;letter-spacing:2px}
+.tabs{display:flex;gap:8px;padding:12px 18px 4px;overflow:hidden;white-space:nowrap}
+.tabs span{padding:9px 15px;border-radius:999px;background:#FFFCF6;border:1px solid #EADCC8;font-size:14px}
+.tabs span.on{background:#8E2230;color:#FFF4E2;border-color:#8E2230}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 18px 24px}
+.card{background:#FFFCF6;border:1px solid #EADCC8;border-radius:22px;overflow:hidden;position:relative}
+.card img{width:100%;aspect-ratio:1/1;object-fit:cover}
+.card div{padding:10px 12px 12px}
+.card b{font-family:Playfair;font-weight:900;font-size:16.5px;display:block;line-height:1.15}
+.card p{font-size:11.8px;color:#8B6E66;line-height:1.35;margin:4px 0 8px;height:32px;overflow:hidden}
+.card .ft{display:flex;justify-content:space-between;align-items:center;padding:0}
+.card .num{color:#8E2230;font-size:15px}
+.card .add{width:30px;height:30px;border-radius:50%;background:#8E2230;color:#fff;display:grid;place-items:center}
+.card .add svg{width:16px;height:16px}
+.card em{position:absolute;left:10px;top:10px;font-style:normal;font-size:11px;font-weight:600;background:#FFF4E2;
+  color:#8E2230;border-radius:999px;padding:3px 9px}
+</style></head><body><div class="hd"><b>Menü<small>Fiyatlara KDV dahildir</small></b><span>MASA<b>07</b></span></div><div class="tabs"><span class="on">Pizzalar</span><span class="">Makarnalar</span><span class="">Salatalar</span><span class="">Tatlılar</span></div><div class="grid"><div class="card"><img src="../img/pizza_margherita.jpg" alt=""><div><b>Margherita</b><p>San Marzano domates, fior di latte, fesleğen</p><div class="ft"><span class="num">380 ₺</span><span class="add"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div><div class="card"><img src="../img/pizza_diavola.jpg" alt=""><em>Acı</em><div><b>Diavola</b><p>Acı salam, mozzarella, pul biber</p><div class="ft"><span class="num">440 ₺</span><span class="add"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div><div class="card"><img src="../img/pizza_formaggi.jpg" alt=""><div><b>Quattro formaggi</b><p>Dört peynir, bal, ceviz</p><div class="ft"><span class="num">460 ₺</span><span class="add"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div><div class="card"><img src="../img/pizza_tartufo.jpg" alt=""><em>Yeni</em><div><b>Tartufo e funghi</b><p>Trüf kreması, mantar, parmesan</p><div class="ft"><span class="num">520 ₺</span><span class="add"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div></div></body></html>

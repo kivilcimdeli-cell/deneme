@@ -1,0 +1,63 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Garaj Burger · Menü</title><style>
+@font-face{font-family:Jost;src:url(../fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#111113;color:#F2EEE6}
+.hz{height:14px;background:repeating-linear-gradient(-45deg,#E0A436 0 14px,#111113 14px 28px)}
+.ps{position:relative;padding:18px 18px 0;height:430px;overflow:hidden}
+.ps h1{font-family:Anton;font-weight:400;font-size:132px;line-height:.86;color:#E0A436;letter-spacing:.01em;
+  position:relative;z-index:1}
+.ps .sub{font-family:Anton;font-size:22px;letter-spacing:.12em;margin-top:10px;position:relative;z-index:1}
+.ps img{position:absolute;right:-74px;bottom:-62px;width:360px;height:360px;object-fit:cover;z-index:2;
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 44%,transparent 64%);
+  mask-image:radial-gradient(circle at 50% 50%,#000 44%,transparent 64%)}
+.ps .ms{position:absolute;left:18px;bottom:24px;z-index:3;background:#E0A436;color:#111;font-family:Anton;
+  font-size:20px;letter-spacing:.06em;padding:8px 14px;transform:rotate(-3deg)}
+.blk{padding:12px 16px 0;display:grid;gap:10px}
+.blk a{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;font-family:Anton;
+  letter-spacing:.05em;font-size:22px;background:#1E1E22;border:2px solid #2C2C33}
+.blk a small{display:block;font-family:Jost;font-size:12px;letter-spacing:.04em;color:#9A968C;margin-top:2px}
+.blk a svg{width:26px;height:26px}
+.blk a.y{background:#E0A436;color:#111;border-color:#E0A436;font-size:36px;padding:12px 18px}
+.blk .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.blk .two a{font-size:18px;flex-direction:column;align-items:flex-start;gap:8px}
+.st{display:flex;align-items:center;gap:10px;padding:14px 18px 22px;font-size:12.5px;color:#9A968C}
+.st b{font-family:Anton;font-size:26px;color:#E0A436}.st span{color:#E0A436;letter-spacing:2px}
+.tp{position:sticky;top:0;z-index:3;background:#111113;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 16px;border-bottom:2px solid #E0A436}
+.tp b{font-family:Anton;font-size:28px;color:#E0A436;letter-spacing:.04em}
+.tp span{font-family:Anton;font-size:15px;letter-spacing:.08em;background:#E0A436;color:#111;padding:5px 10px}
+.tb{display:flex;gap:18px;padding:14px 16px 4px;font-family:Anton;font-size:18px;letter-spacing:.06em;color:#77736a}
+.tb span.on{color:#F2EEE6;border-bottom:3px solid #E0A436;padding-bottom:3px}
+.bc{margin:12px 16px 0;position:relative;height:236px;overflow:hidden;border:2px solid #2C2C33}
+.bc img{width:100%;height:100%;object-fit:cover}
+.bc .ov{position:absolute;inset:auto 0 0 0;padding:44px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.bc .ov b{font-family:Anton;font-size:30px;letter-spacing:.03em;display:block;line-height:1}
+.bc .ov p{font-size:12.5px;color:#CFC9BD;margin-top:4px}
+.bc .pr{position:absolute;right:12px;top:12px;background:#E0A436;color:#111;font-family:Anton;font-size:22px;
+  padding:6px 12px;transform:rotate(-4deg)}
+.bc .tg{position:absolute;left:12px;top:12px;background:#111;color:#E0A436;font-family:Anton;font-size:14px;
+  letter-spacing:.08em;padding:4px 9px;border:1px solid #E0A436}
+.cart{position:fixed;left:12px;right:12px;bottom:14px;z-index:4;background:#E0A436;color:#111;display:flex;
+  justify-content:space-between;align-items:center;padding:15px 18px;font-family:Anton;font-size:20px;letter-spacing:.05em;
+  box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.cart svg{width:24px;height:24px}
+</style></head><body><div class="tp"><b>GARAJ</b><span>MASA 12</span></div><div class="tb"><span class="on">BURGERLER</span><span class="">YANLAR</span><span class="">SHAKE</span><span class="">İÇECEK</span></div><div class="bc"><img src="../img/burger_smash.jpg" alt=""><span class=tg>KLASİK</span><span class="pr">460 ₺</span><div class="ov"><b>DOUBLE SMASH</b><p>2 × 90 g dana, cheddar, karamelize soğan, turşu</p></div></div><div class="bc"><img src="../img/burger_truffle.jpg" alt=""><span class="pr">520 ₺</span><div class="ov"><b>TRUFFLE</b><p>180 g dana, trüf mayonez, mantar, gravyer</p></div></div><div class="bc"><img src="../img/burger_chick.jpg" alt=""><span class=tg>ACI</span><span class="pr">390 ₺</span><div class="ov"><b>HOT CHİCK</b><p>Çıtır tavuk, acı bal, turşu</p></div></div><div class="bc"><img src="../img/burger_veggie.jpg" alt=""><span class=tg>VEGAN</span><span class="pr">360 ₺</span><div class="ov"><b>VEGGİE</b><p>Nohut köftesi, avokado, mor soğan</p></div></div><div class="cart"><span>SEPET · 2 ÜRÜN · 920 ₺</span><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div></body></html>

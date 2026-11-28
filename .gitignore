@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+restoran_masalik/.onbellek.pkl
+restoran_masalik/siteler/img/.doku/
+
+# atölye uygulamasının müşteri verileri: kişisel bilgi, git'e girmez
+atolye_veri/
+dist/
+build/
+
+# anahtarlık modellerinin ara dosyaları (betikler yeniden üretir)
+boyde_labs/anahtarlik_*/kaynak/*.npz
+boyde_labs/guzellik/kaynak/*.npz
+boyde_labs/promosyon/kaynak/*.npz
+boyde_labs/trendyol/kaynak/*.npz
+boyde_labs/trendyol/_ekran/
+boyde_labs/trendyol/foto/
+boyde_labs/trendyol/kaynak_plaka/*.npz

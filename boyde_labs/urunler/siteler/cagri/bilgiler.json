@@ -1,0 +1,18 @@
+{
+  "telefon": "0546 475 45 08",
+  "whatsapp_mesaj": "Merhaba, bilgi almak istiyorum.",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "banka": "Örnek Bankası",
+  "isletme": "Çağrı İletişim",
+  "marka": "ÇAĞRI",
+  "hizmet": "İLETİŞİM",
+  "etiket": "TELEFON · AKSESUAR · TAMİR",
+  "aciklama": "Telefon, aksesuar ve teknik servis. Tek dokunuşla arayın, yazın.",
+  "renk": "#0096BE",
+  "instagram": "@cagriiletisim",
+  "google": "https://www.google.com/search?q=%C3%87a%C4%9Fr%C4%B1+%C4%B0leti%C5%9Fim",
+  "iban_alici": "ÇAĞRI İLETİŞİM",
+  "isaret": "logo/isaret.svg"
+}

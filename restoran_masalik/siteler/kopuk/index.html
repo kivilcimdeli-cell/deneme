@@ -1,0 +1,74 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Köpük</title><style>
+@font-face{font-family:Jost;src:url(../fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#F5EEE4;color:#3B2A22;padding-bottom:90px}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0}
+.hd b{font-family:Fraunces;font-style:italic;font-weight:900;font-size:32px}
+.hd span{background:#4E3428;color:#F5E9D8;border-radius:999px;padding:7px 13px;font-size:12px;letter-spacing:.12em}
+.hi{padding:14px 20px 0}
+.hi small{font-size:13px;color:#8F7B6C}
+.hi h1{font-family:Fraunces;font-weight:800;font-size:31px;line-height:1.1;margin-top:2px}
+.sr{margin:14px 20px 0;display:flex;align-items:center;gap:10px;background:#FFFBF5;border:1px solid #E7D9C7;
+  border-radius:999px;padding:12px 16px;color:#8F7B6C;font-size:14px}
+.sr svg{width:20px;height:20px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;padding:18px 20px 10px}
+.sh b{font-family:Fraunces;font-weight:800;font-size:20px}.sh a{font-size:13px;color:#8F7B6C}
+.car{display:flex;gap:12px;padding-left:20px;overflow:hidden}
+.cc{flex:none;width:158px;background:#FFFBF5;border-radius:24px;overflow:hidden;border:1px solid #E7D9C7}
+.cc img{width:100%;height:150px;object-fit:cover}
+.cc div{padding:10px 12px 12px}
+.cc b{font-weight:600;font-size:15px;display:block}
+.cc .num{color:#4E3428;font-size:14px}
+.cc em{font-style:normal;font-size:10.5px;background:#4E3428;color:#F5E9D8;border-radius:999px;padding:2px 8px;
+  margin-left:6px}
+.cats{display:flex;justify-content:space-between;padding:18px 20px 0;text-align:center;font-size:12.5px}
+.cats a{width:76px}
+.cats img{width:60px;height:60px;border-radius:50%;object-fit:cover;margin:0 auto 6px;border:3px solid #FFFBF5;
+  box-shadow:0 6px 14px rgba(60,40,20,.15)}
+.wf{margin:16px 20px 0;display:flex;align-items:center;gap:12px;background:#4E3428;color:#F5E9D8;border-radius:22px;
+  padding:14px 16px}
+.wf svg{width:26px;height:26px}
+.wf small{display:block;font-size:12px;opacity:.8}
+.wf i{margin-left:auto;width:46px;height:26px;border-radius:999px;background:#C6A57F;position:relative;flex:none}
+.wf i:after{content:"";position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#FFFBF5;border-top:1px solid #E7D9C7;display:flex;
+  justify-content:space-around;padding:10px 0 24px;font-size:11px;color:#8F7B6C;z-index:5}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav svg{width:24px;height:24px}
+.nav a.on{color:#4E3428;font-weight:600}
+.tabs{display:flex;gap:8px;padding:14px 20px 6px;overflow:hidden;white-space:nowrap}
+.tabs span{padding:9px 15px;border-radius:999px;background:#FFFBF5;border:1px solid #E7D9C7;font-size:14px}
+.tabs span.on{background:#4E3428;color:#F5E9D8;border-color:#4E3428}
+.li{display:flex;align-items:center;gap:14px;margin:0 20px;padding:11px 0;border-bottom:1px solid #E7D9C7}
+.li img{width:66px;height:66px;border-radius:50%;object-fit:cover;flex:none}
+.li b{font-weight:600;font-size:16px;display:block}
+.li p{font-size:12.6px;color:#8F7B6C;line-height:1.35}
+.li .num{display:block;color:#4E3428;margin-top:3px;font-size:14.5px}
+.li .add{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid #4E3428;display:grid;
+  place-items:center;color:#4E3428}
+.li .add.on{background:#4E3428;color:#F5E9D8}
+.li .add svg{width:16px;height:16px}
+.ct{position:fixed;left:14px;right:14px;bottom:16px;background:#4E3428;color:#F5E9D8;border-radius:22px;display:flex;
+  justify-content:space-between;align-items:center;padding:16px 20px;z-index:5;box-shadow:0 12px 30px rgba(60,30,20,.35)}
+.ct b{font-weight:600}.ct span{background:#C6A57F;color:#3B2A22;border-radius:999px;padding:7px 14px;font-weight:600;
+  font-size:14px}
+</style></head><body><div class="hd"><b>köpük</b><span>MASA 03</span></div><div class="hi"><small>Günaydın ☀</small><h1>Bugün ne içelim?</h1></div><div class="sr"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Kahve, tatlı, kahvaltı ara</div><div class="sh"><b>Bu hafta</b><a href="menu.html">Tümü</a></div><div class="car"><div class="cc"><img src="../img/kahve_fistik.jpg" alt=""><div><b>Fıstıklı latte</b><span class="num">165 ₺</span><em>Yeni</em></div></div><div class="cc"><img src="../img/kahve_flatwhite.jpg" alt=""><div><b>Flat white</b><span class="num">140 ₺</span></div></div><div class="cc"><img src="../img/kahve_cheesecake.jpg" alt=""><div><b>San Sebastian</b><span class="num">210 ₺</span></div></div></div><div class="cats"><a href="menu.html"><img src="../img/kahve_espresso.jpg" alt="">Espresso</a><a href="menu.html"><img src="../img/kahve_turk.jpg" alt="">Türk kahvesi</a><a href="menu.html"><img src="../img/kahve_flatwhite.jpg" alt="">Sütlü</a><a href="menu.html"><img src="../img/kahve_cheesecake.jpg" alt="">Tatlı</a></div><div class="wf"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.6a7.7 7.7 0 0 1 11 0M9.4 15.6a3.6 3.6 0 0 1 5.2 0"/><circle cx="12" cy="18.6" r="1.1" fill="currentColor"/></svg><span><b>Wi-Fi'ye bağlan</b><small>Kopuk_Misafir · tek dokunuş</small></span><i></i></div><nav class="nav"><a class="on" href="#"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Ana sayfa</a><a class="" href="menu.html"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C6.5 4 9.5 4 12 5.8 14.5 4 17.5 4 20 5.5V19c-2.5-1.4-5.5-1.4-8 .4-2.5-1.8-5.5-1.8-8-.4z"/><path d="M12 5.8v13.6"/></svg>Menü</a><a class="" href="#"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l-1 12h-11z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Sipariş</a><a class="" href="#"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.5 5.3 5.8.7-4.3 4 1.1 5.8L12 16.6l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"/></svg>Yorum</a></nav></body></html>

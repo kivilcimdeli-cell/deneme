@@ -1,0 +1,18 @@
+{
+  "telefon": "0546 475 45 08",
+  "whatsapp_mesaj": "Merhaba, bilgi almak istiyorum.",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "banka": "Örnek Bankası",
+  "isletme": "Mira Kuaför",
+  "marka": "MİRA",
+  "hizmet": "KUAFÖR",
+  "etiket": "KESİM · FÖN · BOYA · GELİN SAÇI",
+  "aciklama": "Randevunuzu tek dokunuşla alın.",
+  "renk": "#9B7BEA",
+  "instagram": "@mirakuafor",
+  "google": "https://www.google.com/search?q=Mira+Kuaf%C3%B6r",
+  "iban_alici": "MİRA KUAFÖR",
+  "isaret": "logo/isaret.svg"
+}

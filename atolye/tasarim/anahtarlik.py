@@ -1,0 +1,556 @@
+"""Toptan anahtarlık: müşterinin markasıyla 8 biçim × 3 dizilim; ön yüz kabartma, arka yüz gömme yazı.
+
+Ad yazılmayan ön yüz de olur (logolu firmalar, ad uzunsa): "logo" (yalnız logo, kutuya en büyük) ve "logo_alt" (logo,
+altında küçük yazı). Arka yüzde gömme QR da olur (yazıların yerine): tablaya bakan yüzde, renk değişimi ilk 3 katmanda
+olduğu için en keskin yüz; kare ≥ 0,9 mm, her QR arka yüz görünüşünden okunarak doğrulanır (qr_oku).
+
+Yapı BOYDE'nin toptan anahtarlıklarıyla aynı (scripts/boyde_anahtarlik_toptan.py):
+  * gövde 3,2 mm; alt ve üst kenarda 3 katmanlık pah (ilk katman fil ayağı yapmaz)
+  * ön yüz: simge (sektör simgesi ya da logo; genel sektörde simge yok) ve yazılar 0,8 mm (4 katman) KABARTMA
+  * arka yüz: yazılar yüzeyle aynı hizada gömme renk (0,6 mm, tablaya bakan 3 katman): arkadan okunur, düz ve keskin
+  * öğeler kenardan 1,5 mm, delikten 1,2 mm içeride; delik Ø5,2 mm, çevresinde en az 3,5 mm et
+Yazılar ve simge kutuya sığacak boyda yeniden dizilir (geometrik küçültme yok: harf arası ve noktalar korunur).
+Baskıya uygunluk: ön kabartmada harf içi ve ara ≥ 0,6 mm (A.MIN_GAP), arka gömme yazıda ≥ 0,5; kenara ya da deliğe
+taşan (kırpılan) alan yok.
+"""
+import math
+
+import manifold3d as m3
+
+from . import ortak as O
+from .ortak import A, J
+
+BODY_H, RAISE, INLAY, CHAMFER_STEPS = 3.2, A.RAISE_H, 0.6, 3
+HOLE_R = 2.6
+MIN_ON, MIN_ARKA = 0.6, 0.45
+LOGO_ZAYIF, LOGO_BOZUK = 0.08, 0.12            # logo küçülünce kaybolan ayrıntı oranı (isimlik9.logo_kaybi gibi)
+QR_KONTRAST = 7.0                              # QR'lı arka yüz: gövde ile yazı rengi arasında en az bu kontrast
+KARO_R = 6.0              # koyu gövdede QR karosunun köşe yarıçapı (kare biriminde): 2 karelik sessiz bölgede yay veriye
+                          # 6,83 karede değer; 6'da oval görünür, bulucu köşesinde ~0,3 kare boşluk kalır (okunuyor)
+
+
+class Anahtarlik:
+    """outline, hole_xy, kutu (ön yüz öğelerinin alanı), arka_kutu; front: [(şekil, renk)] kabartma; back: arkadan
+    bakınca okunur hâlde çizilir, gövdeye aynalanarak gömülür."""
+
+    def __init__(self, bicim, outline, hole_xy, kutu, arka_kutu=None):
+        self.bicim, self.outline, self.hole_xy = bicim, outline, hole_xy
+        self.hole = A.circle(HOLE_R, *hole_xy)
+        self.kutu, self.arka_kutu = kutu, arka_kutu or kutu
+        self.front, self.back, self.lines = [], [], {}
+
+    def size(self):
+        x0, y0, x1, y1 = self.outline.bounds()
+        return x1 - x0, y1 - y0
+
+    def keep(self):
+        return (self.outline - self.hole).offset(-1.0, J) - self.hole.offset(0.8, J)
+
+    def regions(self, items, min_area=0.3):
+        """Filament başına bölgeler; sonra gelen öncekinin üstüne yazar, kıl payı adacıklar atılır."""
+        keep, out, taken = self.keep(), {}, A.empty()
+        for cs, fil in reversed(items):
+            part = (cs ^ keep) - taken
+            taken = taken + cs
+            out[fil] = out.get(fil, A.empty()) + part
+        return {f: A.union(*[p for p in cs.decompose() if p.area() > min_area]) for f, cs in out.items()}
+
+    def solids(self):
+        """Baskı yönünde (arka yüz tablada, z = 0; ön yüz yukarıda): [(ad, Manifold, renk)]."""
+        shape = self.outline - self.hole
+        body = shape.extrude(BODY_H)
+        rings = []
+        for k in range(CHAMFER_STEPS):
+            ring = shape - shape.offset(-A.CHAMFER * (CHAMFER_STEPS - k) / CHAMFER_STEPS, J)
+            lo = -0.1 if k == 0 else 0.0
+            rings.append(ring.extrude(A.LAYER - lo).translate((0, 0, k * A.LAYER + lo)))
+            hi = 0.1 if k == 0 else 0.0
+            rings.append(ring.extrude(A.LAYER + hi).translate((0, 0, BODY_H - (k + 1) * A.LAYER)))
+        body = body - m3.Manifold.batch_boolean(rings, m3.OpType.Add)
+        parts = []
+        for fil, cs in self.regions([(c.mirror((1, 0)), f) for c, f in self.back], 0.08).items():
+            m = cs.extrude(INLAY)
+            body = body - m
+            parts.append((f"Arka yazı ({O.AD[fil]})", m, fil))
+        for fil, cs in self.regions(self.front).items():
+            parts.append((f"Ön kabartma ({O.AD[fil]})", cs.extrude(RAISE).translate((0, 0, BODY_H)), fil))
+        return [(f"Gövde ({O.AD[self.govde]})", body, self.govde)] + parts
+
+
+# ---------------------------------------------------------------- biçimler: (dış çizgi, delik, ön kutu, arka kutu)
+
+def _klasik():
+    W, H = 60.0, 30.0
+    hx = -W / 2 + 6.5
+    return A.rrect(W, H, 5.0), (hx, 0.0), (hx + HOLE_R + 1.2, -H / 2 + 1.5, W / 2 - 1.5, H / 2 - 1.5), None
+
+
+def _dikey():
+    W, H = 30.0, 56.0
+    hy = H / 2 - 6.5
+    return A.rrect(W, H, 4.0), (0.0, hy), (-W / 2 + 1.5, -H / 2 + 1.5, W / 2 - 1.5, hy - HOLE_R - 1.2), None
+
+
+def _kare():
+    S_ = 40.0
+    hx, hy = -S_ / 2 + 7.0, S_ / 2 - 7.0
+    return A.rrect(S_, S_, 7.0), (hx, hy), (-S_ / 2 + 1.5, -S_ / 2 + 1.5, S_ / 2 - 1.5, hy - HOLE_R - 1.2), None
+
+
+def _bar():
+    W, H = 72.0, 24.0
+    hx = W / 2 - 6.0
+    return A.rrect(W, H, 3.0), (hx, 0.0), (-W / 2 + 1.5, -H / 2 + 1.5, hx - HOLE_R - 1.2, H / 2 - 1.5), None
+
+
+def _kesik():
+    W, H, C = 56.0, 32.0, 11.0
+    card = A.rrect(W, H, 4.0) - A.polygon([(W / 2 - C, H / 2 + 1), (W / 2 + 1, H / 2 + 1), (W / 2 + 1, H / 2 - C)])
+    hx, hy = W / 2 - 9.4, H / 2 - 10.2                    # kesik kenara 3,5 mm et payı
+    return (card.offset(-1.0, J).offset(1.0, J), (hx, hy), (-W / 2 + 1.5, -H / 2 + 1.5, hx - HOLE_R - 1.2,
+                                                             H / 2 - 1.5), None)
+
+
+def _kapsul():
+    W, H = 64.0, 26.0
+    hx = -W / 2 + 8.5
+    return A.rrect(W, H, H / 2 - 0.01), (hx, 0.0), (hx + HOLE_R + 1.5, -H / 2 + 3.0, W / 2 - 6.5, H / 2 - 3.0), None
+
+
+def _daire():
+    R = 22.0
+    hy = R - 6.5
+    return A.circle(R, 0, 0, 160), (0.0, hy), (-15.5, -15.5, 15.5, hy - HOLE_R - 1.2), None
+
+
+def _etiket():
+    W, H, U = 62.0, 28.0, 9.0
+    tag = A.polygon([(-W / 2 + U, H / 2), (W / 2, H / 2), (W / 2, -H / 2), (-W / 2 + U, -H / 2), (-W / 2, -H / 2 + U),
+                     (-W / 2, H / 2 - U)])
+    hx = -W / 2 + 7.0
+    return (tag.offset(-2.5, J).offset(2.5, J), (hx, 0.0), (hx + HOLE_R + 1.2, -H / 2 + 1.5, W / 2 - 1.5, H / 2 - 1.5),
+            None)
+
+
+# anahtar: (ad, kurucu, uygun dizilimler)
+BICIMLER = {"klasik": ("Klasik 60 × 30", _klasik, ["yan", "yazi", "ust"]),
+            "dikey": ("Dikey etiket 30 × 56", _dikey, ["ust", "yazi"]),
+            "kare": ("Kare 40 × 40", _kare, ["ust", "yazi"]),
+            "bar": ("Bar 72 × 24", _bar, ["yan", "yazi"]),
+            "kesik": ("Kesik köşe 56 × 32", _kesik, ["yan", "yazi", "ust"]),
+            "kapsul": ("Kapsül 64 × 26", _kapsul, ["yan", "yazi"]),
+            "daire": ("Yuvarlak Ø44", _daire, ["ust", "yazi"]),
+            "etiket": ("Bavul etiketi 62 × 28", _etiket, ["yan", "yazi", "ust"])}
+DIZILIMLER = {"yan": "simge solda, ad yanında", "ust": "simge üstte, ad altında", "yazi": "yalnız ad",
+              "logo": "yalnız logo", "logo_alt": "logo, altında küçük yazı", "logo_cerceve": "ince çerçeve içinde logo"}
+LOGO_DIZILIMLER = ["logo", "logo_cerceve", "logo_alt"]   # ad yazılmaz (logo gerekir); her biçimde
+CERCEVE = (1.7, 1.1)                             # çerçeve: kenardan uzaklık ve kalınlık (mm), vurgu renginde kabartma
+# Yalnız logolu seri: logonun büyük durduğu, birbirine yakışan biçimler (uzun ince bar, kapsül, bavul etiketinde logo
+# küçük kalıyor, seri dağınık duruyordu). Katalogda bu sırayla gruplanır.
+SERI_BICIMLER = ["klasik", "kare", "kesik", "daire", "dikey"]
+SERI_TR = (2.0, 1.6, 1.2, 0.8, 0.4)              # seride alt yazı ve arka yazı harf aralıklı (orijinal logodaki gibi)
+
+
+# ---------------------------------------------------------------- yerleşim
+
+def _kutu_ortasi(items, kutu):
+    """Öğeleri ortak sınır kutularıyla kutunun ortasına taşır. Döner (öğeler, kayma)."""
+    x0, y0, x1, y1 = A.union(*[cs for cs, _ in items]).bounds()
+    d = ((kutu[0] + kutu[2]) / 2 - (x0 + x1) / 2, (kutu[1] + kutu[3]) / 2 - (y0 + y1) / 2)
+    return [(cs.translate(d), f) for cs, f in items], d
+
+
+def _buyuk_parca(parts, alan):
+    """Logonun alanın %2'sinden büyük parçalarının sayısı (harfler, çatı): küçülünce değişirse logo kırık (D'nin gövdesi
+    kavisinden koptu: alan farkı %5 iken bile)."""
+    return sum(1 for cs, _ in parts for q in cs.decompose() if q.area() > 0.02 * alan)
+
+
+def _simge(c, h, w, olcu=None):
+    """Simge parçaları (rol ile), ortası (0, 0). Logoda olcu["logo_kayip"]: küçülünce baskıya gelmeyen ayrıntı oranı."""
+    key = "makas" if c.simge == "direk" else c.simge
+    if key == "logo" and c.logo is not None:
+        ham = O.olcekle([(c.logo, "vurgu")], 0.0, 0.0, w, h)
+        parts = [(O.temizle(cs, 1.0, 0.7), r) for cs, r in ham]
+        if olcu is not None:
+            alan = sum(a.area() for a, _ in ham)
+            fark = sum((a - b).area() + (b - a).area() for (a, _), (b, _) in zip(ham, parts))
+            kayip = fark / max(alan, 1e-6)
+            if _buyuk_parca(ham, alan) != _buyuk_parca(parts, alan):   # harf koptu, kayboldu ya da kaynaştı
+                kayip = max(kayip, 1.0)
+            olcu["logo_kayip"] = max(olcu.get("logo_kayip", 0.0), kayip)
+        return parts if sum(cs.area() for cs, _ in parts) > 1e-6 else ham      # bütünüyle silindiyse: kontrol reddeder
+    if key in O.SIMGE:
+        return O.simge_kur(key, w, h)
+    parts, _ = O.monogram(O.monogram_harfleri(c.marka), 0.0, 0.0, min(w, h))
+    return parts
+
+
+MIN_AD = {"bebas": 5.2, "oswald": 5.0, "anton": 5.6}    # dar yazı tiplerinde harf içi daha çabuk kapanır
+MIN_ALT, MIN_ARKA_BOY = 3.8, 3.0                         # ön alt yazı ve arka gömme yazı en küçük boyu
+CIZGI_H = 1.2                                            # seride logo ile alt yazı arasındaki altın çizginin kalınlığı
+ARKA = "man6"                                            # arka gömme yazı: Manrope SemiBold (küçük boyda harf içi en geniş)
+
+
+def _ust_koy(cs, y):
+    b = cs.bounds()
+    return cs.translate((0.0, y - b[3])), y - (b[3] - b[1])
+
+
+def _ad_satirlari(ad, yazi_tipi, cap_max, w, tr=0.3):
+    """Ad bir satır (sığarsa) ya da iki satır; döner (satırlar, boy) ya da boy en küçüğün altındaysa (.., 0)."""
+    en_az = MIN_AD.get(yazi_tipi, 4.2)
+    c1 = O.sigan(yazi_tipi, ad, cap_max, w, tr)
+    words = ad.split()
+    if c1 >= en_az * 1.25 or len(words) < 2:
+        return [ad], (c1 if c1 >= en_az else 0.0)
+    best = ([ad], c1)
+    for i in range(1, len(words)):
+        a, b = " ".join(words[:i]), " ".join(words[i:])
+        cc = min(O.sigan(yazi_tipi, a, cap_max * 0.78, w, tr), O.sigan(yazi_tipi, b, cap_max * 0.78, w, tr))
+        if cc > best[1] * 1.1:
+            best = ([a, b], cc)
+    return best[0], (best[1] if best[1] >= en_az else 0.0)
+
+
+def _on(c, p, dizilim, yazi_tipi, kutu, uyar, olcu=None):
+    """Ön yüz: ad (bir ya da iki satır), altında küçük yazı, simge (yanda ya da üstte). Her satır kutuya kendi
+    boyunda sığdırılır (en küçük boyun altına inmez). Döner (öğeler, satırlar, kalite)."""
+    W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
+    renk = {"yazi": p.yazi, "vurgu": p.vurgu, "vurgu2": p.vurgu2 or p.vurgu}
+    ad = O.ad_metni(c.marka, yazi_tipi)
+    if c.simge == "yok":                                 # genel: simgesiz, yalnız ad
+        dizilim = "yazi"
+    sim, sw = None, 0.0
+    if dizilim == "yan":
+        sim = _simge(c, H * 0.62, min(H * 1.1, W * 0.3), olcu)
+        sb = A.union(*[cs for cs, _ in sim]).bounds()
+        sw = sb[2] - sb[0] + 2.4
+    aw = W - sw
+    pay = {"yazi": 0.56, "yan": 0.46, "ust": 0.3}[dizilim] * H      # adın boyu için ayrılan yükseklik
+    if c.alt:
+        pay *= 0.82
+    satirlar, cap = _ad_satirlari(ad, yazi_tipi, pay, aw)
+    if not cap:
+        return None, None, 0.0
+    alt_cap, alt_satir, alt_tr = 0.0, [c.alt], 0.8
+    if c.alt:                     # tek satır; sığmazsa iki satır (boy büyük kalır), en son daha dar harf aralığı
+        kelime = c.alt.split()
+        iki = min(([" ".join(kelime[:i]), " ".join(kelime[i:])] for i in range(1, len(kelime))),
+                  key=lambda x: max(len(x[0]), len(x[1])), default=None)
+        for satir_, tr in [([c.alt], 0.8)] + ([(iki, 0.8)] if iki else []) + [([c.alt], 0.5)]:
+            alt_cap = min([4.6] + [O.sigan(O.SATIR, x, cap * 0.75, aw, tr) for x in satir_])
+            if alt_cap >= MIN_ALT:
+                alt_satir, alt_tr = satir_, tr
+                break
+        if alt_cap < MIN_ALT:
+            alt_cap = 0.0
+            uyar.append(f"'{c.alt}' bu biçime sığmadı")
+    for _ in range(3):                                   # yükseklik taşarsa ad küçülür
+        y, yazilar = 0.0, []
+        for s in satirlar:
+            cs, y = _ust_koy(O.yazi(yazi_tipi, s, cap, 0.0, 0.0, "c", 0.3, aw), y)
+            yazilar.append(cs)
+            y -= max(1.0, cap * 0.22)
+        ad_cs = A.union(*yazilar)
+        blok, lines = [(ad_cs, p.yazi)], {"ad": ad_cs}
+        if alt_cap:
+            y, altlar = ad_cs.bounds()[1] - max(1.3, cap * 0.2), []
+            for s in alt_satir:
+                cs, y = _ust_koy(O.yazi(O.SATIR, s, alt_cap, 0.0, 0.0, "c", alt_tr, aw), y)
+                altlar.append(cs)
+                y -= max(1.0, alt_cap * 0.3)
+            alt = A.union(*altlar)
+            lines["alt"] = alt
+            blok.append((alt, p.vurgu))
+        bb = A.union(*[cs for cs, _ in blok]).bounds()
+        items = list(blok)
+        if dizilim == "ust":
+            ih = min(H - (bb[3] - bb[1]) - 2.2, H * 0.42)
+            if ih >= 7.0:
+                sim = _simge(c, ih, W * 0.8, olcu)
+                sb = A.union(*[cs for cs, _ in sim]).bounds()
+                d = ((bb[0] + bb[2]) / 2 - (sb[0] + sb[2]) / 2, bb[3] + 2.2 - sb[1])
+                items = [(cs.translate(d), renk[r]) for cs, r in sim] + blok
+        elif dizilim == "yan":
+            sb = A.union(*[cs for cs, _ in sim]).bounds()
+            d = (bb[0] - 2.4 - sb[2], (bb[1] + bb[3]) / 2 - (sb[1] + sb[3]) / 2)
+            items = [(cs.translate(d), renk[r]) for cs, r in sim] + blok
+        x0, y0, x1, y1 = A.union(*[cs for cs, _ in items]).bounds()
+        f = min(W / (x1 - x0), H / (y1 - y0))
+        if f >= 0.99:
+            break
+        cap = max(cap * f * 0.98, MIN_AD.get(yazi_tipi, 4.2))
+        alt_cap = alt_cap and max(alt_cap * f * 0.98, MIN_ALT)
+    return items, lines, min(1.0, cap / (0.8 * pay)) * (1.0 if not c.alt or alt_cap else 0.85)
+
+
+def _cerceve(k):
+    """Gövdenin dış çizgisini içeriden izleyen ince çerçeve (delik çevresinde açılır)."""
+    d, w = CERCEVE
+    halka = k.outline.offset(-d, J) - k.outline.offset(-d - w, J)
+    return halka - k.hole.offset(1.0, J)                # deliğe 0,8 mm'den yakın yerde açılır (yeterince uzaksa kesilmez)
+
+
+def _on_logo(c, p, dizilim, kutu, olcu, k=None):
+    """Ad yazılmayan ön yüz: logo kutuya en büyük ("logo") ya da altında kısa altın çizgi ve harf aralıklı küçük
+    yazıyla ("logo_alt": alt yazı, yazı renginde, arka yazıyla aynı yazı tipi; isimlikteki "Logo ortada" düzeni gibi).
+    Döner (öğeler, satırlar, kalite): kalite logonun eni 34 mm'ye göre (orijinal ayrıntı ancak büyükte kalır)."""
+    W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
+    if c.logo is None or (dizilim == "logo_alt" and not c.alt):
+        return None, None, 0.0
+    if dizilim == "logo_cerceve":                       # çerçeve gövdeye göre yerinde; logo onun içinde ortalı
+        d = CERCEVE[0] + CERCEVE[1] + 1.2 - 1.5          # kutu kenardan 1,5 mm: çerçevenin içine 1,2 mm pay
+        x0, y0, x1, y1 = kutu[0] + d, kutu[1] + d, kutu[2] - d, kutu[3] - d
+        sim = _simge(c, (y1 - y0) * 0.97, (x1 - x0) * 0.97, olcu)
+        sb = A.union(*[cs for cs, _ in sim]).bounds()
+        dx, dy = (x0 + x1) / 2 - (sb[0] + sb[2]) / 2, (y0 + y1) / 2 - (sb[1] + sb[3]) / 2
+        renk = {"yazi": p.yazi, "vurgu": p.vurgu, "vurgu2": p.vurgu2 or p.vurgu}
+        items = [(_cerceve(k), p.vurgu)] + [(cs.translate((dx, dy)), renk[r]) for cs, r in sim]
+        return items, {}, min(1.0, (sb[2] - sb[0]) / 34.0)
+    alt, lh, ara, cizgi = None, H, 0.0, None
+    if dizilim == "logo_alt":
+        for tr in SERI_TR:                               # sade: en küçük boyda, harf aralığı açık
+            cap = min(MIN_ALT, O.sigan(ARKA, c.alt, MIN_ALT, W * 0.97, tr))
+            if cap >= MIN_ALT - 1e-6:
+                break
+        if cap < MIN_ALT - 1e-6:
+            return None, None, 0.0
+        alt = O.yazi(ARKA, c.alt, cap, 0.0, 0.0, "c", tr, W * 0.97)
+        ab = alt.bounds()
+        ara = 1.6
+        lh = H - (ab[3] - ab[1]) - 2 * ara - CIZGI_H
+    sim = _simge(c, lh * 0.97, W * 0.97, olcu)        # temizle kenarı biraz şişirebilir: kutudan taşmasın
+    renk = {"yazi": p.yazi, "vurgu": p.vurgu, "vurgu2": p.vurgu2 or p.vurgu}
+    items = [(cs, renk[r]) for cs, r in sim]
+    sb = A.union(*[cs for cs, _ in sim]).bounds()
+    lines = {}
+    if alt is not None:
+        ab, mx = alt.bounds(), (sb[0] + sb[2]) / 2
+        cw = min(10.0, (ab[2] - ab[0]) * 0.35)
+        cizgi = A.rrect(cw, CIZGI_H, CIZGI_H / 2 - 0.01, mx, sb[1] - ara - CIZGI_H / 2)
+        items.append((cizgi, p.vurgu))
+        alt = alt.translate((mx - (ab[0] + ab[2]) / 2, sb[1] - 2 * ara - CIZGI_H - ab[3]))
+        lines["alt"] = alt
+        items.append((alt, p.yazi))
+    return items, lines, min(1.0, (sb[2] - sb[0]) / 34.0)
+
+
+def qr_girdisi(adres):
+    """QR girdisi (qr_sistemi.Entry). adres: site adı (sayfa adresi olur), tam adres ya da TEL:... Yolu olmayan http(s)
+    adresi büyük harfle de denenir: alfasayısal kipte QR küçülür (sayfa adresi 25 × 25: 26 mm'ye sığar, anahtarlığın
+    arkasına girer); adresin bu kısmı büyük-küçük harf ayırmaz. En küçük sürüm seçilir."""
+    import segno
+    from urllib.parse import urlsplit
+
+    from .. import site
+    s = adres.strip()
+    if "://" not in s and "." not in s and ":" not in s:
+        s = site.sayfa_url(site.sayfa_adi(s))
+    adaylar = [s]
+    u = urlsplit(s)
+    if u.scheme.lower() in ("http", "https") and u.path in ("", "/") and not u.query and not u.fragment:
+        adaylar.append(s.upper())
+    q, metin = min(((segno.make(x, error="m", micro=False, boost_error=True), x) for x in adaylar),
+                   key=lambda t: t[0].version)
+    return O.Q.Entry("sayfa", "TARA", metin, s, qr=q)
+
+
+def _arka_qr(k, p, entry):
+    """Arka yüze QR (arkadan bakınca), arka kutuya sığan en büyük kare; koyu gövdede beyaz karo (sessiz bölge dahil),
+    açık gövdede koyu kareler; yazı renginde (arka yüzün tek filamenti)."""
+    x0, y0, x1, y1 = k.arka_kutu
+    m = O.Q.module_for(entry, min(x1 - x0, y1 - y0))
+    if m < O.Q.MIN_MODULE - 1e-9:
+        k.uyarilar.append(f"QR bu biçime sığmadı (kare {m:.2f} mm < {O.Q.MIN_MODULE} mm)")
+        k.qr_sigmadi = True
+        return []
+    _, dark, side = O.Q.shapes(entry, m, 0.0, 0.0)
+    dark = _yuvarlak_bulucular(dark, entry.n, m)
+    karo = A.rrect(side, side, KARO_R * m)              # oval görünüm; yay veri karelerinin dışında kalır
+    k.qr, k.qr_modul = entry, m
+    return [((karo - dark) if p.koyu else dark, p.yazi)]
+
+
+def _yuvarlak_bulucular(dark, n, m):
+    """Üç köşedeki bulucu kareleri yuvarlak köşeli yapar (keskin köşeli QR sert duruyordu): dış halka 2 kare, iç
+    boşluk 1 kare, orta 3 × 3 kare 0,8 kare yarıçapla; halka kalınlığı her yerde 1 kare (okuyucular tanır). Veri
+    kareleri kare kalır (0,9 mm'de yuvarlak nokta baskıda okunmayı bozar)."""
+    x0, y1 = -n * m / 2, n * m / 2
+    for r, c in ((0, 0), (0, n - 7), (n - 7, 0)):
+        cx, cy = x0 + (c + 3.5) * m, y1 - (r + 3.5) * m
+        e = 3.5 * m + 0.05                              # kareler 0,01 mm şişirilmiş: kenarda kıl kalmasın
+        dark = dark - A.rect(cx - e, cy - e, cx + e, cy + e)
+        halka = A.rrect(7 * m, 7 * m, 2.0 * m, cx, cy) - A.rrect(5 * m, 5 * m, 1.0 * m, cx, cy)
+        dark = dark + halka + A.rrect(3 * m, 3 * m, 0.8 * m, cx, cy)
+    return dark
+
+
+def qr_oku(k):
+    """Arka yüz görünüşünden QR'ı okur (zxing): okunan metin; okunamazsa "" ; zxing yoksa None."""
+    try:
+        import zxingcpp
+    except ImportError:
+        return None
+    from PIL import Image
+    im = gorunus(k, 900, arka=True)
+    bg = Image.new("L", im.size, 255)
+    bg.paste(im.convert("L"), (0, 0), im.split()[-1])
+    r = zxingcpp.read_barcodes(bg)
+    return r[0].text if r else ""
+
+
+def _arka_parcalari(s, ust, W, seri=False, trler=None):
+    """Bir arka satırın yerleşimi: [(metin, boy, harf aralığı)]. Tek satır; sığmazsa daha dar harf aralığı; o da
+    olmazsa kelimelerden iki satır (telefon: "0546 475" / "45 08"). Hiçbiri olmazsa []. seri: harf aralığı geniş
+    başlar (öndeki alt yazı gibi)."""
+    for tr in (trler or (SERI_TR if seri else (0.5, 0.2))):
+        cap = O.sigan(ARKA, s, ust, W, tr)
+        if cap >= MIN_ARKA_BOY:
+            return [(s, cap, tr)]
+    kelime = s.split()
+    if len(kelime) > 1:
+        iki = min(([" ".join(kelime[:j]), " ".join(kelime[j:])] for j in range(1, len(kelime))),
+                  key=lambda x: max(len(x[0]), len(x[1])))
+        cap = min(O.sigan(ARKA, x, ust, W, 0.5) for x in iki)
+        if cap >= MIN_ARKA_BOY:
+            return [(x, cap, 0.5) for x in iki]
+    return []
+
+
+def _arka(p, satirlar, kutu, uyar, seri=False):
+    """Arka yüz gömme satırları (arkadan okunur hâlde), alt alta ortalı; tek renk (yazı rengi: tablaya bakan
+    katmanlarda tek filament). Genişe sığmayan satır daralır ya da ikiye bölünür; yine sığmayan ya da yükseklikte
+    taşan satır (yarım kalmasın diye bütünüyle) atlanır, uyarı verilir."""
+    W, H = kutu[2] - kutu[0], kutu[3] - kutu[1]
+    out, y, trler = [], 0.0, None
+    if seri:                                   # seride satırlar aynı harf aralığıyla (biri açık biri sık durmasın)
+        tek = [pc[0][2] for i, s in enumerate(satirlar)
+               if len(pc := _arka_parcalari(s, 3.6 if i == 0 else 3.2, W, True)) == 1]
+        if tek:
+            trler = tuple(t for t in SERI_TR if t <= min(tek))
+    for i, s in enumerate(satirlar):
+        parca = _arka_parcalari(s, 3.6 if i == 0 else 3.2, W, seri, trler)
+        yeni, y2 = [], y
+        for metin, cap, tr in parca:
+            cs, a = _ust_koy(O.yazi(ARKA, metin, cap, 0.0, 0.0, "c", tr, W, kabartma=False), y2)
+            yeni.append((cs, p.yazi))
+            y2 = a - 1.6
+        if not parca or -(y2 + 1.6) > H:
+            uyar.append(f"arka yüze '{s}' sığmadı")
+            continue
+        out += yeni
+        y = y2
+    return out
+
+
+def tasarla(bicim, dizilim, c, palet, yazi_tipi, arka, qr=None):
+    """Döner Anahtarlik: front, back, lines (ön yüz yazıları, ölçülür), kalite (0: ad bu biçime sığmadı),
+    uyarilar. qr (qr_girdisi): arka yüzde yazıların yerine QR."""
+    outline, hole_xy, kutu, arka_kutu = BICIMLER[bicim][1]()
+    k = Anahtarlik(bicim, outline, hole_xy, kutu, arka_kutu)
+    k.govde, k.palet, k.dizilim, k.yazi_tipi, k.uyarilar = palet.govde, palet, dizilim, yazi_tipi, []
+    k.qr, k.qr_sigmadi, olcu = None, False, {}
+    if dizilim in LOGO_DIZILIMLER:
+        on, lines, k.kalite = _on_logo(c, palet, dizilim, kutu, olcu, k)
+    else:
+        on, lines, k.kalite = _on(c, palet, dizilim, yazi_tipi, kutu, k.uyarilar, olcu)
+    k.logo_kayip = olcu.get("logo_kayip", 0.0)
+    if k.logo_kayip > LOGO_ZAYIF:
+        k.uyarilar.append(f"logo küçük kaldı (ayrıntının %{100 * k.logo_kayip:.0f}'i kayboldu)")
+    if on is None:
+        k.uyarilar.append("ad bu biçime sığmadı" if dizilim not in LOGO_DIZILIMLER else "logo bu biçime konamadı")
+        return k
+    k.front = on if dizilim == "logo_cerceve" else _kutu_ortasi(on, kutu)[0]   # çerçeve gövdeye göre yerinde
+    adlar = {id(cs): n for n, cs in lines.items()}
+    k.lines = {adlar[id(o)]: cs for (cs, _), (o, _) in zip(k.front, on) if id(o) in adlar}
+    if qr is not None:
+        back = _arka_qr(k, palet, qr)
+    else:
+        back = _arka(palet, arka, k.arka_kutu, k.uyarilar, dizilim in LOGO_DIZILIMLER) if arka else []
+    if back:
+        x0, y0, x1, y1 = k.arka_kutu
+        k.back, _ = _kutu_ortasi(back, (-x1, y0, -x0, y1))       # arkadan bakınca delik öbür yanda
+    return k
+
+
+def arka_sigar(bicim, satirlar, seri=False):
+    """Arka yüz yazıları bu biçime bütünüyle sığıyor mu (kurmadan, yalnız yazı yerleşimi)."""
+    outline, hole_xy, kutu, arka_kutu = BICIMLER[bicim][1]()
+    uyar = []
+    _arka(O.Palet(O.BLACK, O.WHITE), satirlar, arka_kutu or kutu, uyar, seri)
+    return not uyar
+
+
+def kontrol(k):
+    """Ön kabartmada harf içi ve ara (≥ 0,6 mm), arka gömme yazıda (≥ 0,5), simgede ince alan, kırpılan alan."""
+    import uzar_isimlik_baski as B
+    sorun = []
+    for n, cs in k.lines.items():
+        inner, gap, _ = B.line_metrics(cs)
+        if inner < MIN_ON or gap < MIN_ON:
+            sorun.append(f"ön {n}: harf içi {inner:.2f}, ara {gap:.2f}")
+    for i, (cs, _) in enumerate(k.back if getattr(k, "qr", None) is None else []):   # QR kareleri yazı değil
+        inner, gap, _ = B.line_metrics(cs)
+        if inner < MIN_ARKA or gap < MIN_ARKA:
+            sorun.append(f"arka {i + 1}. satır: harf içi {inner:.2f}, ara {gap:.2f}")
+    if getattr(k, "qr_sigmadi", False):
+        sorun.append("QR bu biçime sığmadı")
+    if getattr(k, "logo_kayip", 0.0) > LOGO_BOZUK:
+        sorun.append(f"logo kırık: ayrıntının %{100 * k.logo_kayip:.0f}'i kayboldu")
+    keep = k.keep()
+    kirp = sum((cs - keep).area() for cs, _ in k.front) + sum((cs.mirror((1, 0)) - keep).area() for cs, _ in k.back)
+    if kirp > 0.05:
+        sorun.append(f"kenara ya da deliğe taşan alan {kirp:.1f} mm²")
+    yazilar = {id(v) for v in k.lines.values()}
+    simge = [cs for cs, _ in k.front if id(cs) not in yazilar]
+    if simge:
+        u = A.union(*simge)
+        thin = u - u.offset(-0.45, J).offset(0.45, J)
+        oran = 100 * sum(p.area() for p in thin.decompose() if p.area() > 0.02) / max(u.area(), 1e-6)
+        if oran > 15.0:
+            sorun.append(f"simgede 0,9 mm'den ince alan %{oran:.0f}")
+    return sorun
+
+
+# ---------------------------------------------------------------- tabla
+
+X_AUX, TABLA = 20.5, 256.0                             # X2D yardımcı nozulu x < 20,5 mm'ye ulaşamaz
+KULE = (24.0, 200.0)                                   # prime kulesi sol arkada (Bambu sınırı: kenardan 15 mm)
+KULE_KUTU = (20.5, 192.0, 72.0, 248.0)
+
+
+def tabla_yerleri(w, h, aralik=4.0):
+    """Tablada kopyaların yerleri [(x, y, açı)]: iki nozulun ortak alanında ızgara, kulenin yeri boş."""
+    out = []
+    nx = int((TABLA - 2.0 - X_AUX - 1.0 + aralik) // (w + aralik))
+    ny = int((TABLA - 8.0 + aralik) // (h + aralik))
+    x0 = X_AUX + 1.0 + (TABLA - 2.0 - X_AUX - 1.0 - (nx * w + (nx - 1) * aralik)) / 2
+    y0 = 4.0 + (TABLA - 8.0 - (ny * h + (ny - 1) * aralik)) / 2
+    for j in range(ny):
+        for i in range(nx):
+            cx, cy = x0 + i * (w + aralik) + w / 2, y0 + j * (h + aralik) + h / 2
+            if (cx + w / 2 + 4 > KULE_KUTU[0] and cx - w / 2 - 4 < KULE_KUTU[2] and
+                    cy + h / 2 + 4 > KULE_KUTU[1] and cy - h / 2 - 4 < KULE_KUTU[3]):
+                continue
+            out.append((round(cx, 3), round(cy, 3), 0))
+    return out
+
+
+def gram(parcalar, adet=1):
+    """PLA (1,24 g/cm³) tahmini gram, renk başına."""
+    out = {}
+    for _, m, c in parcalar:
+        out[c] = round(out.get(c, 0.0) + adet * m.volume() * 1.24 / 1000, 1)
+    return out
+
+
+def kac_tabla(adet, tabla_basi):
+    return max(1, math.ceil(adet / max(tabla_basi, 1)))
+
+
+def gorunus(k, boy=700, arka=False):
+    """Önden (üstten) ya da arkadan görünüş: RGBA."""
+    from cift_tarafli_isimlik import render, rotation
+    mesh = [(*A.mesh_arrays(m), O.TON[c]) for _, m, c in k.solids()]
+    return render(mesh, boy, rotation(180, 180) if arka else A.R_TOP, margin=0.03)

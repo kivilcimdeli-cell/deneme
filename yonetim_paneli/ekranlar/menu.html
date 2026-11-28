@@ -1,0 +1,121 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Menü</title><style>
+@font-face{font-family:Jost;src:url(../../restoran_masalik/siteler/fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../../restoran_masalik/siteler/fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../../restoran_masalik/siteler/fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../../restoran_masalik/siteler/fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../../restoran_masalik/siteler/fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../../restoran_masalik/siteler/fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../../restoran_masalik/siteler/fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../../restoran_masalik/siteler/fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../../restoran_masalik/siteler/fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+:root{--ink:#17191F;--bg:#F4F1EA;--line:#E6E0D4;--muted:#7D776C;--acc:#C8963E;--navy:#1D2742;--ok:#2E8B57;
+  --bad:#C4473B;--soft:#FBF8F2}
+body{background:var(--bg);color:var(--ink);font-size:15px}
+.app{display:grid;grid-template-columns:250px 1fr;height:900px;overflow:hidden}
+.side{background:#15171C;color:#D9D3C7;padding:22px 16px;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-family:Fraunces;font-weight:700;font-size:21px;color:#fff;padding:0 6px}
+.logo i{width:36px;height:36px;border-radius:11px;background:var(--acc);display:grid;place-items:center;color:#15171C}
+.logo i svg{width:22px;height:22px}
+.biz{margin:22px 0 14px;padding:11px 12px;border-radius:14px;background:#1F2229;display:flex;align-items:center;gap:11px}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(#2B3A6B,#C9667A 60%,#F2A86C);display:grid;
+  place-items:center;font-family:Norican;font-size:21px;color:#fff;flex:none}
+.biz b{display:block;color:#fff;font-weight:600;font-size:14.5px}
+.biz small{font-size:12px;color:#9C968A}
+.biz svg{margin-left:auto;width:16px;height:16px;color:#9C968A}
+.nav{display:grid;gap:3px}
+.nav h6{font-size:10.5px;letter-spacing:.2em;color:#6E695F;margin:14px 12px 6px;font-weight:600}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:15px;color:#B5AFA3}
+.nav a svg{width:20px;height:20px}
+.nav a.on{background:#2A2E37;color:#fff}
+.nav a em{margin-left:auto;font-style:normal;background:var(--bad);color:#fff;border-radius:999px;font-size:11.5px;
+  font-weight:600;padding:1px 8px}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 8px 0;border-top:1px solid #262930;font-size:13.5px}
+.me .a2{width:34px;height:34px;border-radius:50%;background:var(--acc);color:#15171C;display:grid;place-items:center;
+  font-weight:700}
+.me small{display:block;color:#8C8679;font-size:12px}
+.main{padding:22px 30px;overflow:hidden}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.top h1{font-family:Fraunces;font-weight:700;font-size:30px;letter-spacing:-.01em;line-height:1.1}
+.top .sub{color:var(--muted);font-size:14px;margin-top:3px}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;font-weight:500;font-size:14.5px;white-space:nowrap}
+.btn svg{width:18px;height:18px}
+.btn.p{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.a{background:var(--acc);color:#fff;border-color:var(--acc)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+.card h3{font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card h3 small{margin-left:auto;font-weight:400;color:var(--muted);font-size:13px}
+.card h3 svg{width:19px;height:19px;color:var(--acc);flex:none}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;background:#F2ECE0;
+  color:#7A5A22;margin-right:4px}
+.chip.g{background:#E5F2EA;color:#24704A}.chip.r{background:#F8E4E1;color:#A3372D}.chip.n{background:#E6E9F2;color:#1D2742}
+.tog{width:42px;height:24px;border-radius:999px;background:var(--ok);position:relative;flex:none;display:inline-block}
+.tog:after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff}
+.tog.off{background:#CFC8BA}.tog.off:after{right:auto;left:3px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi .l{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:8px}
+.kpi .l svg{width:18px;height:18px;color:var(--acc)}
+.kpi .v{font-family:Manrope;font-weight:600;font-size:32px;margin-top:6px;letter-spacing:-.01em}
+.kpi .d{font-size:12.5px;color:var(--ok);margin-top:2px}
+.g2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-top:14px}
+.heat{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.heat span{border-radius:8px;height:40px;display:grid;place-items:center;font-size:11.5px;font-weight:600}
+.top5 .r{display:flex;align-items:center;gap:12px;padding:7px 0}
+.top5 img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+.top5 b{font-weight:600;font-size:14.5px;display:block}
+.top5 i{display:block;height:6px;border-radius:3px;background:#F0EADF;margin-top:5px;width:150px}
+.top5 i u{display:block;height:100%;border-radius:3px;background:var(--acc)}
+.top5 .num{margin-left:auto;font-size:14px}
+.log .r{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #F0EBE1;font-size:13.5px}
+.log .r:last-child{border:0}
+.log .d{width:8px;height:8px;border-radius:50%;background:var(--acc);margin-top:6px;flex:none}
+.log small{display:block;color:var(--muted);font-size:12px}
+.banner{display:flex;align-items:center;gap:14px;background:var(--navy);color:#F4EDE1;border-radius:18px;padding:14px 20px;
+  margin-top:14px}
+.banner b{font-family:Fraunces;font-size:26px}.banner span{color:#E2B86A;letter-spacing:2px}
+.banner small{color:#C9C5D6}
+
+.cols{display:grid;grid-template-columns:230px 1fr 300px;gap:14px;height:770px}
+.cats .c{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:12px;font-size:15px}
+.cats .c svg{width:16px;height:16px;color:#B3AC9E}
+.cats .c small{margin-left:auto;color:var(--muted);font-family:Manrope;font-weight:600}
+.cats .c.on{background:#F6EFE2;font-weight:600}
+.cats .add{color:var(--acc);font-weight:600;padding:12px 10px;font-size:14.5px}
+.items .hd{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.items .hd b{font-family:Fraunces;font-size:22px}
+.items .hd .lang{margin-left:auto;display:flex;gap:4px}
+.items .hd .lang span{padding:5px 9px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.items .hd .lang span.on{background:var(--ink);color:#fff}
+.it{display:flex;align-items:center;gap:14px;padding:11px 4px;border-bottom:1px solid #F0EBE1}
+.it>svg{width:18px;height:18px;color:#C1BAAC;flex:none}
+.it img{width:58px;height:58px;border-radius:12px;object-fit:cover;flex:none}
+.it .t{flex:1;min-width:0}
+.it .t b{font-weight:600;font-size:15.5px}
+.it .t p{color:var(--muted);font-size:13px;margin:2px 0 4px}
+.it .pr{width:104px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-family:Manrope;font-weight:600;
+  font-size:14.5px;text-align:right;flex:none}
+.it .st{width:92px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}
+.it .ed{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.it .ed svg{width:17px;height:17px}
+.it.out img{filter:grayscale(1);opacity:.6}
+.prev{display:flex;flex-direction:column;align-items:center}
+.prev h3{width:100%}
+.ph{width:262px;height:566px;border-radius:38px;background:#16161A;padding:9px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.ph .sc{width:244px;height:548px;border-radius:30px;overflow:hidden;position:relative}
+.ph iframe{width:390px;height:877px;border:0;transform:scale(.6256);transform-origin:0 0}
+.live{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ok);font-weight:600}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(46,139,87,.18)}
+</style></head><body><div class="app"><aside class="side"><div class="logo"><i><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 19h2M19 14v2"/></svg></i>QR Sistem</div><div class="biz"><span class="av">P</span><span><b>Palmiye</b><small>Beach club · Lara</small></span><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div><nav class="nav"><a class=""><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Gösterge paneli</a><a class="on"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C6.5 4 9.5 4 12 5.8 14.5 4 17.5 4 20 5.5V19c-2.5-1.4-5.5-1.4-8 .4-2.5-1.8-5.5-1.8-8-.4z"/><path d="M12 5.8v13.6"/></svg>Menü</a><a class=""><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 19h2M19 14v2"/></svg>Masalar ve QR</a><a class=""><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9h16M9.5 20v-6h5v6"/></svg>İşletme bilgileri</a><a class=""><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1.2-1.6-1.2-2.8 0-1 .8-1.8 1.9-1.8h2.2a3.8 3.8 0 0 0 3.8-3.8C20.5 6.6 16.7 3.5 12 3.5z"/><circle cx="7.8" cy="11" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="7.8" r="1"/></svg>Tema</a><a class=""><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/></svg>İstatistik</a><h6>SİPARİŞ PAKETİ</h6><a class=""><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l-1 12h-11z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>Siparişler<em>3</em></a><a><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>Garson çağrıları</a><h6>HESAP</h6><a><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.8-3.3 3-4.8 5.5-4.8s4.7 1.5 5.5 4.8"/><path d="M15.5 5.5a3 3 0 0 1 0 6M17.5 14.5c1.6.6 2.6 2 3 4.5"/></svg>Kullanıcılar</a><a><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg>Ayarlar</a></nav><div class="me"><span class="a2">E</span><span>Elif Kaya<small>Yönetici</small></span></div></aside><main class="main"><div class="top"><div><h1>Menü</h1><div class="sub">6 kategori · 22 ürün · son güncelleme 14:05</div></div><span class="sp"></span><span class="btn"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>Toplu fiyat</span><span class="btn"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Menü içe aktar</span><span class="btn a"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Ürün ekle</span></div><div class="cols"><div class="card cats"><h3>Kategoriler</h3><div class="c on"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg>Kokteyller<small>6</small></div><div class="c"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg>Bowl<small>3</small></div><div class="c"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg>Pizza<small>4</small></div><div class="c"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg>Burger<small>2</small></div><div class="c"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg>Tatlı<small>3</small></div><div class="c"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg>Kahve<small>4</small></div><div class="add">+ Kategori ekle</div></div><div class="card items"><div class="hd"><b>Kokteyller</b><span class="chip n">12:00–01:00 arası</span><span class="lang"><span class="on">TR</span><span>EN</span><span>RU</span><span>DE</span></span></div><div class="it"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg><img src="../../restoran_masalik/siteler/img/icki_aperol.jpg"><div class="t"><b>Aperol spritz</b><p>Prosecco, soda, portakal</p><span class="chip">Çok satan</span></div><span class="pr">420 ₺</span><span class="st"><span class="tog"></span>Satışta</span><span class="ed"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></div><div class="it out"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg><img src="../../restoran_masalik/siteler/img/icki_mojito.jpg"><div class="t"><b>Mojito</b><p>Taze nane, lime, kırık buz</p><span class="chip r">Tükendi</span></div><span class="pr">380 ₺</span><span class="st"><span class="tog off"></span>Tükendi</span><span class="ed"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></div><div class="it"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg><img src="../../restoran_masalik/siteler/img/icki_colada.jpg"><div class="t"><b>Virgin colada</b><p>Ananas, hindistancevizi</p><span class="chip g">Alkolsüz</span></div><span class="pr">260 ₺</span><span class="st"><span class="tog"></span>Satışta</span><span class="ed"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></div><div class="it"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg><img src="../../restoran_masalik/siteler/img/icki_negroni.jpg"><div class="t"><b>Negroni</b><p>Gin, vermut, bitter</p></div><span class="pr">520 ₺</span><span class="st"><span class="tog"></span>Satışta</span><span class="ed"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></div><div class="it"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg><img src="../../restoran_masalik/siteler/img/icki_gunbatimi.jpg"><div class="t"><b>Gün batımı</b><p>Tekila, kan portakalı, agave</p><span class="chip">Yeni</span></div><span class="pr">450 ₺</span><span class="st"><span class="tog"></span>Satışta</span><span class="ed"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></div><div class="it"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.3" fill="currentColor"/><circle cx="15" cy="6" r="1.3" fill="currentColor"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><circle cx="9" cy="18" r="1.3" fill="currentColor"/><circle cx="15" cy="18" r="1.3" fill="currentColor"/></svg><img src="../../restoran_masalik/siteler/img/icki_oldfashioned.jpg"><div class="t"><b>Old fashioned</b><p>Burbon, akçaağaç, portakal</p></div><span class="pr">480 ₺</span><span class="st"><span class="tog"></span>Satışta</span><span class="ed"><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></div></div><div class="card prev"><h3>Canlı önizleme</h3><div class="ph"><div class="sc"><iframe src="palmiye_tukendi.html" scrolling="no"></iframe></div></div><div class="live"><i></i>Yayında · anında görünür</div></div></div></main></div></body></html>

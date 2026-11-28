@@ -1,0 +1,19 @@
+{
+  "telefon": "0546 475 45 08",
+  "whatsapp_mesaj": "Merhaba, randevu almak istiyorum.",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "banka": "Örnek Bankası",
+  "isletme": "Defne Kuaför",
+  "marka": "DEFNE",
+  "hizmet": "BAYAN KUAFÖRÜ",
+  "etiket": "KESİM · FÖN · BOYA · GELİN SAÇI",
+  "aciklama": "Randevunuzu tek dokunuşla alın; gerisini bize bırakın.",
+  "renk": "#C2607A",
+  "instagram": "@defnekuafor",
+  "google": "https://www.google.com/search?q=Defne+Kuaf%C3%B6r",
+  "iban_alici": "DEFNE KUAFÖR",
+  "isaret": "logo/isaret.svg",
+  "konum": "Muratpaşa, Antalya"
+}

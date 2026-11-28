@@ -1,0 +1,127 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Ürünü düzenle</title><style>
+@font-face{font-family:Jost;src:url(../../restoran_masalik/siteler/fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../../restoran_masalik/siteler/fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../../restoran_masalik/siteler/fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../../restoran_masalik/siteler/fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../../restoran_masalik/siteler/fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../../restoran_masalik/siteler/fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../../restoran_masalik/siteler/fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../../restoran_masalik/siteler/fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../../restoran_masalik/siteler/fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../../restoran_masalik/siteler/fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../../restoran_masalik/siteler/fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+:root{--ink:#17191F;--bg:#F4F1EA;--line:#E6E0D4;--muted:#7D776C;--acc:#C8963E;--navy:#1D2742;--ok:#2E8B57;
+  --bad:#C4473B;--soft:#FBF8F2}
+body{background:var(--bg);color:var(--ink);font-size:15px}
+.app{display:grid;grid-template-columns:250px 1fr;height:900px;overflow:hidden}
+.side{background:#15171C;color:#D9D3C7;padding:22px 16px;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;font-family:Fraunces;font-weight:700;font-size:21px;color:#fff;padding:0 6px}
+.logo i{width:36px;height:36px;border-radius:11px;background:var(--acc);display:grid;place-items:center;color:#15171C}
+.logo i svg{width:22px;height:22px}
+.biz{margin:22px 0 14px;padding:11px 12px;border-radius:14px;background:#1F2229;display:flex;align-items:center;gap:11px}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(#2B3A6B,#C9667A 60%,#F2A86C);display:grid;
+  place-items:center;font-family:Norican;font-size:21px;color:#fff;flex:none}
+.biz b{display:block;color:#fff;font-weight:600;font-size:14.5px}
+.biz small{font-size:12px;color:#9C968A}
+.biz svg{margin-left:auto;width:16px;height:16px;color:#9C968A}
+.nav{display:grid;gap:3px}
+.nav h6{font-size:10.5px;letter-spacing:.2em;color:#6E695F;margin:14px 12px 6px;font-weight:600}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:15px;color:#B5AFA3}
+.nav a svg{width:20px;height:20px}
+.nav a.on{background:#2A2E37;color:#fff}
+.nav a em{margin-left:auto;font-style:normal;background:var(--bad);color:#fff;border-radius:999px;font-size:11.5px;
+  font-weight:600;padding:1px 8px}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 8px 0;border-top:1px solid #262930;font-size:13.5px}
+.me .a2{width:34px;height:34px;border-radius:50%;background:var(--acc);color:#15171C;display:grid;place-items:center;
+  font-weight:700}
+.me small{display:block;color:#8C8679;font-size:12px}
+.main{padding:22px 30px;overflow:hidden}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.top h1{font-family:Fraunces;font-weight:700;font-size:30px;letter-spacing:-.01em;line-height:1.1}
+.top .sub{color:var(--muted);font-size:14px;margin-top:3px}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;font-weight:500;font-size:14.5px;white-space:nowrap}
+.btn svg{width:18px;height:18px}
+.btn.p{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.a{background:var(--acc);color:#fff;border-color:var(--acc)}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+.card h3{font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card h3 small{margin-left:auto;font-weight:400;color:var(--muted);font-size:13px}
+.card h3 svg{width:19px;height:19px;color:var(--acc);flex:none}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;background:#F2ECE0;
+  color:#7A5A22;margin-right:4px}
+.chip.g{background:#E5F2EA;color:#24704A}.chip.r{background:#F8E4E1;color:#A3372D}.chip.n{background:#E6E9F2;color:#1D2742}
+.tog{width:42px;height:24px;border-radius:999px;background:var(--ok);position:relative;flex:none;display:inline-block}
+.tog:after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff}
+.tog.off{background:#CFC8BA}.tog.off:after{right:auto;left:3px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi .l{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:8px}
+.kpi .l svg{width:18px;height:18px;color:var(--acc)}
+.kpi .v{font-family:Manrope;font-weight:600;font-size:32px;margin-top:6px;letter-spacing:-.01em}
+.kpi .d{font-size:12.5px;color:var(--ok);margin-top:2px}
+.g2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-top:14px}
+.heat{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.heat span{border-radius:8px;height:40px;display:grid;place-items:center;font-size:11.5px;font-weight:600}
+.top5 .r{display:flex;align-items:center;gap:12px;padding:7px 0}
+.top5 img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+.top5 b{font-weight:600;font-size:14.5px;display:block}
+.top5 i{display:block;height:6px;border-radius:3px;background:#F0EADF;margin-top:5px;width:150px}
+.top5 i u{display:block;height:100%;border-radius:3px;background:var(--acc)}
+.top5 .num{margin-left:auto;font-size:14px}
+.log .r{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #F0EBE1;font-size:13.5px}
+.log .r:last-child{border:0}
+.log .d{width:8px;height:8px;border-radius:50%;background:var(--acc);margin-top:6px;flex:none}
+.log small{display:block;color:var(--muted);font-size:12px}
+.banner{display:flex;align-items:center;gap:14px;background:var(--navy);color:#F4EDE1;border-radius:18px;padding:14px 20px;
+  margin-top:14px}
+.banner b{font-family:Fraunces;font-size:26px}.banner span{color:#E2B86A;letter-spacing:2px}
+.banner small{color:#C9C5D6}
+
+body{background:#fff}
+.mt{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.mt a{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:15px}
+.mt a svg{width:20px;height:20px}
+.mt b{font-weight:600;font-size:16.5px}
+.mt span{color:var(--acc);font-weight:600}
+.fm{padding:16px 18px 120px}
+.photo{position:relative;border-radius:18px;overflow:hidden;height:150px}
+.photo img{width:100%;height:100%;object-fit:cover}
+.photo span{position:absolute;right:12px;bottom:12px;background:rgba(23,25,31,.78);color:#fff;border-radius:10px;
+  padding:8px 12px;font-size:13.5px;display:flex;gap:6px;align-items:center}
+.photo span svg{width:16px;height:16px}
+label{display:block;font-size:12.5px;color:var(--muted);margin:14px 0 6px;font-weight:500}
+.in{border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15.5px;background:var(--soft)}
+.in.ta{min-height:64px;line-height:1.4}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips span{display:inline-block;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:13.5px;
+  margin:0 6px 6px 0}
+.chips span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sw{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-top:14px;font-size:15px}
+.sw small{display:block;color:var(--muted);font-size:12.5px}
+.save{position:fixed;left:16px;right:16px;bottom:22px;background:var(--ink);color:#fff;border-radius:16px;padding:16px;
+  text-align:center;font-weight:600;font-size:16px}
+.lng{display:flex;gap:6px}
+.lng span{flex:1;text-align:center;padding:8px 0;border-radius:10px;border:1px solid var(--line);font-size:13px;font-weight:600}
+.lng span.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.pct{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:16px;padding:6px}
+.pct span{width:52px;height:52px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:24px}
+.pct b{font-family:Manrope;font-weight:600;font-size:34px}
+.pv .r{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F0EBE1}
+.pv img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+.pv b{flex:1;font-weight:600;font-size:15px}
+.pv s{color:var(--muted);font-family:Manrope;font-size:14px}
+.pv .num{font-size:15px;color:var(--ok)}
+.pv .ar{color:#C1BAAC}
+</style></head><body><div class="mt"><a><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Kokteyller</a><b>Ürünü düzenle</b><span>Kaydet</span></div><div class="fm"><div class="photo"><img src="../../restoran_masalik/siteler/img/icki_aperol.jpg"><span><svg class="" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></svg>Fotoğrafı değiştir</span></div><label>Dil</label><div class="lng"><span class="on">TR</span><span>EN</span><span>RU</span><span>DE</span></div><label>Ürün adı</label><div class="in">Aperol spritz</div><label>Açıklama</label><div class="in ta">Prosecco, soda, portakal dilimi. Gün batımında en çok tercih edilen.</div><div class="row2"><div><label>Fiyat</label><div class="in num">420 ₺</div></div><div><label>Kategori</label><div class="in">Kokteyller</div></div></div><label>Etiketler</label><div class="chips"><span class="on">Çok satan</span><span>Yeni</span><span>Şefin önerisi</span><span>Alkolsüz</span><span>Vegan</span></div><label>Alerjenler</label><div class="chips"><span>Gluten</span><span>Süt</span><span class="on">Sülfit</span><span>Kuruyemiş</span></div><div class="sw"><span>Satışta<small>Kapatınca menüde “Tükendi” yazar</small></span><span class="tog"></span></div></div><div class="save">Kaydet ve yayınla</div></body></html>

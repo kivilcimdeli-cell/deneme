@@ -1,0 +1,59 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Asmaaltı</title><style>
+@font-face{font-family:Jost;src:url(../fonts/Jost.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces.ttf);font-weight:100 900}
+@font-face{font-family:Fraunces;src:url(../fonts/Fraunces-Italic.ttf);font-weight:100 900;font-style:italic}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay.ttf);font-weight:400 900}
+@font-face{font-family:Playfair;src:url(../fonts/PlayfairDisplay-Italic.ttf);font-weight:400 900;font-style:italic}
+@font-face{font-family:Cinzel;src:url(../fonts/Cinzel.ttf);font-weight:400 900}
+@font-face{font-family:Syne;src:url(../fonts/Syne.ttf);font-weight:400 800}
+@font-face{font-family:Unbounded;src:url(../fonts/Unbounded.ttf);font-weight:200 900}
+@font-face{font-family:Bodoni;src:url(../fonts/BodoniModa.ttf);font-weight:400 900}
+@font-face{font-family:Anton;src:url(../fonts/Anton-Regular.ttf)}
+@font-face{font-family:Norican;src:url(../fonts/Norican-Regular.ttf)}
+@font-face{font-family:Caveat;src:url(../fonts/Caveat-Bold.ttf)}
+@font-face{font-family:Manrope;src:url(../fonts/Manrope-SemiBold.ttf);font-weight:600}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{-webkit-font-smoothing:antialiased;font-family:Jost,'Noto Sans',sans-serif;font-size:16px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.num{font-family:Manrope,'Noto Sans',sans-serif;font-weight:600;white-space:nowrap}
+
+body{background:#5B3A22;color:#F4F1E6}
+.bd{margin:10px;min-height:824px;border-radius:6px;padding:24px 22px 22px;position:relative;
+  background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.08),transparent 50%),
+  radial-gradient(ellipse at 80% 70%,rgba(255,255,255,.05),transparent 45%),#26362B;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.55),0 0 0 6px #7A5532,0 0 0 8px #4A2F1B}
+.hand{font-family:Caveat;font-weight:700}
+h1.hand{font-size:68px;line-height:.9;text-align:center}
+.sub{text-align:center;font-family:Caveat;font-size:25px;color:#F2D27A;margin-top:4px}
+.ms{display:block;width:max-content;margin:8px auto 0;font-family:Caveat;font-size:25px;border:2px dashed
+  rgba(244,241,230,.7);border-radius:12px;padding:0 16px}
+.cup{width:196px;height:196px;margin:16px auto 0;border-radius:50%;padding:6px;border:2px dashed rgba(244,241,230,.6)}
+.cup img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.lf{position:absolute;width:84px;height:84px;opacity:.55}
+.bx{display:grid;gap:12px;margin-top:20px}
+.bx a{display:flex;justify-content:space-between;align-items:center;font-family:Caveat;font-size:29px;padding:4px 16px;
+  border:2px solid rgba(244,241,230,.85);border-radius:14px 10px 16px 9px}
+.bx a small{font-family:Caveat;font-size:21px;color:#C9D3C0}
+.bx a.y{border-color:#F2D27A;color:#F2D27A}
+.bx .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bx .two a{font-size:25px;justify-content:center}
+.ft{text-align:center;font-family:Caveat;font-size:22px;color:#C9D3C0;margin-top:16px}
+.mh{display:flex;justify-content:space-between;align-items:baseline}
+.mh h1{font-size:56px}
+.mh span{font-family:Caveat;font-size:24px;color:#F2D27A}
+.pol{display:flex;gap:16px;justify-content:center;margin:12px 0 4px}
+.pol div{background:#F7F3E8;padding:7px 7px 28px;width:150px;box-shadow:0 8px 18px rgba(0,0,0,.4);position:relative}
+.pol div:first-child{transform:rotate(-4deg)}.pol div:last-child{transform:rotate(3deg);margin-top:8px}
+.pol img{width:100%;height:122px;object-fit:cover}
+.pol span{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-family:Caveat;font-size:21px;color:#3A2A20}
+.pol div:before{content:"";position:absolute;left:50%;top:-10px;width:56px;height:18px;margin-left:-28px;z-index:2;
+  background:rgba(240,226,180,.75);transform:rotate(-3deg)}
+.sc h2{font-family:Caveat;font-size:35px;color:#F2D27A;margin:10px 0 0;text-decoration:underline;
+  text-decoration-thickness:2px;text-underline-offset:6px}
+.ci{display:flex;align-items:baseline;gap:8px;font-family:Caveat;font-size:28px;line-height:1.2}
+.ci i{flex:1;border-bottom:2px dotted rgba(244,241,230,.5);transform:translateY(-6px)}
+.cd{font-family:Caveat;font-size:20px;color:#C9D3C0;margin:-2px 0 4px}
+</style></head><body><div class="bd"><svg class="lf" style="left:-4px;top:-2px" viewBox="0 0 80 80" fill="none" stroke="#B9D39A" stroke-width="2" stroke-linecap="round"><path d="M10 70C20 40 40 20 72 10"/><path d="M26 46c-8-2-14-8-14-18 8 2 13 8 14 18zM40 32c-2-8 0-15 8-21 3 8 1 15-8 21zM34 40c8 0 15 4 18 12-9 1-15-3-18-12zM50 24c8 0 14 4 17 11-9 1-14-3-17-11z"/></svg><svg class="lf" style="right:-4px;top:-2px;transform:scaleX(-1)" viewBox="0 0 80 80" fill="none" stroke="#B9D39A" stroke-width="2" stroke-linecap="round"><path d="M10 70C20 40 40 20 72 10"/><path d="M26 46c-8-2-14-8-14-18 8 2 13 8 14 18zM40 32c-2-8 0-15 8-21 3 8 1 15-8 21zM34 40c8 0 15 4 18 12-9 1-15-3-18-12zM50 24c8 0 14 4 17 11-9 1-14-3-17-11z"/></svg><h1 class="hand">Asmaaltı</h1><div class="sub">çay bahçesi · Düden</div><span class="ms">Masa 11</span><div class="cup"><img src="../img/cay.jpg" alt=""></div><nav class="bx"><a href="menu.html">Menüye bak <small>çay · gözleme · tost →</small></a><a class="y" href="#">Çay söyle! <small style="color:#F2D27A">tek dokunuş</small></a><div class="two"><a href="#">★ Değerlendir</a><a href="#">Wi-Fi</a></div></nav><p class="ft">Google 4,6 ★ · 2.904 yorum · 07:00–24:00</p></div></body></html>

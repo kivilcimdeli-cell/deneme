@@ -1,0 +1,18 @@
+{
+  "telefon": "0546 475 45 08",
+  "whatsapp_mesaj": "Merhaba, bilgi almak istiyorum.",
+  "harita": "https://www.google.com/maps/search/?api=1&query=Antalya",
+  "iban": "TR12 3456 7890 1234 5678 9012 34",
+  "iban_ornek": true,
+  "banka": "Örnek Bankası",
+  "isletme": "Luna Güzellik",
+  "marka": "LUNA",
+  "hizmet": "GÜZELLİK",
+  "etiket": "CİLT · KAŞ · MANİKÜR",
+  "aciklama": "Randevunuzu tek dokunuşla alın.",
+  "renk": "#E8668F",
+  "instagram": "@lunaguzellik",
+  "google": "https://www.google.com/search?q=Luna+G%C3%BCzellik",
+  "iban_alici": "LUNA GÜZELLİK",
+  "isaret": "logo/isaret.svg"
+}
