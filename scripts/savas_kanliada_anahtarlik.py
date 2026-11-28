@@ -1,4 +1,4 @@
-"""SAVAŞ KANLIADA (otomotiv ve gayrimenkul danışmanlığı) kurumsal anahtarlık önerileri: 10 sade, kart biçimli model,
+"""SAVAŞ KANLIADA (otomotiv ve gayrimenkul danışmanlığı) kurumsal anahtarlık önerileri: 9 sade, kart biçimli model,
 her biri iki renkte (antrasit gövde, kırmızı gövde); en çok 50 × 50 mm. GALERİ IŞIK kataloğunun yapısı (ön ve arka
 yüz, müşteri sayfaları ve PDF).
 
@@ -6,9 +6,8 @@ Logo müşterinin görselinden (scripts/savas_kanliada_logo.py): kırmızı S ve
 pencere. Çatı ile harfler arasında logodaki gibi gövde renginde boşluk (≥ 0,7 mm: 0,4 nozul ayırır). Küçük boyda dört
 pencere camı tek kare + artı çizgiye sadeleşir (camlar ≥ 0,9 mm). Ad Poppins ExtraBold (logodaki kalın yazıya en
 yakın). Antrasit gövdede S, K ve ad kırmızı, çatı beyaz; kırmızı gövdede S, K ve ad beyaz, çatı antrasit.
-Arka yüz: telefon 0506 101 68 97 ve logodaki alt satır (OTOMOTİV & / GAYRİMENKUL; tek satıra 3 mm'de sığmıyor);
-QR'lılarda (künye, kare ve yatay QR kart) telefon QR'ı (TEL:+905061016897), arka yüz görüntüsünden okunarak
-doğrulanır.
+Arka yüz: telefon 0506 101 68 97 ve logodaki alt satır (OTOMOTİV & / GAYRİMENKUL; tek satıra 3 mm'de sığmıyor).
+QR'lı model yok (müşteri istemedi).
 
 Baskı kontrolleri GALERİ IŞIK'takilerle aynı (galeri_isik_anahtarlik.check).
 Çıktı : anahtarlik/savas_kanliada/<nn>_<model>_<renk>.png, hepsi.png, musteri_1.png, musteri_2.png,
@@ -31,7 +30,6 @@ import uzar_anahtarlik as U  # noqa: E402
 
 OUT_DIR = os.path.join(A.ROOT, "anahtarlik", "savas_kanliada")
 PHONE = "0506 101 68 97"
-QR_TEXT = "TEL:+905061016897"
 NAME = "SAVAŞ KANLIADA"
 ANT = (84, 87, 92)                                 # antrasit (koyu gri) gövde
 RED = (214, 32, 42)                                # logodaki kırmızı
@@ -40,7 +38,6 @@ K.FILAMENT.update({ANT: "antrasit – PLA Basic Dark Gray", WHITE: "beyaz – PL
                    RED: "kırmızı – PLA Basic Red"})
 J = m3.JoinType.Round
 HOLE_R = G.HOLE_R
-G.QR_TEXT = QR_TEXT                                # G.qr_check bununla karşılaştırır
 
 DARK = dict(k=RED, b=WHITE, ad=RED, alt=WHITE)     # antrasit gövde
 LIGHT = dict(k=RED, b=ANT, ad=RED, alt=ANT)        # beyaz gövde
@@ -175,15 +172,6 @@ def rule(x0, x1, y, t=0.8):
 
 
 
-
-def back_qr(c, cx, cy, module=1.0, phone_y=None, phone_w=40.0, phone_cap=3.6):
-    q, size = U.qr(cx, cy, module, data=QR_TEXT)
-    c.back.append((q, WHITE))
-    c.qr_box = A.rect(-cx - size / 2, cy - size / 2, -cx + size / 2, cy + size / 2)
-    if phone_y is not None:
-        c.back.append((small(PHONE, phone_cap, cx, phone_y, max_w=phone_w), WHITE))
-    c.qr = True
-    return size
 
 
 def card(key, title, desc, outline, hole_xy, body=ANT, holes=None):
@@ -335,41 +323,27 @@ def m08(v):
     W, H = 32.0, 48.0
     tag = A.rrect(W, H, 7.0)
     hole = (0, H / 2 - 6.4)
-    c = card("kunye", "Künye", "Künye biçimi; ince beyaz çerçeve, logo ve iki satır ad. Arkada telefon QR'ı ve numara.",
+    c = card("kunye", "Künye", "Künye biçimi; iki yüzde de ince beyaz çerçeve, logo ve iki satır ad. Arkada telefon.",
              tag, hole, body=V[v]["body"])
-    c.front += [(A.outline(tag, 0.9, inset=1.7) - A.circle(HOLE_R + 3.4, *hole), WHITE)]
+    frame = A.outline(tag, 0.9, inset=1.7) - A.circle(HOLE_R + 3.4, *hole)
+    c.front += [(frame, WHITE)]
     c.front += fit(lambda R: stack(R, V[v]["pal"], iki=True), (-W / 2 + 4.4, -H / 2 + 4.0, W / 2 - 4.4, H / 2 - 12.4))[0]
-    back_qr(c, 0, 1.8, 0.98)
-    ph, _ = phone_lines(0, -12.0, W - 6.0, 3.6)
-    c.back.append((ph, WHITE))
+    ph, bot = phone_lines(0.0, H / 2 - 13.0, W - 8.0, 4.4)
+    c.back += [(frame, WHITE), (ph, WHITE), (rule(-9.0, 9.0, bot - 3.0), V[v]["acc"])]
+    c.back += place(sk_mark(11.0, pal=V[v]["pal"]), 0.0, bot - 12.6)
     return c
 
 
 def m09(v):
     S = 44.0
-    c = card("kare_qr_kart", "Kare QR kart", "Kare kart; önde logo ve ad, arkada telefon QR'ı (okutunca arar) ve numara.",
+    c = card("kare_kart", "Kare kart", "Kare kart; önde büyük logo ve ad, arkada telefon ve OTOMOTİV & GAYRİMENKUL.",
              A.rrect(S, S, 6.0), (S / 2 - 6.0, S / 2 - 6.0), body=V[v]["body"])
     c.front += kart_logo((-S / 2 + 3.4, -S / 2 + 3.4, S / 2 - 3.4, S / 2 - 9.6), V[v]["pal"])
-    back_qr(c, 2.4, 3.2, 1.0, phone_y=-15.0, phone_w=S - 9.0, phone_cap=3.6)
+    arka(c, v, 0.0, -2.0, S - 8.0)
     return c
 
 
-def m10(v):
-    W, H = 50.0, 32.0
-    c = card("yatay_qr_kart", "Yatay QR kart", "Yatay kart; önde logo ve ad, arkada solda telefon QR'ı, sağda numara.",
-             A.rrect(W, H, 4.0), (-W / 2 + 5.5, H / 2 - 5.5), body=V[v]["body"])
-    c.front += kart_logo((-W / 2 + 3.6, -H / 2 + 2.2, W / 2 - 3.6, H / 2 - 2.2), V[v]["pal"])
-    size = back_qr(c, -W / 2 + 2.4 + 12.25, 0.0, 0.98)
-    rx = -W / 2 + 2.4 + size + (W / 2 - 1.6 - (-W / 2 + 2.4 + size)) / 2
-    rw = W / 2 - 2.0 - (-W / 2 + 2.4 + size) - 1.0
-    f = G.outfit()
-    cp = min(4.2, f.fit_cap("0506 101", 4.2, rw, 0.3))
-    c.back += [(small("0506 101", cp, rx, -1.0, tracking=0.3) + small("68 97", cp, rx, -2.8 - cp, tracking=0.3), WHITE),
-               (rule(rx - rw / 2 + 0.6, rx + rw / 2 - 0.6, -6.0 - 2 * cp), V[v]["acc"])]
-    return c
-
-
-MODELS = [m01, m02, m03, m04, m05, m06, m07, m08, m09, m10]
+MODELS = [m01, m02, m03, m04, m05, m06, m07, m08, m09]
 CONCEPTS = [model(2 * k + j + 1, fn, v) for k, fn in enumerate(MODELS) for j, v in enumerate(("ant", "red"))]
 
 
@@ -386,7 +360,8 @@ def header(dr, im, W, title, sub):
     dr.rectangle((0, 256, W, 262), fill=RED)
 
 
-def customer_pages(concepts, per_page=10, start_page=1, total=20):
+def customer_pages(concepts, per_page=10, start_page=1, total=None):
+    total = total or len(CONCEPTS)
     G.header = header                                         # G.customer_pages sayfa başlığını bundan çizer
     G.ORANGE = RED
     G.OUT_DIR = OUT_DIR
@@ -396,7 +371,7 @@ def customer_pages(concepts, per_page=10, start_page=1, total=20):
         dr = ImageDraw.Draw(im)
         dr.rectangle((60, 284, 1640, 330), fill=(244, 244, 242))
         dr.text((70, 290), "Her model iki renkte: antrasit gövde ve kırmızı gövde · en çok 50 × 50 mm · arka yüzde "
-                           "telefon (QR'lı modellerde okutunca arar)", font=K.fnt(24), fill=(40, 40, 44))
+                           "telefon numarası", font=K.fnt(24), fill=(40, 40, 44))
         im.save(p, optimize=True)
     return paths
 
@@ -405,14 +380,10 @@ def build(i):
     c = CONCEPTS[i - 1]()
     c.front, c.back = U.resolve(c.front), U.resolve(c.back)
     issues, wall = G.check(c)
-    if getattr(c, "qr", False):
-        c.qr_read = G.qr_check(c)
-        if c.qr_read != QR_TEXT:
-            issues.append(f"QR okunamadı ({c.qr_read})")
     G.sheet(c, os.path.join(OUT_DIR, c.key + ".png"), i)
     w, h = c.size()
     return (f"{c.key:22s} {w:4.1f} × {h:4.1f} mm  renk {len(c.colours())}  delik eti {wall}  "
-            f"{'; '.join(issues) or 'kontroller tamam'}" + (f"  QR: {c.qr_read}" if getattr(c, "qr", False) else ""),
+            f"{'; '.join(issues) or 'kontroller tamam'}",
             bool(issues))
 
 
@@ -425,7 +396,7 @@ def build_pages(args):
         concepts.append((i, c))
     if kind == "genel":
         U.overview([c for _, c in concepts], os.path.join(OUT_DIR, "hepsi.png"),
-                   title="SAVAŞ KANLIADA – ANAHTARLIK ÖNERİLERİ (10 model, antrasit ve kırmızı)")
+                   title="SAVAŞ KANLIADA – ANAHTARLIK ÖNERİLERİ (9 model, antrasit ve kırmızı)")
         return [os.path.join(OUT_DIR, "hepsi.png")]
     return customer_pages(concepts, start_page=kind)
 
