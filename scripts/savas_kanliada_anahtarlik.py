@@ -1,11 +1,12 @@
 """SAVAŞ KANLIADA (otomotiv ve gayrimenkul danışmanlığı) kurumsal anahtarlık önerileri: 9 sade, kart biçimli model,
-her biri iki renkte (antrasit gövde, kırmızı gövde); en çok 50 × 50 mm. GALERİ IŞIK kataloğunun yapısı (ön ve arka
+her biri üç renkte (antrasit, kırmızı, beyaz gövde); en çok 50 × 50 mm. GALERİ IŞIK kataloğunun yapısı (ön ve arka
 yüz, müşteri sayfaları ve PDF).
 
 Logo müşterinin görselinden (scripts/savas_kanliada_logo.py): kırmızı S ve K, üstte gümüş (burada beyaz) çatı ve
 pencere. Çatı ile harfler arasında logodaki gibi gövde renginde boşluk (≥ 0,7 mm: 0,4 nozul ayırır). Küçük boyda dört
 pencere camı tek kare + artı çizgiye sadeleşir (camlar ≥ 0,9 mm). Ad Poppins ExtraBold (logodaki kalın yazıya en
-yakın). Antrasit gövdede S, K ve ad kırmızı, çatı beyaz; kırmızı gövdede S, K ve ad beyaz, çatı antrasit.
+yakın). Antrasit gövdede S, K ve ad kırmızı, çatı beyaz; kırmızı gövdede S, K ve ad beyaz, çatı antrasit; beyaz
+gövdede S, K ve ad kırmızı, çatı, çerçeve ve telefon antrasit.
 Arka yüz: telefon 0506 101 68 97 ve logodaki alt satır (OTOMOTİV & / GAYRİMENKUL; tek satıra 3 mm'de sığmıyor).
 QR'lı model yok (müşteri istemedi).
 
@@ -32,11 +33,23 @@ OUT_DIR = os.path.join(A.ROOT, "anahtarlik", "savas_kanliada")
 PHONE = "0506 101 68 97"
 NAME = "SAVAŞ KANLIADA"
 ANT = (84, 87, 92)                                 # antrasit (koyu gri) gövde
-RED = (214, 32, 42)                                # logodaki kırmızı
-WHITE = K.WHITE
+RED = (232, 16, 26)                                # canlı kırmızı (Elas PLA kırmızısına yakın)
+WHITE = (255, 255, 253)                            # saf beyaz (açık gri değil)
 K.FILAMENT.update({ANT: "antrasit – PLA Basic Dark Gray", WHITE: "beyaz – PLA Basic White",
-                   RED: "kırmızı – PLA Basic Red"})
+                   RED: "kırmızı – Elas PLA Kırmızı"})
 J = m3.JoinType.Round
+_render = K.render
+
+
+def duz_render(parts, size, R, **kw):
+    """Ön ve arka görünüş düz ışıkla: kameraya bakan yüzler tam parlaklıkta (beyaz gri görünmesin), kenarlar biraz
+    koyu. Perspektif ve QR okuma çağrıları değişmez."""
+    if "light" not in kw and "flat" not in kw and any(np.allclose(R, K.rotation(*a)) for a in ((0, 0), (180, 180))):
+        kw["flat"] = 0.72
+    return _render(parts, size, R, **kw)
+
+
+K.render = G.render = duz_render
 HOLE_R = G.HOLE_R
 
 DARK = dict(k=RED, b=WHITE, ad=RED, alt=WHITE)     # antrasit gövde
@@ -186,8 +199,9 @@ rounded, with_lug, fit, place = G.rounded, G.with_lug, G.fit, G.place
 # ---------------------------------------------------------------- 10 model × 2 renk
 
 V = {
-    "ant": dict(body=ANT, pal=DARK, acc=RED, txt=WHITE, ad="antrasit"),        # antrasit gövde: logo kırmızı-beyaz
-    "red": dict(body=RED, pal=ON_RED, acc=ANT, txt=WHITE, ad="kırmızı"),       # kırmızı gövde: S, K ve ad beyaz
+    "ant": dict(body=ANT, pal=DARK, acc=RED, txt=WHITE, cizgi=WHITE, ad="antrasit", dosya="antrasit"),
+    "red": dict(body=RED, pal=ON_RED, acc=ANT, txt=WHITE, cizgi=WHITE, ad="kırmızı", dosya="kirmizi"),
+    "wht": dict(body=WHITE, pal=LIGHT, acc=RED, txt=ANT, cizgi=ANT, ad="beyaz", dosya="beyaz"),
 }
 TAG = ("OTOMOTİV &", "GAYRİMENKUL")                    # logodaki alt satır (tek satıra 3 mm'de sığmıyor)
 
@@ -230,7 +244,7 @@ def kart_logo(box, pal, cap_max=4.6, gap=1.6):
 def model(n, fn, v):
     def make():
         c = fn(v)
-        c.key = f"{n:02d}_{c.key}_{'antrasit' if v == 'ant' else 'kirmizi'}"
+        c.key = f"{n:02d}_{c.key}_{V[v]['dosya']}"
         c.title = f"{c.title} · {V[v]['ad']}"
         return c
     return make
@@ -261,9 +275,9 @@ def m03(v):
     c = card("cerceveli_kart", "Çerçeveli kart", "Yatay kart; iki yüzde de ince beyaz çerçeve, ortada logo ve ad.",
              shape, hole, body=V[v]["body"])
     frame = A.outline(shape, 0.9, inset=1.8)
-    c.front += [(frame - A.circle(HOLE_R + 3.2, *hole), WHITE)]
+    c.front += [(frame - A.circle(HOLE_R + 3.2, *hole), V[v]["cizgi"])]
     c.front += kart_logo((-W / 2 + 4.6, -H / 2 + 3.4, W / 2 - 4.6, H / 2 - 3.4), V[v]["pal"], cap_max=4.2)
-    c.back += [(frame - A.circle(HOLE_R + 3.2, -hole[0], hole[1]), WHITE)]
+    c.back += [(frame - A.circle(HOLE_R + 3.2, -hole[0], hole[1]), V[v]["cizgi"])]
     arka(c, v, 0.0, -1.6, 36.0)
     return c
 
@@ -302,7 +316,7 @@ def m06(v):
     c = card("cati_kart", "Çatı kart", "Sağ üst köşesi çatı eğiminde kesik kart; kesiğe paralel beyaz çizgi, logo ve "
              "iki satır ad.", shape, (-W / 2 + 5.5, H / 2 - 5.5), body=V[v]["body"])
     c.front += [(A.polygon([(W / 2 - 1.4, H / 2 - 12.6), (W / 2 - 1.4, H / 2 - 10.8), (W / 2 - 10.8, H / 2 - 1.4),
-                            (W / 2 - 12.6, H / 2 - 1.4)]), WHITE)]
+                            (W / 2 - 12.6, H / 2 - 1.4)]), V[v]["cizgi"])]
     c.front += fit(lambda R: line(R, V[v]["pal"]), (-W / 2 + 3.4, -H / 2 + 3.0, W / 2 - 8.0, H / 2 - 10.0))[0]
     arka(c, v, 1.0, -1.4, 30.0)
     return c
@@ -314,7 +328,7 @@ def m07(v):
              A.rrect(W, H, 4.0), (0.0, H / 2 - 5.6), body=V[v]["body"])
     c.front += fit(lambda R: stack(R, V[v]["pal"], iki=True), (-W / 2 + 3.4, -H / 2 + 3.4, W / 2 - 3.4, H / 2 - 11.2))[0]
     ph, bot = phone_lines(0.0, H / 2 - 12.0, W - 6.0, 4.4)
-    c.back += [(ph, WHITE), (rule(-9.0, 9.0, bot - 3.0), V[v]["acc"])]
+    c.back += [(ph, V[v]["txt"]), (rule(-9.0, 9.0, bot - 3.0), V[v]["acc"])]
     c.back += place(sk_mark(12.0, pal=V[v]["pal"]), 0.0, bot - 13.0)
     return c
 
@@ -326,10 +340,10 @@ def m08(v):
     c = card("kunye", "Künye", "Künye biçimi; iki yüzde de ince beyaz çerçeve, logo ve iki satır ad. Arkada telefon.",
              tag, hole, body=V[v]["body"])
     frame = A.outline(tag, 0.9, inset=1.7) - A.circle(HOLE_R + 3.4, *hole)
-    c.front += [(frame, WHITE)]
+    c.front += [(frame, V[v]["cizgi"])]
     c.front += fit(lambda R: stack(R, V[v]["pal"], iki=True), (-W / 2 + 4.4, -H / 2 + 4.0, W / 2 - 4.4, H / 2 - 12.4))[0]
     ph, bot = phone_lines(0.0, H / 2 - 13.0, W - 8.0, 4.4)
-    c.back += [(frame, WHITE), (ph, WHITE), (rule(-9.0, 9.0, bot - 3.0), V[v]["acc"])]
+    c.back += [(frame, V[v]["cizgi"]), (ph, V[v]["txt"]), (rule(-9.0, 9.0, bot - 3.0), V[v]["acc"])]
     c.back += place(sk_mark(11.0, pal=V[v]["pal"]), 0.0, bot - 12.6)
     return c
 
@@ -344,7 +358,8 @@ def m09(v):
 
 
 MODELS = [m01, m02, m03, m04, m05, m06, m07, m08, m09]
-CONCEPTS = [model(2 * k + j + 1, fn, v) for k, fn in enumerate(MODELS) for j, v in enumerate(("ant", "red"))]
+RENKLER = ("ant", "red", "wht")
+CONCEPTS = [model(len(RENKLER) * k + j + 1, fn, v) for k, fn in enumerate(MODELS) for j, v in enumerate(RENKLER)]
 
 
 # ---------------------------------------------------------------- sayfalar
@@ -365,12 +380,12 @@ def customer_pages(concepts, per_page=10, start_page=1, total=None):
     G.header = header                                         # G.customer_pages sayfa başlığını bundan çizer
     G.ORANGE = RED
     G.OUT_DIR = OUT_DIR
-    paths = G.customer_pages(concepts, per_page, start_page, total)
+    paths = G.customer_pages(concepts, per_page, start_page, total, kart_bg=(232, 234, 238))   # beyaz gövde seçilsin
     for p in paths:                                           # alt bilgi satırı bu firmaya göre
         im = Image.open(p)
         dr = ImageDraw.Draw(im)
         dr.rectangle((60, 284, 1640, 330), fill=(244, 244, 242))
-        dr.text((70, 290), "Her model iki renkte: antrasit gövde ve kırmızı gövde · en çok 50 × 50 mm · arka yüzde "
+        dr.text((70, 290), "Her model üç renkte: antrasit, kırmızı ve beyaz gövde · en çok 50 × 50 mm · arka yüzde "
                            "telefon numarası", font=K.fnt(24), fill=(40, 40, 44))
         im.save(p, optimize=True)
     return paths
@@ -396,7 +411,7 @@ def build_pages(args):
         concepts.append((i, c))
     if kind == "genel":
         U.overview([c for _, c in concepts], os.path.join(OUT_DIR, "hepsi.png"),
-                   title="SAVAŞ KANLIADA – ANAHTARLIK ÖNERİLERİ (9 model, antrasit ve kırmızı)")
+                   title="SAVAŞ KANLIADA – ANAHTARLIK ÖNERİLERİ (9 model × antrasit, kırmızı, beyaz)")
         return [os.path.join(OUT_DIR, "hepsi.png")]
     return customer_pages(concepts, start_page=kind)
 
@@ -416,8 +431,12 @@ def main():
         bad = sum(b for _, b in rows)
         if not only:
             logo_sheet(os.path.join(OUT_DIR, "logo.png"))
-            pages = pool.map(build_pages, [("genel", todo), (1, todo[:10]), (2, todo[10:])])
-            pdf = [Image.open(p).convert("RGB") for p in pages[1] + pages[2]]
+            for eski in os.listdir(OUT_DIR):
+                if eski.startswith("musteri_") and eski.endswith(".png"):
+                    os.remove(os.path.join(OUT_DIR, eski))
+            jobs = [("genel", todo)] + [(k // 10 + 1, todo[k:k + 10]) for k in range(0, len(todo), 10)]
+            pages = pool.map(build_pages, jobs)
+            pdf = [Image.open(p).convert("RGB") for ps in pages[1:] for p in ps]
             pdf[0].save(os.path.join(OUT_DIR, "musteri_katalog.pdf"), save_all=True, append_images=pdf[1:],
                         resolution=200)
     print("sorunlu:", bad)

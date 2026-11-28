@@ -672,7 +672,7 @@ def header(dr, im, W, title, sub):
     dr.rectangle((0, 256, W, 262), fill=ORANGE)
 
 
-def customer_pages(concepts, per_page=10, start_page=1, total=20):
+def customer_pages(concepts, per_page=10, start_page=1, total=20, kart_bg=(255, 255, 255)):
     """Müşteriye gönderilecek sayfalar: her önerinin ön ve arka yüzü, numarası ve adı (A4, 10'ar)."""
     W, H = 1654, 2339
     paths = []
@@ -688,7 +688,7 @@ def customer_pages(concepts, per_page=10, start_page=1, total=20):
         ch = (H - top - 150 - 4 * gap) // 5
         for k, (n, c) in enumerate(page):
             x0, y0 = 50 + (k % 2) * (cw + 50), top + (k // 2) * (ch + gap)
-            dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 26, fill=(255, 255, 255), outline=(222, 222, 226))
+            dr.rounded_rectangle((x0, y0, x0 + cw, y0 + ch), 26, fill=kart_bg, outline=(222, 222, 226))
             dr.ellipse((x0 + 22, y0 + 20, x0 + 78, y0 + 76), fill=(16, 16, 18))
             num = str(n)
             dr.text((x0 + 50 - dr.textlength(num, font=K.fnt(28)) / 2, y0 + 30), num, font=K.fnt(28), fill=ORANGE)
